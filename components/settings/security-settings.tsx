@@ -1,0 +1,128 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useActionState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { disableTwoFactor } from "@/app/(dashboard)/settings/actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+
+const initialState = { status: "idle" as const };
+
+export function SecuritySettings({
+  lastLogin,
+  twoFactorEnabled,
+}: {
+  lastLogin: string;
+  twoFactorEnabled: boolean;
+}) {
+  const router = useRouter();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [state, formAction] = useActionState(disableTwoFactor, initialState);
+
+  useEffect(() => {
+    if (state.status === "success") {
+      toast.success(state.message ?? "2FA disabled");
+      setDialogOpen(false);
+      router.refresh();
+    }
+    if (state.status === "error") toast.error(state.message ?? "Unable to disable 2FA");
+  }, [router, state]);
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Security Overview</CardTitle>
+        <CardDescription>
+          Manage your authentication options and active session controls.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-3 rounded-2xl border p-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium">Two-factor authentication</p>
+            <p className="text-xs text-muted-foreground">
+              Require a one-time code on every sign in.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              checked={twoFactorEnabled}
+              onCheckedChange={(checked) => {
+                if (checked && !twoFactorEnabled) {
+                  router.push("/settings/2fa");
+                  return;
+                }
+                if (!checked && twoFactorEnabled) {
+                  setDialogOpen(true);
+                }
+              }}
+            />
+            {twoFactorEnabled ? (
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Disable</Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Disable 2FA</DialogTitle>
+                  </DialogHeader>
+                  <form action={formAction} className="space-y-3">
+                    <div className="grid gap-2">
+                      <Label htmlFor="disable-password">Confirm password</Label>
+                      <Input id="disable-password" name="password" type="password" required />
+                    </div>
+                    <Button type="submit">Disable 2FA</Button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            ) : (
+              <Button variant="outline" onClick={() => router.push("/settings/2fa")}>
+                Enable
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border p-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium">Last login</p>
+            <p className="text-xs text-muted-foreground">{lastLogin}</p>
+          </div>
+          <Button type="button" variant="outline" disabled>
+            View sessions
+          </Button>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border p-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium">Logout from all devices</p>
+            <p className="text-xs text-muted-foreground">
+              End every active session across your devices.
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={logoutPending}
+            onClick={() => {
+              setLogoutPending(true);
+              setTimeout(() => {
+                setLogoutPending(false);
+                toast.success("Logged out from all devices (mock).");
+              }, 800);
+            }}
+          >
+            {logoutPending ? "Working..." : "Logout all"}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
