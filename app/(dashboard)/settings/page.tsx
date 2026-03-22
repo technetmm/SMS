@@ -8,8 +8,10 @@ import {
   Palette,
   ShieldCheck,
 } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const cards = [
   {
@@ -53,87 +55,130 @@ const cards = [
 export default function SettingsOverviewPage() {
   return (
     <div className="space-y-8">
-      <div className="rounded-2xl border bg-gradient-to-br from-muted/40 via-background to-background p-6 shadow-sm">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Settings
-            </p>
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Settings
+        </p>
+        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+          <div>
             <h1 className="text-3xl font-semibold tracking-tight">
-              Manage your account experience
+              Account preferences
             </h1>
             <p className="text-sm text-muted-foreground">
-              Update appearance, profile, authentication, and security from one place.
+              Manage your profile, appearance, and security controls.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button asChild>
+            <Button asChild variant="secondary">
               <Link href="/settings/security">
-                Security Check
+                Security status
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/settings/profile-photo">Update Photo</Link>
+              <Link href="/settings/2fa">Enable 2FA</Link>
             </Button>
-          </div>
-        </div>
-        <div className="mt-6 grid gap-3 md:grid-cols-3">
-          <div className="rounded-xl border bg-background p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Appearance
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Switch themes and personalize the dashboard tone.
-            </p>
-          </div>
-          <div className="rounded-xl border bg-background p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Account
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Keep email and password credentials updated.
-            </p>
-          </div>
-          <div className="rounded-xl border bg-background p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Security
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Enable 2FA and review session safeguards.
-            </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <Card
-              key={card.href}
-              className="group border-border/60 transition hover:border-primary/40 hover:shadow-md"
-            >
-              <CardHeader className="space-y-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-muted/40 text-primary">
-                  <Icon className="h-5 w-5" />
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Settings overview</CardTitle>
+            <CardDescription>
+              Jump straight to the section you want to update.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {cards.map((card, index) => {
+              const Icon = card.icon;
+              return (
+                <div key={card.href} className="space-y-4">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-muted/40 text-primary">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold">{card.title}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {card.description}
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild variant="outline">
+                      <Link href={card.href}>
+                        Open
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                  {index < cards.length - 1 ? <Separator /> : null}
                 </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Security snapshot</CardTitle>
+              <CardDescription>Review your protection status.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between rounded-xl border px-3 py-2">
                 <div>
-                  <CardTitle className="text-lg">{card.title}</CardTitle>
-                  <CardDescription>{card.description}</CardDescription>
+                  <p className="text-sm font-medium">Two-factor auth</p>
+                  <p className="text-xs text-muted-foreground">
+                    Add a second verification step.
+                  </p>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <Button asChild variant="outline" className="w-full">
-                  <Link href={card.href}>
-                    Open
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
+                <Badge variant="outline">Recommended</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">Password</p>
+                  <p className="text-xs text-muted-foreground">
+                    Updated regularly for safety.
+                  </p>
+                </div>
+                <Badge variant="secondary">Good</Badge>
+              </div>
+              <Button asChild className="w-full">
+                <Link href="/settings/security">Review security</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick updates</CardTitle>
+              <CardDescription>Common account changes.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/settings/profile-photo">
+                  Update profile photo
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/settings/change-email">
+                  Change email
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/settings/change-password">
+                  Change password
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

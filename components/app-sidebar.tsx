@@ -21,6 +21,7 @@ import {
   ShieldCheckIcon,
   UsersIcon,
   GraduationCapIcon,
+  UserRoundIcon,
 } from "lucide-react"
 
 const navMain = [
@@ -33,6 +34,11 @@ const navMain = [
     title: "Students",
     url: "/students",
     icon: <UsersIcon />,
+  },
+  {
+    title: "Teachers",
+    url: "/teachers",
+    icon: <UserRoundIcon />,
   },
   {
     title: "Classes",

@@ -9,11 +9,19 @@ const adapter = new PrismaPg({
 
 const prisma = new PrismaClient({ adapter });
 
-async function ensureCourse(name: string, subject: "ENGLISH" | "MYANMAR") {
-  return prisma.course.upsert({
+async function ensureSubject(name: "English" | "Myanmar") {
+  return prisma.subject.upsert({
     where: { name },
     update: {},
-    create: { name, subject },
+    create: { name },
+  });
+}
+
+async function ensureCourse(name: string, subjectId: string) {
+  return prisma.course.upsert({
+    where: { name },
+    update: { subjectId },
+    create: { name, subjectId },
   });
 }
 
@@ -44,16 +52,46 @@ export async function main() {
 
   const teacher = await prisma.teacher.upsert({
     where: { userId: teacherUser.id },
-    update: { ratePerSection: 150 },
+    update: {
+      name: "Teacher One",
+      jobTitle: "Senior Teacher",
+      nrcNumber: "12/ABC(N)123456",
+      dob: new Date("1990-05-12T00:00:00Z"),
+      email: "teacher@lms.local",
+      gender: "FEMALE",
+      maritalStatus: "SINGLE",
+      parmentAddress: "Mandalay",
+      currentAddress: "Yangon",
+      phone: "09-0000-0000",
+      hireDate: new Date("2024-01-05T00:00:00Z"),
+      status: "ACTIVE",
+      remark: "Seeded teacher account",
+      ratePerSection: 150,
+    },
     create: {
       userId: teacherUser.id,
-      ratePerSection: 150,
+      name: "Teacher One",
+      jobTitle: "Senior Teacher",
+      nrcNumber: "12/ABC(N)123456",
+      dob: new Date("1990-05-12T00:00:00Z"),
+      email: "teacher@lms.local",
+      gender: "FEMALE",
+      maritalStatus: "SINGLE",
+      parmentAddress: "Mandalay",
+      currentAddress: "Yangon",
       phone: "09-0000-0000",
+      hireDate: new Date("2024-01-05T00:00:00Z"),
+      status: "ACTIVE",
+      remark: "Seeded teacher account",
+      ratePerSection: 150,
     },
   });
 
-  const english = await ensureCourse("English", "ENGLISH");
-  await ensureCourse("Myanmar", "MYANMAR");
+  const englishSubject = await ensureSubject("English");
+  const myanmarSubject = await ensureSubject("Myanmar");
+
+  const english = await ensureCourse("English", englishSubject.id);
+  await ensureCourse("Myanmar", myanmarSubject.id);
 
   const classA = await prisma.class.upsert({
     where: { id: "class-english-1" },
@@ -94,16 +132,16 @@ export async function main() {
   });
 
   const students = [
-    { name: "Aye Aye", gender: "FEMALE", phone: "09-1111-1111" },
-    { name: "Ko Ko", gender: "MALE", phone: "09-2222-2222" },
-    { name: "Myo Min", gender: "MALE", phone: "09-3333-3333" },
-    { name: "Su Su", gender: "FEMALE", phone: "09-4444-4444" },
-    { name: "Hla Hla", gender: "FEMALE", phone: "09-5555-5555" },
-    { name: "Kyaw Thu", gender: "MALE", phone: "09-6666-6666" },
-    { name: "Nandar", gender: "FEMALE", phone: "09-7777-7777" },
-    { name: "Zaw Win", gender: "MALE", phone: "09-8888-8888" },
-    { name: "Thiri", gender: "FEMALE", phone: "09-9999-9999" },
-    { name: "Ye Yint", gender: "MALE", phone: "09-1010-1010" },
+    { name: "Aye Aye", gender: "FEMALE", phone: "09-1111-1111", dob: "2010-03-10" },
+    { name: "Ko Ko", gender: "MALE", phone: "09-2222-2222", dob: "2009-08-22" },
+    { name: "Myo Min", gender: "MALE", phone: "09-3333-3333", dob: "2011-01-15" },
+    { name: "Su Su", gender: "FEMALE", phone: "09-4444-4444", dob: "2010-11-05" },
+    { name: "Hla Hla", gender: "FEMALE", phone: "09-5555-5555", dob: "2008-04-28" },
+    { name: "Kyaw Thu", gender: "MALE", phone: "09-6666-6666", dob: "2009-12-02" },
+    { name: "Nandar", gender: "FEMALE", phone: "09-7777-7777", dob: "2011-07-19" },
+    { name: "Zaw Win", gender: "MALE", phone: "09-8888-8888", dob: "2008-09-30" },
+    { name: "Thiri", gender: "FEMALE", phone: "09-9999-9999", dob: "2010-06-14" },
+    { name: "Ye Yint", gender: "MALE", phone: "09-1010-1010", dob: "2009-02-08" },
   ];
 
   const createdStudents = [] as { id: string; name: string }[];
@@ -113,7 +151,11 @@ export async function main() {
       data: {
         name: student.name,
         gender: student.gender as "MALE" | "FEMALE" | "OTHER",
+        dob: new Date(`${student.dob}T00:00:00Z`),
+        fatherName: "U Htun",
+        motherName: "Daw Mya",
         phone: student.phone,
+        address: "Yangon",
         status: "ACTIVE",
       },
     });
