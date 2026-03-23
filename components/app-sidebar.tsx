@@ -1,9 +1,11 @@
 "use client";
 
+import * as React from "react";
+import Link from "next/link";
+
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
-import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -15,7 +17,12 @@ import {
 } from "@/components/ui/sidebar";
 import {
   CalendarDaysIcon,
+  CalendarClockIcon,
+  ClipboardCheckIcon,
   CreditCardIcon,
+  BarChart3Icon,
+  ReceiptIcon,
+  FileDownIcon,
   LayoutDashboardIcon,
   Settings2Icon,
   ShieldCheckIcon,
@@ -23,20 +30,63 @@ import {
   GraduationCapIcon,
   UserRoundIcon,
   BookOpenIcon,
-  FolderTreeIcon,
+  BookOpenTextIcon,
+  TvMinimalIcon,
 } from "lucide-react";
 import { UserRole } from "@/app/generated/prisma/enums";
 
-const schoolNavMain = [
-  { title: "Dashboard", url: "/dashboard", icon: <LayoutDashboardIcon /> },
-  { title: "Students", url: "/students", icon: <UsersIcon /> },
-  { title: "Teachers", url: "/teachers", icon: <UserRoundIcon /> },
-  { title: "Subjects", url: "/subjects", icon: <FolderTreeIcon /> },
-  { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
-  { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
-  { title: "Sections", url: "/sections", icon: <GraduationCapIcon /> },
-  { title: "Attendance", url: "/attendance", icon: <CalendarDaysIcon /> },
-  { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
+const schoolNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      { title: "Dashboard", url: "/dashboard", icon: <LayoutDashboardIcon /> },
+      {
+        title: "Analytics",
+        url: "/analytics",
+        icon: <BarChart3Icon />,
+      },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { title: "Students", url: "/students", icon: <UsersIcon /> },
+      { title: "Teachers", url: "/teachers", icon: <UserRoundIcon /> },
+    ],
+  },
+  {
+    label: "Academics",
+    items: [
+      { title: "Subjects", url: "/subjects", icon: <BookOpenTextIcon /> },
+      { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
+      { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
+      { title: "Sections", url: "/sections", icon: <TvMinimalIcon /> },
+    ],
+  },
+  {
+    label: "Schedule",
+    items: [
+      { title: "Timetable", url: "/timetable", icon: <CalendarClockIcon /> },
+      {
+        title: "Student Attendance",
+        url: "/attendance",
+        icon: <CalendarDaysIcon />,
+      },
+      {
+        title: "Teacher Attendance",
+        url: "/teacher-attendance",
+        icon: <ClipboardCheckIcon />,
+      },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
+      { title: "Payroll", url: "/payroll", icon: <ReceiptIcon /> },
+      { title: "Exports", url: "/exports", icon: <FileDownIcon /> },
+    ],
+  },
 ];
 
 const schoolNavSecondary = [
@@ -82,9 +132,9 @@ export function AppSidebar({
   tenantId: string | null;
 }) {
   const isPlatform = role === UserRole.SUPER_ADMIN && !tenantId;
-  const navMain = isPlatform ? platformNavMain : schoolNavMain;
   const navSecondary = isPlatform ? platformNavSecondary : schoolNavSecondary;
   const homeHref = isPlatform ? "/platform/dashboard" : "/dashboard";
+  const settingsHref = isPlatform ? "/platform/settings" : "/settings";
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -98,6 +148,9 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Technet LMS</span>
+                  <span className="truncate text-xs">
+                    {isPlatform ? "Platform" : "School"}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -105,13 +158,17 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        {isPlatform ? (
+          <NavMain label="Platform" items={platformNavMain} />
+        ) : (
+          <NavMain groups={schoolNavGroups} />
+        )}
         {navSecondary.length ? (
           <NavSecondary items={navSecondary} className="mt-auto" />
         ) : null}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={user} settingsHref={settingsHref} />
       </SidebarFooter>
     </Sidebar>
   );

@@ -15,7 +15,7 @@ export default async function CreateSubjectPage() {
         description="Add a new subject to your school catalog."
         actions={
           <Button asChild variant="outline">
-            <Link href="/subjects">Back</Link>
+            <Link href="/subjects">Back to Subjects</Link>
           </Button>
         }
       />
@@ -23,4 +23,3 @@ export default async function CreateSubjectPage() {
     </div>
   );
 }
-

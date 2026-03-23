@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useActionState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(school)/settings/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-
-const initialState = { status: "idle" as const };
 
 export function ProfilePhoto({
   name,
@@ -19,15 +16,8 @@ export function ProfilePhoto({
   imageUrl: string | null;
 }) {
   const [file, setFile] = useState<File | null>(null);
-  const [state, formAction] = useActionState(uploadProfilePhoto, initialState);
-
-  useEffect(() => {
-    if (state.status === "success") {
-      toast.success(state.message ?? "Updated");
-      setFile(null);
-    }
-    if (state.status === "error") toast.error(state.message ?? "Failed");
-  }, [state]);
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
 
   const previewUrl = useMemo(() => {
     if (!file) return null;
@@ -60,7 +50,26 @@ export function ProfilePhoto({
           </div>
         </div>
 
-        <form action={formAction} className="space-y-3">
+        <form
+          className="space-y-3"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!file) return;
+            const formData = new FormData();
+            formData.set("photo", file);
+            startTransition(async () => {
+              const result = await uploadProfilePhoto({ status: "idle" }, formData);
+              if (result.status === "success") {
+                toast.success(result.message ?? "Updated");
+                setError(null);
+                setFile(null);
+                return;
+              }
+              setError(result.message ?? "Failed");
+              toast.error(result.message ?? "Failed");
+            });
+          }}
+        >
           <Input
             type="file"
             name="photo"
@@ -71,13 +80,13 @@ export function ProfilePhoto({
             }}
           />
           <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={!file}>
+            <Button type="submit" disabled={!file || pending}>
               Upload Photo
             </Button>
             <Button
               type="button"
               variant="outline"
-              disabled={!imageUrl}
+              disabled={!imageUrl || pending}
               onClick={async () => {
                 const result = await removeProfilePhotoAction();
                 if (result.status === "success") toast.success(result.message ?? "Removed");
@@ -87,9 +96,9 @@ export function ProfilePhoto({
               Remove Photo
             </Button>
           </div>
-          {state.status === "error" ? (
+          {error ? (
             <p className="text-sm text-destructive" role="status">
-              {state.message}
+              {error}
             </p>
           ) : null}
         </form>

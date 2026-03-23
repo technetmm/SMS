@@ -31,7 +31,7 @@ export default async function CreateSectionPage() {
         description="Add a section and optionally assign a teacher."
         actions={
           <Button asChild variant="outline">
-            <Link href="/sections">Cancel</Link>
+            <Link href="/sections">Back to Sections</Link>
           </Button>
         }
       />

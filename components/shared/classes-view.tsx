@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClass, createSection } from "@/app/actions/classes";
@@ -30,7 +30,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SubmitButton } from "@/components/shared/submit-button";
-import type { ClassActionState } from "@/app/actions/classes";
 import {
   Combobox,
   ComboboxChip,
@@ -93,52 +92,55 @@ export function ClassesView({
   const [selectedTeachers, setSelectedTeachers] = useState<TeacherOption[]>([]);
   const sectionClassAnchor = useComboboxAnchor();
   const sectionTeacherAnchor = useComboboxAnchor();
-  const initialState: ClassActionState = { status: "idle" };
-  const [classState, classFormAction] = useActionState(
-    createClass,
-    initialState,
-  );
-  const [sectionState, sectionFormAction] = useActionState(
-    createSection,
-    initialState,
-  );
+  const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (classState.status === "success") {
-      setClassDialogOpen(false);
-      toast.success(classState.message ?? "Class created");
-      router.refresh();
-    }
-    if (classState.status === "error") {
-      toast.error(classState.message ?? "Unable to create class");
-    }
-  }, [classState, router]);
+  function resetSectionDraft() {
+    setSelectedSectionClass(null);
+    setSelectedTeachers([]);
+  }
 
-  useEffect(() => {
-    if (sectionState.status === "success") {
-      setSectionDialogOpen(false);
-      setSelectedSectionClass(null);
-      setSelectedTeachers([]);
-      toast.success(sectionState.message ?? "Section created");
-      router.refresh();
-    }
-    if (sectionState.status === "error") {
-      toast.error(sectionState.message ?? "Unable to create section");
-    }
-  }, [sectionState, router]);
+  function handleSectionDialogChange(open: boolean) {
+    setSectionDialogOpen(open);
+    if (!open) resetSectionDraft();
+  }
 
-  useEffect(() => {
-    if (!sectionDialogOpen) {
-      setSelectedSectionClass(null);
-      setSelectedTeachers([]);
-    }
-  }, [sectionDialogOpen]);
+  function handleClassSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await createClass({ status: "idle" }, formData);
+      if (result.status === "success") {
+        setClassDialogOpen(false);
+        toast.success(result.message ?? "Class created");
+        router.refresh();
+        event.currentTarget.reset();
+        return;
+      }
+      toast.error(result.message ?? "Unable to create class");
+    });
+  }
 
   function handleSectionSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!selectedSectionClass) {
       event.preventDefault();
       toast.error("Please select a class.");
+      return;
     }
+
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await createSection({ status: "idle" }, formData);
+      if (result.status === "success") {
+        setSectionDialogOpen(false);
+        resetSectionDraft();
+        toast.success(result.message ?? "Section created");
+        router.refresh();
+        event.currentTarget.reset();
+        return;
+      }
+      toast.error(result.message ?? "Unable to create section");
+    });
   }
 
   return (
@@ -146,13 +148,13 @@ export function ClassesView({
       <div className="flex flex-wrap gap-3">
         <Dialog open={classDialogOpen} onOpenChange={setClassDialogOpen}>
           <DialogTrigger asChild>
-            <Button>New Class</Button>
+            <Button disabled={pending}>New Class</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-130">
             <DialogHeader>
               <DialogTitle>Create Class</DialogTitle>
             </DialogHeader>
-            <form action={classFormAction} className="space-y-4">
+            <form onSubmit={handleClassSubmit} className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="class-name">Class name</Label>
                 <Input id="class-name" name="name" required />
@@ -200,20 +202,20 @@ export function ClassesView({
                 </Select>
               </div>
               <div className="flex justify-end">
-                <SubmitButton label="Create class" />
+                <SubmitButton label="Create class" loadingLabel="Creating..." />
               </div>
             </form>
           </DialogContent>
         </Dialog>
-        <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+        <Dialog open={sectionDialogOpen} onOpenChange={handleSectionDialogChange}>
           <DialogTrigger asChild>
-            <Button variant="outline">New Section</Button>
+            <Button variant="outline" disabled={pending}>New Section</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-130">
             <DialogHeader>
               <DialogTitle>Create Section</DialogTitle>
             </DialogHeader>
-            <form action={sectionFormAction} onSubmit={handleSectionSubmit} className="space-y-4">
+            <form onSubmit={handleSectionSubmit} className="space-y-4">
               <input type="hidden" name="classId" value={selectedSectionClass?.id ?? ""} />
               <input type="hidden" name="teacherId" value={selectedTeachers[0]?.id ?? ""} />
               {selectedTeachers.map((teacher) => (

@@ -31,6 +31,8 @@ type ClassFormProps = {
     classType: "ONE_ON_ONE" | "PRIVATE" | "GROUP";
     programType: "REGULAR" | "INTENSIVE";
     courseId: string;
+    fee: number;
+    feeCurrency: "USD" | "MMK" | "THB";
   };
 };
 
@@ -57,12 +59,42 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
 
       <Card>
         <CardHeader>
-          <CardTitle>{mode === "create" ? "Create Class" : "Edit Class"}</CardTitle>
+        <CardTitle>{mode === "create" ? "Create Class" : "Edit Class"}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="name">Class Name</Label>
             <Input id="name" name="name" defaultValue={initialData?.name ?? ""} required />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="fee">Class Fee</Label>
+            <Input
+              id="fee"
+              name="fee"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={initialData?.fee ?? 0}
+              required
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="feeCurrency">Currency</Label>
+            <Select
+              name="feeCurrency"
+              defaultValue={initialData?.feeCurrency ?? "MMK"}
+            >
+              <SelectTrigger id="feeCurrency" className="w-full">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value="MMK">MMK</SelectItem>
+                <SelectItem value="USD">USD</SelectItem>
+                <SelectItem value="THB">THB</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-2 md:col-span-2">
@@ -119,4 +151,3 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
     </form>
   );
 }
-

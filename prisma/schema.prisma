@@ -81,6 +81,12 @@ enum PaymentStatus {
   UNPAID
 }
 
+enum Currency {
+  USD
+  MMK
+  THB
+}
+
 enum Permission {
   MANAGE_STUDENTS
   MANAGE_TEACHERS
@@ -135,19 +141,23 @@ model Tenant {
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
-  users         User[]
-  teachers      Teacher[]
-  students      Student[]
-  subjects      Subject[]
-  courses       Course[]
-  classes       Class[]
-  sections      Section[]
-  enrollments   Enrollment[]
-  attendance    Attendance[]
-  payments      Payment[]
-  subscriptions Subscription[]
-  branches      Branch[]
-  auditLogs     AuditLog[]
+  users              User[]
+  teachers           Teacher[]
+  students           Student[]
+  subjects           Subject[]
+  courses            Course[]
+  courseSubjects     CourseSubject[]
+  classes            Class[]
+  sections           Section[]
+  enrollments        Enrollment[]
+  attendance         Attendance[]
+  teacherAttendance  TeacherAttendance[]
+  payments           Payment[]
+  subscriptions      Subscription[]
+  branches           Branch[]
+  auditLogs          AuditLog[]
+  timetables         Timetable[]
+  payrolls           Payroll[]
 }
 
 model Branch {
@@ -192,6 +202,8 @@ model RolePermission {
   permission Permission
   isDeleted  Boolean    @default(false)
   deletedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   @@unique([role, permission])
 }
@@ -202,6 +214,8 @@ model UserPermission {
   permission Permission
   isDeleted  Boolean    @default(false)
   deletedAt  DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -234,10 +248,13 @@ model Teacher {
   isDeleted      Boolean       @default(false)
   deletedAt      DateTime?
 
-  user     User      @relation(fields: [userId], references: [id])
-  tenant   Tenant    @relation(fields: [tenantId], references: [id])
-  branch   Branch?   @relation(fields: [branchId], references: [id])
+  user     User             @relation(fields: [userId], references: [id])
+  tenant   Tenant           @relation(fields: [tenantId], references: [id])
+  branch   Branch?          @relation(fields: [branchId], references: [id])
   sections SectionTeacher[]
+  attendanceLogs TeacherAttendance[]
+  timetables     Timetable[]
+  payrolls       Payroll[]
 
   @@index([tenantId])
 }
@@ -276,9 +293,11 @@ model Subject {
   tenantId  String
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   tenant  Tenant   @relation(fields: [tenantId], references: [id])
-  courses Course[]
+  courses CourseSubject[]
 
   @@unique([tenantId, name])
 }
@@ -293,11 +312,29 @@ model Course {
   deletedAt DateTime?
 
   classes  Class[]
-  subjects Subject[]
+  subjects CourseSubject[]
   tenant   Tenant    @relation(fields: [tenantId], references: [id])
 
   @@unique([tenantId, name])
   @@index([tenantId])
+}
+
+model CourseSubject {
+  id        String   @id @default(cuid())
+  tenantId  String
+  courseId  String
+  subjectId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, subjectId])
+  @@index([tenantId])
+  @@index([courseId])
+  @@index([subjectId])
 }
 
 model Class {
@@ -307,6 +344,8 @@ model Class {
   courseId    String
   classType   ClassType
   programType ProgramType
+  fee         Decimal     @default(0)
+  feeCurrency Currency    @default(MMK)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   isDeleted   Boolean     @default(false)
@@ -317,6 +356,66 @@ model Class {
   sections Section[]
 
   @@index([tenantId])
+}
+
+model TeacherAttendance {
+  id        String           @id @default(cuid())
+  tenantId  String
+  teacherId String
+  sectionId String
+  date      DateTime
+  status    AttendanceStatus
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id])
+
+  @@unique([teacherId, sectionId, date])
+  @@index([tenantId])
+  @@index([teacherId, date])
+  @@index([sectionId, date])
+}
+
+model Timetable {
+  id        String    @id @default(cuid())
+  tenantId  String
+  sectionId String
+  teacherId String
+  dayOfWeek DayOfWeek
+  startTime String
+  endTime   String
+  room      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([teacherId, dayOfWeek])
+  @@index([sectionId, dayOfWeek])
+}
+
+model Payroll {
+  id            String   @id @default(cuid())
+  tenantId      String
+  teacherId     String
+  month         DateTime
+  totalSections Int
+  totalAmount   Decimal
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  teacher Teacher @relation(fields: [teacherId], references: [id])
+
+  @@unique([teacherId, month])
+  @@index([tenantId])
+  @@index([teacherId])
+  @@index([month])
 }
 
 model Section {
@@ -338,7 +437,9 @@ model Section {
   scheduleSlots   SectionSchedule[]
   enrollments     Enrollment[]
   attendanceLogs  Attendance[]
+  teacherAttendance TeacherAttendance[]
   teacherMappings SectionTeacher[]
+  timetables       Timetable[]
 
   @@index([tenantId])
 }
@@ -347,6 +448,8 @@ model SectionTeacher {
   id        String   @id @default(cuid())
   sectionId String
   teacherId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
@@ -363,6 +466,8 @@ model SectionSchedule {
   startTime String
   endTime   String
   room      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   section Section @relation(fields: [sectionId], references: [id])
 
@@ -379,6 +484,8 @@ model Enrollment {
   endDate   DateTime?
   isDeleted Boolean          @default(false)
   deletedAt DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   student Student @relation(fields: [studentId], references: [id])
   section Section @relation(fields: [sectionId], references: [id])
@@ -396,6 +503,8 @@ model Attendance {
   status    AttendanceStatus
   isDeleted Boolean          @default(false)
   deletedAt DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
 
   student Student @relation(fields: [studentId], references: [id])
   section Section @relation(fields: [sectionId], references: [id])
@@ -435,6 +544,7 @@ model AuditLog {
   entityId  String?
   metadata  Json?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   tenant Tenant? @relation(fields: [tenantId], references: [id])
   user   User?   @relation(fields: [userId], references: [id])
@@ -445,7 +555,7 @@ model AuditLog {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String   @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -457,6 +567,8 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -468,6 +580,8 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -476,6 +590,8 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
 }

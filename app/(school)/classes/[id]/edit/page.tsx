@@ -51,9 +51,10 @@ export default async function EditClassPage({
           classType: klass.classType,
           programType: klass.programType,
           courseId: klass.courseId,
+          fee: Number(klass.fee),
+          feeCurrency: klass.feeCurrency,
         }}
       />
     </div>
   );
 }
-

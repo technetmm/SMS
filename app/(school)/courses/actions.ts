@@ -54,7 +54,10 @@ export async function createCourse(
         tenantId,
         name: parsedWithSubjects.data.name,
         subjects: {
-          connect: parsedWithSubjects.data.subjectIds.map((id) => ({ id })),
+          create: parsedWithSubjects.data.subjectIds.map((subjectId) => ({
+            tenantId,
+            subjectId,
+          })),
         },
       },
     });
@@ -71,7 +74,7 @@ export async function getCourses() {
   await requirePermission(Permission.MANAGE_CLASSES);
   const tenantId = await requireTenant();
 
-  return prisma.course.findMany({
+  const courses = await prisma.course.findMany({
     where: { tenantId },
     orderBy: { createdAt: "desc" },
     select: {
@@ -79,7 +82,7 @@ export async function getCourses() {
       name: true,
       createdAt: true,
       subjects: {
-        select: { id: true, name: true },
+        select: { subject: { select: { id: true, name: true } } },
       },
       _count: {
         select: {
@@ -88,6 +91,11 @@ export async function getCourses() {
       },
     },
   });
+
+  return courses.map((course) => ({
+    ...course,
+    subjects: course.subjects.map((mapping) => mapping.subject),
+  }));
 }
 
 export async function getCourseById(id: string) {
@@ -102,13 +110,17 @@ export async function getCourseById(id: string) {
       id: true,
       name: true,
       subjects: {
-        select: {
-          id: true,
-          name: true,
-        },
+        select: { subject: { select: { id: true, name: true } } },
       },
     },
-  });
+  }).then((course) =>
+    course
+      ? {
+          ...course,
+          subjects: course.subjects.map((mapping) => mapping.subject),
+        }
+      : null,
+  );
 }
 
 export async function updateCourse(
@@ -161,7 +173,11 @@ export async function updateCourse(
       data: {
         name: parsed.data.name,
         subjects: {
-          set: parsed.data.subjectIds.map((id) => ({ id })),
+          deleteMany: {},
+          create: parsed.data.subjectIds.map((subjectId) => ({
+            tenantId,
+            subjectId,
+          })),
         },
       },
     });

@@ -52,6 +52,7 @@ export async function getSubjects() {
     select: {
       id: true,
       name: true,
+      createdAt: true,
       _count: {
         select: {
           courses: true,

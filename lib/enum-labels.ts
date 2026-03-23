@@ -66,6 +66,16 @@ export const PERMISSION_LABELS: Record<string, string> = {
   MANAGE_TENANTS: "Manage Tenants",
 };
 
+export const DAY_OF_WEEK_LABELS: Record<string, string> = {
+  MON: "Mon",
+  TUE: "Tue",
+  WED: "Wed",
+  THU: "Thu",
+  FRI: "Fri",
+  SAT: "Sat",
+  SUN: "Sun",
+};
+
 export function enumLabel<T extends string>(
   value: T,
   labels: Record<string, string>,

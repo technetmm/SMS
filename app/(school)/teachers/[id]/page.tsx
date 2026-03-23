@@ -6,20 +6,16 @@ import { prisma } from "@/lib/prisma/client";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   enumLabel,
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
   TEACHER_STATUS_LABELS,
 } from "@/lib/enum-labels";
-
-function formatDate(value: Date | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-    value,
-  );
-}
+import { teacherStatusColor } from "@/lib/colors";
+import { timeToMinutes } from "@/lib/time";
+import { dateFormatter } from "@/lib/helper";
+import { cn } from "@/lib/utils";
 
 export default async function TeacherDetailPage({
   params,
@@ -35,13 +31,31 @@ export default async function TeacherDetailPage({
   await requireSchoolAdmin();
   const tenantId = await requireTenantId();
 
-  const teacher = await prisma.teacher.findFirst({
-    where: { id, tenantId },
-  });
+  const [teacher, sectionCount, timetableSlots] = await Promise.all([
+    prisma.teacher.findFirst({
+      where: { id, tenantId },
+    }),
+    prisma.sectionTeacher.count({ where: { teacherId: id } }),
+    prisma.timetable.findMany({
+      where: { tenantId, teacherId: id },
+      select: { startTime: true, endTime: true },
+    }),
+  ]);
 
   if (!teacher) {
     redirect("/teachers");
   }
+
+  const weeklyMinutes = timetableSlots.reduce((total, slot) => {
+    try {
+      return (
+        total + (timeToMinutes(slot.endTime) - timeToMinutes(slot.startTime))
+      );
+    } catch {
+      return total;
+    }
+  }, 0);
+  const weeklyHoursLabel = `${Math.floor(weeklyMinutes / 60)}h ${weeklyMinutes % 60}m`;
 
   return (
     <div className="space-y-6">
@@ -77,7 +91,9 @@ export default async function TeacherDetailPage({
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Date of birth</p>
-                <p className="font-medium">{formatDate(teacher.dob)}</p>
+                <p className="font-medium">
+                  {teacher?.dob ? dateFormatter.format(teacher.dob) : "-"}
+                </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Gender</p>
@@ -142,11 +158,19 @@ export default async function TeacherDetailPage({
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Hire date</p>
-                <p className="font-medium">{formatDate(teacher.hireDate)}</p>
+                <p className="font-medium">
+                  {teacher?.hireDate
+                    ? dateFormatter.format(teacher.hireDate)
+                    : "-"}
+                </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Exit date</p>
-                <p className="font-medium">{formatDate(teacher.exitDate)}</p>
+                <p className="font-medium">
+                  {teacher.exitDate
+                    ? dateFormatter.format(teacher.exitDate)
+                    : "-"}
+                </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">
@@ -159,13 +183,36 @@ export default async function TeacherDetailPage({
               <div className="flex items-center justify-between rounded-xl border p-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="text-sm font-medium">Current status</p>
+
+                  <p
+                    className={cn(
+                      "font-medium",
+                      teacherStatusColor(teacher.status),
+                    )}
+                  >
+                    {enumLabel(teacher.status, TEACHER_STATUS_LABELS)}
+                  </p>
                 </div>
-                <Badge
-                  variant={teacher.status === "ACTIVE" ? "default" : "outline"}
-                >
-                  {enumLabel(teacher.status, TEACHER_STATUS_LABELS)}
-                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Workload</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">
+                  Assigned sections
+                </p>
+                <p className="font-medium">{sectionCount}</p>
+              </div>
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">
+                  Weekly teaching time
+                </p>
+                <p className="font-medium">{weeklyHoursLabel}</p>
               </div>
             </CardContent>
           </Card>

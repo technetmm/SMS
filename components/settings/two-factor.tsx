@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
-import { useActionState } from "react";
+import Image from "next/image";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   disableTwoFactor,
@@ -17,29 +18,10 @@ import { Label } from "@/components/ui/label";
 const initialState = { status: "idle" as const };
 
 export function TwoFactor({ enabled }: { enabled: boolean }) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [qrCode, setQrCode] = useState<string | null>(null);
-  const [verifyState, verifyAction] = useActionState(
-    verifyTwoFactorSetup,
-    initialState,
-  );
-  const [disableState, disableAction] = useActionState(
-    disableTwoFactor,
-    initialState,
-  );
-
-  useEffect(() => {
-    if (verifyState.status === "success") {
-      toast.success(verifyState.message ?? "2FA enabled");
-      setQrCode(null);
-    }
-    if (verifyState.status === "error") toast.error(verifyState.message ?? "Failed");
-  }, [verifyState]);
-
-  useEffect(() => {
-    if (disableState.status === "success") toast.success(disableState.message ?? "2FA disabled");
-    if (disableState.status === "error") toast.error(disableState.message ?? "Failed");
-  }, [disableState]);
+  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
 
   return (
     <Card>
@@ -55,7 +37,7 @@ export function TwoFactor({ enabled }: { enabled: boolean }) {
             <div className="rounded-xl border bg-muted/30 p-3 text-sm">
               2FA is currently enabled for your account.
             </div>
-            <Dialog>
+            <Dialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline">Disable 2FA</Button>
               </DialogTrigger>
@@ -63,12 +45,30 @@ export function TwoFactor({ enabled }: { enabled: boolean }) {
                 <DialogHeader>
                   <DialogTitle>Disable 2FA</DialogTitle>
                 </DialogHeader>
-                <form action={disableAction} className="space-y-3">
+                <form
+                  className="space-y-3"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const formData = new FormData(event.currentTarget);
+                    startTransition(async () => {
+                      const result = await disableTwoFactor(initialState, formData);
+                      if (result.status === "success") {
+                        toast.success(result.message ?? "2FA disabled");
+                        setDisableDialogOpen(false);
+                        router.refresh();
+                        return;
+                      }
+                      toast.error(result.message ?? "Failed");
+                    });
+                  }}
+                >
                   <div className="grid gap-2">
                     <Label htmlFor="password">Confirm password</Label>
                     <Input id="password" name="password" type="password" required />
                   </div>
-                  <Button type="submit">Disable</Button>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "Disabling..." : "Disable"}
+                  </Button>
                 </form>
               </DialogContent>
             </Dialog>
@@ -96,14 +96,39 @@ export function TwoFactor({ enabled }: { enabled: boolean }) {
             {qrCode ? (
               <div className="space-y-4">
                 <div className="rounded-xl border bg-muted/20 p-4">
-                  <img src={qrCode} alt="2FA QR code" className="mx-auto h-40 w-40" />
+                  <Image
+                    src={qrCode}
+                    alt="2FA QR code"
+                    width={160}
+                    height={160}
+                    className="mx-auto h-40 w-40"
+                    unoptimized
+                  />
                 </div>
-                <form action={verifyAction} className="space-y-3">
+                <form
+                  className="space-y-3"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const formData = new FormData(event.currentTarget);
+                    startTransition(async () => {
+                      const result = await verifyTwoFactorSetup(initialState, formData);
+                      if (result.status === "success") {
+                        toast.success(result.message ?? "2FA enabled");
+                        setQrCode(null);
+                        router.refresh();
+                        return;
+                      }
+                      toast.error(result.message ?? "Failed");
+                    });
+                  }}
+                >
                   <div className="grid gap-2">
                     <Label htmlFor="token">Enter the 6-digit code</Label>
                     <Input id="token" name="token" inputMode="numeric" required />
                   </div>
-                  <Button type="submit">Verify & Enable</Button>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? "Verifying..." : "Verify & Enable"}
+                  </Button>
                 </form>
               </div>
             ) : null}

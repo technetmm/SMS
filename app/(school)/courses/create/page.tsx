@@ -17,16 +17,18 @@ export default async function CreateCoursePage() {
         description="Add a course and assign a subject."
         actions={
           <Button asChild variant="outline">
-            <Link href="/courses">Back</Link>
+            <Link href="/courses">Back to Courses</Link>
           </Button>
         }
       />
       <CourseForm
         mode="create"
         action={createCourse}
-        subjects={subjects.map((subject) => ({ id: subject.id, name: subject.name }))}
+        subjects={subjects.map((subject) => ({
+          id: subject.id,
+          name: subject.name,
+        }))}
       />
     </div>
   );
 }
-

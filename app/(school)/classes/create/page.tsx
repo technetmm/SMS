@@ -24,7 +24,7 @@ export default async function CreateClassPage() {
         description="Add a new class."
         actions={
           <Button asChild variant="outline">
-            <Link href="/classes">Cancel</Link>
+            <Link href="/classes">Back to Classes</Link>
           </Button>
         }
       />
@@ -32,4 +32,3 @@ export default async function CreateClassPage() {
     </div>
   );
 }
-

@@ -58,7 +58,6 @@ export function SectionForm({
 }: SectionFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const classAnchor = useComboboxAnchor();
   const teacherAnchor = useComboboxAnchor();
 
   const initialClass = useMemo(
@@ -79,10 +78,8 @@ export function SectionForm({
   const [selectedTeachers, setSelectedTeachers] =
     useState<Option[]>(initialTeachers);
 
-  useEffect(() => {
-    setSelectedClass(initialClass);
-    setSelectedTeachers(initialTeachers);
-  }, [initialClass, initialTeachers]);
+  // `initialData` is stable for the lifetime of the page render (server component),
+  // so we don't need to sync state from props via an effect.
 
   useEffect(() => {
     if (state.status === "success") {
@@ -142,19 +139,9 @@ export function SectionForm({
               onValueChange={(value: Option | null) => setSelectedClass(value)}
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={classAnchor} className="w-full">
-                <ComboboxValue>
-                  {(value) => (
-                    <>
-                      {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search class..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={classAnchor}>
-                <ComboboxInput placeholder="Search class..." />
-                <ComboboxEmpty>No classes found.</ComboboxEmpty>
+              <ComboboxInput placeholder="Select class..." />
+              <ComboboxContent>
+                <ComboboxEmpty>No items found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>

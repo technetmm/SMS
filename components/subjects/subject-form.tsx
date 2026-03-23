@@ -46,7 +46,9 @@ export function SubjectForm({ mode, action, initialData }: SubjectFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>{mode === "create" ? "Create Subject" : "Edit Subject"}</CardTitle>
+          <CardTitle>
+            {mode === "create" ? "Create Subject" : "Edit Subject"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
@@ -71,4 +73,3 @@ export function SubjectForm({ mode, action, initialData }: SubjectFormProps) {
     </form>
   );
 }
-

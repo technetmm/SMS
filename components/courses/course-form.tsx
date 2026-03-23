@@ -21,7 +21,6 @@ import {
   useComboboxAnchor,
   ComboboxInput,
 } from "@/components/ui/combobox";
-import { uniqueBy } from "@/lib/helper";
 
 const initialState: CourseActionState = { status: "idle" };
 
@@ -59,13 +58,9 @@ export function CourseForm({
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(
-    uniqueBy(initialData?.subjects ?? []),
+    () => uniqueSubjects(initialData?.subjects ?? []),
   );
   const anchor = useComboboxAnchor();
-
-  useEffect(() => {
-    setSelectedSubjects(uniqueSubjects(initialData?.subjects ?? []));
-  }, [initialData?.subjects]);
 
   useEffect(() => {
     if (state.status === "success") {

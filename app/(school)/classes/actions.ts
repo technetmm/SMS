@@ -42,6 +42,8 @@ export async function createClass(
         courseId: parsed.data.courseId,
         classType: parsed.data.classType,
         programType: parsed.data.programType,
+        fee: parsed.data.fee,
+        feeCurrency: parsed.data.feeCurrency,
       },
     });
   } catch {
@@ -65,6 +67,8 @@ export async function getClasses() {
       name: true,
       classType: true,
       programType: true,
+      fee: true,
+      feeCurrency: true,
       createdAt: true,
       course: { select: { id: true, name: true } },
       _count: { select: { sections: true } },
@@ -84,6 +88,8 @@ export async function getClassById(id: string) {
       name: true,
       classType: true,
       programType: true,
+      fee: true,
+      feeCurrency: true,
       courseId: true,
     },
   });
@@ -117,7 +123,8 @@ export async function updateClass(
   ]);
 
   if (!existingClass) return { status: "error", message: "Class not found." };
-  if (!course) return { status: "error", message: "Selected course is invalid." };
+  if (!course)
+    return { status: "error", message: "Selected course is invalid." };
 
   try {
     await prisma.class.update({
@@ -127,6 +134,8 @@ export async function updateClass(
         courseId: parsed.data.courseId,
         classType: parsed.data.classType,
         programType: parsed.data.programType,
+        fee: parsed.data.fee,
+        feeCurrency: parsed.data.feeCurrency,
       },
     });
   } catch {
@@ -159,4 +168,3 @@ export async function deleteClass(formData: FormData) {
   revalidatePath("/classes");
   revalidatePath("/sections");
 }
-

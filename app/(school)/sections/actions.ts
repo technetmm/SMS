@@ -51,7 +51,10 @@ async function validateTenantReferences(
     return { ok: false as const, message: "Selected class is invalid." };
   }
   if (teachers.length !== teacherIds.length) {
-    return { ok: false as const, message: "One or more selected teachers are invalid." };
+    return {
+      ok: false as const,
+      message: "One or more selected teachers are invalid.",
+    };
   }
   return { ok: true as const };
 }
@@ -181,10 +184,15 @@ export async function updateSection(
       where: { id: parsed.data.id, tenantId },
       select: { id: true },
     }),
-    validateTenantReferences(tenantId, parsed.data.classId, parsed.data.teacherIds),
+    validateTenantReferences(
+      tenantId,
+      parsed.data.classId,
+      parsed.data.teacherIds,
+    ),
   ]);
 
-  if (!existingSection) return { status: "error", message: "Section not found." };
+  if (!existingSection)
+    return { status: "error", message: "Section not found." };
   if (!tenantCheck.ok) return { status: "error", message: tenantCheck.message };
 
   try {
@@ -245,7 +253,10 @@ export async function assignTeachersToSection(
 
   if (!section) return { status: "error", message: "Section not found." };
   if (teachers.length !== uniqueTeacherIds.length) {
-    return { status: "error", message: "One or more selected teachers are invalid." };
+    return {
+      status: "error",
+      message: "One or more selected teachers are invalid.",
+    };
   }
 
   await prisma.sectionTeacher.createMany({
@@ -319,4 +330,3 @@ export async function deleteSection(formData: FormData) {
   revalidatePath("/sections");
   revalidatePath("/classes");
 }
-

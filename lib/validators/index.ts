@@ -1,6 +1,9 @@
 import { z } from "zod";
 import {
+  Currency,
   ClassType,
+  DayOfWeek,
+  AttendanceStatus,
   Gender,
   MaritalStatus,
   ProgramType,
@@ -43,6 +46,14 @@ export const classCreateSchema = z.object({
   courseId: z.string().min(1),
   classType: z.nativeEnum(ClassType),
   programType: z.nativeEnum(ProgramType),
+  fee: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().nonnegative("Fee cannot be negative"),
+  ),
+  feeCurrency: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? Currency.MMK : value),
+    z.nativeEnum(Currency),
+  ),
 });
 
 export const sectionCreateSchema = z.object({
@@ -114,3 +125,37 @@ export const teacherUpdateSchema = teacherCreateSchema
   .extend({
     id: z.string().min(1, "Teacher id is required"),
   });
+
+const timeString = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, "Time must be in HH:mm format");
+
+export const timetableSlotSchema = z
+  .object({
+    id: z.string().optional(),
+    sectionId: z.string().min(1, "Section is required"),
+    teacherId: z.string().min(1, "Teacher is required"),
+    dayOfWeek: z.nativeEnum(DayOfWeek),
+    startTime: timeString,
+    endTime: timeString,
+    room: z.string().optional(),
+  })
+  .refine(
+    (value) => {
+      const [sH, sM] = value.startTime.split(":").map(Number);
+      const [eH, eM] = value.endTime.split(":").map(Number);
+      return eH * 60 + eM > sH * 60 + sM;
+    },
+    { message: "End time must be after start time", path: ["endTime"] },
+  );
+
+export const teacherAttendanceSchema = z.object({
+  teacherId: z.string().min(1, "Teacher is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  date: z.coerce.date(),
+  status: z.nativeEnum(AttendanceStatus),
+});
+
+export const payrollGenerateSchema = z.object({
+  month: z.coerce.date(),
+});
