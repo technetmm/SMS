@@ -1,0 +1,14 @@
+services:
+  app:
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/lms_db?schema=public
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_SECRET: ${AUTH_SECRET:-change-this-to-a-long-random-secret}
+    command: sh -c "pnpm install --no-frozen-lockfile && pnpm db:generate && pnpm dev"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"

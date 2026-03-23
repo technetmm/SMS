@@ -1,0 +1,31 @@
+{
+  "title": "LMS Overview",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Usage",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "rate(process_cpu_seconds_total[1m])", "legendFormat": "cpu" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Usage",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "process_resident_memory_bytes", "legendFormat": "rss" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Rate",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(http_requests_total[1m]))", "legendFormat": "req/s" }
+      ]
+    }
+  ],
+  "schemaVersion": 39,
+  "version": 1
+}

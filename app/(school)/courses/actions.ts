@@ -1,0 +1,211 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { Permission } from "@/app/generated/prisma/enums";
+import { prisma } from "@/lib/prisma/client";
+import { formDataToObject } from "@/lib/form-utils";
+import { requirePermission, requireTenant } from "@/lib/rbac";
+import { courseCreateSchema, courseUpdateSchema } from "@/lib/validators";
+
+export type CourseActionState = {
+  status: "idle" | "success" | "error";
+  message?: string;
+};
+
+export async function createCourse(
+  _prevState: CourseActionState,
+  formData: FormData,
+): Promise<CourseActionState> {
+  await requirePermission(Permission.MANAGE_CLASSES);
+  const tenantId = await requireTenant();
+
+  const raw = formDataToObject(formData);
+  const subjectIds = formData
+    .getAll("subjectIds")
+    .map((value) => String(value))
+    .filter(Boolean);
+  const parsedWithSubjects = courseCreateSchema.safeParse({
+    name: raw.name,
+    subjectIds,
+  });
+
+  if (!parsedWithSubjects.success) {
+    return {
+      status: "error",
+      message: parsedWithSubjects.error.errors[0]?.message,
+    };
+  }
+
+  const subjects = await prisma.subject.findMany({
+    where: { id: { in: parsedWithSubjects.data.subjectIds }, tenantId },
+    select: { id: true },
+  });
+
+  if (subjects.length !== parsedWithSubjects.data.subjectIds.length) {
+    return {
+      status: "error",
+      message: "One or more selected subjects are invalid.",
+    };
+  }
+
+  try {
+    await prisma.course.create({
+      data: {
+        tenantId,
+        name: parsedWithSubjects.data.name,
+        subjects: {
+          connect: parsedWithSubjects.data.subjectIds.map((id) => ({ id })),
+        },
+      },
+    });
+  } catch {
+    return { status: "error", message: "Course name already exists." };
+  }
+
+  revalidatePath("/courses");
+  revalidatePath("/classes");
+  return { status: "success", message: "Course created successfully." };
+}
+
+export async function getCourses() {
+  await requirePermission(Permission.MANAGE_CLASSES);
+  const tenantId = await requireTenant();
+
+  return prisma.course.findMany({
+    where: { tenantId },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      createdAt: true,
+      subjects: {
+        select: { id: true, name: true },
+      },
+      _count: {
+        select: {
+          classes: true,
+        },
+      },
+    },
+  });
+}
+
+export async function getCourseById(id: string) {
+  await requirePermission(Permission.MANAGE_CLASSES);
+  const tenantId = await requireTenant();
+
+  if (!id) return null;
+
+  return prisma.course.findFirst({
+    where: { id, tenantId },
+    select: {
+      id: true,
+      name: true,
+      subjects: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  });
+}
+
+export async function updateCourse(
+  _prevState: CourseActionState,
+  formData: FormData,
+): Promise<CourseActionState> {
+  await requirePermission(Permission.MANAGE_CLASSES);
+  const tenantId = await requireTenant();
+
+  const raw = formDataToObject(formData);
+  const subjectIds = formData
+    .getAll("subjectIds")
+    .map((value) => String(value))
+    .filter(Boolean);
+  const parsed = courseUpdateSchema.safeParse({
+    id: raw.id,
+    name: raw.name,
+    subjectIds,
+  });
+
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.errors[0]?.message };
+  }
+
+  const [course, subjects] = await Promise.all([
+    prisma.course.findFirst({
+      where: { id: parsed.data.id, tenantId },
+      select: { id: true },
+    }),
+    prisma.subject.findMany({
+      where: { id: { in: parsed.data.subjectIds }, tenantId },
+      select: { id: true },
+    }),
+  ]);
+
+  if (!course) {
+    return { status: "error", message: "Course not found." };
+  }
+
+  if (subjects.length !== parsed.data.subjectIds.length) {
+    return {
+      status: "error",
+      message: "One or more selected subjects are invalid.",
+    };
+  }
+
+  try {
+    await prisma.course.update({
+      where: { id: parsed.data.id },
+      data: {
+        name: parsed.data.name,
+        subjects: {
+          set: parsed.data.subjectIds.map((id) => ({ id })),
+        },
+      },
+    });
+  } catch {
+    return { status: "error", message: "Course name already exists." };
+  }
+
+  revalidatePath("/courses");
+  revalidatePath("/classes");
+  return { status: "success", message: "Course updated successfully." };
+}
+
+export async function deleteCourse(
+  _prevState: CourseActionState,
+  formData: FormData,
+): Promise<CourseActionState> {
+  await requirePermission(Permission.MANAGE_CLASSES);
+  const tenantId = await requireTenant();
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) return { status: "error", message: "Course id is required." };
+
+  const course = await prisma.course.findFirst({
+    where: { id, tenantId },
+    select: {
+      id: true,
+      _count: { select: { classes: true } },
+    },
+  });
+
+  if (!course) {
+    return { status: "error", message: "Course not found." };
+  }
+
+  if (course._count.classes > 0) {
+    return {
+      status: "error",
+      message: "This course is already used by classes. Remove classes first.",
+    };
+  }
+
+  await prisma.course.delete({ where: { id } });
+
+  revalidatePath("/courses");
+  revalidatePath("/classes");
+  return { status: "success", message: "Course deleted successfully." };
+}

@@ -1,0 +1,65 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma/client";
+import { requireSchoolAdmin } from "@/lib/permissions";
+import { requireTenantId } from "@/lib/tenant";
+import { PageHeader } from "@/components/shared/page-header";
+import { Button } from "@/components/ui/button";
+import { SectionForm } from "@/components/sections/section-form";
+import { getSectionById, updateSection } from "@/app/(school)/sections/actions";
+
+export default async function EditSectionPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireSchoolAdmin();
+  const tenantId = await requireTenantId();
+  const { id } = await params;
+
+  const [section, classes, teachers] = await Promise.all([
+    getSectionById(id),
+    prisma.class.findMany({
+      where: { tenantId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.teacher.findMany({
+      where: { tenantId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
+
+  if (!section) {
+    notFound();
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Edit Section"
+        description="Update section details."
+        actions={
+          <Button asChild variant="outline">
+            <Link href="/sections">Cancel</Link>
+          </Button>
+        }
+      />
+      <SectionForm
+        mode="edit"
+        action={updateSection}
+        classes={classes}
+        teachers={teachers}
+        initialData={{
+          id: section.id,
+          name: section.name,
+          classId: section.classId,
+          teacherIds: section.teacherMappings.map((item) => item.teacher.id),
+          room: section.room,
+          capacity: section.capacity,
+        }}
+      />
+    </div>
+  );
+}
