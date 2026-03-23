@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   createTeacher,
   type TeacherActionState,
-} from "@/app/(dashboard)/teachers/actions";
+} from "@/app/(school)/teachers/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,10 +63,10 @@ export function TeacherForm() {
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue="MALE">
-              <SelectTrigger id="gender">
+              <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="MALE">Male</SelectItem>
                 <SelectItem value="FEMALE">Female</SelectItem>
                 <SelectItem value="OTHER">Other</SelectItem>
@@ -76,10 +76,10 @@ export function TeacherForm() {
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="maritalStatus">Marital status</Label>
             <Select name="maritalStatus" defaultValue="SINGLE">
-              <SelectTrigger id="maritalStatus">
+              <SelectTrigger id="maritalStatus" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="SINGLE">Single</SelectItem>
                 <SelectItem value="MARRIED">Married</SelectItem>
               </SelectContent>
@@ -139,10 +139,10 @@ export function TeacherForm() {
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue="ACTIVE">
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="ONLEAVE">On Leave</SelectItem>
                 <SelectItem value="RESIGNED">Resigned</SelectItem>
@@ -156,10 +156,9 @@ export function TeacherForm() {
               id="ratePerSection"
               name="ratePerSection"
               type="number"
-              min="0.01"
+              min="0"
               step="0.01"
-              placeholder="0.00"
-              required
+              placeholder="Optional (e.g. 25.00)"
             />
           </div>
           <div className="grid gap-2 md:col-span-2">

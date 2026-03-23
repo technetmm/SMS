@@ -4,7 +4,10 @@ import { useEffect } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { updateTeacher, type TeacherActionState } from "@/app/(dashboard)/teachers/actions";
+import {
+  updateTeacher,
+  type TeacherActionState,
+} from "@/app/(school)/teachers/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -70,16 +73,25 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="nrcNumber">NRC number</Label>
-            <Input id="nrcNumber" name="nrcNumber" defaultValue={teacher.nrcNumber} required />
+            <Input
+              id="nrcNumber"
+              name="nrcNumber"
+              defaultValue={teacher.nrcNumber}
+              required
+            />
           </div>
-          <DatePickerField name="dob" label="Date of birth" defaultValue={teacher.dob} />
+          <DatePickerField
+            name="dob"
+            label="Date of birth"
+            defaultValue={teacher.dob}
+          />
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue={teacher.gender}>
-              <SelectTrigger id="gender">
+              <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="MALE">Male</SelectItem>
                 <SelectItem value="FEMALE">Female</SelectItem>
                 <SelectItem value="OTHER">Other</SelectItem>
@@ -89,10 +101,10 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="maritalStatus">Marital status</Label>
             <Select name="maritalStatus" defaultValue={teacher.maritalStatus}>
-              <SelectTrigger id="maritalStatus">
+              <SelectTrigger id="maritalStatus" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="SINGLE">Single</SelectItem>
                 <SelectItem value="MARRIED">Married</SelectItem>
               </SelectContent>
@@ -128,7 +140,13 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" defaultValue={teacher.email} required />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              defaultValue={teacher.email}
+              required
+            />
           </div>
         </CardContent>
       </Card>
@@ -140,17 +158,30 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="jobTitle">Job title</Label>
-            <Input id="jobTitle" name="jobTitle" defaultValue={teacher.jobTitle} required />
+            <Input
+              id="jobTitle"
+              name="jobTitle"
+              defaultValue={teacher.jobTitle}
+              required
+            />
           </div>
-          <DatePickerField name="hireDate" label="Hire date" defaultValue={teacher.hireDate} />
-          <DatePickerField name="exitDate" label="Exit date" defaultValue={teacher.exitDate ?? ""} />
+          <DatePickerField
+            name="hireDate"
+            label="Hire date"
+            defaultValue={teacher.hireDate}
+          />
+          <DatePickerField
+            name="exitDate"
+            label="Exit date"
+            defaultValue={teacher.exitDate ?? ""}
+          />
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue={teacher.status}>
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="ONLEAVE">On Leave</SelectItem>
                 <SelectItem value="RESIGNED">Resigned</SelectItem>
@@ -164,15 +195,19 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
               id="ratePerSection"
               name="ratePerSection"
               type="number"
-              min="0.01"
+              min="0"
               step="0.01"
               defaultValue={teacher.ratePerSection}
-              required
+              placeholder="Optional (e.g. 25.00)"
             />
           </div>
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="remark">Remark</Label>
-            <Textarea id="remark" name="remark" defaultValue={teacher.remark ?? ""} />
+            <Textarea
+              id="remark"
+              name="remark"
+              defaultValue={teacher.remark ?? ""}
+            />
           </div>
         </CardContent>
       </Card>

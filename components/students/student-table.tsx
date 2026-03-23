@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { getStudents } from "@/app/(dashboard)/students/actions";
+import { getStudents } from "@/app/(school)/students/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StudentRowActions } from "@/components/students/student-row-actions";
+import { enumLabel, GENDER_LABELS, STUDENT_STATUS_LABELS } from "@/lib/enum-labels";
 
 export async function StudentTable({
   query,
@@ -32,11 +33,11 @@ export async function StudentTable({
           {students.map((student) => (
             <TableRow key={student.id}>
               <TableCell className="font-medium">{student.name}</TableCell>
-              <TableCell>{student.gender}</TableCell>
+              <TableCell>{enumLabel(student.gender, GENDER_LABELS)}</TableCell>
               <TableCell>{student.phone ?? "-"}</TableCell>
               <TableCell>
                 <Badge variant={student.status === "ACTIVE" ? "default" : "outline"}>
-                  {student.status}
+                  {enumLabel(student.status, STUDENT_STATUS_LABELS)}
                 </Badge>
               </TableCell>
               <TableCell>{formatter.format(student.createdAt)}</TableCell>

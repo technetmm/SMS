@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { disableTwoFactor } from "@/app/(dashboard)/settings/actions";
+import { disableTwoFactor } from "@/app/(school)/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

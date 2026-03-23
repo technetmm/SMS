@@ -8,7 +8,7 @@ import {
   createStudent,
   updateStudent,
   type StudentActionState,
-} from "@/app/(dashboard)/students/actions";
+} from "@/app/(school)/students/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,10 +83,10 @@ export function StudentForm({
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue={initialData?.gender ?? "MALE"}>
-              <SelectTrigger id="gender">
+              <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="MALE">Male</SelectItem>
                 <SelectItem value="FEMALE">Female</SelectItem>
                 <SelectItem value="OTHER">Other</SelectItem>
@@ -161,10 +161,10 @@ export function StudentForm({
               name="status"
               defaultValue={initialData?.status ?? "ACTIVE"}
             >
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="INACTIVE">Inactive</SelectItem>
                 <SelectItem value="GRADUATED">Graduated</SelectItem>

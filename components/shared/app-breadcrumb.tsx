@@ -13,6 +13,9 @@ import {
 
 const LABELS: Record<string, string> = {
   dashboard: "Dashboard",
+  platform: "Platform",
+  tenants: "Tenants",
+  subscriptions: "Subscriptions",
   students: "Students",
   classes: "Classes",
   attendance: "Attendance",
@@ -24,6 +27,7 @@ const LABELS: Record<string, string> = {
   "2fa": "Two-Factor Auth",
   security: "Security",
   theme: "Theme",
+  permissions: "Permissions",
 };
 
 function toTitleCase(segment: string) {

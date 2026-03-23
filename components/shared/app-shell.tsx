@@ -33,6 +33,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           email: user.email,
           avatar: user.image ?? "",
         }}
+        role={session.user.role}
+        tenantId={session.user.tenantId ?? null}
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">

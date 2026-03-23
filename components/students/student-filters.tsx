@@ -26,17 +26,22 @@ export function StudentFilters({
         <label className="text-sm font-medium" htmlFor="q">
           Search
         </label>
-        <Input id="q" name="q" placeholder="Search by name or phone" defaultValue={query} />
+        <Input
+          id="q"
+          name="q"
+          placeholder="Search by name or phone"
+          defaultValue={query}
+        />
       </div>
       <div className="grid gap-2 md:w-52">
         <label className="text-sm font-medium" htmlFor="status">
           Status
         </label>
         <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger id="status">
+          <SelectTrigger id="status" className="w-full">
             <SelectValue placeholder="All statuses" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="ALL">All</SelectItem>
             <SelectItem value="ACTIVE">Active</SelectItem>
             <SelectItem value="INACTIVE">Inactive</SelectItem>
@@ -47,7 +52,11 @@ export function StudentFilters({
       </div>
       <div className="flex gap-2">
         <Button type="submit">Apply</Button>
-        <Button type="button" variant="outline" onClick={() => (window.location.href = "/students")}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => (window.location.href = "/students")}
+        >
           Reset
         </Button>
       </div>

@@ -6,7 +6,7 @@ import {
   ProgramType,
   StudentStatus,
   TeacherStatus,
-} from "@/app/generated/prisma/index";
+} from "@/app/generated/prisma/enums";
 
 export const studentCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -28,7 +28,10 @@ export const studentCreateSchema = z.object({
     z.boolean().optional(),
   ),
   email: z.string().email("Valid email is required").optional(),
-  password: z.string().min(8, "Password must be at least 8 characters").optional(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .optional(),
 });
 
 export const studentUpdateSchema = studentCreateSchema.extend({
@@ -53,6 +56,37 @@ export const sectionCreateSchema = z.object({
   ),
 });
 
+export const sectionMultiTeacherSchema = z.object({
+  id: z.string().optional(),
+  classId: z.string().min(1, "Class is required"),
+  name: z.string().min(1, "Section name is required"),
+  teacherIds: z.array(z.string().min(1)).optional().default([]),
+  room: z.string().optional(),
+  capacity: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.coerce.number().int().positive().optional(),
+  ),
+});
+
+export const subjectCreateSchema = z.object({
+  name: z.string().trim().min(2, "Subject name is required"),
+});
+
+export const subjectUpdateSchema = subjectCreateSchema.extend({
+  id: z.string().min(1, "Subject id is required"),
+});
+
+export const courseCreateSchema = z.object({
+  name: z.string().trim().min(2, "Course name is required"),
+  subjectIds: z
+    .array(z.string().min(1))
+    .min(1, "Select at least one subject"),
+});
+
+export const courseUpdateSchema = courseCreateSchema.extend({
+  id: z.string().min(1, "Course id is required"),
+});
+
 export const teacherCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   jobTitle: z.string().min(2, "Job title is required"),
@@ -67,9 +101,10 @@ export const teacherCreateSchema = z.object({
   hireDate: z.coerce.date(),
   exitDate: z.coerce.date().optional(),
   status: z.nativeEnum(TeacherStatus),
-  ratePerSection: z.coerce
-    .number()
-    .positive("Rate per section must be positive"),
+  ratePerSection: z.preprocess(
+    (value) => (value === "" || value === null ? undefined : value),
+    z.coerce.number().nonnegative("Rate per section cannot be negative").optional(),
+  ),
   remark: z.string().optional(),
   password: z.string().min(8, "Password must be at least 8 characters"),
 });

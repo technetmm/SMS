@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTeachers, deleteTeacher } from "@/app/(dashboard)/teachers/actions";
+import { getTeachers, deleteTeacher } from "@/app/(school)/teachers/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { enumLabel, TEACHER_STATUS_LABELS } from "@/lib/enum-labels";
 
 export async function TeacherTable() {
   const teachers = await getTeachers();
@@ -38,7 +39,7 @@ export async function TeacherTable() {
                 <Badge
                   variant={teacher.status === "ACTIVE" ? "default" : "outline"}
                 >
-                  {teacher.status}
+                  {enumLabel(teacher.status, TEACHER_STATUS_LABELS)}
                 </Badge>
               </TableCell>
               <TableCell>{formatter.format(teacher.hireDate)}</TableCell>

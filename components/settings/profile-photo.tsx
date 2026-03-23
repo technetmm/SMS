@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useActionState } from "react";
 import { toast } from "sonner";
-import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(dashboard)/settings/actions";
+import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(school)/settings/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
-import Link from "next/link"
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -12,7 +12,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   CalendarDaysIcon,
   CreditCardIcon,
@@ -22,71 +22,77 @@ import {
   UsersIcon,
   GraduationCapIcon,
   UserRoundIcon,
-} from "lucide-react"
+  BookOpenIcon,
+  FolderTreeIcon,
+} from "lucide-react";
+import { UserRole } from "@/app/generated/prisma/enums";
 
-const navMain = [
+const schoolNavMain = [
+  { title: "Dashboard", url: "/dashboard", icon: <LayoutDashboardIcon /> },
+  { title: "Students", url: "/students", icon: <UsersIcon /> },
+  { title: "Teachers", url: "/teachers", icon: <UserRoundIcon /> },
+  { title: "Subjects", url: "/subjects", icon: <FolderTreeIcon /> },
+  { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
+  { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
+  { title: "Sections", url: "/sections", icon: <GraduationCapIcon /> },
+  { title: "Attendance", url: "/attendance", icon: <CalendarDaysIcon /> },
+  { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
+];
+
+const schoolNavSecondary = [
+  { title: "Settings", url: "/settings", icon: <Settings2Icon /> },
+  { title: "Security", url: "/settings/security", icon: <ShieldCheckIcon /> },
+];
+
+const platformNavMain = [
   {
     title: "Dashboard",
-    url: "/dashboard",
+    url: "/platform/dashboard",
     icon: <LayoutDashboardIcon />,
   },
+  { title: "Tenants", url: "/platform/tenants", icon: <UsersIcon /> },
   {
-    title: "Students",
-    url: "/students",
-    icon: <UsersIcon />,
-  },
-  {
-    title: "Teachers",
-    url: "/teachers",
-    icon: <UserRoundIcon />,
-  },
-  {
-    title: "Classes",
-    url: "/classes",
-    icon: <GraduationCapIcon />,
-  },
-  {
-    title: "Attendance",
-    url: "/attendance",
-    icon: <CalendarDaysIcon />,
-  },
-  {
-    title: "Payments",
-    url: "/payments",
+    title: "Subscriptions",
+    url: "/platform/subscriptions",
     icon: <CreditCardIcon />,
   },
-]
+];
 
-const navSecondary = [
-  {
-    title: "Settings",
-    url: "/settings",
-    icon: <Settings2Icon />,
-  },
+const platformNavSecondary = [
+  { title: "Settings", url: "/platform/settings", icon: <Settings2Icon /> },
   {
     title: "Security",
-    url: "/settings/security",
+    url: "/platform/settings/security",
     icon: <ShieldCheckIcon />,
   },
-]
+];
 
 export function AppSidebar({
   user,
+  role,
+  tenantId,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
+  role: UserRole;
+  tenantId: string | null;
 }) {
+  const isPlatform = role === UserRole.SUPER_ADMIN && !tenantId;
+  const navMain = isPlatform ? platformNavMain : schoolNavMain;
+  const navSecondary = isPlatform ? platformNavSecondary : schoolNavSecondary;
+  const homeHref = isPlatform ? "/platform/dashboard" : "/dashboard";
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
+              <Link href={homeHref}>
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <LayoutDashboardIcon className="size-4" />
                 </div>
@@ -100,11 +106,13 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMain} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+        {navSecondary.length ? (
+          <NavSecondary items={navSecondary} className="mt-auto" />
+        ) : null}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
