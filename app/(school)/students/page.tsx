@@ -7,20 +7,19 @@ import { StudentFilters } from "@/components/students/student-filters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ExportMenu } from "@/components/shared/export-menu";
 import { exportStudentsToExcel } from "@/app/(school)/exports/actions";
+import { StudentStatus } from "@/app/generated/prisma/enums";
 
 export default async function StudentsPage({
   searchParams,
 }: {
-  searchParams: { q?: string; status?: string };
+  searchParams: Promise<{ q?: string; status?: string }>;
 }) {
   await requireSchoolAdmin();
 
-  const query =
-    searchParams && typeof searchParams.q === "string" ? searchParams.q : "";
-  const status =
-    searchParams && typeof searchParams.status === "string"
-      ? searchParams.status
-      : "ALL";
+  const { q, status: paramsStatus } = await searchParams;
+
+  const query = typeof q === "string" ? q : "";
+  const status = typeof paramsStatus === "string" ? paramsStatus : "ALL";
 
   return (
     <div className="space-y-6">
@@ -46,10 +45,7 @@ export default async function StudentsPage({
           <StudentFilters query={query} status={status} />
         </CardContent>
       </Card>
-      <StudentTable
-        query={query}
-        status={status as "ACTIVE" | "INACTIVE" | "GRADUATED" | "ALL"}
-      />
+      <StudentTable query={query} status={status as StudentStatus | "ALL"} />
     </div>
   );
 }

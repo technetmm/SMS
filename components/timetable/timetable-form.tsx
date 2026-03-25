@@ -130,7 +130,9 @@ export function TimetableForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            {mode === "create" ? "Create Timetable Slot" : "Edit Timetable Slot"}
+            {mode === "create"
+              ? "Create Timetable Slot"
+              : "Edit Timetable Slot"}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
@@ -139,7 +141,9 @@ export function TimetableForm({
             <Combobox
               items={teachers}
               value={selectedTeacher}
-              onValueChange={(value: Option | null) => setSelectedTeacher(value)}
+              onValueChange={(value: Option | null) =>
+                setSelectedTeacher(value)
+              }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={teacherAnchor} className="w-full">
@@ -171,7 +175,9 @@ export function TimetableForm({
             <Combobox
               items={sections}
               value={selectedSection}
-              onValueChange={(value: Option | null) => setSelectedSection(value)}
+              onValueChange={(value: Option | null) =>
+                setSelectedSection(value)
+              }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={sectionAnchor} className="w-full">
@@ -204,10 +210,10 @@ export function TimetableForm({
               name="dayOfWeek"
               defaultValue={initialData?.dayOfWeek ?? "MON"}
             >
-              <SelectTrigger id="dayOfWeek">
+              <SelectTrigger id="dayOfWeek" className="w-full">
                 <SelectValue placeholder="Select day" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {days.map((day) => (
                   <SelectItem key={day.value} value={day.value}>
                     {day.label}
@@ -219,7 +225,11 @@ export function TimetableForm({
 
           <div className="grid gap-2">
             <Label htmlFor="room">Room (Optional)</Label>
-            <Input id="room" name="room" defaultValue={initialData?.room ?? ""} />
+            <Input
+              id="room"
+              name="room"
+              defaultValue={initialData?.room ?? ""}
+            />
           </div>
 
           <div className="grid gap-2">

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ClassType, Currency, ProgramType } from "@/app/generated/prisma/enums";
 
 const initialState: ClassActionState = { status: "idle" };
 
@@ -28,15 +29,20 @@ type ClassFormProps = {
   initialData?: {
     id: string;
     name: string;
-    classType: "ONE_ON_ONE" | "PRIVATE" | "GROUP";
-    programType: "REGULAR" | "INTENSIVE";
+    classType: ClassType;
+    programType: ProgramType;
     courseId: string;
     fee: number;
-    feeCurrency: "USD" | "MMK" | "THB";
+    feeCurrency: Currency;
   };
 };
 
-export function ClassForm({ mode, action, courses, initialData }: ClassFormProps) {
+export function ClassForm({
+  mode,
+  action,
+  courses,
+  initialData,
+}: ClassFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
 
@@ -59,12 +65,19 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
 
       <Card>
         <CardHeader>
-        <CardTitle>{mode === "create" ? "Create Class" : "Edit Class"}</CardTitle>
+          <CardTitle>
+            {mode === "create" ? "Create Class" : "Edit Class"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="name">Class Name</Label>
-            <Input id="name" name="name" defaultValue={initialData?.name ?? ""} required />
+            <Input
+              id="name"
+              name="name"
+              defaultValue={initialData?.name ?? ""}
+              required
+            />
           </div>
 
           <div className="grid gap-2">
@@ -90,9 +103,9 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="MMK">MMK</SelectItem>
-                <SelectItem value="USD">USD</SelectItem>
-                <SelectItem value="THB">THB</SelectItem>
+                <SelectItem value={Currency.MMK}>MMK</SelectItem>
+                <SelectItem value={Currency.USD}>USD</SelectItem>
+                <SelectItem value={Currency.THB}>THB</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -115,27 +128,37 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
 
           <div className="grid gap-2">
             <Label htmlFor="classType">Class Type</Label>
-            <Select name="classType" defaultValue={initialData?.classType ?? "GROUP"}>
+            <Select
+              name="classType"
+              defaultValue={initialData?.classType ?? "GROUP"}
+            >
               <SelectTrigger id="classType" className="w-full">
                 <SelectValue placeholder="Select class type" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="ONE_ON_ONE">One-on-One</SelectItem>
-                <SelectItem value="PRIVATE">Private</SelectItem>
-                <SelectItem value="GROUP">Group</SelectItem>
+                <SelectItem value={ClassType.ONE_ON_ONE}>One-on-One</SelectItem>
+                <SelectItem value={ClassType.PRIVATE}>Private</SelectItem>
+                <SelectItem value={ClassType.GROUP}>Group</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="programType">Program Type</Label>
-            <Select name="programType" defaultValue={initialData?.programType ?? "REGULAR"}>
+            <Select
+              name="programType"
+              defaultValue={initialData?.programType ?? "REGULAR"}
+            >
               <SelectTrigger id="programType" className="w-full">
                 <SelectValue placeholder="Select program type" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="REGULAR">Regular</SelectItem>
-                <SelectItem value="INTENSIVE">Intensive</SelectItem>
+                <SelectItem value={ProgramType.REGULAR}>
+                  Regular ( 2 days )
+                </SelectItem>
+                <SelectItem value={ProgramType.INTENSIVE}>
+                  Intensive ( 4 days )
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

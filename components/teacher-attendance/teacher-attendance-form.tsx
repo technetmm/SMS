@@ -28,6 +28,7 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
+import { AttendanceStatus } from "@/app/generated/prisma/enums";
 
 const initialState: TeacherAttendanceActionState = { status: "idle" };
 
@@ -90,7 +91,9 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
             <Combobox
               items={teachers}
               value={selectedTeacher}
-              onValueChange={(value: Option | null) => setSelectedTeacher(value)}
+              onValueChange={(value: Option | null) =>
+                setSelectedTeacher(value)
+              }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={teacherAnchor} className="w-full">
@@ -122,7 +125,9 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
             <Combobox
               items={sections}
               value={selectedSection}
-              onValueChange={(value: Option | null) => setSelectedSection(value)}
+              onValueChange={(value: Option | null) =>
+                setSelectedSection(value)
+              }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={sectionAnchor} className="w-full">
@@ -154,14 +159,16 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue="PRESENT">
-              <SelectTrigger id="status">
+              <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="PRESENT">Present</SelectItem>
-                <SelectItem value="ABSENT">Absent</SelectItem>
-                <SelectItem value="LATE">Late</SelectItem>
-                <SelectItem value="LEAVE">Leave</SelectItem>
+              <SelectContent position="popper">
+                <SelectItem value={AttendanceStatus.PRESENT}>
+                  Present
+                </SelectItem>
+                <SelectItem value={AttendanceStatus.ABSENT}>Absent</SelectItem>
+                <SelectItem value={AttendanceStatus.LATE}>Late</SelectItem>
+                <SelectItem value={AttendanceStatus.LEAVE}>Leave</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -174,4 +181,3 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
     </form>
   );
 }
-

@@ -6,7 +6,11 @@ import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
-import { Permission, StudentStatus, UserRole } from "@/app/generated/prisma/enums";
+import {
+  Permission,
+  StudentStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 
 export type StudentActionState = {
   status: "idle" | "success" | "error";
@@ -201,7 +205,9 @@ export async function deleteStudent(
   const student = await prisma.student.findFirst({
     where: { id, tenantId },
     select: {
-      _count: { select: { enrollments: true, attendance: true, payments: true } },
+      _count: {
+        select: { enrollments: true, attendance: true, payments: true },
+      },
     },
   });
 

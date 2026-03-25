@@ -57,8 +57,8 @@ export function CourseForm({
 }: CourseFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(
-    () => uniqueSubjects(initialData?.subjects ?? []),
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(() =>
+    uniqueSubjects(initialData?.subjects ?? []),
   );
   const anchor = useComboboxAnchor();
 
