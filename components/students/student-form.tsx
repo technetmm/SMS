@@ -77,6 +77,7 @@ export function StudentForm({
               id="name"
               name="name"
               defaultValue={initialData?.name}
+              placeholder="Student name"
               required
             />
           </div>
@@ -111,6 +112,7 @@ export function StudentForm({
             <Input
               id="fatherName"
               name="fatherName"
+              placeholder="Father name"
               defaultValue={initialData?.fatherName ?? ""}
             />
           </div>
@@ -119,6 +121,7 @@ export function StudentForm({
             <Input
               id="motherName"
               name="motherName"
+              placeholder="Mother name"
               defaultValue={initialData?.motherName ?? ""}
             />
           </div>
@@ -144,6 +147,7 @@ export function StudentForm({
             <Textarea
               id="address"
               name="address"
+              placeholder="Address"
               defaultValue={initialData?.address ?? ""}
             />
           </div>

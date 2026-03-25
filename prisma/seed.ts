@@ -58,22 +58,33 @@ async function ensureSubject(name: "English" | "Myanmar", tenantId: string) {
 }
 
 async function ensureCourse(name: string, subjectIds: string[], tenantId: string) {
-  return prisma.course.upsert({
+  const course = await prisma.course.upsert({
     where: { tenantId_name: { tenantId, name } },
     update: {
       tenantId,
-      subjects: {
-        set: subjectIds.map((id) => ({ id })),
-      },
     },
     create: {
       name,
       tenantId,
-      subjects: {
-        connect: subjectIds.map((id) => ({ id })),
-      },
     },
   });
+
+  await prisma.courseSubject.deleteMany({
+    where: { courseId: course.id },
+  });
+
+  if (subjectIds.length > 0) {
+    await prisma.courseSubject.createMany({
+      data: subjectIds.map((subjectId) => ({
+        tenantId,
+        courseId: course.id,
+        subjectId,
+      })),
+      skipDuplicates: true,
+    });
+  }
+
+  return course;
 }
 
 async function upsertRolePermissions() {

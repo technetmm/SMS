@@ -1,21 +1,16 @@
 import { TeacherStatus } from "@/app/generated/prisma/enums";
 
 export const teacherStatusColor = (status: TeacherStatus) => {
-  let color = "text-";
   switch (status) {
-    case "ACTIVE":
-      color = color.concat("[#28A745]");
-      break;
-    case "ONLEAVE":
-      color = color.concat("[#F39C12]");
-      break;
-    case "RESIGNED":
-      color = color.concat("[#3498DB]");
-      break;
-    case "TERMINATED":
-      color = color.concat("[#E74C3C]");
-      break;
+    case TeacherStatus.ACTIVE:
+      return "text-[#28A745]";
+    case TeacherStatus.ONLEAVE:
+      return "text-[#F39C12]";
+    case TeacherStatus.RESIGNED:
+      return "text-[#3498DB]";
+    case TeacherStatus.TERMINATED:
+      return "text-[#E74C3C]";
+    default:
+      return "text-foreground";
   }
-
-  return color;
 };
