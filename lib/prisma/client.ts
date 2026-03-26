@@ -24,7 +24,8 @@ const softDeleteModels = new Set([
   "Section",
   "Enrollment",
   "Attendance",
-  "Payment",
+  "Progress",
+  "Invoice",
 ]);
 
 function appendNotDeleted(where?: Record<string, unknown>) {

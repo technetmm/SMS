@@ -4,11 +4,14 @@ import {
   ClassType,
   DayOfWeek,
   AttendanceStatus,
+  EnrollmentStatus,
   Gender,
   MaritalStatus,
+  PaymentStatus,
   ProgramType,
   StudentStatus,
   TeacherStatus,
+  UserRole,
 } from "@/app/generated/prisma/enums";
 
 export const studentCreateSchema = z.object({
@@ -74,8 +77,8 @@ export const sectionMultiTeacherSchema = z.object({
   teacherIds: z.array(z.string().min(1)).optional().default([]),
   room: z.string().optional(),
   capacity: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.coerce.number().int().positive().optional(),
+    (value) => (value === "" || value === null || value === undefined ? 30 : value),
+    z.coerce.number().int().positive("Capacity must be at least 1"),
   ),
 });
 
@@ -154,6 +157,67 @@ export const teacherAttendanceSchema = z.object({
   sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
+});
+
+export const enrollmentCreateSchema = z.object({
+  studentId: z.string().min(1, "Student is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  discountType: z
+    .enum(["NONE", "FIXED", "PERCENT"])
+    .optional()
+    .default("NONE"),
+  discountValue: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().min(0, "Discount must be >= 0"),
+  ),
+});
+
+export const enrollmentUpdateSchema = z.object({
+  id: z.string().min(1, "Enrollment id is required"),
+  status: z.nativeEnum(EnrollmentStatus),
+});
+
+export const enrollmentAttendanceSchema = z.object({
+  enrollmentId: z.string().min(1, "Enrollment is required"),
+  date: z.coerce.date(),
+  status: z.nativeEnum(AttendanceStatus),
+});
+
+export const enrollmentProgressSchema = z.object({
+  enrollmentId: z.string().min(1, "Enrollment is required"),
+  progress: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
+  remark: z.string().optional(),
+});
+
+export const invoiceUpdateSchema = z.object({
+  id: z.string().min(1, "Invoice id is required"),
+  status: z.nativeEnum(PaymentStatus),
+});
+
+export const enrollmentActorRoleSchema = z.nativeEnum(UserRole).refine(
+  (role) =>
+    role === UserRole.SCHOOL_ADMIN ||
+    role === UserRole.TEACHER ||
+    role === UserRole.SUPER_ADMIN,
+  { message: "Only teacher/admin can enroll students." },
+);
+
+export const paymentCreateSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice is required"),
+  amount: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().positive("Payment amount must be greater than 0"),
+  ),
+  method: z.string().min(2, "Payment method is required"),
+});
+
+export const refundCreateSchema = z.object({
+  paymentId: z.string().min(1, "Payment is required"),
+  amount: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().positive("Refund amount must be greater than 0"),
+  ),
+  reason: z.string().optional(),
 });
 
 export const payrollGenerateSchema = z.object({

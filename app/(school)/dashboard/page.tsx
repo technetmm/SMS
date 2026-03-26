@@ -10,16 +10,21 @@ export default async function DashboardPage() {
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
-  const [studentCount, classCount, revenue] = await Promise.all([
+  const [studentCount, classCount, paymentRevenue, refundRevenue] = await Promise.all([
     prisma.student.count({ where: { tenantId } }),
     prisma.class.count({ where: { tenantId } }),
     prisma.payment.aggregate({
       _sum: { amount: true },
-      where: { tenantId, status: "PAID", paidAt: { gte: startOfMonth } },
+      where: { tenantId, createdAt: { gte: startOfMonth } },
+    }),
+    prisma.refund.aggregate({
+      _sum: { amount: true },
+      where: { tenantId, createdAt: { gte: startOfMonth } },
     }),
   ]);
 
-  const monthlyRevenue = revenue._sum.amount ?? 0;
+  const monthlyRevenue =
+    Number(paymentRevenue._sum.amount ?? 0) - Number(refundRevenue._sum.amount ?? 0);
 
   return (
     <div className="space-y-6">
@@ -28,7 +33,7 @@ export default async function DashboardPage() {
         <StatCard title="Active Classes" value={classCount.toString()} />
         <StatCard
           title="Monthly Revenue"
-          value={`$${Number(monthlyRevenue).toFixed(2)}`}
+          value={`$${monthlyRevenue.toFixed(2)}`}
         />
       </div>
 

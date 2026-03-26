@@ -99,15 +99,24 @@ export async function exportAttendanceToExcel(): Promise<ExportState> {
     select: {
       status: true,
       date: true,
-      student: { select: { name: true } },
-      section: { select: { name: true } },
+      enrollment: {
+        select: {
+          student: { select: { name: true } },
+          section: { select: { name: true } },
+        },
+      },
     },
   });
 
   const buffer = await buildExcelBuffer({
     sheetName: "Attendance",
     headers: ["Student", "Section", "Status", "Date"],
-    rows: attendance.map((a) => [a.student.name, a.section.name, a.status, a.date]),
+    rows: attendance.map((a) => [
+      a.enrollment.student.name,
+      a.enrollment.section.name,
+      a.status,
+      a.date,
+    ]),
   });
 
   const filename = `${stamp("attendance")}.xlsx`;
@@ -127,20 +136,21 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
   await requirePermission(Permission.VIEW_REPORTS);
   const tenantId = await requireTenant();
 
-  const payments = await prisma.payment.findMany({
+  const payments = await prisma.invoice.findMany({
     where: { tenantId },
-    orderBy: { billingMonth: "desc" },
+    orderBy: { createdAt: "desc" },
     take: 1000,
     select: {
-      amount: true,
+      finalAmount: true,
+      paidAmount: true,
       status: true,
-      invoiceNumber: true,
-      billingMonth: true,
+      id: true,
+      dueDate: true,
       student: { select: { name: true } },
     },
   });
 
-  const total = payments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+  const total = payments.reduce((sum, payment) => sum + Number(payment.finalAmount), 0);
 
   const buffer = await buildSimpleTablePdfBuffer({
     title: "Payment Summary Report",
@@ -148,13 +158,14 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(new Date())} | Records: ${payments.length} | Total: $${total.toFixed(2)}`,
-    headers: ["Invoice", "Student", "Month", "Status", "Amount"],
+    headers: ["Invoice", "Student", "Due Date", "Status", "Final", "Paid"],
     rows: payments.map((payment) => [
-      payment.invoiceNumber ?? "-",
+      payment.id,
       payment.student.name,
-      new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(payment.billingMonth),
+      new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(payment.dueDate),
       payment.status,
-      `$${Number(payment.amount).toFixed(2)}`,
+      `$${Number(payment.finalAmount).toFixed(2)}`,
+      `$${Number(payment.paidAmount).toFixed(2)}`,
     ]),
   });
 

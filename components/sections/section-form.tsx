@@ -41,7 +41,7 @@ type SectionFormProps = {
     classId: string;
     teacherIds: string[];
     room: string | null;
-    capacity: number | null;
+    capacity: number;
   };
 };
 
@@ -215,7 +215,7 @@ export function SectionForm({
               name="capacity"
               type="number"
               min={1}
-              defaultValue={initialData?.capacity?.toString() ?? ""}
+              defaultValue={initialData?.capacity?.toString() ?? "30"}
             />
           </div>
         </CardContent>

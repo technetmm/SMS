@@ -14,8 +14,6 @@ import { dateFormatter } from "@/lib/helper";
 export async function SubjectTable() {
   const subjects = await getSubjects();
 
-  console.log(subjects);
-
   return (
     <div className="rounded-lg border bg-background">
       <Table>

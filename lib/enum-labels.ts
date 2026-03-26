@@ -53,8 +53,9 @@ export const ATTENDANCE_STATUS_LABELS: Record<string, string> = {
 };
 
 export const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  PAID: "Paid",
   UNPAID: "Unpaid",
+  PARTIAL: "Partial",
+  PAID: "Paid",
 };
 
 export const PERMISSION_LABELS: Record<string, string> = {

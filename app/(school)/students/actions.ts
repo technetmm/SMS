@@ -206,7 +206,7 @@ export async function deleteStudent(
     where: { id, tenantId },
     select: {
       _count: {
-        select: { enrollments: true, attendance: true, payments: true },
+        select: { enrollments: true, invoices: true },
       },
     },
   });
@@ -217,8 +217,7 @@ export async function deleteStudent(
 
   if (
     student._count.enrollments > 0 ||
-    student._count.attendance > 0 ||
-    student._count.payments > 0
+    student._count.invoices > 0
   ) {
     return {
       status: "error",

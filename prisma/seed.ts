@@ -374,7 +374,7 @@ export async function main() {
   for (let i = 0; i < createdStudents.length; i++) {
     const student = createdStudents[i];
 
-    await prisma.enrollment.upsert({
+    const enrollment = await prisma.enrollment.upsert({
       where: {
         studentId_sectionId: {
           studentId: student.id,
@@ -393,34 +393,128 @@ export async function main() {
       },
     });
 
-    await prisma.payment.upsert({
-      where: { invoiceNumber: `INV-2026-${String(i + 1).padStart(3, "0")}` },
+    const originalAmount = 120;
+    const discount = i % 5 === 0 ? 20 : 0;
+    const finalAmount = Math.max(0, originalAmount - discount);
+
+    const invoice = await prisma.invoice.upsert({
+      where: { enrollmentId: enrollment.id },
       update: {
-        studentId: student.id,
         tenantId: tenant.id,
-        billingMonth: new Date("2026-03-01T00:00:00Z"),
-        amount: 120,
-        deposit: i % 3 === 0 ? 20 : 0,
-        status: i % 3 === 0 ? PaymentStatus.PAID : PaymentStatus.UNPAID,
-        paidAt: i % 3 === 0 ? new Date("2026-03-10T00:00:00Z") : null,
+        studentId: student.id,
+        originalAmount,
+        discount,
+        finalAmount,
+        paidAmount: 0,
+        dueDate: new Date("2026-03-31T00:00:00Z"),
+        status: PaymentStatus.UNPAID,
       },
       create: {
-        studentId: student.id,
         tenantId: tenant.id,
-        billingMonth: new Date("2026-03-01T00:00:00Z"),
-        amount: 120,
-        deposit: i % 3 === 0 ? 20 : 0,
-        status: i % 3 === 0 ? PaymentStatus.PAID : PaymentStatus.UNPAID,
-        paidAt: i % 3 === 0 ? new Date("2026-03-10T00:00:00Z") : null,
-        invoiceNumber: `INV-2026-${String(i + 1).padStart(3, "0")}`,
+        studentId: student.id,
+        enrollmentId: enrollment.id,
+        originalAmount,
+        discount,
+        finalAmount,
+        paidAmount: 0,
+        dueDate: new Date("2026-03-31T00:00:00Z"),
+        status: PaymentStatus.UNPAID,
+      },
+    });
+
+    await prisma.progress.upsert({
+      where: { enrollmentId: enrollment.id },
+      update: {
+        tenantId: tenant.id,
+        progress: Math.min(100, 15 + i * 8),
+        remark: i % 2 === 0 ? "Good participation" : "Needs vocabulary practice",
+      },
+      create: {
+        tenantId: tenant.id,
+        enrollmentId: enrollment.id,
+        progress: Math.min(100, 15 + i * 8),
+        remark: i % 2 === 0 ? "Good participation" : "Needs vocabulary practice",
+      },
+    });
+
+    await prisma.refund.deleteMany({
+      where: {
+        payment: { invoiceId: invoice.id },
+      },
+    });
+    await prisma.payment.deleteMany({
+      where: { invoiceId: invoice.id },
+    });
+
+    let paidAmount = 0;
+
+    if (i % 3 === 0) {
+      // Fully paid in two installments.
+      const first = Number((finalAmount / 2).toFixed(2));
+      const second = Number((finalAmount - first).toFixed(2));
+      const firstPayment = await prisma.payment.create({
+        data: {
+          tenantId: tenant.id,
+          invoiceId: invoice.id,
+          amount: first,
+          method: "Cash",
+        },
+      });
+      await prisma.payment.create({
+        data: {
+          tenantId: tenant.id,
+          invoiceId: invoice.id,
+          amount: second,
+          method: "Bank Transfer",
+        },
+      });
+      paidAmount = finalAmount;
+
+      if (i % 6 === 0) {
+        // Refund part of first payment to cover refund scenarios.
+        await prisma.refund.create({
+          data: {
+            tenantId: tenant.id,
+            paymentId: firstPayment.id,
+            amount: 10,
+            reason: "Discount correction",
+          },
+        });
+        paidAmount = Math.max(0, finalAmount - 10);
+      }
+    } else if (i % 3 === 1) {
+      // Partially paid.
+      const partial = Number((finalAmount / 2).toFixed(2));
+      await prisma.payment.create({
+        data: {
+          tenantId: tenant.id,
+          invoiceId: invoice.id,
+          amount: partial,
+          method: "Cash",
+        },
+      });
+      paidAmount = partial;
+    }
+
+    const status =
+      paidAmount <= 0
+        ? PaymentStatus.UNPAID
+        : paidAmount >= finalAmount
+          ? PaymentStatus.PAID
+          : PaymentStatus.PARTIAL;
+
+    await prisma.invoice.update({
+      where: { id: invoice.id },
+      data: {
+        paidAmount,
+        status,
       },
     });
 
     await prisma.attendance.upsert({
       where: {
-        studentId_sectionId_date: {
-          studentId: student.id,
-          sectionId: student.sectionId,
+        enrollmentId_date: {
+          enrollmentId: enrollment.id,
           date: new Date("2026-03-20T00:00:00Z"),
         },
       },
@@ -429,8 +523,7 @@ export async function main() {
         status: i % 4 === 0 ? AttendanceStatus.LATE : AttendanceStatus.PRESENT,
       },
       create: {
-        studentId: student.id,
-        sectionId: student.sectionId,
+        enrollmentId: enrollment.id,
         tenantId: tenant.id,
         date: new Date("2026-03-20T00:00:00Z"),
         status: i % 4 === 0 ? AttendanceStatus.LATE : AttendanceStatus.PRESENT,

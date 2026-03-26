@@ -144,7 +144,7 @@ export function TimetableForm({
               onValueChange={(value: Option | null) =>
                 setSelectedTeacher(value)
               }
-              itemToStringLabel={(item) => item?.name ?? ""}
+              // itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={teacherAnchor} className="w-full">
                 <ComboboxValue>
@@ -162,7 +162,7 @@ export function TimetableForm({
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
-                      {item.name}
+                      {item?.name}
                     </ComboboxItem>
                   )}
                 </ComboboxList>

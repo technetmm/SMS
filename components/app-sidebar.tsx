@@ -23,6 +23,7 @@ import {
   BarChart3Icon,
   ReceiptIcon,
   FileDownIcon,
+  FileTextIcon,
   LayoutDashboardIcon,
   Settings2Icon,
   ShieldCheckIcon,
@@ -31,6 +32,7 @@ import {
   UserRoundIcon,
   BookOpenIcon,
   BookOpenTextIcon,
+  ListChecksIcon,
   TvMinimalIcon,
 } from "lucide-react";
 import { UserRole } from "@/app/generated/prisma/enums";
@@ -61,6 +63,7 @@ const schoolNavGroups = [
       { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
       { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
       { title: "Sections", url: "/sections", icon: <TvMinimalIcon /> },
+      { title: "Enrollments", url: "/enrollments", icon: <ListChecksIcon /> },
     ],
   },
   {
@@ -82,6 +85,7 @@ const schoolNavGroups = [
   {
     label: "Finance",
     items: [
+      { title: "Invoices", url: "/invoices", icon: <FileTextIcon /> },
       { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
       { title: "Payroll", url: "/payroll", icon: <ReceiptIcon /> },
       { title: "Exports", url: "/exports", icon: <FileDownIcon /> },
@@ -163,11 +167,11 @@ export function AppSidebar({
         ) : (
           <NavMain groups={schoolNavGroups} />
         )}
+      </SidebarContent>
+      <SidebarFooter>
         {navSecondary.length ? (
           <NavSecondary items={navSecondary} className="mt-auto" />
         ) : null}
-      </SidebarContent>
-      <SidebarFooter>
         <NavUser user={user} settingsHref={settingsHref} />
       </SidebarFooter>
     </Sidebar>

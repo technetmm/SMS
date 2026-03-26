@@ -34,3 +34,11 @@ export async function requireSchoolStaff() {
     UserRole.SUPER_ADMIN,
   ]);
 }
+
+export async function requireEnrollmentManager() {
+  return requireRole([
+    UserRole.SCHOOL_ADMIN,
+    UserRole.TEACHER,
+    UserRole.SUPER_ADMIN,
+  ]);
+}

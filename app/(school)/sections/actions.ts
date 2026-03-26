@@ -122,6 +122,11 @@ export async function getSections() {
       room: true,
       capacity: true,
       createdAt: true,
+      enrollments: {
+        select: {
+          status: true,
+        },
+      },
       class: { select: { id: true, name: true } },
       teacherMappings: {
         select: {
@@ -311,14 +316,13 @@ export async function deleteSection(formData: FormData) {
       _count: {
         select: {
           enrollments: true,
-          attendanceLogs: true,
         },
       },
     },
   });
 
   if (!section) throw new Error("Section not found.");
-  if (section._count.enrollments > 0 || section._count.attendanceLogs > 0) {
+  if (section._count.enrollments > 0) {
     throw new Error("Section has related records and cannot be deleted.");
   }
 

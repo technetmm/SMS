@@ -77,8 +77,9 @@ enum AttendanceStatus {
 }
 
 enum PaymentStatus {
-  PAID
   UNPAID
+  PARTIAL
+  PAID
 }
 
 enum Currency {
@@ -151,8 +152,11 @@ model Tenant {
   sections           Section[]
   enrollments        Enrollment[]
   attendance         Attendance[]
-  teacherAttendance  TeacherAttendance[]
+  progresses         Progress[]
+  invoices           Invoice[]
   payments           Payment[]
+  refunds            Refund[]
+  teacherAttendance  TeacherAttendance[]
   subscriptions      Subscription[]
   branches           Branch[]
   auditLogs          AuditLog[]
@@ -281,8 +285,7 @@ model Student {
   tenant      Tenant       @relation(fields: [tenantId], references: [id])
   branch      Branch?      @relation(fields: [branchId], references: [id])
   enrollments Enrollment[]
-  attendance  Attendance[]
-  payments    Payment[]
+  invoices    Invoice[]
 
   @@index([tenantId])
 }
@@ -425,7 +428,7 @@ model Section {
   branchId  String?
   name      String
   room      String?
-  capacity  Int?
+  capacity  Int       @default(30)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   isDeleted Boolean   @default(false)
@@ -436,7 +439,6 @@ model Section {
   tenant          Tenant            @relation(fields: [tenantId], references: [id])
   scheduleSlots   SectionSchedule[]
   enrollments     Enrollment[]
-  attendanceLogs  Attendance[]
   teacherAttendance TeacherAttendance[]
   teacherMappings SectionTeacher[]
   timetables       Timetable[]
@@ -479,60 +481,119 @@ model Enrollment {
   tenantId  String
   studentId String
   sectionId String
+  enrolledAt DateTime        @default(now())
   status    EnrollmentStatus @default(ACTIVE)
-  startDate DateTime         @default(now())
-  endDate   DateTime?
   isDeleted Boolean          @default(false)
   deletedAt DateTime?
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
-  student Student @relation(fields: [studentId], references: [id])
-  section Section @relation(fields: [sectionId], references: [id])
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  student    Student      @relation(fields: [studentId], references: [id])
+  section    Section      @relation(fields: [sectionId], references: [id])
+  tenant     Tenant       @relation(fields: [tenantId], references: [id])
+  attendance Attendance[]
+  progress   Progress[]
+  invoices   Invoice[]
 
   @@unique([studentId, sectionId])
+  @@index([tenantId])
 }
 
 model Attendance {
-  id        String           @id @default(cuid())
-  tenantId  String
-  studentId String
-  sectionId String
-  date      DateTime
-  status    AttendanceStatus
-  isDeleted Boolean          @default(false)
-  deletedAt DateTime?
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id           String           @id @default(cuid())
+  tenantId     String
+  enrollmentId String
+  date         DateTime
+  status       AttendanceStatus
+  isDeleted    Boolean          @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 
-  student Student @relation(fields: [studentId], references: [id])
-  section Section @relation(fields: [sectionId], references: [id])
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
 
-  @@unique([studentId, sectionId, date])
-  @@index([sectionId, date])
+  @@unique([enrollmentId, date])
+  @@index([tenantId, date])
+  @@index([enrollmentId])
+}
+
+model Progress {
+  id           String   @id @default(cuid())
+  tenantId     String
+  enrollmentId String
+  progress     Float
+  remark       String?
+  isDeleted    Boolean  @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+
+  @@unique([enrollmentId])
+  @@index([tenantId])
+  @@index([enrollmentId])
+}
+
+model Invoice {
+  id           String        @id @default(cuid())
+  tenantId     String
+  studentId    String
+  enrollmentId String
+  originalAmount Decimal
+  discount     Decimal       @default(0)
+  finalAmount  Decimal
+  paidAmount   Decimal       @default(0)
+  status       PaymentStatus @default(UNPAID)
+  dueDate      DateTime
+  isDeleted    Boolean       @default(false)
+  deletedAt    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  student    Student    @relation(fields: [studentId], references: [id])
+  enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  payments   Payment[]
+
+  @@unique([enrollmentId])
+  @@index([tenantId])
+  @@index([studentId])
+  @@index([enrollmentId])
 }
 
 model Payment {
   id            String        @id @default(cuid())
   tenantId      String
-  studentId     String
-  billingMonth  DateTime
+  invoiceId     String
   amount        Decimal
-  deposit       Decimal?      @default(0)
-  status        PaymentStatus @default(UNPAID)
-  invoiceNumber String?       @unique
-  paidAt        DateTime?
+  method        String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  isDeleted     Boolean       @default(false)
-  deletedAt     DateTime?
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  tenant        Tenant        @relation(fields: [tenantId], references: [id])
+  refunds       Refund[]
 
-  student Student @relation(fields: [studentId], references: [id])
+  @@index([tenantId])
+  @@index([invoiceId])
+}
+
+model Refund {
+  id        String   @id @default(cuid())
+  tenantId  String
+  paymentId String
+  amount    Decimal
+  reason    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   tenant  Tenant  @relation(fields: [tenantId], references: [id])
 
-  @@index([studentId, billingMonth])
+  @@index([tenantId])
+  @@index([paymentId])
 }
 
 model AuditLog {
