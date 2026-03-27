@@ -37,7 +37,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         tenantId={session.user.tenantId ?? null}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
+        <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 bg-background rounded-t-xl">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator

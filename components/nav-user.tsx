@@ -22,8 +22,23 @@ import {
   ChevronsUpDownIcon,
   LogOutIcon,
   Settings2Icon,
+  ShieldCheckIcon,
   UserIcon,
 } from "lucide-react";
+
+const menuItems = [
+  {
+    name: "Profile",
+    href: "/profile",
+    icon: <UserIcon />,
+  },
+  {
+    name: "Settings",
+    href: "/settings",
+    icon: <Settings2Icon />,
+  },
+  { name: "Security", href: "/settings/security", icon: <ShieldCheckIcon /> },
+];
 
 export function NavUser({
   user,
@@ -89,16 +104,14 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link href={settingsHref}>
-                  <Settings2Icon />
-                  Settings
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem disabled>
-                <UserIcon />
-                Profile
-              </DropdownMenuItem>
+              {menuItems.map((item) => (
+                <DropdownMenuItem asChild key={item.name}>
+                  <Link href={settingsHref}>
+                    {item.icon}
+                    {item.name}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

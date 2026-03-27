@@ -93,11 +93,6 @@ const schoolNavGroups = [
   },
 ];
 
-const schoolNavSecondary = [
-  { title: "Settings", url: "/settings", icon: <Settings2Icon /> },
-  { title: "Security", url: "/settings/security", icon: <ShieldCheckIcon /> },
-];
-
 const platformNavMain = [
   {
     title: "Dashboard",
@@ -109,15 +104,6 @@ const platformNavMain = [
     title: "Subscriptions",
     url: "/platform/subscriptions",
     icon: <CreditCardIcon />,
-  },
-];
-
-const platformNavSecondary = [
-  { title: "Settings", url: "/platform/settings", icon: <Settings2Icon /> },
-  {
-    title: "Security",
-    url: "/platform/settings/security",
-    icon: <ShieldCheckIcon />,
   },
 ];
 
@@ -136,7 +122,6 @@ export function AppSidebar({
   tenantId: string | null;
 }) {
   const isPlatform = role === UserRole.SUPER_ADMIN && !tenantId;
-  const navSecondary = isPlatform ? platformNavSecondary : schoolNavSecondary;
   const homeHref = isPlatform ? "/platform/dashboard" : "/dashboard";
   const settingsHref = isPlatform ? "/platform/settings" : "/settings";
 
@@ -169,9 +154,6 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        {navSecondary.length ? (
-          <NavSecondary items={navSecondary} className="mt-auto" />
-        ) : null}
         <NavUser user={user} settingsHref={settingsHref} />
       </SidebarFooter>
     </Sidebar>
