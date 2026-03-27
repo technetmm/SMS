@@ -13,7 +13,7 @@ type Slot = {
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
-  teacher: { id: string; name: string };
+  staff: { id: string; name: string };
   section: { id: string; name: string; class: { id: string; name: string } };
 };
 
@@ -90,7 +90,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                     "cursor-grab rounded-md border bg-background p-2 text-xs shadow-sm active:cursor-grabbing",
                     pending && "pointer-events-none opacity-70",
                   )}
-                  title={`${slot.teacher.name} • ${slot.section.class.name} • ${slot.section.name}`}
+                  title={`${slot.staff.name} • ${slot.section.class.name} • ${slot.section.name}`}
                 >
                   <div className="font-medium">
                     {slot.startTime}-{slot.endTime}

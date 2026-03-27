@@ -53,7 +53,7 @@ const schoolNavGroups = [
     label: "People",
     items: [
       { title: "Students", url: "/students", icon: <UsersIcon /> },
-      { title: "Teachers", url: "/teachers", icon: <UserRoundIcon /> },
+      { title: "Staff", url: "/staff", icon: <UserRoundIcon /> },
     ],
   },
   {
@@ -76,8 +76,8 @@ const schoolNavGroups = [
         icon: <CalendarDaysIcon />,
       },
       {
-        title: "Teacher Attendance",
-        url: "/teacher-attendance",
+        title: "Staff Attendance",
+        url: "/staff-attendance",
         icon: <ClipboardCheckIcon />,
       },
     ],

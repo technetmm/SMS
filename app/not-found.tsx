@@ -18,7 +18,7 @@ export default async function NotFoundPage() {
     ? checkRole(session.user, "SUPER_ADMIN")
       ? "/platform/dashboard"
       : checkRole(session.user, "SCHOOL_ADMIN") ||
-          checkRole(session.user, "TEACHER")
+          checkRole(session.user, "STAFF")
         ? "/dashboard"
         : "/login"
     : "/login";

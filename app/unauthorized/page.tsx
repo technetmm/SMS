@@ -11,7 +11,7 @@ export default async function UnauthorizedPage() {
     ? checkRole(session.user, "SUPER_ADMIN")
       ? "/platform/dashboard"
       : checkRole(session.user, "SCHOOL_ADMIN") ||
-          checkRole(session.user, "TEACHER")
+          checkRole(session.user, "STAFF")
         ? "/dashboard"
         : "/login"
     : "/login";

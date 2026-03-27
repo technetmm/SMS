@@ -35,7 +35,7 @@ export default async function TenantsPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Users</TableHead>
                 <TableHead>Students</TableHead>
-                <TableHead>Teachers</TableHead>
+                <TableHead>Staff</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -51,7 +51,7 @@ export default async function TenantsPage() {
                   </TableCell>
                   <TableCell>{tenant._count.users}</TableCell>
                   <TableCell>{tenant._count.students}</TableCell>
-                  <TableCell>{tenant._count.teachers}</TableCell>
+                  <TableCell>{tenant._count.staff}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button asChild type="button" size="sm" variant="outline">

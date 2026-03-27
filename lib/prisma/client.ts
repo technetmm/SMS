@@ -16,7 +16,7 @@ const softDeleteModels = new Set([
   "Subscription",
   "RolePermission",
   "UserPermission",
-  "Teacher",
+  "Staff",
   "Student",
   "Subject",
   "Course",

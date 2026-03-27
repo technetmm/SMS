@@ -49,7 +49,7 @@ type CourseOption = {
   name: string;
 };
 
-type TeacherOption = {
+type StaffOption = {
   id: string;
   name: string;
 };
@@ -63,7 +63,7 @@ type ClassItem = {
   sections: Array<{
     id: string;
     name: string;
-    teacher: { user: { name: string | null } } | null;
+    staff: { user: { name: string | null } } | null;
   }>;
 };
 
@@ -78,25 +78,25 @@ function uniqueById<T extends { id: string }>(items: T[]) {
 
 export function ClassesView({
   courses,
-  teachers,
+  staff,
   classes,
 }: {
   courses: CourseOption[];
-  teachers: TeacherOption[];
+  staff: StaffOption[];
   classes: ClassItem[];
 }) {
   const router = useRouter();
   const [classDialogOpen, setClassDialogOpen] = useState(false);
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
   const [selectedSectionClass, setSelectedSectionClass] = useState<ClassItem | null>(null);
-  const [selectedTeachers, setSelectedTeachers] = useState<TeacherOption[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<StaffOption[]>([]);
   const sectionClassAnchor = useComboboxAnchor();
-  const sectionTeacherAnchor = useComboboxAnchor();
+  const sectionStaffAnchor = useComboboxAnchor();
   const [pending, startTransition] = useTransition();
 
   function resetSectionDraft() {
     setSelectedSectionClass(null);
-    setSelectedTeachers([]);
+    setSelectedStaff([]);
   }
 
   function handleSectionDialogChange(open: boolean) {
@@ -217,9 +217,9 @@ export function ClassesView({
             </DialogHeader>
             <form onSubmit={handleSectionSubmit} className="space-y-4">
               <input type="hidden" name="classId" value={selectedSectionClass?.id ?? ""} />
-              <input type="hidden" name="teacherId" value={selectedTeachers[0]?.id ?? ""} />
-              {selectedTeachers.map((teacher) => (
-                <input key={teacher.id} type="hidden" name="teacherIds" value={teacher.id} />
+              <input type="hidden" name="staffId" value={selectedStaff[0]?.id ?? ""} />
+              {selectedStaff.map((staff) => (
+                <input key={staff.id} type="hidden" name="staffIds" value={staff.id} />
               ))}
               <div className="grid gap-2">
                 <Label htmlFor="section-name">Section name</Label>
@@ -257,34 +257,34 @@ export function ClassesView({
                 </Combobox>
               </div>
               <div className="grid gap-2">
-                <Label>Teachers (Multiple)</Label>
+                <Label>Staff (Multiple)</Label>
                 <Combobox
                   multiple
                   autoHighlight
-                  items={teachers}
-                  value={selectedTeachers}
-                  onValueChange={(value: TeacherOption[]) =>
-                    setSelectedTeachers(uniqueById(value))
+                  items={staff}
+                  value={selectedStaff}
+                  onValueChange={(value: StaffOption[]) =>
+                    setSelectedStaff(uniqueById(value))
                   }
                   itemToStringLabel={(item) => item?.name ?? ""}
                 >
-                  <ComboboxChips ref={sectionTeacherAnchor} className="w-full">
+                  <ComboboxChips ref={sectionStaffAnchor} className="w-full">
                     <ComboboxValue>
                       {(values) => (
                         <>
-                          {values.map((value: TeacherOption) => (
+                          {values.map((value: StaffOption) => (
                             <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                           ))}
-                          <ComboboxChipsInput placeholder="Search teachers..." />
+                          <ComboboxChipsInput placeholder="Search staff..." />
                         </>
                       )}
                     </ComboboxValue>
                   </ComboboxChips>
-                  <ComboboxContent anchor={sectionTeacherAnchor}>
-                    <ComboboxInput placeholder="Search teachers..." />
-                    <ComboboxEmpty>No teachers found.</ComboboxEmpty>
+                  <ComboboxContent anchor={sectionStaffAnchor}>
+                    <ComboboxInput placeholder="Search staff..." />
+                    <ComboboxEmpty>No staff found.</ComboboxEmpty>
                     <ComboboxList>
-                      {(item: TeacherOption) => (
+                      {(item: StaffOption) => (
                         <ComboboxItem key={item.id} value={item}>
                           {item.name}
                         </ComboboxItem>
@@ -293,8 +293,8 @@ export function ClassesView({
                   </ComboboxContent>
                 </Combobox>
                 <p className="text-xs text-muted-foreground">
-                  Multiple teachers can be selected. Current schema assigns the first selected
-                  teacher to this section.
+                  Multiple staff can be selected. Current schema assigns the first selected
+                  staff to this section.
                 </p>
               </div>
               <div className="grid gap-2">
@@ -341,7 +341,7 @@ export function ClassesView({
                       item.sections.map((section) => (
                         <span key={section.id} className="text-sm">
                           {section.name} ·{" "}
-                          {section.teacher?.user.name ?? "Unassigned"}
+                          {section.staff?.user.name ?? "Unassigned"}
                         </span>
                       ))
                     )}

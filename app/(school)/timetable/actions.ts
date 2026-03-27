@@ -30,16 +30,16 @@ export async function getTimetable() {
       startTime: true,
       endTime: true,
       room: true,
-      teacher: { select: { id: true, name: true } },
+      staff: { select: { id: true, name: true } },
       section: { select: { id: true, name: true, class: { select: { id: true, name: true } } } },
       createdAt: true,
     },
   });
 }
 
-async function assertNoTeacherConflict(input: {
+async function assertNoStaffConflict(input: {
   tenantId: string;
-  teacherId: string;
+  staffId: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
   endTime: string;
@@ -48,7 +48,7 @@ async function assertNoTeacherConflict(input: {
   const conflicts = await prisma.timetable.findMany({
     where: {
       tenantId: input.tenantId,
-      teacherId: input.teacherId,
+      staffId: input.staffId,
       dayOfWeek: input.dayOfWeek,
       ...(input.ignoreId ? { id: { not: input.ignoreId } } : {}),
     },
@@ -66,7 +66,7 @@ async function assertNoTeacherConflict(input: {
 
   if (conflict) {
     throw new Error(
-      `Teacher is already scheduled for ${conflict.section.name} (${conflict.startTime}-${conflict.endTime}).`,
+      `Staff is already scheduled for ${conflict.section.name} (${conflict.startTime}-${conflict.endTime}).`,
     );
   }
 }
@@ -84,34 +84,34 @@ export async function createTimetableSlot(
     return { status: "error", message: parsed.error.errors[0]?.message };
   }
 
-  const [section, teacher, mapping] = await Promise.all([
+  const [section, staff, mapping] = await Promise.all([
     prisma.section.findFirst({
       where: { id: parsed.data.sectionId, tenantId },
       select: { id: true },
     }),
-    prisma.teacher.findFirst({
-      where: { id: parsed.data.teacherId, tenantId },
+    prisma.staff.findFirst({
+      where: { id: parsed.data.staffId, tenantId },
       select: { id: true },
     }),
-    prisma.sectionTeacher.findFirst({
-      where: { sectionId: parsed.data.sectionId, teacherId: parsed.data.teacherId },
+    prisma.sectionStaff.findFirst({
+      where: { sectionId: parsed.data.sectionId, staffId: parsed.data.staffId },
       select: { id: true },
     }),
   ]);
 
   if (!section) return { status: "error", message: "Selected section is invalid." };
-  if (!teacher) return { status: "error", message: "Selected teacher is invalid." };
+  if (!staff) return { status: "error", message: "Selected staff is invalid." };
   if (!mapping) {
     return {
       status: "error",
-      message: "Teacher must be assigned to the section before scheduling.",
+      message: "Staff must be assigned to the section before scheduling.",
     };
   }
 
   try {
-    await assertNoTeacherConflict({
+    await assertNoStaffConflict({
       tenantId,
-      teacherId: parsed.data.teacherId,
+      staffId: parsed.data.staffId,
       dayOfWeek: parsed.data.dayOfWeek,
       startTime: parsed.data.startTime,
       endTime: parsed.data.endTime,
@@ -121,7 +121,7 @@ export async function createTimetableSlot(
       data: {
         tenantId,
         sectionId: parsed.data.sectionId,
-        teacherId: parsed.data.teacherId,
+        staffId: parsed.data.staffId,
         dayOfWeek: parsed.data.dayOfWeek,
         startTime: parsed.data.startTime,
         endTime: parsed.data.endTime,
@@ -160,9 +160,9 @@ export async function updateTimetableSlot(
   if (!existing) return { status: "error", message: "Timetable slot not found." };
 
   try {
-    await assertNoTeacherConflict({
+    await assertNoStaffConflict({
       tenantId,
-      teacherId: parsed.data.teacherId,
+      staffId: parsed.data.staffId,
       dayOfWeek: parsed.data.dayOfWeek,
       startTime: parsed.data.startTime,
       endTime: parsed.data.endTime,
@@ -173,7 +173,7 @@ export async function updateTimetableSlot(
       where: { id: parsed.data.id },
       data: {
         sectionId: parsed.data.sectionId,
-        teacherId: parsed.data.teacherId,
+        staffId: parsed.data.staffId,
         dayOfWeek: parsed.data.dayOfWeek,
         startTime: parsed.data.startTime,
         endTime: parsed.data.endTime,
@@ -221,7 +221,7 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
     where: { id, tenantId },
     select: {
       id: true,
-      teacherId: true,
+      staffId: true,
       startTime: true,
       endTime: true,
     },
@@ -232,9 +232,9 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   }
 
   try {
-    await assertNoTeacherConflict({
+    await assertNoStaffConflict({
       tenantId,
-      teacherId: slot.teacherId,
+      staffId: slot.staffId,
       dayOfWeek,
       startTime: slot.startTime,
       endTime: slot.endTime,

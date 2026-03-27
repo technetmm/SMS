@@ -40,7 +40,7 @@ export function PayrollGenerateForm({
             <Label htmlFor="month">Month</Label>
             <Input id="month" name="month" type="month" required />
             <p className="text-xs text-muted-foreground">
-              Generates (or updates) payroll for all teachers.
+              Generates (or updates) payroll for all staff.
             </p>
           </div>
         </CardContent>

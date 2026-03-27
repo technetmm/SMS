@@ -1,4 +1,4 @@
-import { getTeacherAttendance } from "@/app/(school)/teacher-attendance/actions";
+import { getStaffAttendance } from "@/app/(school)/staff-attendance/actions";
 import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,8 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function TeacherAttendanceTable() {
-  const logs = await getTeacherAttendance();
+export async function StaffAttendanceTable() {
+  const logs = await getStaffAttendance();
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -20,7 +20,7 @@ export async function TeacherAttendanceTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Date</TableHead>
-            <TableHead>Teacher</TableHead>
+            <TableHead>Staff</TableHead>
             <TableHead>Section</TableHead>
             <TableHead>Status</TableHead>
           </TableRow>
@@ -29,7 +29,7 @@ export async function TeacherAttendanceTable() {
           {logs.map((log) => (
             <TableRow key={log.id}>
               <TableCell className="font-medium">{formatter.format(log.date)}</TableCell>
-              <TableCell>{log.teacher.name}</TableCell>
+              <TableCell>{log.staff.name}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
                   <span>{log.section.name}</span>
@@ -48,7 +48,7 @@ export async function TeacherAttendanceTable() {
           {logs.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                No teacher attendance records yet.
+                No staff attendance records yet.
               </TableCell>
             </TableRow>
           ) : null}

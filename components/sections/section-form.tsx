@@ -34,12 +34,12 @@ type SectionFormProps = {
     formData: FormData,
   ) => Promise<SectionActionState>;
   classes: Option[];
-  teachers: Option[];
+  staff: Option[];
   initialData?: {
     id: string;
     name: string;
     classId: string;
-    teacherIds: string[];
+    staffIds: string[];
     room: string | null;
     capacity: number;
   };
@@ -53,30 +53,30 @@ export function SectionForm({
   mode,
   action,
   classes,
-  teachers,
+  staff,
   initialData,
 }: SectionFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const teacherAnchor = useComboboxAnchor();
+  const staffAnchor = useComboboxAnchor();
 
   const initialClass = useMemo(
     () => classes.find((item) => item.id === initialData?.classId) ?? null,
     [classes, initialData?.classId],
   );
-  const initialTeachers = useMemo(
+  const initialStaff = useMemo(
     () =>
-      (initialData?.teacherIds ?? [])
-        .map((id) => teachers.find((item) => item.id === id))
+      (initialData?.staffIds ?? [])
+        .map((id) => staff.find((item) => item.id === id))
         .filter((item): item is Option => Boolean(item)),
-    [initialData?.teacherIds, teachers],
+    [initialData?.staffIds, staff],
   );
 
   const [selectedClass, setSelectedClass] = useState<Option | null>(
     initialClass,
   );
-  const [selectedTeachers, setSelectedTeachers] =
-    useState<Option[]>(initialTeachers);
+  const [selectedStaff, setSelectedStaff] =
+    useState<Option[]>(initialStaff);
 
   // `initialData` is stable for the lifetime of the page render (server component),
   // so we don't need to sync state from props via an effect.
@@ -105,12 +105,12 @@ export function SectionForm({
         <input type="hidden" name="id" value={initialData.id} />
       ) : null}
       <input type="hidden" name="classId" value={selectedClass?.id ?? ""} />
-      {selectedTeachers.map((teacher) => (
+      {selectedStaff.map((staff) => (
         <input
-          key={teacher.id}
+          key={staff.id}
           type="hidden"
-          name="teacherIds"
-          value={teacher.id}
+          name="staffIds"
+          value={staff.id}
         />
       ))}
 
@@ -154,25 +154,25 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label>Teachers (Optional)</Label>
+            <Label>Staff (Optional)</Label>
             <Combobox
               multiple
               autoHighlight
-              items={teachers}
-              value={selectedTeachers}
+              items={staff}
+              value={selectedStaff}
               onValueChange={(value: Option[]) =>
-                setSelectedTeachers(uniqueById(value))
+                setSelectedStaff(uniqueById(value))
               }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={teacherAnchor} className="w-full">
+              <ComboboxChips ref={staffAnchor} className="w-full">
                 <ComboboxValue>
                   {(values) => (
                     <>
                       {values.map((value: Option) => (
                         <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                       ))}
-                      <ComboboxChipsInput placeholder="Search teachers..." />
+                      <ComboboxChipsInput placeholder="Search staff..." />
                     </>
                   )}
                 </ComboboxValue>
@@ -180,14 +180,14 @@ export function SectionForm({
                 <button
                   type="button"
                   className="w-fit text-xs text-muted-foreground underline underline-offset-4"
-                  onClick={() => setSelectedTeachers([])}
+                  onClick={() => setSelectedStaff([])}
                 >
                   <X size={16} />
                 </button>
               </ComboboxChips>
-              <ComboboxContent anchor={teacherAnchor}>
-                <ComboboxInput placeholder="Search teachers..." />
-                <ComboboxEmpty>No teachers found.</ComboboxEmpty>
+              <ComboboxContent anchor={staffAnchor}>
+                <ComboboxInput placeholder="Search staff..." />
+                <ComboboxEmpty>No staff found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>

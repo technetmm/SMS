@@ -10,7 +10,7 @@ import {
   PaymentStatus,
   ProgramType,
   StudentStatus,
-  TeacherStatus,
+  StaffStatus,
   UserRole,
 } from "@/app/generated/prisma/enums";
 
@@ -62,7 +62,7 @@ export const classCreateSchema = z.object({
 export const sectionCreateSchema = z.object({
   classId: z.string().min(1),
   name: z.string().min(1, "Section name is required"),
-  teacherId: z.string().optional(),
+  staffId: z.string().optional(),
   room: z.string().optional(),
   capacity: z.preprocess(
     (value) => (value === "" ? undefined : value),
@@ -70,11 +70,11 @@ export const sectionCreateSchema = z.object({
   ),
 });
 
-export const sectionMultiTeacherSchema = z.object({
+export const sectionMultiStaffSchema = z.object({
   id: z.string().optional(),
   classId: z.string().min(1, "Class is required"),
   name: z.string().min(1, "Section name is required"),
-  teacherIds: z.array(z.string().min(1)).optional().default([]),
+  staffIds: z.array(z.string().min(1)).optional().default([]),
   room: z.string().optional(),
   capacity: z.preprocess(
     (value) => (value === "" || value === null || value === undefined ? 30 : value),
@@ -101,7 +101,7 @@ export const courseUpdateSchema = courseCreateSchema.extend({
   id: z.string().min(1, "Course id is required"),
 });
 
-export const teacherCreateSchema = z.object({
+export const staffCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   jobTitle: z.string().min(2, "Job title is required"),
   nrcNumber: z.string().min(3, "NRC number is required"),
@@ -114,7 +114,7 @@ export const teacherCreateSchema = z.object({
   phone: z.string().min(6).optional(),
   hireDate: z.coerce.date(),
   exitDate: z.coerce.date().optional(),
-  status: z.nativeEnum(TeacherStatus),
+  status: z.nativeEnum(StaffStatus),
   ratePerSection: z.preprocess(
     (value) => (value === "" || value === null ? undefined : value),
     z.coerce.number().nonnegative("Rate per section cannot be negative").optional(),
@@ -123,10 +123,10 @@ export const teacherCreateSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const teacherUpdateSchema = teacherCreateSchema
+export const staffUpdateSchema = staffCreateSchema
   .omit({ password: true })
   .extend({
-    id: z.string().min(1, "Teacher id is required"),
+    id: z.string().min(1, "Staff id is required"),
   });
 
 const timeString = z
@@ -137,7 +137,7 @@ export const timetableSlotSchema = z
   .object({
     id: z.string().optional(),
     sectionId: z.string().min(1, "Section is required"),
-    teacherId: z.string().min(1, "Teacher is required"),
+    staffId: z.string().min(1, "Staff is required"),
     dayOfWeek: z.nativeEnum(DayOfWeek),
     startTime: timeString,
     endTime: timeString,
@@ -152,8 +152,8 @@ export const timetableSlotSchema = z
     { message: "End time must be after start time", path: ["endTime"] },
   );
 
-export const teacherAttendanceSchema = z.object({
-  teacherId: z.string().min(1, "Teacher is required"),
+export const staffAttendanceSchema = z.object({
+  staffId: z.string().min(1, "Staff is required"),
   sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
@@ -197,9 +197,9 @@ export const invoiceUpdateSchema = z.object({
 export const enrollmentActorRoleSchema = z.nativeEnum(UserRole).refine(
   (role) =>
     role === UserRole.SCHOOL_ADMIN ||
-    role === UserRole.TEACHER ||
+    role === UserRole.STAFF ||
     role === UserRole.SUPER_ADMIN,
-  { message: "Only teacher/admin can enroll students." },
+  { message: "Only staff/admin can enroll students." },
 );
 
 export const paymentCreateSchema = z.object({

@@ -53,11 +53,11 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
   return { status: "success", url };
 }
 
-export async function exportTeachersToExcel(): Promise<ExportState> {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+export async function exportStaffToExcel(): Promise<ExportState> {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
-  const teachers = await prisma.teacher.findMany({
+  const staff = await prisma.staff.findMany({
     where: { tenantId },
     orderBy: { createdAt: "desc" },
     select: {
@@ -70,19 +70,19 @@ export async function exportTeachersToExcel(): Promise<ExportState> {
   });
 
   const buffer = await buildExcelBuffer({
-    sheetName: "Teachers",
+    sheetName: "Staff",
     headers: ["Name", "Email", "Phone", "Status", "Hire Date"],
-    rows: teachers.map((t) => [t.name, t.email, t.phone ?? "-", t.status, t.hireDate]),
+    rows: staff.map((t) => [t.name, t.email, t.phone ?? "-", t.status, t.hireDate]),
   });
 
-  const filename = `${stamp("teachers")}.xlsx`;
+  const filename = `${stamp("staff")}.xlsx`;
   const url = await saveExportFile({ filename, buffer });
 
   await logAction({
     action: "EXPORT",
-    entity: "Teacher",
+    entity: "Staff",
     tenantId,
-    metadata: { format: "xlsx", count: teachers.length },
+    metadata: { format: "xlsx", count: staff.length },
   });
 
   return { status: "success", url };

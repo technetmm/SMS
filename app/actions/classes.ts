@@ -65,8 +65,8 @@ export async function createSection(
   const prismaTenant = getPrismaClient(session ?? {});
 
   const raw = formDataToObject(formData);
-  const teacherIds = formData
-    .getAll("teacherIds")
+  const staffIds = formData
+    .getAll("staffIds")
     .map((value) => String(value))
     .filter(Boolean);
 
@@ -89,11 +89,11 @@ export async function createSection(
       },
     });
 
-    if (teacherIds.length > 0) {
-      await prismaTenant.sectionTeacher.createMany({
-        data: teacherIds.map((teacherId) => ({
+    if (staffIds.length > 0) {
+      await prismaTenant.sectionStaff.createMany({
+        data: staffIds.map((staffId) => ({
           sectionId: created.id,
-          teacherId,
+          staffId,
         })),
         skipDuplicates: true,
       });
@@ -107,7 +107,7 @@ export async function createSection(
       metadata: {
         classId: parsed.data.classId,
         name: parsed.data.name,
-        teacherIds,
+        staffIds,
       },
     });
   } catch {

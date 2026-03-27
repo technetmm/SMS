@@ -5,18 +5,18 @@ import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
-import { teacherAttendanceSchema } from "@/lib/validators";
+import { staffAttendanceSchema } from "@/lib/validators";
 
-export type TeacherAttendanceActionState = {
+export type StaffAttendanceActionState = {
   status: "idle" | "success" | "error";
   message?: string;
 };
 
-export async function getTeacherAttendance() {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+export async function getStaffAttendance() {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
-  return prisma.teacherAttendance.findMany({
+  return prisma.staffAttendance.findMany({
     where: { tenantId },
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     take: 200,
@@ -24,7 +24,7 @@ export async function getTeacherAttendance() {
       id: true,
       date: true,
       status: true,
-      teacher: { select: { id: true, name: true } },
+      staff: { select: { id: true, name: true } },
       section: {
         select: {
           id: true,
@@ -37,58 +37,58 @@ export async function getTeacherAttendance() {
   });
 }
 
-export async function markTeacherAttendance(
-  _prev: TeacherAttendanceActionState,
+export async function markStaffAttendance(
+  _prev: StaffAttendanceActionState,
   formData: FormData,
-): Promise<TeacherAttendanceActionState> {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+): Promise<StaffAttendanceActionState> {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   const raw = formDataToObject(formData);
-  const parsed = teacherAttendanceSchema.safeParse(raw);
+  const parsed = staffAttendanceSchema.safeParse(raw);
   if (!parsed.success) {
     return { status: "error", message: parsed.error.errors[0]?.message };
   }
 
-  const [teacher, section, mapping] = await Promise.all([
-    prisma.teacher.findFirst({
-      where: { id: parsed.data.teacherId, tenantId },
+  const [staff, section, mapping] = await Promise.all([
+    prisma.staff.findFirst({
+      where: { id: parsed.data.staffId, tenantId },
       select: { id: true },
     }),
     prisma.section.findFirst({
       where: { id: parsed.data.sectionId, tenantId },
       select: { id: true },
     }),
-    prisma.sectionTeacher.findFirst({
+    prisma.sectionStaff.findFirst({
       where: {
-        teacherId: parsed.data.teacherId,
+        staffId: parsed.data.staffId,
         sectionId: parsed.data.sectionId,
       },
       select: { id: true },
     }),
   ]);
 
-  if (!teacher) return { status: "error", message: "Selected teacher is invalid." };
+  if (!staff) return { status: "error", message: "Selected staff is invalid." };
   if (!section) return { status: "error", message: "Selected section is invalid." };
   if (!mapping) {
     return {
       status: "error",
-      message: "Teacher must be assigned to the section before marking attendance.",
+      message: "Staff must be assigned to the section before marking attendance.",
     };
   }
 
   try {
-    await prisma.teacherAttendance.upsert({
+    await prisma.staffAttendance.upsert({
       where: {
-        teacherId_sectionId_date: {
-          teacherId: parsed.data.teacherId,
+        staffId_sectionId_date: {
+          staffId: parsed.data.staffId,
           sectionId: parsed.data.sectionId,
           date: parsed.data.date,
         },
       },
       create: {
         tenantId,
-        teacherId: parsed.data.teacherId,
+        staffId: parsed.data.staffId,
         sectionId: parsed.data.sectionId,
         date: parsed.data.date,
         status: parsed.data.status,
@@ -98,10 +98,10 @@ export async function markTeacherAttendance(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to save teacher attendance." };
+    return { status: "error", message: "Unable to save staff attendance." };
   }
 
-  revalidatePath("/teacher-attendance");
-  return { status: "success", message: "Teacher attendance saved." };
+  revalidatePath("/staff-attendance");
+  return { status: "success", message: "Staff attendance saved." };
 }
 

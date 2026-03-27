@@ -39,7 +39,7 @@ async function SignupPageContent() {
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
             We will create your tenant and your SCHOOL_ADMIN user account in one transaction.
-            After signup, you can sign in and manage teachers, students, classes, and billing.
+            After signup, you can sign in and manage staff, students, classes, and billing.
           </p>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}

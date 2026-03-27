@@ -14,7 +14,7 @@ import {
 export const metadata: Metadata = {
   title: "Technet LMS SaaS | Multi-Tenant School Management",
   description:
-    "Run your school operations on one secure platform. Manage students, teachers, classes, payments, and reports in minutes.",
+    "Run your school operations on one secure platform. Manage students, staff, classes, payments, and reports in minutes.",
 };
 
 export default async function HomePage() {

@@ -16,7 +16,7 @@ export const STUDENT_STATUS_LABELS: Record<string, string> = {
   GRADUATED: "Graduated",
 };
 
-export const TEACHER_STATUS_LABELS: Record<string, string> = {
+export const STAFF_STATUS_LABELS: Record<string, string> = {
   ACTIVE: "Active",
   ONLEAVE: "On Leave",
   RESIGNED: "Resigned",
@@ -60,7 +60,7 @@ export const PAYMENT_STATUS_LABELS: Record<string, string> = {
 
 export const PERMISSION_LABELS: Record<string, string> = {
   MANAGE_STUDENTS: "Manage Students",
-  MANAGE_TEACHERS: "Manage Teachers",
+  MANAGE_STAFF: "Manage Staff",
   MANAGE_CLASSES: "Manage Classes",
   VIEW_REPORTS: "View Reports",
   MANAGE_SUBSCRIPTIONS: "Manage Subscriptions",

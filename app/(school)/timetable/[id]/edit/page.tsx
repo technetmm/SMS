@@ -15,12 +15,12 @@ export default async function EditTimetablePage({
   const tenantId = await requireTenant();
   const { id } = await params;
 
-  const [slot, teachers, sections] = await Promise.all([
+  const [slot, staff, sections] = await Promise.all([
     prisma.timetable.findFirst({
       where: { id, tenantId },
       select: {
         id: true,
-        teacherId: true,
+        staffId: true,
         sectionId: true,
         dayOfWeek: true,
         startTime: true,
@@ -28,7 +28,7 @@ export default async function EditTimetablePage({
         room: true,
       },
     }),
-    prisma.teacher.findMany({
+    prisma.staff.findMany({
       where: { tenantId, isDeleted: false },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -48,7 +48,7 @@ export default async function EditTimetablePage({
       <TimetableForm
         mode="edit"
         action={updateTimetableSlot}
-        teachers={teachers}
+        staff={staff}
         sections={sections.map((section) => ({
           id: section.id,
           name: `${section.class.name} • ${section.name}`,

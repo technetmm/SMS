@@ -23,7 +23,7 @@ function resolveInvoiceStatus(finalAmount: Prisma.Decimal, paidAmount: Prisma.De
   return PaymentStatus.PARTIAL;
 }
 
-async function requireTeacherOrAdmin() {
+async function requireStaffOrAdmin() {
   const session = await getServerAuth();
   if (!session?.user?.id || !session.user.tenantId) {
     return { ok: false as const, message: "Unauthorized." };
@@ -31,7 +31,7 @@ async function requireTeacherOrAdmin() {
 
   const roleCheck = enrollmentActorRoleSchema.safeParse(session.user.role);
   if (!roleCheck.success) {
-    return { ok: false as const, message: "Only teacher/admin can manage payments." };
+    return { ok: false as const, message: "Only staff/admin can manage payments." };
   }
 
   return {
@@ -42,7 +42,7 @@ async function requireTeacherOrAdmin() {
 }
 
 async function requireAdminRefund() {
-  const actor = await requireTeacherOrAdmin();
+  const actor = await requireStaffOrAdmin();
   if (!actor.ok) return actor;
 
   if (
@@ -56,7 +56,7 @@ async function requireAdminRefund() {
 }
 
 export async function getInvoices() {
-  const actor = await requireTeacherOrAdmin();
+  const actor = await requireStaffOrAdmin();
   if (!actor.ok) return [];
 
   return prisma.invoice.findMany({
@@ -100,7 +100,7 @@ export async function getInvoices() {
 }
 
 export async function getInvoiceById(id: string) {
-  const actor = await requireTeacherOrAdmin();
+  const actor = await requireStaffOrAdmin();
   if (!actor.ok || !id) return null;
 
   return prisma.invoice.findFirst({
@@ -152,7 +152,7 @@ export async function addPayment(
   _prevState: BillingActionState,
   formData: FormData,
 ): Promise<BillingActionState> {
-  const actor = await requireTeacherOrAdmin();
+  const actor = await requireStaffOrAdmin();
   if (!actor.ok) return { status: "error", message: actor.message };
 
   const raw = formDataToObject(formData);
@@ -318,7 +318,7 @@ export async function addRefund(
 }
 
 export async function generateInvoicePDF(invoiceId: string) {
-  const actor = await requireTeacherOrAdmin();
+  const actor = await requireStaffOrAdmin();
   if (!actor.ok) {
     return { status: "error" as const, message: actor.message };
   }

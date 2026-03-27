@@ -5,25 +5,25 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
-import { teacherCreateSchema, teacherUpdateSchema } from "@/lib/validators";
+import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
 import { Permission, UserRole } from "@/app/generated/prisma/enums";
 import { enqueueEmail } from "@/lib/queue";
 import { logAction } from "@/lib/audit-log";
 
-export type TeacherActionState = {
+export type StaffActionState = {
   status: "idle" | "success" | "error";
   message?: string;
 };
 
-export async function createTeacher(
-  _prevState: TeacherActionState,
+export async function createStaff(
+  _prevState: StaffActionState,
   formData: FormData,
-): Promise<TeacherActionState> {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+): Promise<StaffActionState> {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   const raw = formDataToObject(formData);
-  const parsed = teacherCreateSchema.safeParse({
+  const parsed = staffCreateSchema.safeParse({
     ...raw,
     parmentAddress: emptyToUndefined(raw.parmentAddress),
     currentAddress: emptyToUndefined(raw.currentAddress),
@@ -46,7 +46,7 @@ export async function createTeacher(
   }
 
   try {
-    let createdTeacherId = "";
+    let createdStaffId = "";
     await prisma.$transaction(async (tx) => {
       const passwordHash = await bcrypt.hash(parsed.data.password, 10);
 
@@ -54,13 +54,13 @@ export async function createTeacher(
         data: {
           email: parsed.data.email,
           name: parsed.data.name,
-          role: UserRole.TEACHER,
+          role: UserRole.STAFF,
           passwordHash,
           tenantId,
         },
       });
 
-      const teacher = await tx.teacher.create({
+      const staff = await tx.staff.create({
         data: {
           userId: user.id,
           tenantId,
@@ -81,37 +81,37 @@ export async function createTeacher(
           ratePerSection: parsed.data.ratePerSection,
         },
       });
-      createdTeacherId = teacher.id;
+      createdStaffId = staff.id;
     });
 
     await enqueueEmail({
       to: parsed.data.email,
       subject: "Welcome to LMS",
-      body: `Hi ${parsed.data.name}, your teacher account is ready.`,
+      body: `Hi ${parsed.data.name}, your staff account is ready.`,
       delayMs: 2000,
     });
 
     await logAction({
       action: "CREATE",
-      entity: "Teacher",
-      entityId: createdTeacherId,
+      entity: "Staff",
+      entityId: createdStaffId,
       tenantId,
       metadata: { email: parsed.data.email },
     });
   } catch (error) {
-    console.error("createTeacher failed", error);
-    return { status: "error", message: "Unable to create teacher." };
+    console.error("createStaff failed", error);
+    return { status: "error", message: "Unable to create staff." };
   }
 
-  revalidatePath("/teachers");
-  return { status: "success", message: "Teacher created successfully." };
+  revalidatePath("/staff");
+  return { status: "success", message: "Staff created successfully." };
 }
 
-export async function getTeachers() {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+export async function getStaff() {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
-  return prisma.teacher.findMany({
+  return prisma.staff.findMany({
     where: { tenantId },
     orderBy: { createdAt: "desc" },
     select: {
@@ -126,15 +126,15 @@ export async function getTeachers() {
   });
 }
 
-export async function updateTeacher(
-  _prevState: TeacherActionState,
+export async function updateStaff(
+  _prevState: StaffActionState,
   formData: FormData,
-): Promise<TeacherActionState> {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+): Promise<StaffActionState> {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   const raw = formDataToObject(formData);
-  const parsed = teacherUpdateSchema.safeParse({
+  const parsed = staffUpdateSchema.safeParse({
     ...raw,
     parmentAddress: emptyToUndefined(raw.parmentAddress),
     currentAddress: emptyToUndefined(raw.currentAddress),
@@ -147,13 +147,13 @@ export async function updateTeacher(
     return { status: "error", message: parsed.error.errors[0]?.message };
   }
 
-  const teacher = await prisma.teacher.findFirst({
+  const staff = await prisma.staff.findFirst({
     where: { id: parsed.data.id, tenantId },
     select: { userId: true },
   });
 
-  if (!teacher) {
-    return { status: "error", message: "Teacher not found." };
+  if (!staff) {
+    return { status: "error", message: "Staff not found." };
   }
 
   const existing = await prisma.user.findUnique({
@@ -161,21 +161,21 @@ export async function updateTeacher(
     select: { id: true },
   });
 
-  if (existing && existing.id !== teacher.userId) {
+  if (existing && existing.id !== staff.userId) {
     return { status: "error", message: "Email already exists." };
   }
 
   try {
     await prisma.$transaction(async (tx) => {
       await tx.user.update({
-        where: { id: teacher.userId },
+        where: { id: staff.userId },
         data: {
           email: parsed.data.email,
           name: parsed.data.name,
         },
       });
 
-      await tx.teacher.update({
+      await tx.staff.update({
         where: { id: parsed.data.id },
         data: {
           tenantId,
@@ -198,24 +198,24 @@ export async function updateTeacher(
       });
     });
   } catch (error) {
-    console.error("updateTeacher failed", error);
-    return { status: "error", message: "Unable to update teacher." };
+    console.error("updateStaff failed", error);
+    return { status: "error", message: "Unable to update staff." };
   }
 
-  revalidatePath("/teachers");
-  return { status: "success", message: "Teacher updated successfully." };
+  revalidatePath("/staff");
+  return { status: "success", message: "Staff updated successfully." };
 }
 
-export async function deleteTeacher(formData: FormData) {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+export async function deleteStaff(formData: FormData) {
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
-    throw new Error("Teacher id is required");
+    throw new Error("Staff id is required");
   }
 
-  const teacher = await prisma.teacher.findFirst({
+  const staff = await prisma.staff.findFirst({
     where: { id, tenantId },
     select: {
       userId: true,
@@ -223,20 +223,20 @@ export async function deleteTeacher(formData: FormData) {
     },
   });
 
-  if (!teacher) {
-    throw new Error("Teacher not found");
+  if (!staff) {
+    throw new Error("Staff not found");
   }
 
-  if (teacher._count.sections > 0) {
+  if (staff._count.sections > 0) {
     throw new Error(
-      "Teacher is assigned to sections. Remove assignments first.",
+      "Staff is assigned to sections. Remove assignments first.",
     );
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.teacher.delete({ where: { id } });
-    await tx.user.delete({ where: { id: teacher.userId } });
+    await tx.staff.delete({ where: { id } });
+    await tx.user.delete({ where: { id: staff.userId } });
   });
 
-  revalidatePath("/teachers");
+  revalidatePath("/staff");
 }

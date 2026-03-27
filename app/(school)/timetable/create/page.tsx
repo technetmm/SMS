@@ -9,8 +9,8 @@ export default async function CreateTimetablePage() {
   await requirePermission(Permission.MANAGE_CLASSES);
   const tenantId = await requireTenant();
 
-  const [teachers, sections] = await Promise.all([
-    prisma.teacher.findMany({
+  const [staff, sections] = await Promise.all([
+    prisma.staff.findMany({
       where: { tenantId, isDeleted: false },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -28,7 +28,7 @@ export default async function CreateTimetablePage() {
       <TimetableForm
         mode="create"
         action={createTimetableSlot}
-        teachers={teachers}
+        staff={staff}
         sections={sections.map((section) => ({
           id: section.id,
           name: `${section.class.name} • ${section.name}`,

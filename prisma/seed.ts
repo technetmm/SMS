@@ -11,7 +11,7 @@ import {
   ProgramType,
   StudentStatus,
   SubscriptionStatus,
-  TeacherStatus,
+  StaffStatus,
   UserRole,
 } from "../app/generated/prisma/enums";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -94,11 +94,11 @@ async function upsertRolePermissions() {
       { role: UserRole.SUPER_ADMIN, permission: Permission.MANAGE_SUBSCRIPTIONS },
       { role: UserRole.SUPER_ADMIN, permission: Permission.VIEW_REPORTS },
       { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_STUDENTS },
-      { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_TEACHERS },
+      { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_STAFF },
       { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_CLASSES },
       { role: UserRole.SCHOOL_ADMIN, permission: Permission.VIEW_REPORTS },
-      { role: UserRole.TEACHER, permission: Permission.MANAGE_CLASSES },
-      { role: UserRole.TEACHER, permission: Permission.VIEW_REPORTS },
+      { role: UserRole.STAFF, permission: Permission.MANAGE_CLASSES },
+      { role: UserRole.STAFF, permission: Permission.VIEW_REPORTS },
     ],
     skipDuplicates: true,
   });
@@ -199,53 +199,53 @@ export async function main() {
     },
   });
 
-  const teacherUser = await prisma.user.upsert({
-    where: { email: "teacher@lms.local" },
+  const staffUser = await prisma.user.upsert({
+    where: { email: "staff@lms.local" },
     update: {},
     create: {
-      name: "Teacher One",
-      email: "teacher@lms.local",
-      role: UserRole.TEACHER,
+      name: "Staff One",
+      email: "staff@lms.local",
+      role: UserRole.STAFF,
       tenantId: tenant.id,
-      passwordHash: await bcrypt.hash("Teacher123!", 10),
+      passwordHash: await bcrypt.hash("Staff123!", 10),
     },
   });
 
-  const teacher = await prisma.teacher.upsert({
-    where: { userId: teacherUser.id },
+  const staff = await prisma.staff.upsert({
+    where: { userId: staffUser.id },
     update: {
-      name: "Teacher One",
-      jobTitle: "Senior Teacher",
+      name: "Staff One",
+      jobTitle: "Senior Staff",
       nrcNumber: "12/ABC(N)123456",
       dob: new Date("1990-05-12T00:00:00Z"),
-      email: "teacher@lms.local",
+      email: "staff@lms.local",
       gender: Gender.FEMALE,
       maritalStatus: MaritalStatus.SINGLE,
       parmentAddress: "Mandalay",
       currentAddress: "Yangon",
       phone: "09-0000-0000",
       hireDate: new Date("2024-01-05T00:00:00Z"),
-      status: TeacherStatus.ACTIVE,
-      remark: "Seeded teacher account",
+      status: StaffStatus.ACTIVE,
+      remark: "Seeded staff account",
       ratePerSection: 150,
       tenantId: tenant.id,
     },
     create: {
-      userId: teacherUser.id,
+      userId: staffUser.id,
       tenantId: tenant.id,
-      name: "Teacher One",
-      jobTitle: "Senior Teacher",
+      name: "Staff One",
+      jobTitle: "Senior Staff",
       nrcNumber: "12/ABC(N)123456",
       dob: new Date("1990-05-12T00:00:00Z"),
-      email: "teacher@lms.local",
+      email: "staff@lms.local",
       gender: Gender.FEMALE,
       maritalStatus: MaritalStatus.SINGLE,
       parmentAddress: "Mandalay",
       currentAddress: "Yangon",
       phone: "09-0000-0000",
       hireDate: new Date("2024-01-05T00:00:00Z"),
-      status: TeacherStatus.ACTIVE,
-      remark: "Seeded teacher account",
+      status: StaffStatus.ACTIVE,
+      remark: "Seeded staff account",
       ratePerSection: 150,
     },
   });
@@ -263,8 +263,8 @@ export async function main() {
     },
   });
 
-  await prisma.teacher.update({
-    where: { id: teacher.id },
+  await prisma.staff.update({
+    where: { id: staff.id },
     data: { branchId: branch.id },
   });
 
@@ -312,10 +312,10 @@ export async function main() {
     },
   });
 
-  await prisma.sectionTeacher.createMany({
+  await prisma.sectionStaff.createMany({
     data: [
-      { sectionId: sectionA.id, teacherId: teacher.id },
-      { sectionId: sectionB.id, teacherId: teacher.id },
+      { sectionId: sectionA.id, staffId: staff.id },
+      { sectionId: sectionB.id, staffId: staff.id },
     ],
     skipDuplicates: true,
   });
@@ -534,7 +534,7 @@ export async function main() {
   console.log("Seed completed:");
   console.log("- Tenants: demo-school, sunrise-academy");
   console.log("- Branches: Main Campus");
-  console.log("- Users: super@lms.local, admin@lms.local, teacher@lms.local");
+  console.log("- Users: super@lms.local, admin@lms.local, staff@lms.local");
   console.log("- Students seeded: 10");
 }
 

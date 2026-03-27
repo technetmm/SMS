@@ -18,7 +18,7 @@ function monthStartUTC(value: Date) {
 }
 
 export async function getPayrolls() {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   return prisma.payroll.findMany({
@@ -29,7 +29,7 @@ export async function getPayrolls() {
       month: true,
       totalSections: true,
       totalAmount: true,
-      teacher: { select: { id: true, name: true } },
+      staff: { select: { id: true, name: true } },
       createdAt: true,
     },
   });
@@ -39,7 +39,7 @@ export async function generatePayroll(
   _prev: PayrollActionState,
   formData: FormData,
 ): Promise<PayrollActionState> {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+  await requirePermission(Permission.MANAGE_STAFF);
   const tenantId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -50,25 +50,25 @@ export async function generatePayroll(
 
   const month = monthStartUTC(parsed.data.month);
 
-  const teachers = await prisma.teacher.findMany({
+  const staffMembers = await prisma.staff.findMany({
     where: { tenantId, isDeleted: false },
     select: { id: true, ratePerSection: true },
   });
 
   await prisma.$transaction(async (tx) => {
-    for (const teacher of teachers) {
-      const totalSections = await tx.sectionTeacher.count({
-        where: { teacherId: teacher.id },
+    for (const staff of staffMembers) {
+      const totalSections = await tx.sectionStaff.count({
+        where: { staffId: staff.id },
       });
-      const totalAmount = new Prisma.Decimal(teacher.ratePerSection).mul(
+      const totalAmount = new Prisma.Decimal(staff.ratePerSection).mul(
         totalSections,
       );
 
       await tx.payroll.upsert({
-        where: { teacherId_month: { teacherId: teacher.id, month } },
+        where: { staffId_month: { staffId: staff.id, month } },
         create: {
           tenantId,
-          teacherId: teacher.id,
+          staffId: staff.id,
           month,
           totalSections,
           totalAmount,
@@ -84,4 +84,3 @@ export async function generatePayroll(
   revalidatePath("/payroll");
   return { status: "success", message: "Payroll generated." };
 }
-

@@ -11,13 +11,13 @@ export default async function CreateSectionPage() {
   await requireSchoolAdmin();
   const tenantId = await requireTenantId();
 
-  const [classes, teachers] = await Promise.all([
+  const [classes, staff] = await Promise.all([
     prisma.class.findMany({
       where: { tenantId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
-    prisma.teacher.findMany({
+    prisma.staff.findMany({
       where: { tenantId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -28,7 +28,7 @@ export default async function CreateSectionPage() {
     <div className="space-y-6">
       <PageHeader
         title="Create Section"
-        description="Add a section and optionally assign a teacher."
+        description="Add a section and optionally assign a staff."
         actions={
           <Button asChild variant="outline">
             <Link href="/sections">Back to Sections</Link>
@@ -39,7 +39,7 @@ export default async function CreateSectionPage() {
         mode="create"
         action={createSection}
         classes={classes}
-        teachers={teachers}
+        staff={staff}
       />
     </div>
   );

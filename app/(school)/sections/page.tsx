@@ -11,7 +11,7 @@ export default async function SectionsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Sections"
-        description="Manage class sections and teacher assignments."
+        description="Manage class sections and staff assignments."
         actions={
           <Button asChild>
             <Link href="/sections/create">Create Section</Link>

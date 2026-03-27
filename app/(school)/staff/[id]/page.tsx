@@ -10,14 +10,14 @@ import {
   enumLabel,
   GENDER_LABELS,
   MARITAL_STATUS_LABELS,
-  TEACHER_STATUS_LABELS,
+  STAFF_STATUS_LABELS,
 } from "@/lib/enum-labels";
-import { teacherStatusColor } from "@/lib/colors";
+import { staffStatusColor } from "@/lib/colors";
 import { timeToMinutes } from "@/lib/time";
 import { dateFormatter } from "@/lib/helper";
 import { cn } from "@/lib/utils";
 
-export default async function TeacherDetailPage({
+export default async function StaffDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -25,25 +25,25 @@ export default async function TeacherDetailPage({
   const { id } = await params;
 
   if (!id) {
-    redirect("/teachers");
+    redirect("/staff");
   }
 
   await requireSchoolAdmin();
   const tenantId = await requireTenantId();
 
-  const [teacher, sectionCount, timetableSlots] = await Promise.all([
-    prisma.teacher.findFirst({
+  const [staff, sectionCount, timetableSlots] = await Promise.all([
+    prisma.staff.findFirst({
       where: { id, tenantId },
     }),
-    prisma.sectionTeacher.count({ where: { teacherId: id } }),
+    prisma.sectionStaff.count({ where: { staffId: id } }),
     prisma.timetable.findMany({
-      where: { tenantId, teacherId: id },
+      where: { tenantId, staffId: id },
       select: { startTime: true, endTime: true },
     }),
   ]);
 
-  if (!teacher) {
-    redirect("/teachers");
+  if (!staff) {
+    redirect("/staff");
   }
 
   const weeklyMinutes = timetableSlots.reduce((total, slot) => {
@@ -60,15 +60,15 @@ export default async function TeacherDetailPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title={teacher.name}
-        description="Teacher profile and employment details."
+        title={staff.name}
+        description="Staff profile and employment details."
         actions={
           <div className="flex gap-2">
             <Button asChild variant="outline">
-              <Link href="/teachers">Back</Link>
+              <Link href="/staff">Back</Link>
             </Button>
             <Button asChild>
-              <Link href={`/teachers/${teacher.id}/edit`}>Edit</Link>
+              <Link href={`/staff/${staff.id}/edit`}>Edit</Link>
             </Button>
           </div>
         }
@@ -83,28 +83,28 @@ export default async function TeacherDetailPage({
             <CardContent className="grid gap-4 md:grid-cols-2 text-sm">
               <div>
                 <p className="text-xs text-muted-foreground">Full name</p>
-                <p className="font-medium">{teacher.name}</p>
+                <p className="font-medium">{staff.name}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">NRC number</p>
-                <p className="font-medium">{teacher.nrcNumber}</p>
+                <p className="font-medium">{staff.nrcNumber}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Date of birth</p>
                 <p className="font-medium">
-                  {teacher?.dob ? dateFormatter.format(teacher.dob) : "-"}
+                  {staff?.dob ? dateFormatter.format(staff.dob) : "-"}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Gender</p>
                 <p className="font-medium">
-                  {enumLabel(teacher.gender, GENDER_LABELS)}
+                  {enumLabel(staff.gender, GENDER_LABELS)}
                 </p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Marital status</p>
                 <p className="font-medium">
-                  {enumLabel(teacher.maritalStatus, MARITAL_STATUS_LABELS)}
+                  {enumLabel(staff.maritalStatus, MARITAL_STATUS_LABELS)}
                 </p>
               </div>
             </CardContent>
@@ -117,21 +117,21 @@ export default async function TeacherDetailPage({
             <CardContent className="grid gap-4 md:grid-cols-2 text-sm">
               <div>
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="font-medium">{teacher.email}</p>
+                <p className="font-medium">{staff.email}</p>
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">Phone</p>
-                <p className="font-medium">{teacher.phone ?? "-"}</p>
+                <p className="font-medium">{staff.phone ?? "-"}</p>
               </div>
               <div className="md:col-span-2">
                 <p className="text-xs text-muted-foreground">
                   Permanent address
                 </p>
-                <p className="font-medium">{teacher.parmentAddress ?? "-"}</p>
+                <p className="font-medium">{staff.parmentAddress ?? "-"}</p>
               </div>
               <div className="md:col-span-2">
                 <p className="text-xs text-muted-foreground">Current address</p>
-                <p className="font-medium">{teacher.currentAddress ?? "-"}</p>
+                <p className="font-medium">{staff.currentAddress ?? "-"}</p>
               </div>
             </CardContent>
           </Card>
@@ -141,7 +141,7 @@ export default async function TeacherDetailPage({
               <CardTitle>Notes</CardTitle>
             </CardHeader>
             <CardContent className="text-sm">
-              {teacher.remark ?? "No remarks yet."}
+              {staff.remark ?? "No remarks yet."}
             </CardContent>
           </Card>
         </div>
@@ -154,21 +154,21 @@ export default async function TeacherDetailPage({
             <CardContent className="space-y-3 text-sm">
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Job title</p>
-                <p className="font-medium">{teacher.jobTitle}</p>
+                <p className="font-medium">{staff.jobTitle}</p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Hire date</p>
                 <p className="font-medium">
-                  {teacher?.hireDate
-                    ? dateFormatter.format(teacher.hireDate)
+                  {staff?.hireDate
+                    ? dateFormatter.format(staff.hireDate)
                     : "-"}
                 </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Exit date</p>
                 <p className="font-medium">
-                  {teacher.exitDate
-                    ? dateFormatter.format(teacher.exitDate)
+                  {staff.exitDate
+                    ? dateFormatter.format(staff.exitDate)
                     : "-"}
                 </p>
               </div>
@@ -177,7 +177,7 @@ export default async function TeacherDetailPage({
                   Rate per section
                 </p>
                 <p className="font-medium">
-                  {teacher.ratePerSection.toString()}
+                  {staff.ratePerSection.toString()}
                 </p>
               </div>
               <div className="flex items-center justify-between rounded-xl border p-3">
@@ -187,10 +187,10 @@ export default async function TeacherDetailPage({
                   <p
                     className={cn(
                       "font-medium",
-                      teacherStatusColor(teacher.status),
+                      staffStatusColor(staff.status),
                     )}
                   >
-                    {enumLabel(teacher.status, TEACHER_STATUS_LABELS)}
+                    {enumLabel(staff.status, STAFF_STATUS_LABELS)}
                   </p>
                 </div>
               </div>

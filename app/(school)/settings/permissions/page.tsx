@@ -7,13 +7,13 @@ import { UserPermissionOverrides } from "@/components/settings/user-permission-o
 
 const ROLE_OPTIONS: Array<UserRole> = [
   UserRole.SCHOOL_ADMIN,
-  UserRole.TEACHER,
+  UserRole.STAFF,
   UserRole.STUDENT,
 ];
 
 const PERMISSION_OPTIONS: Array<Permission> = [
   Permission.MANAGE_STUDENTS,
-  Permission.MANAGE_TEACHERS,
+  Permission.MANAGE_STAFF,
   Permission.MANAGE_CLASSES,
   Permission.VIEW_REPORTS,
 ];

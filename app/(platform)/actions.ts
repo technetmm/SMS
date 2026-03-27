@@ -312,7 +312,7 @@ export async function getTenants() {
   return prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      _count: { select: { users: true, students: true, teachers: true } },
+      _count: { select: { users: true, students: true, staff: true } },
     },
   });
 }

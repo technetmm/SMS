@@ -23,7 +23,7 @@ export async function SectionTable() {
             <TableHead>Name</TableHead>
             <TableHead>Class</TableHead>
             <TableHead>Capacity</TableHead>
-            <TableHead>Teacher</TableHead>
+            <TableHead>Staff</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -44,8 +44,8 @@ export async function SectionTable() {
                   {activeEnrollments} / {section.capacity}
                 </TableCell>
                 <TableCell>
-                  {section.teacherMappings.length
-                    ? section.teacherMappings.map((item) => item.teacher.name).join(", ")
+                  {section.staffMappings.length
+                    ? section.staffMappings.map((item) => item.staff.name).join(", ")
                     : "-"}
                 </TableCell>
                 <TableCell>

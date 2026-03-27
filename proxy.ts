@@ -5,11 +5,11 @@ import { UserRole } from "@/app/generated/prisma/enums";
 
 const permissionGuards: Record<string, string> = {
   "/students": "MANAGE_STUDENTS",
-  "/teachers": "MANAGE_TEACHERS",
+  "/staff": "MANAGE_STAFF",
   "/classes": "MANAGE_CLASSES",
   "/attendance": "VIEW_REPORTS",
   "/payments": "VIEW_REPORTS",
-  "/settings/permissions": "MANAGE_TEACHERS",
+  "/settings/permissions": "MANAGE_STAFF",
   "/platform/tenants": "MANAGE_TENANTS",
   "/platform/subscriptions": "MANAGE_SUBSCRIPTIONS",
 };
@@ -48,7 +48,7 @@ export default async function proxy(req: NextRequest) {
   if (
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/students") ||
-    pathname.startsWith("/teachers") ||
+    pathname.startsWith("/staff") ||
     pathname.startsWith("/classes") ||
     pathname.startsWith("/attendance") ||
     pathname.startsWith("/payments") ||
@@ -83,7 +83,7 @@ export const config = {
     "/classes/:path*",
     "/attendance/:path*",
     "/payments/:path*",
-    "/teachers/:path*",
+    "/staff/:path*",
     "/settings/:path*",
   ],
 };

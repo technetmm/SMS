@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import type { TeacherAttendanceActionState } from "@/app/(school)/teacher-attendance/actions";
+import type { StaffAttendanceActionState } from "@/app/(school)/staff-attendance/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -30,26 +30,26 @@ import {
 } from "@/components/ui/combobox";
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
 
-const initialState: TeacherAttendanceActionState = { status: "idle" };
+const initialState: StaffAttendanceActionState = { status: "idle" };
 
 type Option = { id: string; name: string };
 
 type Props = {
   action: (
-    prevState: TeacherAttendanceActionState,
+    prevState: StaffAttendanceActionState,
     formData: FormData,
-  ) => Promise<TeacherAttendanceActionState>;
-  teachers: Option[];
+  ) => Promise<StaffAttendanceActionState>;
+  staff: Option[];
   sections: Option[];
 };
 
-export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
+export function StaffAttendanceForm({ action, staff, sections }: Props) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const teacherAnchor = useComboboxAnchor();
+  const staffAnchor = useComboboxAnchor();
   const sectionAnchor = useComboboxAnchor();
 
-  const [selectedTeacher, setSelectedTeacher] = useState<Option | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<Option | null>(null);
   const [selectedSection, setSelectedSection] = useState<Option | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -65,9 +65,9 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
   }, [router, state]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    if (!selectedTeacher) {
+    if (!selectedStaff) {
       event.preventDefault();
-      toast.error("Please select a teacher.");
+      toast.error("Please select a staff.");
       return;
     }
     if (!selectedSection) {
@@ -78,37 +78,37 @@ export function TeacherAttendanceForm({ action, teachers, sections }: Props) {
 
   return (
     <form action={formAction} onSubmit={handleSubmit} className="space-y-6">
-      <input type="hidden" name="teacherId" value={selectedTeacher?.id ?? ""} />
+      <input type="hidden" name="staffId" value={selectedStaff?.id ?? ""} />
       <input type="hidden" name="sectionId" value={selectedSection?.id ?? ""} />
 
       <Card>
         <CardHeader>
-          <CardTitle>Mark Teacher Attendance</CardTitle>
+          <CardTitle>Mark Staff Attendance</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label>Teacher</Label>
+            <Label>Staff</Label>
             <Combobox
-              items={teachers}
-              value={selectedTeacher}
+              items={staff}
+              value={selectedStaff}
               onValueChange={(value: Option | null) =>
-                setSelectedTeacher(value)
+                setSelectedStaff(value)
               }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={teacherAnchor} className="w-full">
+              <ComboboxChips ref={staffAnchor} className="w-full">
                 <ComboboxValue>
                   {(value) => (
                     <>
                       {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search teacher..." />
+                      <ComboboxChipsInput placeholder="Search staff..." />
                     </>
                   )}
                 </ComboboxValue>
               </ComboboxChips>
-              <ComboboxContent anchor={teacherAnchor}>
-                <ComboboxInput placeholder="Search teacher..." />
-                <ComboboxEmpty>No teachers found.</ComboboxEmpty>
+              <ComboboxContent anchor={staffAnchor}>
+                <ComboboxInput placeholder="Search staff..." />
+                <ComboboxEmpty>No staff found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>

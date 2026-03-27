@@ -29,7 +29,7 @@ export async function requireSchoolAdmin() {
 export async function requireSchoolStaff() {
   return requireRole([
     UserRole.SCHOOL_ADMIN,
-    UserRole.TEACHER,
+    UserRole.STAFF,
     UserRole.STUDENT,
     UserRole.SUPER_ADMIN,
   ]);
@@ -38,7 +38,7 @@ export async function requireSchoolStaff() {
 export async function requireEnrollmentManager() {
   return requireRole([
     UserRole.SCHOOL_ADMIN,
-    UserRole.TEACHER,
+    UserRole.STAFF,
     UserRole.SUPER_ADMIN,
   ]);
 }

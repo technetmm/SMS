@@ -27,7 +27,7 @@ export async function PayrollTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Month</TableHead>
-            <TableHead>Teacher</TableHead>
+            <TableHead>Staff</TableHead>
             <TableHead className="text-right">Sections</TableHead>
             <TableHead className="text-right">Total</TableHead>
           </TableRow>
@@ -38,7 +38,7 @@ export async function PayrollTable() {
               <TableCell className="font-medium">
                 {monthFormatter.format(row.month)}
               </TableCell>
-              <TableCell>{row.teacher.name}</TableCell>
+              <TableCell>{row.staff.name}</TableCell>
               <TableCell className="text-right">
                 <Badge variant="outline">{row.totalSections}</Badge>
               </TableCell>

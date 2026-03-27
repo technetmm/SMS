@@ -13,7 +13,7 @@ const tenantScopedModels = new Set([
   "tenant",
   "branch",
   "subscription",
-  "teacher",
+  "staff",
   "student",
   "subject",
   "course",

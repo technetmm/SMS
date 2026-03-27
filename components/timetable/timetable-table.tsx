@@ -26,7 +26,7 @@ export async function TimetableTable({
           <TableRow>
             <TableHead>Day</TableHead>
             <TableHead>Time</TableHead>
-            <TableHead>Teacher</TableHead>
+            <TableHead>Staff</TableHead>
             <TableHead>Section</TableHead>
             <TableHead>Room</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -39,7 +39,7 @@ export async function TimetableTable({
               <TableCell className="font-medium">
                 {slot.startTime} - {slot.endTime}
               </TableCell>
-              <TableCell>{slot.teacher.name}</TableCell>
+              <TableCell>{slot.staff.name}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
                   <span>{slot.section.name}</span>

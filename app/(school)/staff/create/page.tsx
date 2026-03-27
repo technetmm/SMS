@@ -2,23 +2,23 @@ import Link from "next/link";
 import { requireSchoolAdmin } from "@/lib/permissions";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
-import { TeacherForm } from "@/components/teachers/teacher-form";
+import { StaffForm } from "@/components/staff/staff-form";
 
-export default async function CreateTeacherPage() {
+export default async function CreateStaffPage() {
   await requireSchoolAdmin();
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Teacher"
-        description="Create a new teacher account and link it to a user."
+        title="Create Staff"
+        description="Create a new staff account and link it to a user."
         actions={
           <Button asChild variant="outline">
-            <Link href="/teachers">Back to Teachers</Link>
+            <Link href="/staff">Back to Staff</Link>
           </Button>
         }
       />
-      <TeacherForm />
+      <StaffForm />
     </div>
   );
 }

@@ -17,14 +17,14 @@ export default async function EditSectionPage({
   const tenantId = await requireTenantId();
   const { id } = await params;
 
-  const [section, classes, teachers] = await Promise.all([
+  const [section, classes, staff] = await Promise.all([
     getSectionById(id),
     prisma.class.findMany({
       where: { tenantId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
-    prisma.teacher.findMany({
+    prisma.staff.findMany({
       where: { tenantId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -50,12 +50,12 @@ export default async function EditSectionPage({
         mode="edit"
         action={updateSection}
         classes={classes}
-        teachers={teachers}
+        staff={staff}
         initialData={{
           id: section.id,
           name: section.name,
           classId: section.classId,
-          teacherIds: section.teacherMappings.map((item) => item.teacher.id),
+          staffIds: section.staffMappings.map((item) => item.staff.id),
           room: section.room,
           capacity: section.capacity,
         }}

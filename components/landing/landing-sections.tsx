@@ -15,7 +15,7 @@ export function LandingHero() {
       </h1>
       <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
         Launch tenant onboarding, manage classrooms, track attendance, and automate billing with a
-        clean, secure dashboard your admins and teachers can trust.
+        clean, secure dashboard your admins and staff can trust.
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild size="lg">
@@ -38,7 +38,7 @@ export function LandingFeatures() {
     },
     {
       title: "Academic Operations",
-      description: "Manage students, teachers, sections, and attendance in one workflow.",
+      description: "Manage students, staff, sections, and attendance in one workflow.",
       icon: GraduationCap,
     },
     {
@@ -76,7 +76,7 @@ export function LandingPricing() {
       name: "Basic",
       price: "$49",
       description: "For growing schools",
-      points: ["Up to 500 students", "Teacher & class workflows", "Attendance & payments"],
+      points: ["Up to 500 students", "Staff & class workflows", "Attendance & payments"],
     },
     {
       name: "Premium",

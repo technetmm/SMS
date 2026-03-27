@@ -15,7 +15,7 @@ export default async function TimetablePage() {
     <div className="space-y-6">
       <PageHeader
         title="Timetable"
-        description="Manage weekly schedules and prevent teacher conflicts."
+        description="Manage weekly schedules and prevent staff conflicts."
         actions={
           <Button asChild>
             <Link href="/timetable/create">Create Slot</Link>

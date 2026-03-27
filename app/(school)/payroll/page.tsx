@@ -6,13 +6,13 @@ import { PayrollTable } from "@/components/payroll/payroll-table";
 import { generatePayroll } from "@/app/(school)/payroll/actions";
 
 export default async function PayrollPage() {
-  await requirePermission(Permission.MANAGE_TEACHERS);
+  await requirePermission(Permission.MANAGE_STAFF);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Payroll"
-        description="Generate and review monthly teacher payroll."
+        description="Generate and review monthly staff payroll."
       />
       <PayrollGenerateForm action={generatePayroll} />
       <PayrollTable />

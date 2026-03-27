@@ -27,7 +27,7 @@ export type EnrollmentActionState = {
 
 const ENROLLMENT_ALLOWED_ROLES = new Set<UserRole>([
   UserRole.SCHOOL_ADMIN,
-  UserRole.TEACHER,
+  UserRole.STAFF,
   UserRole.SUPER_ADMIN,
 ]);
 
@@ -72,7 +72,7 @@ async function requireEnrollmentActor() {
   if (!roleParsed.success || !ENROLLMENT_ALLOWED_ROLES.has(session.user.role)) {
     return {
       ok: false as const,
-      message: "Only teacher/admin can enroll students.",
+      message: "Only staff/admin can enroll students.",
     };
   }
 

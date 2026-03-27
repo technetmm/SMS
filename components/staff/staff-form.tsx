@@ -5,9 +5,9 @@ import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  updateTeacher,
-  type TeacherActionState,
-} from "@/app/(school)/teachers/actions";
+  createStaff,
+  type StaffActionState,
+} from "@/app/(school)/staff/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,46 +22,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { DatePickerField } from "@/components/shared/date-picker-field";
 
-type TeacherFormData = {
-  id: string;
-  name: string;
-  jobTitle: string;
-  nrcNumber: string;
-  dob: string;
-  email: string;
-  gender: "MALE" | "FEMALE" | "OTHER";
-  maritalStatus: "SINGLE" | "MARRIED";
-  parmentAddress?: string | null;
-  currentAddress?: string | null;
-  phone?: string | null;
-  hireDate: string;
-  exitDate?: string | null;
-  status: "ACTIVE" | "ONLEAVE" | "RESIGNED" | "TERMINATED";
-  ratePerSection: string;
-  remark?: string | null;
-};
+const initialState: StaffActionState = { status: "idle" };
 
-const initialState: TeacherActionState = { status: "idle" };
-
-export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
+export function StaffForm() {
   const router = useRouter();
-  const [state, formAction] = useActionState(updateTeacher, initialState);
+  const [state, formAction] = useActionState(createStaff, initialState);
 
   useEffect(() => {
     if (state.status === "success") {
-      toast.success(state.message ?? "Teacher updated");
-      router.push(`/teachers/${teacher.id}`);
+      toast.success(state.message ?? "Staff created");
+      router.push("/staff");
       router.refresh();
     }
     if (state.status === "error") {
-      toast.error(state.message ?? "Unable to update teacher");
+      toast.error(state.message ?? "Unable to create staff");
     }
-  }, [router, state, teacher.id]);
+  }, [router, state]);
 
   return (
     <form action={formAction} className="space-y-6">
-      <input type="hidden" name="id" value={teacher.id} />
-
       <Card>
         <CardHeader>
           <CardTitle>Personal Info</CardTitle>
@@ -69,25 +48,21 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" name="name" defaultValue={teacher.name} required />
+            <Input id="name" name="name" placeholder="Staff name" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="nrcNumber">NRC number</Label>
             <Input
               id="nrcNumber"
               name="nrcNumber"
-              defaultValue={teacher.nrcNumber}
+              placeholder="12/LAMANA(N)123456"
               required
             />
           </div>
-          <DatePickerField
-            name="dob"
-            label="Date of birth"
-            defaultValue={teacher.dob}
-          />
+          <DatePickerField name="dob" label="Date of birth" />
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
-            <Select name="gender" defaultValue={teacher.gender}>
+            <Select name="gender" defaultValue="MALE">
               <SelectTrigger id="gender" className="w-full">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
@@ -100,7 +75,7 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
           </div>
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="maritalStatus">Marital status</Label>
-            <Select name="maritalStatus" defaultValue={teacher.maritalStatus}>
+            <Select name="maritalStatus" defaultValue="SINGLE">
               <SelectTrigger id="maritalStatus" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
@@ -123,7 +98,7 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
             <Textarea
               id="parmentAddress"
               name="parmentAddress"
-              defaultValue={teacher.parmentAddress ?? ""}
+              placeholder="Permanent address"
             />
           </div>
           <div className="grid gap-2 md:col-span-2">
@@ -131,22 +106,16 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
             <Textarea
               id="currentAddress"
               name="currentAddress"
-              defaultValue={teacher.currentAddress ?? ""}
+              placeholder="Current address"
             />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" defaultValue={teacher.phone ?? ""} />
+            <Input id="phone" name="phone" placeholder="09xxxxxxxx" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              defaultValue={teacher.email}
-              required
-            />
+            <Input id="email" name="email" type="email" required />
           </div>
         </CardContent>
       </Card>
@@ -161,23 +130,15 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
             <Input
               id="jobTitle"
               name="jobTitle"
-              defaultValue={teacher.jobTitle}
+              placeholder="Senior Staff"
               required
             />
           </div>
-          <DatePickerField
-            name="hireDate"
-            label="Hire date"
-            defaultValue={teacher.hireDate}
-          />
-          <DatePickerField
-            name="exitDate"
-            label="Exit date"
-            defaultValue={teacher.exitDate ?? ""}
-          />
+          <DatePickerField name="hireDate" label="Hire date" />
+          <DatePickerField name="exitDate" label="Exit date" />
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
-            <Select name="status" defaultValue={teacher.status}>
+            <Select name="status" defaultValue="ACTIVE">
               <SelectTrigger id="status" className="w-full">
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
@@ -197,7 +158,6 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
               type="number"
               min="0"
               step="0.01"
-              defaultValue={teacher.ratePerSection}
               placeholder="Optional (e.g. 25.00)"
             />
           </div>
@@ -206,14 +166,26 @@ export function TeacherEditForm({ teacher }: { teacher: TeacherFormData }) {
             <Textarea
               id="remark"
               name="remark"
-              defaultValue={teacher.remark ?? ""}
+              placeholder="Additional notes"
             />
           </div>
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Account Info</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="password">Account password</Label>
+            <Input id="password" name="password" type="password" required />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-end gap-2">
-        <SubmitButton label="Save Changes" loadingLabel="Saving..." />
+        <SubmitButton label="Create Staff" loadingLabel="Creating..." />
       </div>
       {state.status === "error" ? (
         <p className="text-sm text-destructive">{state.message}</p>

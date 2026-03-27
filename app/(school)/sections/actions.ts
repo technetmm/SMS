@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
-import { sectionMultiTeacherSchema } from "@/lib/validators";
+import { sectionMultiStaffSchema } from "@/lib/validators";
 import { requireSchoolAdmin } from "@/lib/permissions";
 import { requireTenantId } from "@/lib/tenant";
 
@@ -14,16 +14,16 @@ export type SectionActionState = {
 
 function parseSectionInput(formData: FormData) {
   const raw = formDataToObject(formData);
-  const teacherIds = formData
-    .getAll("teacherIds")
+  const staffIds = formData
+    .getAll("staffIds")
     .map((value) => String(value))
     .filter(Boolean);
 
-  return sectionMultiTeacherSchema.safeParse({
+  return sectionMultiStaffSchema.safeParse({
     id: raw.id,
     classId: raw.classId,
     name: raw.name,
-    teacherIds: Array.from(new Set(teacherIds)),
+    staffIds: Array.from(new Set(staffIds)),
     room: emptyToUndefined(raw.room as string | undefined),
     capacity: raw.capacity,
   });
@@ -32,16 +32,16 @@ function parseSectionInput(formData: FormData) {
 async function validateTenantReferences(
   tenantId: string,
   classId: string,
-  teacherIds: string[],
+  staffIds: string[],
 ) {
-  const [klass, teachers] = await Promise.all([
+  const [klass, staff] = await Promise.all([
     prisma.class.findFirst({
       where: { id: classId, tenantId },
       select: { id: true },
     }),
-    teacherIds.length
-      ? prisma.teacher.findMany({
-          where: { id: { in: teacherIds }, tenantId },
+    staffIds.length
+      ? prisma.staff.findMany({
+          where: { id: { in: staffIds }, tenantId },
           select: { id: true },
         })
       : Promise.resolve([]),
@@ -50,10 +50,10 @@ async function validateTenantReferences(
   if (!klass) {
     return { ok: false as const, message: "Selected class is invalid." };
   }
-  if (teachers.length !== teacherIds.length) {
+  if (staff.length !== staffIds.length) {
     return {
       ok: false as const,
-      message: "One or more selected teachers are invalid.",
+      message: "One or more selected staff are invalid.",
     };
   }
   return { ok: true as const };
@@ -74,7 +74,7 @@ export async function createSection(
   const tenantCheck = await validateTenantReferences(
     tenantId,
     parsed.data.classId,
-    parsed.data.teacherIds,
+    parsed.data.staffIds,
   );
   if (!tenantCheck.ok) return { status: "error", message: tenantCheck.message };
 
@@ -90,11 +90,11 @@ export async function createSection(
         },
       });
 
-      if (parsed.data.teacherIds.length > 0) {
-        await tx.sectionTeacher.createMany({
-          data: parsed.data.teacherIds.map((teacherId) => ({
+      if (parsed.data.staffIds.length > 0) {
+        await tx.sectionStaff.createMany({
+          data: parsed.data.staffIds.map((staffId) => ({
             sectionId: section.id,
-            teacherId,
+            staffId,
           })),
           skipDuplicates: true,
         });
@@ -128,9 +128,9 @@ export async function getSections() {
         },
       },
       class: { select: { id: true, name: true } },
-      teacherMappings: {
+      staffMappings: {
         select: {
-          teacher: {
+          staff: {
             select: {
               id: true,
               name: true,
@@ -155,9 +155,9 @@ export async function getSectionById(id: string) {
       classId: true,
       room: true,
       capacity: true,
-      teacherMappings: {
+      staffMappings: {
         select: {
-          teacher: {
+          staff: {
             select: {
               id: true,
               name: true,
@@ -192,7 +192,7 @@ export async function updateSection(
     validateTenantReferences(
       tenantId,
       parsed.data.classId,
-      parsed.data.teacherIds,
+      parsed.data.staffIds,
     ),
   ]);
 
@@ -212,15 +212,15 @@ export async function updateSection(
         },
       });
 
-      await tx.sectionTeacher.deleteMany({
+      await tx.sectionStaff.deleteMany({
         where: { sectionId: parsed.data.id as string },
       });
 
-      if (parsed.data.teacherIds.length > 0) {
-        await tx.sectionTeacher.createMany({
-          data: parsed.data.teacherIds.map((teacherId) => ({
+      if (parsed.data.staffIds.length > 0) {
+        await tx.sectionStaff.createMany({
+          data: parsed.data.staffIds.map((staffId) => ({
             sectionId: parsed.data.id as string,
-            teacherId,
+            staffId,
           })),
           skipDuplicates: true,
         });
@@ -235,57 +235,57 @@ export async function updateSection(
   return { status: "success", message: "Section updated successfully." };
 }
 
-export async function assignTeachersToSection(
+export async function assignStaffToSection(
   sectionId: string,
-  teacherIds: string[],
+  staffIds: string[],
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
   const tenantId = await requireTenantId();
-  const uniqueTeacherIds = Array.from(new Set(teacherIds)).filter(Boolean);
+  const uniqueStaffIds = Array.from(new Set(staffIds)).filter(Boolean);
 
-  const [section, teachers] = await Promise.all([
+  const [section, staff] = await Promise.all([
     prisma.section.findFirst({
       where: { id: sectionId, tenantId },
       select: { id: true },
     }),
-    uniqueTeacherIds.length
-      ? prisma.teacher.findMany({
-          where: { id: { in: uniqueTeacherIds }, tenantId },
+    uniqueStaffIds.length
+      ? prisma.staff.findMany({
+          where: { id: { in: uniqueStaffIds }, tenantId },
           select: { id: true },
         })
       : Promise.resolve([]),
   ]);
 
   if (!section) return { status: "error", message: "Section not found." };
-  if (teachers.length !== uniqueTeacherIds.length) {
+  if (staff.length !== uniqueStaffIds.length) {
     return {
       status: "error",
-      message: "One or more selected teachers are invalid.",
+      message: "One or more selected staff are invalid.",
     };
   }
 
-  await prisma.sectionTeacher.createMany({
-    data: uniqueTeacherIds.map((teacherId) => ({ sectionId, teacherId })),
+  await prisma.sectionStaff.createMany({
+    data: uniqueStaffIds.map((staffId) => ({ sectionId, staffId })),
     skipDuplicates: true,
   });
 
   revalidatePath("/sections");
-  return { status: "success", message: "Teachers assigned successfully." };
+  return { status: "success", message: "Staff assigned successfully." };
 }
 
-export async function removeTeacherFromSection(
+export async function removeStaffFromSection(
   sectionId: string,
-  teacherId: string,
+  staffId: string,
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
   const tenantId = await requireTenantId();
 
-  const relation = await prisma.sectionTeacher.findFirst({
+  const relation = await prisma.sectionStaff.findFirst({
     where: {
       sectionId,
-      teacherId,
+      staffId,
       section: { tenantId },
-      teacher: { tenantId },
+      staff: { tenantId },
     },
     select: { id: true },
   });
@@ -294,12 +294,12 @@ export async function removeTeacherFromSection(
     return { status: "error", message: "Assignment not found." };
   }
 
-  await prisma.sectionTeacher.deleteMany({
-    where: { sectionId, teacherId },
+  await prisma.sectionStaff.deleteMany({
+    where: { sectionId, staffId },
   });
 
   revalidatePath("/sections");
-  return { status: "success", message: "Teacher removed from section." };
+  return { status: "success", message: "Staff removed from section." };
 }
 
 export async function deleteSection(formData: FormData) {
@@ -327,7 +327,7 @@ export async function deleteSection(formData: FormData) {
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.sectionTeacher.deleteMany({ where: { sectionId: id } });
+    await tx.sectionStaff.deleteMany({ where: { sectionId: id } });
     await tx.section.delete({ where: { id } });
   });
 
