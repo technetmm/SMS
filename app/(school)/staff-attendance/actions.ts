@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { staffAttendanceSchema } from "@/lib/validators";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StaffAttendanceActionState = {
   status: "idle" | "success" | "error";
@@ -13,11 +13,11 @@ export type StaffAttendanceActionState = {
 };
 
 export async function getStaffAttendance() {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.staffAttendance.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: [{ date: "desc" }, { createdAt: "desc" }],
     take: 200,
     select: {
@@ -41,8 +41,8 @@ export async function markStaffAttendance(
   _prev: StaffAttendanceActionState,
   formData: FormData,
 ): Promise<StaffAttendanceActionState> {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = staffAttendanceSchema.safeParse(raw);
@@ -52,11 +52,11 @@ export async function markStaffAttendance(
 
   const [staff, section, mapping] = await Promise.all([
     prisma.staff.findFirst({
-      where: { id: parsed.data.staffId, tenantId },
+      where: { id: parsed.data.staffId, schoolId },
       select: { id: true },
     }),
     prisma.section.findFirst({
-      where: { id: parsed.data.sectionId, tenantId },
+      where: { id: parsed.data.sectionId, schoolId },
       select: { id: true },
     }),
     prisma.sectionStaff.findFirst({
@@ -87,7 +87,7 @@ export async function markStaffAttendance(
         },
       },
       create: {
-        tenantId,
+        schoolId,
         staffId: parsed.data.staffId,
         sectionId: parsed.data.sectionId,
         date: parsed.data.date,

@@ -1,42 +1,40 @@
-import { Permission, UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PermissionMatrix } from "@/components/settings/permission-matrix";
-import { UserPermissionOverrides } from "@/components/settings/user-permission-overrides";
-
-const ROLE_OPTIONS: Array<UserRole> = [
-  UserRole.SCHOOL_ADMIN,
-  UserRole.STAFF,
-  UserRole.STUDENT,
-];
-
-const PERMISSION_OPTIONS: Array<Permission> = [
-  Permission.MANAGE_STUDENTS,
-  Permission.MANAGE_STAFF,
-  Permission.MANAGE_CLASSES,
-  Permission.VIEW_REPORTS,
-];
 
 export default async function PermissionsPage() {
   const session = await requireRole([UserRole.SCHOOL_ADMIN, UserRole.SUPER_ADMIN]);
-  const tenantId = session.user.tenantId;
+  const schoolId = session.user.schoolId;
 
-  const [rolePermissions, users] = await Promise.all([
-    prisma.rolePermission.findMany({
-      where: { role: { in: ROLE_OPTIONS } },
-      select: { role: true, permission: true },
+  if (!schoolId && session.user.role !== UserRole.SUPER_ADMIN) {
+    return null;
+  }
+
+  const [roles, permissions, rolePermissions] = await Promise.all([
+    prisma.role.findMany({
+      where: schoolId ? { schoolId } : undefined,
+      select: { id: true, name: true },
+      orderBy: [{ isSystem: "desc" }, { name: "asc" }],
     }),
-    prisma.user.findMany({
-      where: { tenantId: tenantId ?? undefined, role: { in: ROLE_OPTIONS } },
-      select: { id: true, name: true, email: true },
-      orderBy: { createdAt: "desc" },
-      take: 100,
+    prisma.permission.findMany({
+      select: { id: true, key: true, category: true },
+      orderBy: [{ category: "asc" }, { key: "asc" }],
+    }),
+    prisma.rolePermission.findMany({
+      where: {
+        role: schoolId ? { schoolId } : undefined,
+      },
+      select: {
+        roleId: true,
+        permission: { select: { key: true } },
+      },
     }),
   ]);
 
   const enabledMap = rolePermissions.reduce<Record<string, boolean>>((acc, item) => {
-    acc[`${item.role}:${item.permission}`] = true;
+    acc[`${item.roleId}:${item.permission.key}`] = true;
     return acc;
   }, {});
 
@@ -48,25 +46,9 @@ export default async function PermissionsPage() {
         </CardHeader>
         <CardContent>
           <PermissionMatrix
-            roles={ROLE_OPTIONS}
-            permissions={PERMISSION_OPTIONS}
+            roles={roles}
+            permissions={permissions.map((item) => item.key)}
             enabledMap={enabledMap}
-          />
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>User Permission Overrides</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserPermissionOverrides
-            users={users.map((u) => ({
-              id: u.id,
-              name: u.name ?? "Unnamed",
-              email: u.email,
-            }))}
-            permissions={PERMISSION_OPTIONS}
           />
         </CardContent>
       </Card>

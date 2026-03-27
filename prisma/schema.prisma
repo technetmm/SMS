@@ -12,7 +12,7 @@ datasource db {
 enum UserRole {
   SUPER_ADMIN
   SCHOOL_ADMIN
-  STAFF
+  TEACHER
   STUDENT
 }
 
@@ -88,15 +88,6 @@ enum Currency {
   THB
 }
 
-enum Permission {
-  MANAGE_STUDENTS
-  MANAGE_STAFF
-  MANAGE_CLASSES
-  VIEW_REPORTS
-  MANAGE_SUBSCRIPTIONS
-  MANAGE_TENANTS
-}
-
 enum DayOfWeek {
   MON
   TUE
@@ -112,8 +103,8 @@ model User {
   name             String?
   email            String    @unique
   image            String?
-  role             UserRole  @default(STUDENT)
-  tenantId         String?
+  role             UserRole  @default(SCHOOL_ADMIN)
+  schoolId         String?
   passwordHash     String?
   twoFactorSecret  String?
   twoFactorEnabled Boolean   @default(false)
@@ -122,13 +113,13 @@ model User {
   isDeleted        Boolean   @default(false)
   deletedAt        DateTime?
 
-  tenant          Tenant?          @relation(fields: [tenantId], references: [id])
-  staffProfile    Staff?
-  studentProfile  Student?
-  userPermissions UserPermission[]
-  auditLogs       AuditLog[]
-  accounts        Account[]
-  sessions        Session[]
+  school         Tenant?              @relation(fields: [schoolId], references: [id])
+  staffProfile   Staff?
+  studentProfile Student?
+  roles          UserRoleAssignment[]
+  auditLogs      AuditLog[]
+  accounts       Account[]
+  sessions       Session[]
 }
 
 model Tenant {
@@ -143,6 +134,7 @@ model Tenant {
   deletedAt DateTime?
 
   users           User[]
+  roles           Role[]
   staff           Staff[]
   students        Student[]
   subjects        Subject[]
@@ -166,7 +158,7 @@ model Tenant {
 
 model Branch {
   id        String    @id @default(cuid())
-  tenantId  String
+  schoolId  String
   name      String
   address   String?
   createdAt DateTime  @default(now())
@@ -174,18 +166,18 @@ model Branch {
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
-  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  tenant   Tenant    @relation(fields: [schoolId], references: [id])
   students Student[]
   staff    Staff[]
   sections Section[]
 
-  @@unique([tenantId, name])
-  @@index([tenantId])
+  @@unique([schoolId, name])
+  @@index([schoolId])
 }
 
 model Subscription {
   id                   String             @id @default(cuid())
-  tenantId             String
+  schoolId             String
   stripeCustomerId     String             @unique
   stripeSubscriptionId String             @unique
   plan                 Plan
@@ -197,39 +189,63 @@ model Subscription {
   isDeleted            Boolean            @default(false)
   deletedAt            DateTime?
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [schoolId], references: [id])
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String
+  schoolId  String
+  isSystem  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  school      Tenant               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  permissions RolePermission[]
+  users       UserRoleAssignment[]
+
+  @@unique([schoolId, name])
+  @@index([schoolId])
+}
+
+model Permission {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  category  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  roles RolePermission[]
 }
 
 model RolePermission {
-  id         String     @id @default(cuid())
-  role       UserRole
-  permission Permission
-  isDeleted  Boolean    @default(false)
-  deletedAt  DateTime?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  roleId       String
+  permissionId String
 
-  @@unique([role, permission])
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
 }
 
-model UserPermission {
-  id         String     @id @default(cuid())
-  userId     String
-  permission Permission
-  isDeleted  Boolean    @default(false)
-  deletedAt  DateTime?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+model UserRoleAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, permission])
+  @@unique([userId, roleId])
+  @@index([roleId])
 }
 
 model Staff {
   id             String        @id @default(cuid())
   userId         String        @unique
-  tenantId       String
+  schoolId       String
   branchId       String?
   name           String
   jobTitle       String
@@ -253,20 +269,20 @@ model Staff {
   deletedAt      DateTime?
 
   user           User              @relation(fields: [userId], references: [id])
-  tenant         Tenant            @relation(fields: [tenantId], references: [id])
+  tenant         Tenant            @relation(fields: [schoolId], references: [id])
   branch         Branch?           @relation(fields: [branchId], references: [id])
   sections       SectionStaff[]
   attendanceLogs StaffAttendance[]
   timetables     Timetable[]
   payrolls       Payroll[]
 
-  @@index([tenantId])
+  @@index([schoolId])
 }
 
 model Student {
   id         String        @id @default(cuid())
   userId     String?       @unique
-  tenantId   String
+  schoolId   String
   branchId   String?
   name       String
   gender     Gender
@@ -282,33 +298,33 @@ model Student {
   deletedAt  DateTime?
 
   user        User?        @relation(fields: [userId], references: [id])
-  tenant      Tenant       @relation(fields: [tenantId], references: [id])
+  tenant      Tenant       @relation(fields: [schoolId], references: [id])
   branch      Branch?      @relation(fields: [branchId], references: [id])
   enrollments Enrollment[]
   invoices    Invoice[]
 
-  @@index([tenantId])
+  @@index([schoolId])
 }
 
 model Subject {
   id        String    @id @default(cuid())
   name      String
-  tenantId  String
+  schoolId  String
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  tenant  Tenant          @relation(fields: [tenantId], references: [id])
+  tenant  Tenant          @relation(fields: [schoolId], references: [id])
   courses CourseSubject[]
 
-  @@unique([tenantId, name])
+  @@unique([schoolId, name])
 }
 
 model Course {
   id        String    @id @default(cuid())
   name      String
-  tenantId  String
+  schoolId  String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   isDeleted Boolean   @default(false)
@@ -316,33 +332,33 @@ model Course {
 
   classes  Class[]
   subjects CourseSubject[]
-  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  tenant   Tenant          @relation(fields: [schoolId], references: [id])
 
-  @@unique([tenantId, name])
-  @@index([tenantId])
+  @@unique([schoolId, name])
+  @@index([schoolId])
 }
 
 model CourseSubject {
   id        String   @id @default(cuid())
-  tenantId  String
+  schoolId  String
   courseId  String
   subjectId String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  tenant  Tenant  @relation(fields: [schoolId], references: [id])
   course  Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
 
   @@unique([courseId, subjectId])
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([courseId])
   @@index([subjectId])
 }
 
 model Class {
   id          String      @id @default(cuid())
-  tenantId    String
+  schoolId    String
   name        String
   courseId    String
   classType   ClassType
@@ -355,15 +371,15 @@ model Class {
   deletedAt   DateTime?
 
   course   Course    @relation(fields: [courseId], references: [id])
-  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  tenant   Tenant    @relation(fields: [schoolId], references: [id])
   sections Section[]
 
-  @@index([tenantId])
+  @@index([schoolId])
 }
 
 model StaffAttendance {
   id        String           @id @default(cuid())
-  tenantId  String
+  schoolId  String
   staffId   String
   sectionId String
   date      DateTime
@@ -371,19 +387,19 @@ model StaffAttendance {
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  tenant  Tenant  @relation(fields: [schoolId], references: [id])
   staff   Staff   @relation(fields: [staffId], references: [id])
   section Section @relation(fields: [sectionId], references: [id])
 
   @@unique([staffId, sectionId, date])
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([staffId, date])
   @@index([sectionId, date])
 }
 
 model Timetable {
   id        String    @id @default(cuid())
-  tenantId  String
+  schoolId  String
   sectionId String
   staffId   String
   dayOfWeek DayOfWeek
@@ -393,18 +409,18 @@ model Timetable {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  tenant  Tenant  @relation(fields: [schoolId], references: [id])
   section Section @relation(fields: [sectionId], references: [id], onDelete: Cascade)
   staff   Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
 
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([staffId, dayOfWeek])
   @@index([sectionId, dayOfWeek])
 }
 
 model Payroll {
   id            String   @id @default(cuid())
-  tenantId      String
+  schoolId      String
   staffId       String
   month         DateTime
   totalSections Int
@@ -412,18 +428,18 @@ model Payroll {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant @relation(fields: [schoolId], references: [id])
   staff  Staff  @relation(fields: [staffId], references: [id])
 
   @@unique([staffId, month])
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([staffId])
   @@index([month])
 }
 
 model Section {
   id        String    @id @default(cuid())
-  tenantId  String
+  schoolId  String
   classId   String
   branchId  String?
   name      String
@@ -436,14 +452,14 @@ model Section {
 
   class           Class             @relation(fields: [classId], references: [id])
   branch          Branch?           @relation(fields: [branchId], references: [id])
-  tenant          Tenant            @relation(fields: [tenantId], references: [id])
+  tenant          Tenant            @relation(fields: [schoolId], references: [id])
   scheduleSlots   SectionSchedule[]
   enrollments     Enrollment[]
   staffAttendance StaffAttendance[]
   staffMappings   SectionStaff[]
   timetables      Timetable[]
 
-  @@index([tenantId])
+  @@index([schoolId])
 }
 
 model SectionStaff {
@@ -478,7 +494,7 @@ model SectionSchedule {
 
 model Enrollment {
   id         String           @id @default(cuid())
-  tenantId   String
+  schoolId   String
   studentId  String
   sectionId  String
   enrolledAt DateTime         @default(now())
@@ -490,18 +506,18 @@ model Enrollment {
 
   student    Student      @relation(fields: [studentId], references: [id])
   section    Section      @relation(fields: [sectionId], references: [id])
-  tenant     Tenant       @relation(fields: [tenantId], references: [id])
+  tenant     Tenant       @relation(fields: [schoolId], references: [id])
   attendance Attendance[]
   progress   Progress[]
   invoices   Invoice[]
 
   @@unique([studentId, sectionId])
-  @@index([tenantId])
+  @@index([schoolId])
 }
 
 model Attendance {
   id           String           @id @default(cuid())
-  tenantId     String
+  schoolId     String
   enrollmentId String
   date         DateTime
   status       AttendanceStatus
@@ -511,16 +527,16 @@ model Attendance {
   updatedAt    DateTime         @updatedAt
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  tenant     Tenant     @relation(fields: [schoolId], references: [id])
 
   @@unique([enrollmentId, date])
-  @@index([tenantId, date])
+  @@index([schoolId, date])
   @@index([enrollmentId])
 }
 
 model Progress {
   id           String    @id @default(cuid())
-  tenantId     String
+  schoolId     String
   enrollmentId String
   progress     Float
   remark       String?
@@ -530,16 +546,16 @@ model Progress {
   updatedAt    DateTime  @updatedAt
 
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  tenant     Tenant     @relation(fields: [schoolId], references: [id])
 
   @@unique([enrollmentId])
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([enrollmentId])
 }
 
 model Invoice {
   id             String        @id @default(cuid())
-  tenantId       String
+  schoolId       String
   studentId      String
   enrollmentId   String
   originalAmount Decimal
@@ -553,36 +569,36 @@ model Invoice {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
-  tenant     Tenant     @relation(fields: [tenantId], references: [id])
+  tenant     Tenant     @relation(fields: [schoolId], references: [id])
   student    Student    @relation(fields: [studentId], references: [id])
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   payments   Payment[]
 
   @@unique([enrollmentId])
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([studentId])
   @@index([enrollmentId])
 }
 
 model Payment {
   id        String   @id @default(cuid())
-  tenantId  String
+  schoolId  String
   invoiceId String
   amount    Decimal
   method    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenant    Tenant   @relation(fields: [schoolId], references: [id])
   refunds   Refund[]
 
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([invoiceId])
 }
 
 model Refund {
   id        String   @id @default(cuid())
-  tenantId  String
+  schoolId  String
   paymentId String
   amount    Decimal
   reason    String?
@@ -590,15 +606,15 @@ model Refund {
   updatedAt DateTime @updatedAt
 
   payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  tenant  Tenant  @relation(fields: [schoolId], references: [id])
 
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([paymentId])
 }
 
 model AuditLog {
   id        String   @id @default(cuid())
-  tenantId  String?
+  schoolId  String?
   userId    String?
   action    String
   entity    String
@@ -607,10 +623,10 @@ model AuditLog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenant Tenant? @relation(fields: [tenantId], references: [id])
+  tenant Tenant? @relation(fields: [schoolId], references: [id])
   user   User?   @relation(fields: [userId], references: [id])
 
-  @@index([tenantId])
+  @@index([schoolId])
   @@index([userId])
   @@index([createdAt])
 }

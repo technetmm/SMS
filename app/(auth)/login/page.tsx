@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,16 +37,18 @@ export default function LoginPage() {
       email,
       password,
       redirect: false,
-      callbackUrl: "/dashboard",
+      callbackUrl: "/",
     });
 
     if (result?.error) {
       setError("Invalid email or password.");
+      toast.error("Invalid email or password.");
       setIsSubmitting(false);
       return;
     }
 
-    router.push("/dashboard");
+    toast.success("Signed in successfully.");
+    router.push("/");
   }
 
   return (

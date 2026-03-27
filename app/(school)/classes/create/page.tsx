@@ -9,10 +9,10 @@ import { createClass } from "@/app/(school)/classes/actions";
 
 export default async function CreateClassPage() {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const courses = await prisma.course.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { name: "asc" },
     select: { id: true, name: true },
   });

@@ -27,18 +27,14 @@ export async function requireSchoolAdmin() {
 }
 
 export async function requireSchoolStaff() {
-  return requireRole([
-    UserRole.SCHOOL_ADMIN,
-    UserRole.STAFF,
-    UserRole.STUDENT,
-    UserRole.SUPER_ADMIN,
-  ]);
+  const session = await requireUser();
+  if (!session.user.schoolId && session.user.role !== UserRole.SUPER_ADMIN) {
+    forbidden();
+  }
+  return session;
 }
 
 export async function requireEnrollmentManager() {
-  return requireRole([
-    UserRole.SCHOOL_ADMIN,
-    UserRole.STAFF,
-    UserRole.SUPER_ADMIN,
-  ]);
+  const session = await requireSchoolStaff();
+  return session;
 }

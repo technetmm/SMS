@@ -22,8 +22,16 @@ async function SignupPageContent() {
     redirect("/platform/dashboard");
   }
 
-  if (session?.user) {
+  if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
     redirect("/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.TEACHER) {
+    redirect("/teacher/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.STUDENT) {
+    redirect("/student/dashboard");
   }
 
   return (
@@ -38,12 +46,16 @@ async function SignupPageContent() {
             Start your LMS school in minutes.
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
-            We will create your tenant and your SCHOOL_ADMIN user account in one transaction.
-            After signup, you can sign in and manage staff, students, classes, and billing.
+            We will create your tenant and your SCHOOL_ADMIN user account in one
+            transaction. After signup, you can sign in and manage staff,
+            students, classes, and billing.
           </p>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

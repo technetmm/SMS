@@ -8,13 +8,13 @@ export async function GET(
   context: { params: Promise<{ id: string }> },
 ) {
   const session = await getServerAuth();
-  if (!session?.user?.tenantId) {
+  if (!session?.user?.schoolId) {
     return new Response("Unauthorized", { status: 401 });
   }
 
   const { id } = await context.params;
   const invoice = await prisma.invoice.findFirst({
-    where: { id, tenantId: session.user.tenantId },
+    where: { id, schoolId: session.user.schoolId },
     select: {
       id: true,
       createdAt: true,

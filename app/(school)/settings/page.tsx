@@ -6,6 +6,7 @@ import {
   LockKeyhole,
   Mail,
   Palette,
+  Shield,
   ShieldCheck,
   ShieldEllipsis,
 } from "lucide-react";
@@ -46,8 +47,14 @@ const cards = [
     icon: LockKeyhole,
   },
   {
+    title: "Roles",
+    description: "Create and manage staff roles for your school.",
+    href: "/settings/roles",
+    icon: Shield,
+  },
+  {
     title: "Permissions",
-    description: "Manage role matrix and user overrides.",
+    description: "Manage the permission matrix for all roles.",
     href: "/settings/permissions",
     icon: ShieldEllipsis,
   },

@@ -13,7 +13,7 @@ export const emailQueue = connection
 
 export async function enqueueAuditLog(payload: {
   userId?: string | null;
-  tenantId?: string | null;
+  schoolId?: string | null;
   action: string;
   entity: string;
   entityId?: string | null;

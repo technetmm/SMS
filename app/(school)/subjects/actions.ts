@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { subjectCreateSchema, subjectUpdateSchema } from "@/lib/validators";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type SubjectActionState = {
   status: "idle" | "success" | "error";
@@ -16,8 +16,8 @@ export async function createSubject(
   _prevState: SubjectActionState,
   formData: FormData,
 ): Promise<SubjectActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = subjectCreateSchema.safeParse(raw);
@@ -29,7 +29,7 @@ export async function createSubject(
   try {
     await prisma.subject.create({
       data: {
-        tenantId,
+        schoolId,
         name: parsed.data.name,
       },
     });
@@ -43,11 +43,11 @@ export async function createSubject(
 }
 
 export async function getSubjects() {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.subject.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { name: "asc" },
     select: {
       id: true,
@@ -63,13 +63,13 @@ export async function getSubjects() {
 }
 
 export async function getSubjectById(id: string) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   if (!id) return null;
 
   return prisma.subject.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       name: true,
@@ -81,8 +81,8 @@ export async function updateSubject(
   _prevState: SubjectActionState,
   formData: FormData,
 ): Promise<SubjectActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = subjectUpdateSchema.safeParse(raw);
@@ -94,7 +94,7 @@ export async function updateSubject(
   const existing = await prisma.subject.findFirst({
     where: {
       id: parsed.data.id,
-      tenantId,
+      schoolId,
     },
     select: { id: true },
   });
@@ -121,14 +121,14 @@ export async function deleteSubject(
   _prevState: SubjectActionState,
   formData: FormData,
 ): Promise<SubjectActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");
   if (!id) return { status: "error", message: "Subject id is required." };
 
   const subject = await prisma.subject.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       _count: { select: { courses: true } },

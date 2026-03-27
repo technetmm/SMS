@@ -9,16 +9,16 @@ import { createSection } from "@/app/(school)/sections/actions";
 
 export default async function CreateSectionPage() {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const [classes, staff] = await Promise.all([
     prisma.class.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.staff.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),

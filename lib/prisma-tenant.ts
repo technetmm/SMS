@@ -5,11 +5,11 @@ type SessionLike = {
   user?: {
     id?: string;
     role?: UserRole;
-    tenantId?: string | null;
+    schoolId?: string | null;
   };
 };
 
-const tenantScopedModels = new Set([
+const schoolScopedModels = new Set([
   "tenant",
   "branch",
   "subscription",
@@ -22,73 +22,75 @@ const tenantScopedModels = new Set([
   "enrollment",
   "attendance",
   "payment",
+  "role",
+  "userroleassignment",
   "auditlog",
 ]);
 
-function mergeWhereWithTenant(
+function mergeWhereWithSchool(
   where: Record<string, unknown> | undefined,
-  tenantId: string,
+  schoolId: string,
 ) {
-  if (!where) return { tenantId };
-  if ("tenantId" in where) return where;
-  return { ...where, tenantId };
+  if (!where) return { schoolId };
+  if ("schoolId" in where) return where;
+  return { ...where, schoolId };
 }
 
 export function getPrismaClient(session: SessionLike) {
   const role = session.user?.role;
-  const tenantId = session.user?.tenantId ?? null;
+  const schoolId = session.user?.schoolId ?? null;
   const isSuperAdmin = role === UserRole.SUPER_ADMIN;
 
   if (isSuperAdmin) {
     return prisma;
   }
 
-  if (!tenantId) {
-    throw new Error("Tenant context is required for non-super-admin users.");
+  if (!schoolId) {
+    throw new Error("School context is required for non-super-admin users.");
   }
 
   return prisma.$extends({
     query: {
       $allModels: {
         async findMany({ model, args, query }) {
-          if (!tenantScopedModels.has(String(model).toLowerCase())) {
+          if (!schoolScopedModels.has(String(model).toLowerCase())) {
             return query(args);
           }
           return query({
             ...args,
-            where: mergeWhereWithTenant(
+            where: mergeWhereWithSchool(
               (args as Record<string, unknown> | undefined)?.where as
                 | Record<string, unknown>
                 | undefined,
-              tenantId,
+              schoolId,
             ),
           });
         },
         async findFirst({ model, args, query }) {
-          if (!tenantScopedModels.has(String(model).toLowerCase())) {
+          if (!schoolScopedModels.has(String(model).toLowerCase())) {
             return query(args);
           }
           return query({
             ...args,
-            where: mergeWhereWithTenant(
+            where: mergeWhereWithSchool(
               (args as Record<string, unknown> | undefined)?.where as
                 | Record<string, unknown>
                 | undefined,
-              tenantId,
+              schoolId,
             ),
           });
         },
         async count({ model, args, query }) {
-          if (!tenantScopedModels.has(String(model).toLowerCase())) {
+          if (!schoolScopedModels.has(String(model).toLowerCase())) {
             return query(args);
           }
           return query({
             ...args,
-            where: mergeWhereWithTenant(
+            where: mergeWhereWithSchool(
               (args as Record<string, unknown> | undefined)?.where as
                 | Record<string, unknown>
                 | undefined,
-              tenantId,
+              schoolId,
             ),
           });
         },

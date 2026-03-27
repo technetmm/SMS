@@ -1,7 +1,8 @@
 import { forbidden, unauthorized } from "next/navigation";
 import { getServerAuth } from "@/auth";
-import { Permission, UserRole } from "@/app/generated/prisma/enums";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
+import type { PermissionKey } from "@/lib/permission-keys";
 
 async function getSessionUser() {
   const session = await getServerAuth();
@@ -11,27 +12,46 @@ async function getSessionUser() {
   return session.user;
 }
 
-export async function canAccess(userId: string, permission: Permission) {
+export async function can(userId: string, permission: PermissionKey | string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, role: true, isDeleted: true },
+    select: {
+      id: true,
+      role: true,
+      schoolId: true,
+      isDeleted: true,
+      staffProfile: { select: { id: true } },
+      studentProfile: { select: { id: true } },
+    },
   });
 
   if (!user || user.isDeleted) return false;
   if (user.role === UserRole.SUPER_ADMIN) return true;
+  if (
+    user.role === UserRole.SCHOOL_ADMIN &&
+    !user.staffProfile &&
+    !user.studentProfile
+  ) {
+    return true;
+  }
+  if (!user.schoolId) return false;
 
-  const [roleHit, userHit] = await Promise.all([
-    prisma.rolePermission.findFirst({
-      where: { role: user.role, permission },
-      select: { id: true },
-    }),
-    prisma.userPermission.findFirst({
-      where: { userId, permission },
-      select: { id: true },
-    }),
-  ]);
+  const roleHit = await prisma.userRoleAssignment.findFirst({
+    where: {
+      userId,
+      role: {
+        schoolId: user.schoolId,
+        permissions: {
+          some: {
+            permission: { key: permission },
+          },
+        },
+      },
+    },
+    select: { id: true },
+  });
 
-  return Boolean(roleHit || userHit);
+  return Boolean(roleHit);
 }
 
 export async function requireRole(role: UserRole) {
@@ -42,18 +62,22 @@ export async function requireRole(role: UserRole) {
   return user;
 }
 
-export async function requireTenant() {
+export async function requireSchool() {
   const user = await getSessionUser();
-  if (!user.tenantId) {
+  if (!user.schoolId) {
     forbidden();
   }
-  return user.tenantId;
+  return user.schoolId;
 }
 
-export async function requirePermission(permission: Permission) {
+export async function requireTenant() {
+  return requireSchool();
+}
+
+export async function requirePermission(permission: PermissionKey | string) {
   const user = await getSessionUser();
 
-  const allowed = await canAccess(user.id, permission);
+  const allowed = await can(user.id, permission);
   if (!allowed) {
     forbidden();
   }

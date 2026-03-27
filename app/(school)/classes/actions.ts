@@ -17,7 +17,7 @@ export async function createClass(
   formData: FormData,
 ): Promise<ClassActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const raw = formDataToObject(formData);
   const parsed = classCreateSchema.safeParse(raw);
@@ -26,7 +26,7 @@ export async function createClass(
   }
 
   const course = await prisma.course.findFirst({
-    where: { id: parsed.data.courseId, tenantId },
+    where: { id: parsed.data.courseId, schoolId },
     select: { id: true },
   });
 
@@ -37,7 +37,7 @@ export async function createClass(
   try {
     await prisma.class.create({
       data: {
-        tenantId,
+        schoolId,
         name: parsed.data.name,
         courseId: parsed.data.courseId,
         classType: parsed.data.classType,
@@ -57,10 +57,10 @@ export async function createClass(
 
 export async function getClasses() {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   return prisma.class.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -78,11 +78,11 @@ export async function getClasses() {
 
 export async function getClassById(id: string) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
   if (!id) return null;
 
   return prisma.class.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       name: true,
@@ -100,7 +100,7 @@ export async function updateClass(
   formData: FormData,
 ): Promise<ClassActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const raw = formDataToObject(formData);
   const id = String(raw.id ?? "");
@@ -113,11 +113,11 @@ export async function updateClass(
 
   const [existingClass, course] = await Promise.all([
     prisma.class.findFirst({
-      where: { id, tenantId },
+      where: { id, schoolId },
       select: { id: true },
     }),
     prisma.course.findFirst({
-      where: { id: parsed.data.courseId, tenantId },
+      where: { id: parsed.data.courseId, schoolId },
       select: { id: true },
     }),
   ]);
@@ -149,13 +149,13 @@ export async function updateClass(
 
 export async function deleteClass(formData: FormData) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("Class id is required.");
 
   const klass = await prisma.class.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: { id: true, _count: { select: { sections: true } } },
   });
 

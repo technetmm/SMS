@@ -25,7 +25,7 @@ function resolveInvoiceStatus(finalAmount: Prisma.Decimal, paidAmount: Prisma.De
 
 async function requireStaffOrAdmin() {
   const session = await getServerAuth();
-  if (!session?.user?.id || !session.user.tenantId) {
+  if (!session?.user?.id || !session.user.schoolId) {
     return { ok: false as const, message: "Unauthorized." };
   }
 
@@ -36,7 +36,7 @@ async function requireStaffOrAdmin() {
 
   return {
     ok: true as const,
-    tenantId: session.user.tenantId,
+    schoolId: session.user.schoolId,
     role: session.user.role,
   };
 }
@@ -60,7 +60,7 @@ export async function getInvoices() {
   if (!actor.ok) return [];
 
   return prisma.invoice.findMany({
-    where: { tenantId: actor.tenantId },
+    where: { schoolId: actor.schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -104,7 +104,7 @@ export async function getInvoiceById(id: string) {
   if (!actor.ok || !id) return null;
 
   return prisma.invoice.findFirst({
-    where: { id, tenantId: actor.tenantId },
+    where: { id, schoolId: actor.schoolId },
     select: {
       id: true,
       status: true,
@@ -164,7 +164,7 @@ export async function addPayment(
   try {
     await prisma.$transaction(async (tx) => {
       const invoice = await tx.invoice.findFirst({
-        where: { id: parsed.data.invoiceId, tenantId: actor.tenantId },
+        where: { id: parsed.data.invoiceId, schoolId: actor.schoolId },
         select: {
           id: true,
           finalAmount: true,
@@ -177,13 +177,13 @@ export async function addPayment(
 
       const amount = new Prisma.Decimal(parsed.data.amount);
       const paymentAgg = await tx.payment.aggregate({
-        where: { tenantId: actor.tenantId, invoiceId: invoice.id },
+        where: { schoolId: actor.schoolId, invoiceId: invoice.id },
         _sum: { amount: true },
       });
 
       const refundAgg = await tx.refund.aggregate({
         where: {
-          tenantId: actor.tenantId,
+          schoolId: actor.schoolId,
           payment: { invoiceId: invoice.id },
         },
         _sum: { amount: true },
@@ -200,7 +200,7 @@ export async function addPayment(
 
       await tx.payment.create({
         data: {
-          tenantId: actor.tenantId,
+          schoolId: actor.schoolId,
           invoiceId: invoice.id,
           amount,
           method: parsed.data.method,
@@ -247,7 +247,7 @@ export async function addRefund(
   try {
     await prisma.$transaction(async (tx) => {
       const payment = await tx.payment.findFirst({
-        where: { id: parsed.data.paymentId, tenantId: actor.tenantId },
+        where: { id: parsed.data.paymentId, schoolId: actor.schoolId },
         select: {
           id: true,
           amount: true,
@@ -262,7 +262,7 @@ export async function addRefund(
 
       const refundAmount = new Prisma.Decimal(parsed.data.amount);
       const refundedAgg = await tx.refund.aggregate({
-        where: { tenantId: actor.tenantId, paymentId: payment.id },
+        where: { schoolId: actor.schoolId, paymentId: payment.id },
         _sum: { amount: true },
       });
 
@@ -274,7 +274,7 @@ export async function addRefund(
 
       await tx.refund.create({
         data: {
-          tenantId: actor.tenantId,
+          schoolId: actor.schoolId,
           paymentId: payment.id,
           amount: refundAmount,
           reason: parsed.data.reason,
@@ -282,12 +282,12 @@ export async function addRefund(
       });
 
       const paymentAgg = await tx.payment.aggregate({
-        where: { tenantId: actor.tenantId, invoiceId: payment.invoiceId },
+        where: { schoolId: actor.schoolId, invoiceId: payment.invoiceId },
         _sum: { amount: true },
       });
       const refundAgg = await tx.refund.aggregate({
         where: {
-          tenantId: actor.tenantId,
+          schoolId: actor.schoolId,
           payment: { invoiceId: payment.invoiceId },
         },
         _sum: { amount: true },
@@ -324,7 +324,7 @@ export async function generateInvoicePDF(invoiceId: string) {
   }
 
   const invoice = await prisma.invoice.findFirst({
-    where: { id: invoiceId, tenantId: actor.tenantId },
+    where: { id: invoiceId, schoolId: actor.schoolId },
     select: { id: true },
   });
 

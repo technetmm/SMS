@@ -11,10 +11,10 @@ import { Badge } from "@/components/ui/badge";
 
 export default async function PaymentsPage() {
   await requireSchoolStaff();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const invoices = await prisma.invoice.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     take: 200,
     select: {

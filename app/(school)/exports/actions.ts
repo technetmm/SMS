@@ -1,12 +1,12 @@
 "use server";
 
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { buildExcelBuffer } from "@/lib/export/excel";
 import { buildSimpleTablePdfBuffer } from "@/lib/export/pdf";
 import { saveExportFile } from "@/lib/export/storage";
 import { logAction } from "@/lib/audit-log";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type ExportState = {
   status: "idle" | "success" | "error";
@@ -19,11 +19,11 @@ function stamp(prefix: string) {
 }
 
 export async function exportStudentsToExcel(): Promise<ExportState> {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   const students = await prisma.student.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       name: true,
@@ -46,7 +46,7 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
   await logAction({
     action: "EXPORT",
     entity: "Student",
-    tenantId,
+    schoolId,
     metadata: { format: "xlsx", count: students.length },
   });
 
@@ -54,11 +54,11 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
 }
 
 export async function exportStaffToExcel(): Promise<ExportState> {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const staff = await prisma.staff.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       name: true,
@@ -81,7 +81,7 @@ export async function exportStaffToExcel(): Promise<ExportState> {
   await logAction({
     action: "EXPORT",
     entity: "Staff",
-    tenantId,
+    schoolId,
     metadata: { format: "xlsx", count: staff.length },
   });
 
@@ -89,11 +89,11 @@ export async function exportStaffToExcel(): Promise<ExportState> {
 }
 
 export async function exportAttendanceToExcel(): Promise<ExportState> {
-  await requirePermission(Permission.VIEW_REPORTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.feeReport);
+  const schoolId = await requireTenant();
 
   const attendance = await prisma.attendance.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { date: "desc" },
     take: 1000,
     select: {
@@ -125,7 +125,7 @@ export async function exportAttendanceToExcel(): Promise<ExportState> {
   await logAction({
     action: "EXPORT",
     entity: "Attendance",
-    tenantId,
+    schoolId,
     metadata: { format: "xlsx", count: attendance.length },
   });
 
@@ -133,11 +133,11 @@ export async function exportAttendanceToExcel(): Promise<ExportState> {
 }
 
 export async function exportPaymentsToPDF(): Promise<ExportState> {
-  await requirePermission(Permission.VIEW_REPORTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.feeReport);
+  const schoolId = await requireTenant();
 
   const payments = await prisma.invoice.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     take: 1000,
     select: {
@@ -175,7 +175,7 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
   await logAction({
     action: "EXPORT",
     entity: "Payment",
-    tenantId,
+    schoolId,
     metadata: { format: "pdf", count: payments.length, total },
   });
 

@@ -7,7 +7,7 @@ declare module "next-auth" {
     user: {
       id: string;
       role: UserRole;
-      tenantId?: string | null;
+      schoolId?: string | null;
       permissions?: string[];
       name?: string | null;
       email?: string | null;
@@ -17,7 +17,7 @@ declare module "next-auth" {
 
   interface User {
     role: UserRole;
-    tenantId?: string | null;
+    schoolId?: string | null;
     permissions?: string[];
   }
 }
@@ -26,7 +26,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     role?: UserRole;
-    tenantId?: string | null;
+    schoolId?: string | null;
     permissions?: string[];
   }
 }

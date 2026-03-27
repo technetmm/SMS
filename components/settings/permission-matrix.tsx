@@ -23,7 +23,7 @@ export function PermissionMatrix({
   permissions,
   enabledMap,
 }: {
-  roles: string[];
+  roles: Array<{ id: string; name: string }>;
   permissions: string[];
   enabledMap: Record<string, boolean>;
 }) {
@@ -51,15 +51,15 @@ export function PermissionMatrix({
         </TableHeader>
         <TableBody>
           {roles.map((role) => (
-            <TableRow key={role}>
-              <TableCell className="font-medium">{role}</TableCell>
+            <TableRow key={role.id}>
+              <TableCell className="font-medium">{role.name}</TableCell>
               {permissions.map((permission) => {
-                const key = `${role}:${permission}`;
+                const key = `${role.id}:${permission}`;
                 const enabled = Boolean(enabledMap[key]);
                 return (
                   <TableCell key={key}>
                     <form action={formAction}>
-                      <input type="hidden" name="role" value={role} />
+                      <input type="hidden" name="roleId" value={role.id} />
                       <input
                         type="hidden"
                         name="permission"
@@ -72,7 +72,7 @@ export function PermissionMatrix({
                       />
                       <button
                         type="submit"
-                        aria-label={`Toggle ${permission} for ${role}`}
+                        aria-label={`Toggle ${permission} for ${role.name}`}
                         className="inline-flex items-center"
                       >
                         <input

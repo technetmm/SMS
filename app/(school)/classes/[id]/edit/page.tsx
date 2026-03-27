@@ -14,13 +14,13 @@ export default async function EditClassPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
   const { id } = await params;
 
   const [klass, courses] = await Promise.all([
     getClassById(id),
     prisma.course.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),

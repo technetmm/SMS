@@ -195,10 +195,7 @@ export const invoiceUpdateSchema = z.object({
 });
 
 export const enrollmentActorRoleSchema = z.nativeEnum(UserRole).refine(
-  (role) =>
-    role === UserRole.SCHOOL_ADMIN ||
-    role === UserRole.STAFF ||
-    role === UserRole.SUPER_ADMIN,
+  (role) => role === UserRole.SCHOOL_ADMIN || role === UserRole.SUPER_ADMIN,
   { message: "Only staff/admin can enroll students." },
 );
 

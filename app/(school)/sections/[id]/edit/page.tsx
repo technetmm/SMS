@@ -14,18 +14,18 @@ export default async function EditSectionPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
   const { id } = await params;
 
   const [section, classes, staff] = await Promise.all([
     getSectionById(id),
     prisma.class.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.staff.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),

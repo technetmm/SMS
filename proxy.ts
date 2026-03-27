@@ -4,14 +4,15 @@ import { getToken } from "next-auth/jwt";
 import { UserRole } from "@/app/generated/prisma/enums";
 
 const permissionGuards: Record<string, string> = {
-  "/students": "MANAGE_STUDENTS",
-  "/staff": "MANAGE_STAFF",
-  "/classes": "MANAGE_CLASSES",
-  "/attendance": "VIEW_REPORTS",
-  "/payments": "VIEW_REPORTS",
-  "/settings/permissions": "MANAGE_STAFF",
-  "/platform/tenants": "MANAGE_TENANTS",
-  "/platform/subscriptions": "MANAGE_SUBSCRIPTIONS",
+  "/students": "student.view",
+  "/staff": "staff.view",
+  "/classes": "class.view",
+  "/attendance": "attendance.view",
+  "/payments": "fee.view",
+  "/settings/roles": "role.view",
+  "/settings/permissions": "permission.assign",
+  "/platform/tenants": "settings.view",
+  "/platform/subscriptions": "settings.view",
 };
 
 function hasPermission(pathname: string, permissions: string[]) {
@@ -31,12 +32,21 @@ export default async function proxy(req: NextRequest) {
   }
 
   const role = token.role as UserRole | undefined;
-  const tenantId = token.tenantId as string | null | undefined;
+  const schoolId = token.schoolId as string | null | undefined;
   const permissions = (token.permissions as string[] | undefined) ?? [];
   const pathname = req.nextUrl.pathname;
 
   if (role === UserRole.SUPER_ADMIN && pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/platform/dashboard", req.url));
+  }
+
+  if (pathname.startsWith("/dashboard")) {
+    if (role === UserRole.TEACHER) {
+      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
+    }
+    if (role === UserRole.STUDENT) {
+      return NextResponse.redirect(new URL("/student/dashboard", req.url));
+    }
   }
 
   if (pathname.startsWith("/platform")) {
@@ -45,8 +55,30 @@ export default async function proxy(req: NextRequest) {
     }
   }
 
+  if (pathname.startsWith("/teacher")) {
+    if (role !== UserRole.TEACHER) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+
+  if (pathname.startsWith("/student")) {
+    if (role !== UserRole.STUDENT) {
+      return NextResponse.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+
+  if (
+    pathname.startsWith("/settings") &&
+    role !== UserRole.SCHOOL_ADMIN &&
+    role !== UserRole.SUPER_ADMIN
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+  }
+
   if (
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/teacher") ||
+    pathname.startsWith("/student") ||
     pathname.startsWith("/students") ||
     pathname.startsWith("/staff") ||
     pathname.startsWith("/classes") ||
@@ -54,7 +86,7 @@ export default async function proxy(req: NextRequest) {
     pathname.startsWith("/payments") ||
     pathname.startsWith("/settings")
   ) {
-    if (!tenantId) {
+    if (!schoolId) {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
   }
@@ -64,8 +96,8 @@ export default async function proxy(req: NextRequest) {
   }
 
   const requestHeaders = new Headers(req.headers);
-  if (tenantId) {
-    requestHeaders.set("x-tenant-id", tenantId);
+  if (schoolId) {
+    requestHeaders.set("x-school-id", schoolId);
   }
 
   return NextResponse.next({
@@ -79,6 +111,8 @@ export const config = {
   matcher: [
     "/platform/:path*",
     "/dashboard/:path*",
+    "/teacher/:path*",
+    "/student/:path*",
     "/students/:path*",
     "/classes/:path*",
     "/attendance/:path*",

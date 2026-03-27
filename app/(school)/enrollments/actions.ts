@@ -5,10 +5,10 @@ import { revalidatePath } from "next/cache";
 import {
   EnrollmentStatus,
   PaymentStatus,
-  Permission,
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
+import { PERMISSIONS } from "@/lib/permission-keys";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
 import {
@@ -27,7 +27,6 @@ export type EnrollmentActionState = {
 
 const ENROLLMENT_ALLOWED_ROLES = new Set<UserRole>([
   UserRole.SCHOOL_ADMIN,
-  UserRole.STAFF,
   UserRole.SUPER_ADMIN,
 ]);
 
@@ -64,7 +63,7 @@ function calculateDiscountAmount({
 
 async function requireEnrollmentActor() {
   const session = await getServerAuth();
-  if (!session?.user?.id || !session.user.tenantId) {
+  if (!session?.user?.id || !session.user.schoolId) {
     return { ok: false as const, message: "Unauthorized." };
   }
 
@@ -78,7 +77,7 @@ async function requireEnrollmentActor() {
 
   return {
     ok: true as const,
-    tenantId: session.user.tenantId,
+    schoolId: session.user.schoolId,
   };
 }
 
@@ -91,7 +90,7 @@ export async function enrollStudent(
     return { status: "error", message: actor.message };
   }
 
-  const tenantId = actor.tenantId;
+  const schoolId = actor.schoolId;
   const raw = formDataToObject(formData);
   const parsed = enrollmentCreateSchema.safeParse(raw);
   if (!parsed.success) {
@@ -99,7 +98,7 @@ export async function enrollStudent(
   }
 
   const student = await prisma.student.findFirst({
-    where: { id: parsed.data.studentId, tenantId },
+    where: { id: parsed.data.studentId, schoolId },
     select: { id: true },
   });
 
@@ -114,7 +113,7 @@ export async function enrollStudent(
         FROM "Section" s
         INNER JOIN "Class" c ON c."id" = s."classId"
         WHERE s."id" = ${parsed.data.sectionId}
-          AND s."tenantId" = ${tenantId}
+          AND s."schoolId" = ${schoolId}
           AND s."isDeleted" = false
         FOR UPDATE
       `;
@@ -126,7 +125,7 @@ export async function enrollStudent(
 
       const duplicate = await tx.enrollment.findFirst({
         where: {
-          tenantId,
+          schoolId,
           studentId: parsed.data.studentId,
           sectionId: parsed.data.sectionId,
         },
@@ -139,7 +138,7 @@ export async function enrollStudent(
 
       const enrolledCount = await tx.enrollment.count({
         where: {
-          tenantId,
+          schoolId,
           sectionId: parsed.data.sectionId,
           status: EnrollmentStatus.ACTIVE,
         },
@@ -159,7 +158,7 @@ export async function enrollStudent(
 
       const enrollment = await tx.enrollment.create({
         data: {
-          tenantId,
+          schoolId,
           studentId: parsed.data.studentId,
           sectionId: parsed.data.sectionId,
           status: EnrollmentStatus.ACTIVE,
@@ -168,7 +167,7 @@ export async function enrollStudent(
 
       await tx.invoice.create({
         data: {
-          tenantId,
+          schoolId,
           studentId: parsed.data.studentId,
           enrollmentId: enrollment.id,
           originalAmount,
@@ -202,12 +201,12 @@ export async function getEnrollments(filters?: {
   studentId?: string;
   date?: Date;
 }) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.enrollment.findMany({
     where: {
-      tenantId,
+      schoolId,
       ...(filters?.sectionId ? { sectionId: filters.sectionId } : {}),
       ...(filters?.studentId ? { studentId: filters.studentId } : {}),
       ...(filters?.date
@@ -275,15 +274,15 @@ export async function getEnrollmentFormOptions() {
     return { students: [], sections: [] };
   }
 
-  const tenantId = actor.tenantId;
+  const schoolId = actor.schoolId;
   const [students, sections, activeEnrollmentCounts] = await Promise.all([
     prisma.student.findMany({
-      where: { tenantId, status: "ACTIVE" },
+      where: { schoolId, status: "ACTIVE" },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.section.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
       select: {
         id: true,
@@ -294,7 +293,7 @@ export async function getEnrollmentFormOptions() {
     }),
     prisma.enrollment.groupBy({
       by: ["sectionId"],
-      where: { tenantId, status: EnrollmentStatus.ACTIVE },
+      where: { schoolId, status: EnrollmentStatus.ACTIVE },
       _count: { _all: true },
     }),
   ]);
@@ -326,8 +325,8 @@ export async function updateEnrollment(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = enrollmentUpdateSchema.safeParse(raw);
@@ -336,7 +335,7 @@ export async function updateEnrollment(
   }
 
   const existing = await prisma.enrollment.findFirst({
-    where: { id: parsed.data.id, tenantId },
+    where: { id: parsed.data.id, schoolId },
     select: { id: true },
   });
 
@@ -364,8 +363,8 @@ export async function markAttendance(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = enrollmentAttendanceSchema.safeParse(raw);
@@ -374,7 +373,7 @@ export async function markAttendance(
   }
 
   const enrollment = await prisma.enrollment.findFirst({
-    where: { id: parsed.data.enrollmentId, tenantId },
+    where: { id: parsed.data.enrollmentId, schoolId },
     select: { id: true },
   });
 
@@ -391,7 +390,7 @@ export async function markAttendance(
         },
       },
       create: {
-        tenantId,
+        schoolId,
         enrollmentId: parsed.data.enrollmentId,
         date: parsed.data.date,
         status: parsed.data.status,
@@ -416,12 +415,12 @@ export async function getAttendanceRecords(filters?: {
   studentId?: string;
   date?: Date;
 }) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.attendance.findMany({
     where: {
-      tenantId,
+      schoolId,
       ...(filters?.enrollmentId ? { enrollmentId: filters.enrollmentId } : {}),
       ...(filters?.date ? { date: filters.date } : {}),
       ...(filters?.sectionId || filters?.studentId
@@ -460,8 +459,8 @@ export async function updateProgress(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = enrollmentProgressSchema.safeParse({
@@ -474,7 +473,7 @@ export async function updateProgress(
   }
 
   const enrollment = await prisma.enrollment.findFirst({
-    where: { id: parsed.data.enrollmentId, tenantId },
+    where: { id: parsed.data.enrollmentId, schoolId },
     select: { id: true },
   });
 
@@ -486,7 +485,7 @@ export async function updateProgress(
     await prisma.progress.upsert({
       where: { enrollmentId: parsed.data.enrollmentId },
       create: {
-        tenantId,
+        schoolId,
         enrollmentId: parsed.data.enrollmentId,
         progress: parsed.data.progress,
         remark: parsed.data.remark,

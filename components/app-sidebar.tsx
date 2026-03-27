@@ -93,6 +93,54 @@ const schoolNavGroups = [
   },
 ];
 
+const teacherNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/teacher/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
+    ],
+  },
+  {
+    label: "Teaching",
+    items: [
+      { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
+      { title: "Sections", url: "/sections", icon: <TvMinimalIcon /> },
+      { title: "Timetable", url: "/timetable", icon: <CalendarClockIcon /> },
+      {
+        title: "Attendance",
+        url: "/attendance",
+        icon: <CalendarDaysIcon />,
+      },
+    ],
+  },
+];
+
+const studentNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/student/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
+    ],
+  },
+  {
+    label: "Essentials",
+    items: [
+      { title: "Schedule", url: "/timetable", icon: <CalendarClockIcon /> },
+      { title: "Attendance", url: "/attendance", icon: <CalendarDaysIcon /> },
+      { title: "Fees", url: "/invoices", icon: <FileTextIcon /> },
+      { title: "Results", url: "/enrollments", icon: <ListChecksIcon /> },
+    ],
+  },
+];
+
 const platformNavMain = [
   {
     title: "Dashboard",
@@ -110,7 +158,7 @@ const platformNavMain = [
 export function AppSidebar({
   user,
   role,
-  tenantId,
+  schoolId,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -119,11 +167,23 @@ export function AppSidebar({
     avatar: string;
   };
   role: UserRole;
-  tenantId: string | null;
+  schoolId: string | null;
 }) {
-  const isPlatform = role === UserRole.SUPER_ADMIN && !tenantId;
-  const homeHref = isPlatform ? "/platform/dashboard" : "/dashboard";
-  const settingsHref = isPlatform ? "/platform/settings" : "/settings";
+  const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
+  const isTeacher = role === UserRole.TEACHER;
+  const isStudent = role === UserRole.STUDENT;
+  const homeHref = isPlatform
+    ? "/platform/dashboard"
+    : isTeacher
+      ? "/teacher/dashboard"
+      : isStudent
+        ? "/student/dashboard"
+        : "/dashboard";
+  const settingsHref = isPlatform
+    ? "/platform/settings"
+    : isTeacher || isStudent
+      ? homeHref
+      : "/settings";
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -149,6 +209,10 @@ export function AppSidebar({
       <SidebarContent>
         {isPlatform ? (
           <NavMain label="Platform" items={platformNavMain} />
+        ) : isTeacher ? (
+          <NavMain groups={teacherNavGroups} />
+        ) : isStudent ? (
+          <NavMain groups={studentNavGroups} />
         ) : (
           <NavMain groups={schoolNavGroups} />
         )}

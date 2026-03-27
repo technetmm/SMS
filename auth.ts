@@ -51,28 +51,40 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id;
         token.role = user.role;
-        token.tenantId = user.tenantId ?? null;
+        token.schoolId = user.schoolId ?? null;
       }
 
       if (token.id && token.role) {
-        if (token.role === UserRole.SUPER_ADMIN) {
+        if (
+          token.role === UserRole.SUPER_ADMIN ||
+          token.role === UserRole.SCHOOL_ADMIN
+        ) {
           token.permissions = ["*"];
         } else {
-          const [rolePermissions, userPermissions] = await Promise.all([
-            prisma.rolePermission.findMany({
-              where: { role: token.role as UserRole },
-              select: { permission: true },
-            }),
-            prisma.userPermission.findMany({
-              where: { userId: String(token.id) },
-              select: { permission: true },
-            }),
-          ]);
+          const roleAssignments = await prisma.userRoleAssignment.findMany({
+            where: {
+              userId: String(token.id),
+            },
+            select: {
+              role: {
+                select: {
+                  permissions: {
+                    select: {
+                      permission: {
+                        select: { key: true },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
 
           token.permissions = Array.from(
             new Set([
-              ...rolePermissions.map((item) => item.permission),
-              ...userPermissions.map((item) => item.permission),
+              ...roleAssignments.flatMap((assignment) =>
+                assignment.role.permissions.map((item) => item.permission.key),
+              ),
             ]),
           );
         }
@@ -84,7 +96,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = String(token.id ?? "");
         session.user.role = token.role as typeof session.user.role;
-        session.user.tenantId = token.tenantId as string | null;
+        session.user.schoolId = token.schoolId as string | null;
         session.user.permissions = (token.permissions as string[]) ?? [];
       }
       return session;

@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { Prisma } from "@/app/generated/prisma/client";
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { payrollGenerateSchema } from "@/lib/validators";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type PayrollActionState = {
   status: "idle" | "success" | "error";
@@ -18,11 +18,11 @@ function monthStartUTC(value: Date) {
 }
 
 export async function getPayrolls() {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.payroll.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: [{ month: "desc" }, { createdAt: "desc" }],
     select: {
       id: true,
@@ -39,8 +39,8 @@ export async function generatePayroll(
   _prev: PayrollActionState,
   formData: FormData,
 ): Promise<PayrollActionState> {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = payrollGenerateSchema.safeParse(raw);
@@ -51,7 +51,7 @@ export async function generatePayroll(
   const month = monthStartUTC(parsed.data.month);
 
   const staffMembers = await prisma.staff.findMany({
-    where: { tenantId, isDeleted: false },
+    where: { schoolId, isDeleted: false },
     select: { id: true, ratePerSection: true },
   });
 
@@ -67,7 +67,7 @@ export async function generatePayroll(
       await tx.payroll.upsert({
         where: { staffId_month: { staffId: staff.id, month } },
         create: {
-          tenantId,
+          schoolId,
           staffId: staff.id,
           month,
           totalSections,

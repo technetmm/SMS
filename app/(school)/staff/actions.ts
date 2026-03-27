@@ -6,9 +6,10 @@ import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
-import { Permission, UserRole } from "@/app/generated/prisma/enums";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { enqueueEmail } from "@/lib/queue";
 import { logAction } from "@/lib/audit-log";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StaffActionState = {
   status: "idle" | "success" | "error";
@@ -19,8 +20,8 @@ export async function createStaff(
   _prevState: StaffActionState,
   formData: FormData,
 ): Promise<StaffActionState> {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = staffCreateSchema.safeParse({
@@ -54,16 +55,16 @@ export async function createStaff(
         data: {
           email: parsed.data.email,
           name: parsed.data.name,
-          role: UserRole.STAFF,
+          role: UserRole.TEACHER,
           passwordHash,
-          tenantId,
+          schoolId,
         },
       });
 
       const staff = await tx.staff.create({
         data: {
           userId: user.id,
-          tenantId,
+          schoolId,
           name: parsed.data.name,
           jobTitle: parsed.data.jobTitle,
           nrcNumber: parsed.data.nrcNumber,
@@ -82,6 +83,18 @@ export async function createStaff(
         },
       });
       createdStaffId = staff.id;
+
+      const teacherRole = await tx.role.findFirst({
+        where: { schoolId, name: "Teacher" },
+        select: { id: true },
+      });
+      if (teacherRole) {
+        await tx.userRoleAssignment.upsert({
+          where: { userId_roleId: { userId: user.id, roleId: teacherRole.id } },
+          update: {},
+          create: { userId: user.id, roleId: teacherRole.id },
+        });
+      }
     });
 
     await enqueueEmail({
@@ -95,7 +108,7 @@ export async function createStaff(
       action: "CREATE",
       entity: "Staff",
       entityId: createdStaffId,
-      tenantId,
+      schoolId,
       metadata: { email: parsed.data.email },
     });
   } catch (error) {
@@ -108,11 +121,11 @@ export async function createStaff(
 }
 
 export async function getStaff() {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.staff.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -130,8 +143,8 @@ export async function updateStaff(
   _prevState: StaffActionState,
   formData: FormData,
 ): Promise<StaffActionState> {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = staffUpdateSchema.safeParse({
@@ -148,7 +161,7 @@ export async function updateStaff(
   }
 
   const staff = await prisma.staff.findFirst({
-    where: { id: parsed.data.id, tenantId },
+    where: { id: parsed.data.id, schoolId },
     select: { userId: true },
   });
 
@@ -178,7 +191,7 @@ export async function updateStaff(
       await tx.staff.update({
         where: { id: parsed.data.id },
         data: {
-          tenantId,
+          schoolId,
           name: parsed.data.name,
           jobTitle: parsed.data.jobTitle,
           nrcNumber: parsed.data.nrcNumber,
@@ -207,8 +220,8 @@ export async function updateStaff(
 }
 
 export async function deleteStaff(formData: FormData) {
-  await requirePermission(Permission.MANAGE_STAFF);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.staffUpdate);
+  const schoolId = await requireTenant();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -216,7 +229,7 @@ export async function deleteStaff(formData: FormData) {
   }
 
   const staff = await prisma.staff.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       userId: true,
       _count: { select: { sections: true } },

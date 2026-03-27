@@ -4,22 +4,22 @@ import { StatCard } from "@/components/shared/stat-card";
 import { RevenueChart } from "@/components/shared/revenue-chart";
 
 export default async function DashboardPage() {
-  const tenantId = await requireTenant();
+  const schoolId = await requireTenant();
 
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
   const [studentCount, classCount, paymentRevenue, refundRevenue] = await Promise.all([
-    prisma.student.count({ where: { tenantId } }),
-    prisma.class.count({ where: { tenantId } }),
+    prisma.student.count({ where: { schoolId } }),
+    prisma.class.count({ where: { schoolId } }),
     prisma.payment.aggregate({
       _sum: { amount: true },
-      where: { tenantId, createdAt: { gte: startOfMonth } },
+      where: { schoolId, createdAt: { gte: startOfMonth } },
     }),
     prisma.refund.aggregate({
       _sum: { amount: true },
-      where: { tenantId, createdAt: { gte: startOfMonth } },
+      where: { schoolId, createdAt: { gte: startOfMonth } },
     }),
   ]);
 

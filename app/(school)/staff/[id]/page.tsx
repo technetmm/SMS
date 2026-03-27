@@ -29,15 +29,15 @@ export default async function StaffDetailPage({
   }
 
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const [staff, sectionCount, timetableSlots] = await Promise.all([
     prisma.staff.findFirst({
-      where: { id, tenantId },
+      where: { id, schoolId },
     }),
     prisma.sectionStaff.count({ where: { staffId: id } }),
     prisma.timetable.findMany({
-      where: { tenantId, staffId: id },
+      where: { schoolId, staffId: id },
       select: { startTime: true, endTime: true },
     }),
   ]);
@@ -69,6 +69,9 @@ export default async function StaffDetailPage({
             </Button>
             <Button asChild>
               <Link href={`/staff/${staff.id}/edit`}>Edit</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href={`/staff/${staff.id}/roles`}>Roles</Link>
             </Button>
           </div>
         }

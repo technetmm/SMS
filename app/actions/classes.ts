@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Permission } from "@/app/generated/prisma/enums";
 import { getPrismaClient } from "@/lib/prisma-tenant";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { classCreateSchema, sectionCreateSchema } from "@/lib/validators";
 import { getServerAuth } from "@/auth";
 import { logAction } from "@/lib/audit-log";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type ClassActionState = {
   status: "idle" | "success" | "error";
@@ -18,8 +18,8 @@ export async function createClass(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});
 
@@ -32,7 +32,7 @@ export async function createClass(
   try {
     const created = await prismaTenant.class.create({
       data: {
-        tenantId,
+        schoolId,
         name: parsed.data.name,
         courseId: parsed.data.courseId,
         classType: parsed.data.classType,
@@ -44,7 +44,7 @@ export async function createClass(
       action: "CREATE",
       entity: "Class",
       entityId: created.id,
-      tenantId,
+      schoolId,
       metadata: { name: parsed.data.name, courseId: parsed.data.courseId },
     });
   } catch {
@@ -59,8 +59,8 @@ export async function createSection(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});
 
@@ -81,7 +81,7 @@ export async function createSection(
   try {
     const created = await prismaTenant.section.create({
       data: {
-        tenantId,
+        schoolId,
         classId: parsed.data.classId,
         name: parsed.data.name,
         room: parsed.data.room,
@@ -103,7 +103,7 @@ export async function createSection(
       action: "CREATE",
       entity: "Section",
       entityId: created.id,
-      tenantId,
+      schoolId,
       metadata: {
         classId: parsed.data.classId,
         name: parsed.data.name,

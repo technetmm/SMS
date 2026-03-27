@@ -6,11 +6,8 @@ import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
-import {
-  Permission,
-  StudentStatus,
-  UserRole,
-} from "@/app/generated/prisma/enums";
+import { StudentStatus, UserRole } from "@/app/generated/prisma/enums";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StudentActionState = {
   status: "idle" | "success" | "error";
@@ -21,8 +18,8 @@ export async function createStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = studentCreateSchema.safeParse({
@@ -64,14 +61,14 @@ export async function createStudent(
               name: parsed.data.name,
               role: UserRole.STUDENT,
               passwordHash: await bcrypt.hash(parsed.data.password!, 10),
-              tenantId,
+              schoolId,
             },
           })
         : null;
 
       await tx.student.create({
         data: {
-          tenantId,
+          schoolId,
           userId: user?.id,
           name: parsed.data.name,
           gender: parsed.data.gender,
@@ -83,6 +80,20 @@ export async function createStudent(
           status: parsed.data.status,
         },
       });
+
+      if (user) {
+        const studentRole = await tx.role.findFirst({
+          where: { schoolId, name: "Student" },
+          select: { id: true },
+        });
+        if (studentRole) {
+          await tx.userRoleAssignment.upsert({
+            where: { userId_roleId: { userId: user.id, roleId: studentRole.id } },
+            update: {},
+            create: { userId: user.id, roleId: studentRole.id },
+          });
+        }
+      }
     });
   } catch (error) {
     console.error("createStudent failed", error);
@@ -100,10 +111,10 @@ export async function getStudents({
   query?: string;
   status?: StudentStatus | "ALL";
 } = {}) {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
-  const where: Record<string, unknown> = { tenantId };
+  const where: Record<string, unknown> = { schoolId };
 
   if (status && status !== "ALL") {
     where.status = status;
@@ -131,11 +142,11 @@ export async function getStudents({
 }
 
 export async function getStudentById(id: string) {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.student.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
   });
 }
 
@@ -143,8 +154,8 @@ export async function updateStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = studentUpdateSchema.safeParse({
@@ -161,7 +172,7 @@ export async function updateStudent(
 
   try {
     const existing = await prisma.student.findFirst({
-      where: { id: parsed.data.id, tenantId },
+      where: { id: parsed.data.id, schoolId },
       select: { id: true },
     });
     if (!existing) {
@@ -194,8 +205,8 @@ export async function deleteStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(Permission.MANAGE_STUDENTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.studentUpdate);
+  const schoolId = await requireTenant();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -203,7 +214,7 @@ export async function deleteStudent(
   }
 
   const student = await prisma.student.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       _count: {
         select: { enrollments: true, invoices: true },

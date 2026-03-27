@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { courseCreateSchema, courseUpdateSchema } from "@/lib/validators";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type CourseActionState = {
   status: "idle" | "success" | "error";
@@ -16,8 +16,8 @@ export async function createCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const subjectIds = formData
@@ -37,7 +37,7 @@ export async function createCourse(
   }
 
   const subjects = await prisma.subject.findMany({
-    where: { id: { in: parsedWithSubjects.data.subjectIds }, tenantId },
+    where: { id: { in: parsedWithSubjects.data.subjectIds }, schoolId },
     select: { id: true },
   });
 
@@ -51,11 +51,11 @@ export async function createCourse(
   try {
     await prisma.course.create({
       data: {
-        tenantId,
+        schoolId,
         name: parsedWithSubjects.data.name,
         subjects: {
           create: parsedWithSubjects.data.subjectIds.map((subjectId) => ({
-            tenantId,
+            schoolId,
             subjectId,
           })),
         },
@@ -71,11 +71,11 @@ export async function createCourse(
 }
 
 export async function getCourses() {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const courses = await prisma.course.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -99,13 +99,13 @@ export async function getCourses() {
 }
 
 export async function getCourseById(id: string) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   if (!id) return null;
 
   return prisma.course.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       name: true,
@@ -127,8 +127,8 @@ export async function updateCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const subjectIds = formData
@@ -147,11 +147,11 @@ export async function updateCourse(
 
   const [course, subjects] = await Promise.all([
     prisma.course.findFirst({
-      where: { id: parsed.data.id, tenantId },
+      where: { id: parsed.data.id, schoolId },
       select: { id: true },
     }),
     prisma.subject.findMany({
-      where: { id: { in: parsed.data.subjectIds }, tenantId },
+      where: { id: { in: parsed.data.subjectIds }, schoolId },
       select: { id: true },
     }),
   ]);
@@ -175,7 +175,7 @@ export async function updateCourse(
         subjects: {
           deleteMany: {},
           create: parsed.data.subjectIds.map((subjectId) => ({
-            tenantId,
+            schoolId,
             subjectId,
           })),
         },
@@ -194,14 +194,14 @@ export async function deleteCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");
   if (!id) return { status: "error", message: "Course id is required." };
 
   const course = await prisma.course.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       _count: { select: { classes: true } },

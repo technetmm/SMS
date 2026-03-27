@@ -21,7 +21,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Technet LMS",
-  description: "Learning management system for students, classes, and payments.",
+  description:
+    "Learning management system for students, classes, and payments.",
 };
 
 export default function RootLayout({
@@ -51,7 +52,7 @@ export default function RootLayout({
         >
           <TooltipProvider>
             <AuthSessionProvider>{children}</AuthSessionProvider>
-            <Toaster />
+            <Toaster position={"top-right"} />
           </TooltipProvider>
         </ThemeProvider>
       </body>

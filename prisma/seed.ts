@@ -6,7 +6,6 @@ import {
   Gender,
   MaritalStatus,
   PaymentStatus,
-  Permission,
   Plan,
   ProgramType,
   StudentStatus,
@@ -17,6 +16,11 @@ import {
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
+import {
+  DEFAULT_SYSTEM_ROLES,
+  PERMISSION_DEFINITIONS,
+  PERMISSIONS,
+} from "@/lib/permission-keys";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -28,8 +32,10 @@ async function assertSchemaReady() {
   const requiredTables = [
     "Tenant",
     "Subscription",
+    "Role",
+    "Permission",
     "RolePermission",
-    "UserPermission",
+    "UserRoleAssignment",
   ] as const;
 
   for (const tableName of requiredTables) {
@@ -49,23 +55,23 @@ async function assertSchemaReady() {
   }
 }
 
-async function ensureSubject(name: "English" | "Myanmar", tenantId: string) {
+async function ensureSubject(name: "English" | "Myanmar", schoolId: string) {
   return prisma.subject.upsert({
-    where: { tenantId_name: { tenantId, name } },
+    where: { schoolId_name: { schoolId, name } },
     update: {},
-    create: { name, tenantId },
+    create: { name, schoolId },
   });
 }
 
-async function ensureCourse(name: string, subjectIds: string[], tenantId: string) {
+async function ensureCourse(name: string, subjectIds: string[], schoolId: string) {
   const course = await prisma.course.upsert({
-    where: { tenantId_name: { tenantId, name } },
+    where: { schoolId_name: { schoolId, name } },
     update: {
-      tenantId,
+      schoolId,
     },
     create: {
       name,
-      tenantId,
+      schoolId,
     },
   });
 
@@ -76,7 +82,7 @@ async function ensureCourse(name: string, subjectIds: string[], tenantId: string
   if (subjectIds.length > 0) {
     await prisma.courseSubject.createMany({
       data: subjectIds.map((subjectId) => ({
-        tenantId,
+        schoolId,
         courseId: course.id,
         subjectId,
       })),
@@ -87,21 +93,76 @@ async function ensureCourse(name: string, subjectIds: string[], tenantId: string
   return course;
 }
 
-async function upsertRolePermissions() {
-  await prisma.rolePermission.createMany({
-    data: [
-      { role: UserRole.SUPER_ADMIN, permission: Permission.MANAGE_TENANTS },
-      { role: UserRole.SUPER_ADMIN, permission: Permission.MANAGE_SUBSCRIPTIONS },
-      { role: UserRole.SUPER_ADMIN, permission: Permission.VIEW_REPORTS },
-      { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_STUDENTS },
-      { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_STAFF },
-      { role: UserRole.SCHOOL_ADMIN, permission: Permission.MANAGE_CLASSES },
-      { role: UserRole.SCHOOL_ADMIN, permission: Permission.VIEW_REPORTS },
-      { role: UserRole.STAFF, permission: Permission.MANAGE_CLASSES },
-      { role: UserRole.STAFF, permission: Permission.VIEW_REPORTS },
-    ],
+async function seedPermissions() {
+  await prisma.permission.createMany({
+    data: PERMISSION_DEFINITIONS.map((item) => ({
+      key: item.key,
+      category: item.category,
+    })),
     skipDuplicates: true,
   });
+}
+
+async function ensureDefaultRolesAndPermissions(schoolId: string) {
+  for (const roleName of DEFAULT_SYSTEM_ROLES) {
+    await prisma.role.upsert({
+      where: { schoolId_name: { schoolId, name: roleName } },
+      update: { isSystem: true },
+      create: { schoolId, name: roleName, isSystem: true },
+    });
+  }
+
+  const [adminRole, teacherRole, hrRole, accountantRole, receptionistRole, studentRole] =
+    await Promise.all([
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Admin Staff" } }),
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Teacher" } }),
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "HR" } }),
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Accountant" } }),
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Receptionist" } }),
+      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Student" } }),
+    ]);
+
+  const grants: Record<string, string[]> = {
+    [adminRole.id]: PERMISSION_DEFINITIONS.map((item) => item.key),
+    [teacherRole.id]: [
+      PERMISSIONS.studentView,
+      PERMISSIONS.attendanceView,
+      PERMISSIONS.attendanceMark,
+      PERMISSIONS.classView,
+      PERMISSIONS.subjectManage,
+      PERMISSIONS.resultManage,
+    ],
+    [hrRole.id]: [PERMISSIONS.staffView, PERMISSIONS.staffCreate, PERMISSIONS.staffUpdate],
+    [accountantRole.id]: [
+      PERMISSIONS.feeView,
+      PERMISSIONS.feeCollect,
+      PERMISSIONS.feeUpdate,
+      PERMISSIONS.feeReport,
+      PERMISSIONS.payrollView,
+      PERMISSIONS.payrollProcess,
+    ],
+    [receptionistRole.id]: [
+      PERMISSIONS.studentView,
+      PERMISSIONS.studentCreate,
+      PERMISSIONS.classView,
+      PERMISSIONS.feeCollect,
+    ],
+    [studentRole.id]: [PERMISSIONS.classView, PERMISSIONS.attendanceView, PERMISSIONS.feeView],
+  };
+
+  for (const [roleId, permissionKeys] of Object.entries(grants)) {
+    for (const key of permissionKeys) {
+      const permission = await prisma.permission.findUnique({ where: { key } });
+      if (!permission) continue;
+      await prisma.rolePermission.upsert({
+        where: {
+          roleId_permissionId: { roleId, permissionId: permission.id },
+        },
+        update: {},
+        create: { roleId, permissionId: permission.id },
+      });
+    }
+  }
 }
 
 async function upsertTenantAndSubscription(input: {
@@ -130,7 +191,7 @@ async function upsertTenantAndSubscription(input: {
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: input.stripeSubscriptionId },
     update: {
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       stripeCustomerId: input.stripeCustomerId,
       plan: input.plan,
       status: input.subscriptionStatus,
@@ -138,7 +199,7 @@ async function upsertTenantAndSubscription(input: {
       currentPeriodEnd: new Date("2026-04-30T00:00:00Z"),
     },
     create: {
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       stripeCustomerId: input.stripeCustomerId,
       stripeSubscriptionId: input.stripeSubscriptionId,
       plan: input.plan,
@@ -153,8 +214,7 @@ async function upsertTenantAndSubscription(input: {
 
 export async function main() {
   await assertSchemaReady();
-
-  await upsertRolePermissions();
+  await seedPermissions();
 
   const tenant = await upsertTenantAndSubscription({
     name: "Demo School",
@@ -173,6 +233,8 @@ export async function main() {
     stripeSubscriptionId: "sub_sunrise_academy",
     subscriptionStatus: SubscriptionStatus.ACTIVE,
   });
+
+  await ensureDefaultRolesAndPermissions(tenant.id);
 
   const passwordHash = await bcrypt.hash("Admin123!", 10);
 
@@ -194,7 +256,7 @@ export async function main() {
       name: "Admin",
       email: "admin@lms.local",
       role: UserRole.SCHOOL_ADMIN,
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       passwordHash,
     },
   });
@@ -205,11 +267,23 @@ export async function main() {
     create: {
       name: "Staff One",
       email: "staff@lms.local",
-      role: UserRole.STAFF,
-      tenantId: tenant.id,
+      role: UserRole.SCHOOL_ADMIN,
+      schoolId: tenant.id,
       passwordHash: await bcrypt.hash("Staff123!", 10),
     },
   });
+
+  const teacherRole = await prisma.role.findFirst({
+    where: { schoolId: tenant.id, name: "Teacher" },
+    select: { id: true },
+  });
+  if (teacherRole) {
+    await prisma.userRoleAssignment.upsert({
+      where: { userId_roleId: { userId: staffUser.id, roleId: teacherRole.id } },
+      update: {},
+      create: { userId: staffUser.id, roleId: teacherRole.id },
+    });
+  }
 
   const staff = await prisma.staff.upsert({
     where: { userId: staffUser.id },
@@ -228,11 +302,11 @@ export async function main() {
       status: StaffStatus.ACTIVE,
       remark: "Seeded staff account",
       ratePerSection: 150,
-      tenantId: tenant.id,
+      schoolId: tenant.id,
     },
     create: {
       userId: staffUser.id,
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       name: "Staff One",
       jobTitle: "Senior Staff",
       nrcNumber: "12/ABC(N)123456",
@@ -254,10 +328,10 @@ export async function main() {
   const myanmarSubject = await ensureSubject("Myanmar", tenant.id);
 
   const branch = await prisma.branch.upsert({
-    where: { tenantId_name: { tenantId: tenant.id, name: "Main Campus" } },
+    where: { schoolId_name: { schoolId: tenant.id, name: "Main Campus" } },
     update: { address: "Yangon Downtown" },
     create: {
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       name: "Main Campus",
       address: "Yangon Downtown",
     },
@@ -277,7 +351,7 @@ export async function main() {
     create: {
       id: "class-english-1",
       name: "English Foundation A",
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       courseId: english.id,
       classType: ClassType.GROUP,
       programType: ProgramType.REGULAR,
@@ -289,7 +363,7 @@ export async function main() {
     update: {},
     create: {
       id: "section-english-a",
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       classId: classA.id,
       branchId: branch.id,
       name: "Section A",
@@ -303,7 +377,7 @@ export async function main() {
     update: {},
     create: {
       id: "section-english-b",
-      tenantId: tenant.id,
+      schoolId: tenant.id,
       classId: classA.id,
       branchId: branch.id,
       name: "Section B",
@@ -343,7 +417,7 @@ export async function main() {
     const created = await prisma.student.upsert({
       where: { id: studentId },
       update: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         name: student.name,
         gender: student.gender as Gender,
         dob: new Date(`${student.dob}T00:00:00Z`),
@@ -357,7 +431,7 @@ export async function main() {
       create: {
         id: studentId,
         name: student.name,
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         gender: student.gender as Gender,
         dob: new Date(`${student.dob}T00:00:00Z`),
         fatherName: "U Htun",
@@ -382,13 +456,13 @@ export async function main() {
         },
       },
       update: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         status: EnrollmentStatus.ACTIVE,
       },
       create: {
         studentId: student.id,
         sectionId: student.sectionId,
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         status: EnrollmentStatus.ACTIVE,
       },
     });
@@ -400,7 +474,7 @@ export async function main() {
     const invoice = await prisma.invoice.upsert({
       where: { enrollmentId: enrollment.id },
       update: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         studentId: student.id,
         originalAmount,
         discount,
@@ -410,7 +484,7 @@ export async function main() {
         status: PaymentStatus.UNPAID,
       },
       create: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         studentId: student.id,
         enrollmentId: enrollment.id,
         originalAmount,
@@ -425,12 +499,12 @@ export async function main() {
     await prisma.progress.upsert({
       where: { enrollmentId: enrollment.id },
       update: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         progress: Math.min(100, 15 + i * 8),
         remark: i % 2 === 0 ? "Good participation" : "Needs vocabulary practice",
       },
       create: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         enrollmentId: enrollment.id,
         progress: Math.min(100, 15 + i * 8),
         remark: i % 2 === 0 ? "Good participation" : "Needs vocabulary practice",
@@ -454,7 +528,7 @@ export async function main() {
       const second = Number((finalAmount - first).toFixed(2));
       const firstPayment = await prisma.payment.create({
         data: {
-          tenantId: tenant.id,
+          schoolId: tenant.id,
           invoiceId: invoice.id,
           amount: first,
           method: "Cash",
@@ -462,7 +536,7 @@ export async function main() {
       });
       await prisma.payment.create({
         data: {
-          tenantId: tenant.id,
+          schoolId: tenant.id,
           invoiceId: invoice.id,
           amount: second,
           method: "Bank Transfer",
@@ -474,7 +548,7 @@ export async function main() {
         // Refund part of first payment to cover refund scenarios.
         await prisma.refund.create({
           data: {
-            tenantId: tenant.id,
+            schoolId: tenant.id,
             paymentId: firstPayment.id,
             amount: 10,
             reason: "Discount correction",
@@ -487,7 +561,7 @@ export async function main() {
       const partial = Number((finalAmount / 2).toFixed(2));
       await prisma.payment.create({
         data: {
-          tenantId: tenant.id,
+          schoolId: tenant.id,
           invoiceId: invoice.id,
           amount: partial,
           method: "Cash",
@@ -519,12 +593,12 @@ export async function main() {
         },
       },
       update: {
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         status: i % 4 === 0 ? AttendanceStatus.LATE : AttendanceStatus.PRESENT,
       },
       create: {
         enrollmentId: enrollment.id,
-        tenantId: tenant.id,
+        schoolId: tenant.id,
         date: new Date("2026-03-20T00:00:00Z"),
         status: i % 4 === 0 ? AttendanceStatus.LATE : AttendanceStatus.PRESENT,
       },

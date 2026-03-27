@@ -3,8 +3,8 @@ import { requireUser } from "@/lib/permissions";
 
 export async function requireTenantId() {
   const session = await requireUser();
-  if (!session.user.tenantId) {
+  if (!session.user.schoolId) {
     forbidden();
   }
-  return session.user.tenantId;
+  return session.user.schoolId;
 }

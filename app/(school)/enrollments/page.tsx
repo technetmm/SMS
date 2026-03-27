@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Permission } from "@/app/generated/prisma/enums";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { EnrollmentTable } from "@/components/enrollments/enrollment-table";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function EnrollmentsPage() {
-  await requirePermission(Permission.MANAGE_CLASSES);
+  await requirePermission(PERMISSIONS.classUpdate);
 
   return (
     <div className="space-y-6">

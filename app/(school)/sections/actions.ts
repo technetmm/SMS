@@ -30,18 +30,18 @@ function parseSectionInput(formData: FormData) {
 }
 
 async function validateTenantReferences(
-  tenantId: string,
+  schoolId: string,
   classId: string,
   staffIds: string[],
 ) {
   const [klass, staff] = await Promise.all([
     prisma.class.findFirst({
-      where: { id: classId, tenantId },
+      where: { id: classId, schoolId },
       select: { id: true },
     }),
     staffIds.length
       ? prisma.staff.findMany({
-          where: { id: { in: staffIds }, tenantId },
+          where: { id: { in: staffIds }, schoolId },
           select: { id: true },
         })
       : Promise.resolve([]),
@@ -64,7 +64,7 @@ export async function createSection(
   formData: FormData,
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const parsed = parseSectionInput(formData);
   if (!parsed.success) {
@@ -72,7 +72,7 @@ export async function createSection(
   }
 
   const tenantCheck = await validateTenantReferences(
-    tenantId,
+    schoolId,
     parsed.data.classId,
     parsed.data.staffIds,
   );
@@ -82,7 +82,7 @@ export async function createSection(
     await prisma.$transaction(async (tx) => {
       const section = await tx.section.create({
         data: {
-          tenantId,
+          schoolId,
           classId: parsed.data.classId,
           name: parsed.data.name,
           room: parsed.data.room,
@@ -111,10 +111,10 @@ export async function createSection(
 
 export async function getSections() {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   return prisma.section.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -144,11 +144,11 @@ export async function getSections() {
 
 export async function getSectionById(id: string) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
   if (!id) return null;
 
   return prisma.section.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       name: true,
@@ -174,7 +174,7 @@ export async function updateSection(
   formData: FormData,
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const parsed = parseSectionInput(formData);
   if (!parsed.success) {
@@ -186,11 +186,11 @@ export async function updateSection(
 
   const [existingSection, tenantCheck] = await Promise.all([
     prisma.section.findFirst({
-      where: { id: parsed.data.id, tenantId },
+      where: { id: parsed.data.id, schoolId },
       select: { id: true },
     }),
     validateTenantReferences(
-      tenantId,
+      schoolId,
       parsed.data.classId,
       parsed.data.staffIds,
     ),
@@ -240,17 +240,17 @@ export async function assignStaffToSection(
   staffIds: string[],
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
   const uniqueStaffIds = Array.from(new Set(staffIds)).filter(Boolean);
 
   const [section, staff] = await Promise.all([
     prisma.section.findFirst({
-      where: { id: sectionId, tenantId },
+      where: { id: sectionId, schoolId },
       select: { id: true },
     }),
     uniqueStaffIds.length
       ? prisma.staff.findMany({
-          where: { id: { in: uniqueStaffIds }, tenantId },
+          where: { id: { in: uniqueStaffIds }, schoolId },
           select: { id: true },
         })
       : Promise.resolve([]),
@@ -278,14 +278,14 @@ export async function removeStaffFromSection(
   staffId: string,
 ): Promise<SectionActionState> {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const relation = await prisma.sectionStaff.findFirst({
     where: {
       sectionId,
       staffId,
-      section: { tenantId },
-      staff: { tenantId },
+      section: { schoolId },
+      staff: { schoolId },
     },
     select: { id: true },
   });
@@ -304,13 +304,13 @@ export async function removeStaffFromSection(
 
 export async function deleteSection(formData: FormData) {
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("Section id is required.");
 
   const section = await prisma.section.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       _count: {

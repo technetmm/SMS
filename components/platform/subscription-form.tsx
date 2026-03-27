@@ -40,9 +40,9 @@ export function SubscriptionForm({ tenants }: { tenants: TenantOption[] }) {
   return (
     <form action={formAction} className="grid gap-4 md:grid-cols-2">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="tenantId">Tenant</Label>
-        <Select name="tenantId">
-          <SelectTrigger id="tenantId" className="w-full">
+        <Label htmlFor="schoolId">Tenant</Label>
+        <Select name="schoolId">
+          <SelectTrigger id="schoolId" className="w-full">
             <SelectValue placeholder="Select tenant" />
           </SelectTrigger>
           <SelectContent position="popper">

@@ -23,10 +23,10 @@ export default async function EditStaffPage({
   }
 
   await requireSchoolAdmin();
-  const tenantId = await requireTenantId();
+  const schoolId = await requireTenantId();
 
   const staff = await prisma.staff.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
   });
 
   if (!staff) {

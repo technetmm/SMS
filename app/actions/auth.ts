@@ -78,7 +78,7 @@ export async function signup(
           email: data.email.toLowerCase(),
           passwordHash,
           role: UserRole.SCHOOL_ADMIN,
-          tenantId: tenant.id,
+          schoolId: tenant.id,
         },
       });
     });

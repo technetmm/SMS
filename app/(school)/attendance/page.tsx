@@ -1,4 +1,3 @@
-import { Permission } from "@/app/generated/prisma/enums";
 import Link from "next/link";
 import { requirePermission } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
@@ -14,25 +13,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function AttendancePage({
   searchParams,
 }: {
   searchParams: Promise<{ sectionId?: string; studentId?: string; date?: string }>;
 }) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenantId();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenantId();
   const params = await searchParams;
 
   const [enrollments, students, sections, rows] = await Promise.all([
     getEnrollments(),
     prisma.student.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.section.findMany({
-      where: { tenantId },
+      where: { schoolId },
       orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
       select: { id: true, name: true, class: { select: { name: true } } },
     }),

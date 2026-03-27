@@ -4,18 +4,18 @@ import { prisma } from "@/lib/prisma/client";
 import { logAction } from "@/lib/audit-log";
 
 export async function createOrUpdateSubscription({
-  tenantId,
+  schoolId,
   plan,
   status = SubscriptionStatus.ACTIVE,
   currentPeriodEnd,
 }: {
-  tenantId: string;
+  schoolId: string;
   plan: Plan;
   status?: SubscriptionStatus;
   currentPeriodEnd?: Date;
 }) {
   await prisma.subscription.updateMany({
-    where: { tenantId, isActive: true },
+    where: { schoolId, isActive: true },
     data: {
       isActive: false,
       status: SubscriptionStatus.CANCELED,
@@ -24,7 +24,7 @@ export async function createOrUpdateSubscription({
 
   const subscription = await prisma.subscription.create({
     data: {
-      tenantId,
+      schoolId,
       stripeCustomerId: `cus_${randomUUID().replace(/-/g, "").slice(0, 18)}`,
       stripeSubscriptionId: `sub_${randomUUID().replace(/-/g, "").slice(0, 18)}`,
       plan,
@@ -39,7 +39,7 @@ export async function createOrUpdateSubscription({
     action: "UPDATE",
     entity: "Subscription",
     entityId: subscription.id,
-    tenantId,
+    schoolId,
     metadata: { plan, status, isActive: subscription.isActive },
   });
 

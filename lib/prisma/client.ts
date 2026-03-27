@@ -14,8 +14,6 @@ const softDeleteModels = new Set([
   "Tenant",
   "Branch",
   "Subscription",
-  "RolePermission",
-  "UserPermission",
   "Staff",
   "Student",
   "Subject",

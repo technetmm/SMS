@@ -34,7 +34,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           avatar: user.image ?? "",
         }}
         role={session.user.role}
-        tenantId={session.user.tenantId ?? null}
+        schoolId={session.user.schoolId ?? null}
       />
       <SidebarInset>
         <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 bg-background rounded-t-xl">

@@ -1,12 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { DayOfWeek, Permission } from "@/app/generated/prisma/enums";
+import { DayOfWeek} from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { timetableSlotSchema } from "@/lib/validators";
 import { rangesOverlap } from "@/lib/time";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type TimetableActionState = {
   status: "idle" | "success" | "error";
@@ -14,11 +15,11 @@ export type TimetableActionState = {
 };
 
 export async function getTimetable() {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   return prisma.timetable.findMany({
-    where: { tenantId },
+    where: { schoolId },
     orderBy: [
       { dayOfWeek: "asc" },
       { startTime: "asc" },
@@ -38,7 +39,7 @@ export async function getTimetable() {
 }
 
 async function assertNoStaffConflict(input: {
-  tenantId: string;
+  schoolId: string;
   staffId: string;
   dayOfWeek: DayOfWeek;
   startTime: string;
@@ -47,7 +48,7 @@ async function assertNoStaffConflict(input: {
 }) {
   const conflicts = await prisma.timetable.findMany({
     where: {
-      tenantId: input.tenantId,
+      schoolId: input.schoolId,
       staffId: input.staffId,
       dayOfWeek: input.dayOfWeek,
       ...(input.ignoreId ? { id: { not: input.ignoreId } } : {}),
@@ -75,8 +76,8 @@ export async function createTimetableSlot(
   _prev: TimetableActionState,
   formData: FormData,
 ): Promise<TimetableActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = timetableSlotSchema.safeParse(raw);
@@ -86,11 +87,11 @@ export async function createTimetableSlot(
 
   const [section, staff, mapping] = await Promise.all([
     prisma.section.findFirst({
-      where: { id: parsed.data.sectionId, tenantId },
+      where: { id: parsed.data.sectionId, schoolId },
       select: { id: true },
     }),
     prisma.staff.findFirst({
-      where: { id: parsed.data.staffId, tenantId },
+      where: { id: parsed.data.staffId, schoolId },
       select: { id: true },
     }),
     prisma.sectionStaff.findFirst({
@@ -110,7 +111,7 @@ export async function createTimetableSlot(
 
   try {
     await assertNoStaffConflict({
-      tenantId,
+      schoolId,
       staffId: parsed.data.staffId,
       dayOfWeek: parsed.data.dayOfWeek,
       startTime: parsed.data.startTime,
@@ -119,7 +120,7 @@ export async function createTimetableSlot(
 
     await prisma.timetable.create({
       data: {
-        tenantId,
+        schoolId,
         sectionId: parsed.data.sectionId,
         staffId: parsed.data.staffId,
         dayOfWeek: parsed.data.dayOfWeek,
@@ -144,8 +145,8 @@ export async function updateTimetableSlot(
   _prev: TimetableActionState,
   formData: FormData,
 ): Promise<TimetableActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
   const parsed = timetableSlotSchema.safeParse(raw);
@@ -154,14 +155,14 @@ export async function updateTimetableSlot(
   }
 
   const existing = await prisma.timetable.findFirst({
-    where: { id: parsed.data.id, tenantId },
+    where: { id: parsed.data.id, schoolId },
     select: { id: true },
   });
   if (!existing) return { status: "error", message: "Timetable slot not found." };
 
   try {
     await assertNoStaffConflict({
-      tenantId,
+      schoolId,
       staffId: parsed.data.staffId,
       dayOfWeek: parsed.data.dayOfWeek,
       startTime: parsed.data.startTime,
@@ -193,14 +194,14 @@ export async function updateTimetableSlot(
 }
 
 export async function deleteTimetableSlot(formData: FormData) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");
   if (!id) throw new Error("Slot id is required.");
 
   const slot = await prisma.timetable.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: { id: true },
   });
 
@@ -210,15 +211,15 @@ export async function deleteTimetableSlot(formData: FormData) {
 }
 
 export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.classUpdate);
+  const schoolId = await requireTenant();
 
   if (!id) {
     return { status: "error" as const, message: "Slot id is required." };
   }
 
   const slot = await prisma.timetable.findFirst({
-    where: { id, tenantId },
+    where: { id, schoolId },
     select: {
       id: true,
       staffId: true,
@@ -233,7 +234,7 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
 
   try {
     await assertNoStaffConflict({
-      tenantId,
+      schoolId,
       staffId: slot.staffId,
       dayOfWeek,
       startTime: slot.startTime,

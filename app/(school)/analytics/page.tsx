@@ -1,4 +1,3 @@
-import { Permission } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { requirePermission, requireTenant } from "@/lib/rbac";
 import { StatCard } from "@/components/shared/stat-card";
@@ -6,36 +5,37 @@ import {
   StudentAttendanceTrendChart,
   type AttendanceTrendPoint,
 } from "@/components/analytics/student-attendance-trend-chart";
+import { PERMISSIONS } from "@/lib/permission-keys";
 
 function toYmd(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
 export default async function AnalyticsPage() {
-  await requirePermission(Permission.VIEW_REPORTS);
-  const tenantId = await requireTenant();
+  await requirePermission(PERMISSIONS.feeReport);
+  const schoolId = await requireTenant();
 
   const from = new Date();
   from.setDate(from.getDate() - 29);
   from.setHours(0, 0, 0, 0);
 
   const [total, present, absent, late, leave, grouped] = await Promise.all([
-    prisma.attendance.count({ where: { tenantId, date: { gte: from } } }),
+    prisma.attendance.count({ where: { schoolId, date: { gte: from } } }),
     prisma.attendance.count({
-      where: { tenantId, date: { gte: from }, status: "PRESENT" },
+      where: { schoolId, date: { gte: from }, status: "PRESENT" },
     }),
     prisma.attendance.count({
-      where: { tenantId, date: { gte: from }, status: "ABSENT" },
+      where: { schoolId, date: { gte: from }, status: "ABSENT" },
     }),
     prisma.attendance.count({
-      where: { tenantId, date: { gte: from }, status: "LATE" },
+      where: { schoolId, date: { gte: from }, status: "LATE" },
     }),
     prisma.attendance.count({
-      where: { tenantId, date: { gte: from }, status: "LEAVE" },
+      where: { schoolId, date: { gte: from }, status: "LEAVE" },
     }),
     prisma.attendance.groupBy({
       by: ["date", "status"],
-      where: { tenantId, date: { gte: from } },
+      where: { schoolId, date: { gte: from } },
       _count: { _all: true },
       orderBy: { date: "asc" },
     }),
