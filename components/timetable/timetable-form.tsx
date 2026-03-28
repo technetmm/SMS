@@ -137,13 +137,11 @@ export function TimetableForm({
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label>Staff</Label>
+            <Label>Teacher</Label>
             <Combobox
               items={staff}
               value={selectedStaff}
-              onValueChange={(value: Option | null) =>
-                setSelectedStaff(value)
-              }
+              onValueChange={(value: Option | null) => setSelectedStaff(value)}
               // itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={staffAnchor} className="w-full">
@@ -151,13 +149,13 @@ export function TimetableForm({
                   {(value) => (
                     <>
                       {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search staff..." />
+                      <ComboboxChipsInput placeholder="Search teacher..." />
                     </>
                   )}
                 </ComboboxValue>
               </ComboboxChips>
               <ComboboxContent anchor={staffAnchor}>
-                <ComboboxInput placeholder="Search staff..." />
+                <ComboboxInput placeholder="Search teacher..." />
                 <ComboboxEmpty>No staff found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (

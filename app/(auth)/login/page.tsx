@@ -16,6 +16,7 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { SESSION_LOCK_ERROR_CODE, SESSION_LOCK_ERROR_MESSAGE } from "@/lib/auth/session-lock";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -41,8 +42,15 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password.");
-      toast.error("Invalid email or password.");
+      const isSessionLocked =
+        result.error === SESSION_LOCK_ERROR_CODE ||
+        result.error.includes(SESSION_LOCK_ERROR_CODE);
+      const message = isSessionLocked
+        ? SESSION_LOCK_ERROR_MESSAGE
+        : "Invalid email or password.";
+
+      setError(message);
+      toast.error(message);
       setIsSubmitting(false);
       return;
     }

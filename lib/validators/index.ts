@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  Currency,
   ClassType,
   DayOfWeek,
   AttendanceStatus,
@@ -57,10 +56,6 @@ export const classCreateSchema = z.object({
   fee: z.preprocess(
     (value) => (value === "" || value === null || value === undefined ? 0 : value),
     z.coerce.number().nonnegative("Fee cannot be negative"),
-  ),
-  feeCurrency: z.preprocess(
-    (value) => (value === "" || value === null || value === undefined ? Currency.MMK : value),
-    z.nativeEnum(Currency),
   ),
 });
 

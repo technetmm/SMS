@@ -45,7 +45,7 @@ export async function ClassTable() {
                 {enumLabel(klass.programType, PROGRAM_TYPE_LABELS)}
               </TableCell>
               <TableCell className="text-right">
-                {money(String(klass.feeCurrency)).format(Number(klass.fee))}
+                {money("MMK").format(Number(klass.fee))}
               </TableCell>
               <TableCell>{dateFormatter.format(klass.createdAt)}</TableCell>
               <TableCell className="text-right">

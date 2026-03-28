@@ -17,7 +17,10 @@ export type BillingActionState = {
   message?: string;
 };
 
-function resolveInvoiceStatus(finalAmount: Prisma.Decimal, paidAmount: Prisma.Decimal) {
+function resolveInvoiceStatus(
+  finalAmount: Prisma.Decimal,
+  paidAmount: Prisma.Decimal,
+) {
   if (paidAmount.lessThanOrEqualTo(0)) return PaymentStatus.UNPAID;
   if (paidAmount.greaterThanOrEqualTo(finalAmount)) return PaymentStatus.PAID;
   return PaymentStatus.PARTIAL;
@@ -31,7 +34,10 @@ async function requireStaffOrAdmin() {
 
   const roleCheck = enrollmentActorRoleSchema.safeParse(session.user.role);
   if (!roleCheck.success) {
-    return { ok: false as const, message: "Only staff/admin can manage payments." };
+    return {
+      ok: false as const,
+      message: "Only staff/admin can manage payments.",
+    };
   }
 
   return {
@@ -218,14 +224,18 @@ export async function addPayment(
         where: { id: invoice.id },
         data: {
           paidAmount: paidAfter,
-          status: resolveInvoiceStatus(new Prisma.Decimal(invoice.finalAmount), paidAfter),
+          status: resolveInvoiceStatus(
+            new Prisma.Decimal(invoice.finalAmount),
+            paidAfter,
+          ),
         },
       });
     });
   } catch (error) {
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "Unable to add payment.",
+      message:
+        error instanceof Error ? error.message : "Unable to add payment.",
     };
   }
 
@@ -299,22 +309,26 @@ export async function addRefund(
         _sum: { amount: true },
       });
 
-      const paidAfterRefund = new Prisma.Decimal(paymentAgg._sum.amount ?? 0).sub(
-        new Prisma.Decimal(refundAgg._sum.amount ?? 0),
-      );
+      const paidAfterRefund = new Prisma.Decimal(
+        paymentAgg._sum.amount ?? 0,
+      ).sub(new Prisma.Decimal(refundAgg._sum.amount ?? 0));
 
       await tx.invoice.update({
         where: { id: payment.invoice.id },
         data: {
           paidAmount: paidAfterRefund,
-          status: resolveInvoiceStatus(new Prisma.Decimal(payment.invoice.finalAmount), paidAfterRefund),
+          status: resolveInvoiceStatus(
+            new Prisma.Decimal(payment.invoice.finalAmount),
+            paidAfterRefund,
+          ),
         },
       });
     });
   } catch (error) {
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "Unable to process refund.",
+      message:
+        error instanceof Error ? error.message : "Unable to process refund.",
     };
   }
 

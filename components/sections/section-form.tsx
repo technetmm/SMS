@@ -148,7 +148,7 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label>Staff (Optional)</Label>
+            <Label>Teacher (Optional)</Label>
             <Combobox
               multiple
               autoHighlight

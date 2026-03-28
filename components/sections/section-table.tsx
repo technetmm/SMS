@@ -1,5 +1,8 @@
 import Link from "next/link";
-import { getSections, deleteSection } from "@/app/(school)/school/sections/actions";
+import {
+  getSections,
+  deleteSection,
+} from "@/app/(school)/school/sections/actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,7 +26,7 @@ export async function SectionTable() {
             <TableHead>Name</TableHead>
             <TableHead>Class</TableHead>
             <TableHead>Capacity</TableHead>
-            <TableHead>Staff</TableHead>
+            <TableHead>Teacher</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -45,13 +48,17 @@ export async function SectionTable() {
                 </TableCell>
                 <TableCell>
                   {section.staffMappings.length
-                    ? section.staffMappings.map((item) => item.staff.name).join(", ")
+                    ? section.staffMappings
+                        .map((item) => item.staff.name)
+                        .join(", ")
                     : "-"}
                 </TableCell>
                 <TableCell>
                   <Badge
                     variant={isFull ? "outline" : "default"}
-                    className={isFull ? "text-destructive border-destructive/40" : ""}
+                    className={
+                      isFull ? "text-destructive border-destructive/40" : ""
+                    }
                   >
                     {isFull ? "Full" : "Available"}
                   </Badge>
@@ -60,7 +67,9 @@ export async function SectionTable() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button asChild size="sm" variant="outline">
-                      <Link href={`/school/sections/${section.id}/edit`}>Edit</Link>
+                      <Link href={`/school/sections/${section.id}/edit`}>
+                        Edit
+                      </Link>
                     </Button>
                     <form action={deleteSection}>
                       <input type="hidden" name="id" value={section.id} />
@@ -75,7 +84,10 @@ export async function SectionTable() {
           })}
           {sections.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell
+                colSpan={7}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
                 No sections yet. Create your first section.
               </TableCell>
             </TableRow>

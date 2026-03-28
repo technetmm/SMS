@@ -9,7 +9,8 @@ function matchesPath(pathname: string, base: string) {
 
 export default async function proxy(req: NextRequest) {
   const token = await getToken({ req });
-  if (!token) {
+  const tokenUserId = typeof token?.id === "string" ? token.id : null;
+  if (!token || !tokenUserId) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 

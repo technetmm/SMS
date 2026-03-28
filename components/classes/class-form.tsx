@@ -15,7 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BillingType, ClassType, Currency, ProgramType } from "@/app/generated/prisma/enums";
+import {
+  BillingType,
+  ClassType,
+  ProgramType,
+} from "@/app/generated/prisma/enums";
 
 const initialState: ClassActionState = { status: "idle" };
 
@@ -34,7 +38,6 @@ type ClassFormProps = {
     billingType: BillingType;
     courseId: string;
     fee: number;
-    feeCurrency: Currency;
   };
 };
 
@@ -81,36 +84,6 @@ export function ClassForm({
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label htmlFor="fee">Class Fee</Label>
-            <Input
-              id="fee"
-              name="fee"
-              type="number"
-              step="0.01"
-              min="0"
-              defaultValue={initialData?.fee ?? 0}
-              required
-            />
-          </div>
-
-          <div className="grid gap-2">
-            <Label htmlFor="feeCurrency">Currency</Label>
-            <Select
-              name="feeCurrency"
-              defaultValue={initialData?.feeCurrency ?? "MMK"}
-            >
-              <SelectTrigger id="feeCurrency" className="w-full">
-                <SelectValue placeholder="Select currency" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                <SelectItem value={Currency.MMK}>MMK</SelectItem>
-                <SelectItem value={Currency.USD}>USD</SelectItem>
-                <SelectItem value={Currency.THB}>THB</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="courseId">Course</Label>
             <Select name="courseId" defaultValue={initialData?.courseId}>
@@ -125,6 +98,19 @@ export function ClassForm({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="fee">Class Fee</Label>
+            <Input
+              id="fee"
+              name="fee"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={initialData?.fee ?? 0}
+              required
+            />
           </div>
 
           <div className="grid gap-2">

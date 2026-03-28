@@ -44,7 +44,6 @@ export async function createClass(
         programType: parsed.data.programType,
         billingType: parsed.data.billingType,
         fee: parsed.data.fee,
-        feeCurrency: parsed.data.feeCurrency,
       },
     });
   } catch {
@@ -70,7 +69,6 @@ export async function getClasses() {
       programType: true,
       billingType: true,
       fee: true,
-      feeCurrency: true,
       createdAt: true,
       course: { select: { id: true, name: true } },
       _count: { select: { sections: true } },
@@ -92,7 +90,6 @@ export async function getClassById(id: string) {
       programType: true,
       billingType: true,
       fee: true,
-      feeCurrency: true,
       courseId: true,
     },
   });
@@ -139,7 +136,6 @@ export async function updateClass(
         programType: parsed.data.programType,
         billingType: parsed.data.billingType,
         fee: parsed.data.fee,
-        feeCurrency: parsed.data.feeCurrency,
       },
     });
   } catch {

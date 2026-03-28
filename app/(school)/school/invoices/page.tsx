@@ -12,7 +12,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { enumLabel, INVOICE_TYPE_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
+import {
+  enumLabel,
+  INVOICE_TYPE_LABELS,
+  PAYMENT_STATUS_LABELS,
+} from "@/lib/enum-labels";
 
 export default async function InvoicesPage() {
   const invoices = await getInvoices();
@@ -52,19 +56,28 @@ export default async function InvoicesPage() {
 
               return (
                 <TableRow key={invoice.id}>
-                  <TableCell className="font-medium">{invoice.id.slice(0, 8)}</TableCell>
+                  <TableCell className="font-medium">
+                    {invoice.id.slice(0, 8)}
+                  </TableCell>
                   <TableCell>{invoice.student.name}</TableCell>
                   <TableCell>
-                    {invoice.enrollment.section.class.name} • {invoice.enrollment.section.name}
+                    {invoice.enrollment.section.class.name} •{" "}
+                    {invoice.enrollment.section.name}
                   </TableCell>
-                  <TableCell>{enumLabel(invoice.invoiceType, INVOICE_TYPE_LABELS)}</TableCell>
+                  <TableCell>
+                    {enumLabel(invoice.invoiceType, INVOICE_TYPE_LABELS)}
+                  </TableCell>
                   <TableCell>
                     {invoice.billingYear && invoice.billingMonth
                       ? `${invoice.billingYear}-${String(invoice.billingMonth).padStart(2, "0")}`
                       : "-"}
                   </TableCell>
-                  <TableCell>${Number(invoice.finalAmount).toFixed(2)}</TableCell>
-                  <TableCell>${Number(invoice.paidAmount).toFixed(2)}</TableCell>
+                  <TableCell>
+                    {Number(invoice.finalAmount).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    ${Number(invoice.paidAmount).toFixed(2)}
+                  </TableCell>
                   <TableCell>${remaining.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge
@@ -82,10 +95,14 @@ export default async function InvoicesPage() {
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button asChild size="sm" variant="outline">
-                        <Link href={`/school/invoices/${invoice.id}`}>View</Link>
+                        <Link href={`/school/invoices/${invoice.id}`}>
+                          View
+                        </Link>
                       </Button>
                       <Button asChild size="sm">
-                        <Link href={`/school/invoices/${invoice.id}/pdf`}>Download PDF</Link>
+                        <Link href={`/school/invoices/${invoice.id}/pdf`}>
+                          Download PDF
+                        </Link>
                       </Button>
                     </div>
                   </TableCell>
@@ -94,7 +111,10 @@ export default async function InvoicesPage() {
             })}
             {invoices.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="py-10 text-center text-sm text-muted-foreground">
+                <TableCell
+                  colSpan={10}
+                  className="py-10 text-center text-sm text-muted-foreground"
+                >
                   No invoices yet.
                 </TableCell>
               </TableRow>

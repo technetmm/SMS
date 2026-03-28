@@ -53,7 +53,6 @@ export default async function EditClassPage({
           billingType: klass.billingType,
           courseId: klass.courseId,
           fee: Number(klass.fee),
-          feeCurrency: klass.feeCurrency,
         }}
       />
     </div>

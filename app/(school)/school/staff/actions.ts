@@ -21,6 +21,8 @@ export type StaffActionState = {
 export type StaffSystemRoleActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  shouldLogout?: boolean;
+  redirectTo?: string;
 };
 
 const setStaffSystemRoleSchema = z.object({
@@ -331,6 +333,19 @@ export async function setStaffSystemRole(
 
   revalidatePath("/school/staff");
   revalidatePath(`/school/staff/${targetUser.staffProfile.id}`);
+
+  const isSelfDemotionToTeacher =
+    targetUser.id === session.user.id &&
+    parsed.data.nextRole === UserRole.TEACHER;
+
+  if (isSelfDemotionToTeacher) {
+    return {
+      status: "success",
+      message: "Demoted to TEACHER.",
+      shouldLogout: true,
+      redirectTo: "/login?demoted=1",
+    };
+  }
 
   if (parsed.data.nextRole === UserRole.SCHOOL_ADMIN) {
     return {
