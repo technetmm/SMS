@@ -200,33 +200,11 @@ model Role {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  school      Tenant               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  permissions RolePermission[]
-  users       UserRoleAssignment[]
+  school Tenant               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  users  UserRoleAssignment[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
-}
-
-model Permission {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  category  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  roles RolePermission[]
-}
-
-model RolePermission {
-  roleId       String
-  permissionId String
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-
-  @@id([roleId, permissionId])
-  @@index([permissionId])
 }
 
 model UserRoleAssignment {

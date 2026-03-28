@@ -8,7 +8,6 @@ import {
   UserRole,
 } from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
-import { PERMISSIONS } from "@/lib/permission-keys";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
 import {
@@ -18,7 +17,7 @@ import {
   enrollmentProgressSchema,
   enrollmentUpdateSchema,
 } from "@/lib/validators";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 
 export type EnrollmentActionState = {
   status: "idle" | "success" | "error";
@@ -201,7 +200,7 @@ export async function getEnrollments(filters?: {
   studentId?: string;
   date?: Date;
 }) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.enrollment.findMany({
@@ -325,7 +324,7 @@ export async function updateEnrollment(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -363,7 +362,7 @@ export async function markAttendance(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -415,7 +414,7 @@ export async function getAttendanceRecords(filters?: {
   studentId?: string;
   date?: Date;
 }) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.attendance.findMany({
@@ -459,7 +458,7 @@ export async function updateProgress(
   _prevState: EnrollmentActionState,
   formData: FormData,
 ): Promise<EnrollmentActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);

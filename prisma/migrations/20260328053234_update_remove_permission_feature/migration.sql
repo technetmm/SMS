@@ -7,13 +7,13 @@
 
 */
 -- DropForeignKey
-ALTER TABLE IF EXISTS "LegacyUserPermission" DROP CONSTRAINT IF EXISTS "LegacyUserPermission_userId_fkey";
+ALTER TABLE "LegacyUserPermission" DROP CONSTRAINT "LegacyUserPermission_userId_fkey";
 
 -- AlterTable
-ALTER TABLE "User" DROP COLUMN IF EXISTS "legacyRole";
+ALTER TABLE "User" DROP COLUMN "legacyRole";
 
 -- DropTable
-DROP TABLE IF EXISTS "LegacyRolePermission";
+DROP TABLE "LegacyRolePermission";
 
 -- DropTable
-DROP TABLE IF EXISTS "LegacyUserPermission";
+DROP TABLE "LegacyUserPermission";

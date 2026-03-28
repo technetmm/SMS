@@ -3,13 +3,12 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { enqueueEmail } from "@/lib/queue";
 import { logAction } from "@/lib/audit-log";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StaffActionState = {
   status: "idle" | "success" | "error";
@@ -20,7 +19,7 @@ export async function createStaff(
   _prevState: StaffActionState,
   formData: FormData,
 ): Promise<StaffActionState> {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -121,7 +120,7 @@ export async function createStaff(
 }
 
 export async function getStaff() {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.staff.findMany({
@@ -143,7 +142,7 @@ export async function updateStaff(
   _prevState: StaffActionState,
   formData: FormData,
 ): Promise<StaffActionState> {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -220,7 +219,7 @@ export async function updateStaff(
 }
 
 export async function deleteStaff(formData: FormData) {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const id = formData.get("id");

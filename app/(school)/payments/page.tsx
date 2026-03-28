@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/shared/page-header";
-import { requireSchoolStaff } from "@/lib/permissions";
+import { requireSchoolAdmin } from "@/lib/permissions";
 import { ExportMenu } from "@/components/shared/export-menu";
 import { exportPaymentsToPDF } from "@/app/(school)/exports/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { enumLabel, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 
 export default async function PaymentsPage() {
-  await requireSchoolStaff();
+  await requireSchoolAdmin();
   const schoolId = await requireTenantId();
 
   const invoices = await prisma.invoice.findMany({

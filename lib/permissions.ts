@@ -25,16 +25,3 @@ export async function requireSuperAdmin() {
 export async function requireSchoolAdmin() {
   return requireRole([UserRole.SCHOOL_ADMIN, UserRole.SUPER_ADMIN]);
 }
-
-export async function requireSchoolStaff() {
-  const session = await requireUser();
-  if (!session.user.schoolId && session.user.role !== UserRole.SUPER_ADMIN) {
-    forbidden();
-  }
-  return session;
-}
-
-export async function requireEnrollmentManager() {
-  const session = await requireSchoolStaff();
-  return session;
-}

@@ -1,13 +1,12 @@
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
 import { StaffAttendanceForm } from "@/components/staff-attendance/staff-attendance-form";
 import { StaffAttendanceTable } from "@/components/staff-attendance/staff-attendance-table";
 import { markStaffAttendance } from "@/app/(school)/staff-attendance/actions";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function StaffAttendancePage() {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const [staff, sections] = await Promise.all([

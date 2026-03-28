@@ -8,7 +8,6 @@ import {
   Palette,
   Shield,
   ShieldCheck,
-  ShieldEllipsis,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,12 +50,6 @@ const cards = [
     description: "Create and manage staff roles for your school.",
     href: "/settings/roles",
     icon: Shield,
-  },
-  {
-    title: "Permissions",
-    description: "Manage the permission matrix for all roles.",
-    href: "/settings/permissions",
-    icon: ShieldEllipsis,
   },
   {
     title: "Security",

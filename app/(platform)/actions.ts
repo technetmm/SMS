@@ -3,12 +3,11 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission } from "@/lib/rbac";
+import { requireSuperAdminAccess } from "@/lib/rbac";
 import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
 import {Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -43,7 +42,7 @@ export async function createTenant(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = tenantSchema.safeParse(raw);
@@ -79,7 +78,7 @@ export async function updateTenant(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = tenantUpdateSchema.safeParse(raw);
@@ -118,7 +117,7 @@ export async function updateTenant(
 }
 
 export async function toggleTenantStatus(formData: FormData) {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -149,7 +148,7 @@ export async function toggleTenantStatus(formData: FormData) {
 }
 
 export async function deleteTenant(formData: FormData) {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -168,7 +167,7 @@ export async function deleteTenant(formData: FormData) {
 }
 
 export async function restoreTenant(formData: FormData) {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -193,7 +192,7 @@ export async function createSubscription(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = subscriptionSchema.safeParse(raw);
@@ -229,7 +228,7 @@ export async function updateSubscription(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = subscriptionUpdateSchema.safeParse(raw);
@@ -285,7 +284,7 @@ export async function updateSubscription(
 }
 
 export async function cancelSubscription(formData: FormData) {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -309,7 +308,7 @@ export async function cancelSubscription(formData: FormData) {
 }
 
 export async function getTenants() {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
   return prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     include: {
@@ -319,7 +318,7 @@ export async function getTenants() {
 }
 
 export async function getSubscriptions() {
-  await requirePermission(PERMISSIONS.settingsUpdate);
+  await requireSuperAdminAccess();
   return prisma.subscription.findMany({
     orderBy: { createdAt: "desc" },
     include: { tenant: true },
@@ -327,7 +326,7 @@ export async function getSubscriptions() {
 }
 
 export async function getActivityLogs() {
-  await requirePermission(PERMISSIONS.feeReport);
+  await requireSuperAdminAccess();
   return prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 25,
@@ -339,7 +338,7 @@ export async function getActivityLogs() {
 }
 
 export async function getPlatformDashboardData() {
-  await requirePermission(PERMISSIONS.feeReport);
+  await requireSuperAdminAccess();
 
   const [tenants, subscriptions] = await Promise.all([
     prisma.tenant.findMany({

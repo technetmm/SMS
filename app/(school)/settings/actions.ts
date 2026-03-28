@@ -5,8 +5,6 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerAuth } from "@/auth";
-import {UserRole } from "@/app/generated/prisma/enums";
-import { requireRole } from "@/lib/rbac";
 import { logAction } from "@/lib/audit-log";
 import { changeEmailSchema, changePasswordSchema } from "@/lib/validators/settings";
 import { saveProfileImage, removeProfileImage } from "@/lib/upload";
@@ -26,11 +24,6 @@ export type ActionState = {
 function revalidateSettingsPages() {
   revalidatePath("/settings");
   revalidatePath("/platform/settings");
-}
-
-function revalidatePermissionPages() {
-  revalidatePath("/settings/permissions");
-  revalidatePath("/platform/settings/permissions");
 }
 
 const tokenSchema = z
@@ -348,96 +341,4 @@ export async function changePasswordAction(
 
   revalidateSettingsPages();
   return { status: "success", message: "Password updated successfully." };
-}
-
-const rolePermissionSchema = z.object({
-  roleId: z.string().min(1, "Role is required"),
-  permissionKey: z.string().min(1, "Permission is required"),
-  enabled: z.coerce.boolean(),
-});
-
-const userPermissionSchema = z.object({
-  userId: z.string().min(1, "User is required"),
-  permissionKey: z.string().min(1, "Permission is required"),
-  enabled: z.coerce.boolean(),
-});
-
-export async function setRolePermission(
-  _prevState: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const current = await requireRole(UserRole.SCHOOL_ADMIN);
-  const parsed = rolePermissionSchema.safeParse({
-    roleId: getFormValue(formData, "roleId"),
-    permissionKey: getFormValue(formData, "permission"),
-    enabled: getFormValue(formData, "enabled"),
-  });
-  if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
-  }
-
-  if (!current.schoolId) {
-    return { status: "error", message: "Unauthorized" };
-  }
-
-  const [role, permission] = await Promise.all([
-    prisma.role.findFirst({
-      where: { id: parsed.data.roleId, schoolId: current.schoolId },
-      select: { id: true },
-    }),
-    prisma.permission.findUnique({
-      where: { key: parsed.data.permissionKey },
-      select: { id: true },
-    }),
-  ]);
-
-  if (!role || !permission) {
-    return { status: "error", message: "Invalid role or permission." };
-  }
-
-  if (parsed.data.enabled) {
-    await prisma.rolePermission.upsert({
-      where: {
-        roleId_permissionId: {
-          roleId: role.id,
-          permissionId: permission.id,
-        },
-      },
-      update: {},
-      create: {
-        roleId: role.id,
-        permissionId: permission.id,
-      },
-    });
-  } else {
-    await prisma.rolePermission.deleteMany({
-      where: { roleId: role.id, permissionId: permission.id },
-    });
-  }
-
-  await logAction({
-    action: "UPDATE",
-    entity: "RolePermission",
-    schoolId: current.schoolId,
-    userId: current.id,
-    metadata: parsed.data,
-  });
-
-  revalidatePermissionPages();
-  return { status: "success", message: "Role permission updated." };
-}
-
-export async function setUserPermission(
-  _prevState: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  userPermissionSchema.parse({
-    userId: getFormValue(formData, "userId"),
-    permissionKey: getFormValue(formData, "permission"),
-    enabled: getFormValue(formData, "enabled"),
-  });
-  return {
-    status: "error",
-    message: "Direct user permission overrides are disabled. Assign a role instead.",
-  };
 }

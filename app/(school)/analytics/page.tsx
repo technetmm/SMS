@@ -1,18 +1,17 @@
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { StatCard } from "@/components/shared/stat-card";
 import {
   StudentAttendanceTrendChart,
   type AttendanceTrendPoint,
 } from "@/components/analytics/student-attendance-trend-chart";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 function toYmd(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
 export default async function AnalyticsPage() {
-  await requirePermission(PERMISSIONS.feeReport);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const from = new Date();

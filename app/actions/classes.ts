@@ -2,12 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { getPrismaClient } from "@/lib/prisma-tenant";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { classCreateSchema, sectionCreateSchema } from "@/lib/validators";
 import { getServerAuth } from "@/auth";
 import { logAction } from "@/lib/audit-log";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type ClassActionState = {
   status: "idle" | "success" | "error";
@@ -18,7 +17,7 @@ export async function createClass(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});
@@ -59,7 +58,7 @@ export async function createSection(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});

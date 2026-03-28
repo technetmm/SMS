@@ -4,7 +4,6 @@ import * as React from "react";
 import Link from "next/link";
 
 import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
@@ -25,8 +24,6 @@ import {
   FileDownIcon,
   FileTextIcon,
   LayoutDashboardIcon,
-  Settings2Icon,
-  ShieldCheckIcon,
   UsersIcon,
   GraduationCapIcon,
   UserRoundIcon,
@@ -104,19 +101,6 @@ const teacherNavGroups = [
       },
     ],
   },
-  {
-    label: "Teaching",
-    items: [
-      { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
-      { title: "Sections", url: "/sections", icon: <TvMinimalIcon /> },
-      { title: "Timetable", url: "/timetable", icon: <CalendarClockIcon /> },
-      {
-        title: "Attendance",
-        url: "/attendance",
-        icon: <CalendarDaysIcon />,
-      },
-    ],
-  },
 ];
 
 const studentNavGroups = [
@@ -128,15 +112,6 @@ const studentNavGroups = [
         url: "/student/dashboard",
         icon: <LayoutDashboardIcon />,
       },
-    ],
-  },
-  {
-    label: "Essentials",
-    items: [
-      { title: "Schedule", url: "/timetable", icon: <CalendarClockIcon /> },
-      { title: "Attendance", url: "/attendance", icon: <CalendarDaysIcon /> },
-      { title: "Fees", url: "/invoices", icon: <FileTextIcon /> },
-      { title: "Results", url: "/enrollments", icon: <ListChecksIcon /> },
     ],
   },
 ];

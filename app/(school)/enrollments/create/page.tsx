@@ -3,10 +3,10 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { EnrollmentCreateForm } from "@/components/enrollments/enrollment-create-form";
 import { getEnrollmentFormOptions } from "@/app/(school)/enrollments/actions";
-import { requireEnrollmentManager } from "@/lib/permissions";
+import { requireSchoolAdmin } from "@/lib/permissions";
 
 export default async function CreateEnrollmentPage() {
-  await requireEnrollmentManager();
+  await requireSchoolAdmin();
 
   const { students, sections } = await getEnrollmentFormOptions();
 

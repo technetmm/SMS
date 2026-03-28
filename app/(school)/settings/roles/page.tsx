@@ -16,7 +16,7 @@ export default async function RolesPage() {
       id: true,
       name: true,
       isSystem: true,
-      _count: { select: { users: true, permissions: true } },
+      _count: { select: { users: true } },
     },
     orderBy: [{ isSystem: "desc" }, { name: "asc" }],
   });
@@ -43,7 +43,7 @@ export default async function RolesPage() {
               <div>
                 <p className="font-medium">{role.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {role._count.permissions} permissions • {role._count.users} users
+                  {role._count.users} users
                   {role.isSystem ? " • System role" : ""}
                 </p>
               </div>

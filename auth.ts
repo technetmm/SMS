@@ -6,7 +6,6 @@ import { getServerSession } from "next-auth/next";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma/client";
-import { UserRole } from "@/app/generated/prisma/enums";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -54,42 +53,6 @@ export const authOptions: NextAuthOptions = {
         token.schoolId = user.schoolId ?? null;
       }
 
-      if (token.id && token.role) {
-        if (
-          token.role === UserRole.SUPER_ADMIN ||
-          token.role === UserRole.SCHOOL_ADMIN
-        ) {
-          token.permissions = ["*"];
-        } else {
-          const roleAssignments = await prisma.userRoleAssignment.findMany({
-            where: {
-              userId: String(token.id),
-            },
-            select: {
-              role: {
-                select: {
-                  permissions: {
-                    select: {
-                      permission: {
-                        select: { key: true },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
-
-          token.permissions = Array.from(
-            new Set([
-              ...roleAssignments.flatMap((assignment) =>
-                assignment.role.permissions.map((item) => item.permission.key),
-              ),
-            ]),
-          );
-        }
-      }
-
       return token;
     },
     async session({ session, token }) {
@@ -97,7 +60,6 @@ export const authOptions: NextAuthOptions = {
         session.user.id = String(token.id ?? "");
         session.user.role = token.role as typeof session.user.role;
         session.user.schoolId = token.schoolId as string | null;
-        session.user.permissions = (token.permissions as string[]) ?? [];
       }
       return session;
     },

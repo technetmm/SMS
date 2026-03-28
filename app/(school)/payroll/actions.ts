@@ -4,9 +4,8 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { payrollGenerateSchema } from "@/lib/validators";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type PayrollActionState = {
   status: "idle" | "success" | "error";
@@ -18,7 +17,7 @@ function monthStartUTC(value: Date) {
 }
 
 export async function getPayrolls() {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.payroll.findMany({
@@ -39,7 +38,7 @@ export async function generatePayroll(
   _prev: PayrollActionState,
   formData: FormData,
 ): Promise<PayrollActionState> {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);

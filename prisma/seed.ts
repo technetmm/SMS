@@ -16,11 +16,15 @@ import {
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import "dotenv/config";
-import {
-  DEFAULT_SYSTEM_ROLES,
-  PERMISSION_DEFINITIONS,
-  PERMISSIONS,
-} from "@/lib/permission-keys";
+
+const DEFAULT_SYSTEM_ROLES = [
+  "Admin Staff",
+  "Teacher",
+  "HR",
+  "Accountant",
+  "Receptionist",
+  "Student",
+] as const;
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -33,8 +37,6 @@ async function assertSchemaReady() {
     "Tenant",
     "Subscription",
     "Role",
-    "Permission",
-    "RolePermission",
     "UserRoleAssignment",
   ] as const;
 
@@ -93,75 +95,13 @@ async function ensureCourse(name: string, subjectIds: string[], schoolId: string
   return course;
 }
 
-async function seedPermissions() {
-  await prisma.permission.createMany({
-    data: PERMISSION_DEFINITIONS.map((item) => ({
-      key: item.key,
-      category: item.category,
-    })),
-    skipDuplicates: true,
-  });
-}
-
-async function ensureDefaultRolesAndPermissions(schoolId: string) {
+async function ensureDefaultRoles(schoolId: string) {
   for (const roleName of DEFAULT_SYSTEM_ROLES) {
     await prisma.role.upsert({
       where: { schoolId_name: { schoolId, name: roleName } },
       update: { isSystem: true },
       create: { schoolId, name: roleName, isSystem: true },
     });
-  }
-
-  const [adminRole, teacherRole, hrRole, accountantRole, receptionistRole, studentRole] =
-    await Promise.all([
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Admin Staff" } }),
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Teacher" } }),
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "HR" } }),
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Accountant" } }),
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Receptionist" } }),
-      prisma.role.findFirstOrThrow({ where: { schoolId, name: "Student" } }),
-    ]);
-
-  const grants: Record<string, string[]> = {
-    [adminRole.id]: PERMISSION_DEFINITIONS.map((item) => item.key),
-    [teacherRole.id]: [
-      PERMISSIONS.studentView,
-      PERMISSIONS.attendanceView,
-      PERMISSIONS.attendanceMark,
-      PERMISSIONS.classView,
-      PERMISSIONS.subjectManage,
-      PERMISSIONS.resultManage,
-    ],
-    [hrRole.id]: [PERMISSIONS.staffView, PERMISSIONS.staffCreate, PERMISSIONS.staffUpdate],
-    [accountantRole.id]: [
-      PERMISSIONS.feeView,
-      PERMISSIONS.feeCollect,
-      PERMISSIONS.feeUpdate,
-      PERMISSIONS.feeReport,
-      PERMISSIONS.payrollView,
-      PERMISSIONS.payrollProcess,
-    ],
-    [receptionistRole.id]: [
-      PERMISSIONS.studentView,
-      PERMISSIONS.studentCreate,
-      PERMISSIONS.classView,
-      PERMISSIONS.feeCollect,
-    ],
-    [studentRole.id]: [PERMISSIONS.classView, PERMISSIONS.attendanceView, PERMISSIONS.feeView],
-  };
-
-  for (const [roleId, permissionKeys] of Object.entries(grants)) {
-    for (const key of permissionKeys) {
-      const permission = await prisma.permission.findUnique({ where: { key } });
-      if (!permission) continue;
-      await prisma.rolePermission.upsert({
-        where: {
-          roleId_permissionId: { roleId, permissionId: permission.id },
-        },
-        update: {},
-        create: { roleId, permissionId: permission.id },
-      });
-    }
   }
 }
 
@@ -214,7 +154,6 @@ async function upsertTenantAndSubscription(input: {
 
 export async function main() {
   await assertSchemaReady();
-  await seedPermissions();
 
   const tenant = await upsertTenantAndSubscription({
     name: "Demo School",
@@ -234,7 +173,7 @@ export async function main() {
     subscriptionStatus: SubscriptionStatus.ACTIVE,
   });
 
-  await ensureDefaultRolesAndPermissions(tenant.id);
+  await ensureDefaultRoles(tenant.id);
 
   const passwordHash = await bcrypt.hash("Admin123!", 10);
 

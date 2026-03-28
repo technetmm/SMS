@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { courseCreateSchema, courseUpdateSchema } from "@/lib/validators";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type CourseActionState = {
   status: "idle" | "success" | "error";
@@ -16,7 +15,7 @@ export async function createCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -71,7 +70,7 @@ export async function createCourse(
 }
 
 export async function getCourses() {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const courses = await prisma.course.findMany({
@@ -99,7 +98,7 @@ export async function getCourses() {
 }
 
 export async function getCourseById(id: string) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   if (!id) return null;
@@ -127,7 +126,7 @@ export async function updateCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -194,7 +193,7 @@ export async function deleteCourse(
   _prevState: CourseActionState,
   formData: FormData,
 ): Promise<CourseActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");

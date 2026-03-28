@@ -4,10 +4,9 @@ import { revalidatePath } from "next/cache";
 import { DayOfWeek} from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { timetableSlotSchema } from "@/lib/validators";
 import { rangesOverlap } from "@/lib/time";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type TimetableActionState = {
   status: "idle" | "success" | "error";
@@ -15,7 +14,7 @@ export type TimetableActionState = {
 };
 
 export async function getTimetable() {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.timetable.findMany({
@@ -76,7 +75,7 @@ export async function createTimetableSlot(
   _prev: TimetableActionState,
   formData: FormData,
 ): Promise<TimetableActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -145,7 +144,7 @@ export async function updateTimetableSlot(
   _prev: TimetableActionState,
   formData: FormData,
 ): Promise<TimetableActionState> {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -194,7 +193,7 @@ export async function updateTimetableSlot(
 }
 
 export async function deleteTimetableSlot(formData: FormData) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");
@@ -211,7 +210,7 @@ export async function deleteTimetableSlot(formData: FormData) {
 }
 
 export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   if (!id) {

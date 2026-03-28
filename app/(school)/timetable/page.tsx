@@ -3,12 +3,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { TimetableTable } from "@/components/timetable/timetable-table";
 import { DragDropWeekTimetable } from "@/components/timetable/drag-drop-week";
-import { requirePermission } from "@/lib/rbac";
+import { requireSchoolAdminAccess } from "@/lib/rbac";
 import { getTimetable } from "@/app/(school)/timetable/actions";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function TimetablePage() {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const slots = await getTimetable();
 
   return (

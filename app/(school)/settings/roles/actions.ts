@@ -20,7 +20,11 @@ function getFormValue(formData: FormData, key: string) {
 
 async function requireSchoolAdminContext() {
   const session = await getServerAuth();
-  if (!session?.user?.id || session.user.role !== UserRole.SCHOOL_ADMIN) {
+  if (
+    !session?.user?.id ||
+    (session.user.role !== UserRole.SCHOOL_ADMIN &&
+      session.user.role !== UserRole.SUPER_ADMIN)
+  ) {
     return null;
   }
   if (!session.user.schoolId) {
@@ -40,11 +44,6 @@ const updateRoleSchema = z.object({
 
 const deleteRoleSchema = z.object({
   roleId: z.string().min(1, "Role is required"),
-});
-
-const assignPermissionsSchema = z.object({
-  roleId: z.string().min(1, "Role is required"),
-  permissionKeys: z.array(z.string().min(1)).min(1, "Select at least one permission"),
 });
 
 const assignRoleToUserSchema = z.object({
@@ -93,7 +92,6 @@ export async function createRole(
   });
 
   revalidatePath("/settings/roles");
-  revalidatePath("/settings/permissions");
   return { status: "success", message: "Role created.", roleId: created.id };
 }
 
@@ -142,7 +140,6 @@ export async function updateRole(
 
   revalidatePath("/settings/roles");
   revalidatePath(`/settings/roles/${role.id}/edit`);
-  revalidatePath("/settings/permissions");
   return { status: "success", message: "Role updated." };
 }
 
@@ -164,7 +161,6 @@ export async function deleteRole(formData: FormData) {
 
   await prisma.$transaction(async (tx) => {
     await tx.userRoleAssignment.deleteMany({ where: { roleId: role.id } });
-    await tx.rolePermission.deleteMany({ where: { roleId: role.id } });
     await tx.role.delete({ where: { id: role.id } });
   });
 
@@ -177,66 +173,6 @@ export async function deleteRole(formData: FormData) {
   });
 
   revalidatePath("/settings/roles");
-  revalidatePath("/settings/permissions");
-}
-
-export async function assignPermissionsToRole(
-  _prevState: RoleActionState,
-  formData: FormData,
-): Promise<RoleActionState> {
-  const ctx = await requireSchoolAdminContext();
-  if (!ctx) return { status: "error", message: "Unauthorized." };
-
-  const permissionKeys = formData
-    .getAll("permissionKeys")
-    .map((value) => String(value))
-    .filter(Boolean);
-
-  const parsed = assignPermissionsSchema.safeParse({
-    roleId: getFormValue(formData, "roleId"),
-    permissionKeys: Array.from(new Set(permissionKeys)),
-  });
-  if (!parsed.success) return { status: "error", message: parsed.error.errors[0]?.message };
-
-  const [role, permissions] = await Promise.all([
-    prisma.role.findFirst({
-      where: { id: parsed.data.roleId, schoolId: ctx.schoolId },
-      select: { id: true },
-    }),
-    prisma.permission.findMany({
-      where: { key: { in: parsed.data.permissionKeys } },
-      select: { id: true, key: true },
-    }),
-  ]);
-
-  if (!role) return { status: "error", message: "Role not found." };
-  if (permissions.length !== parsed.data.permissionKeys.length) {
-    return { status: "error", message: "One or more permissions are invalid." };
-  }
-
-  await prisma.$transaction(async (tx) => {
-    await tx.rolePermission.deleteMany({ where: { roleId: role.id } });
-    await tx.rolePermission.createMany({
-      data: permissions.map((permission) => ({
-        roleId: role.id,
-        permissionId: permission.id,
-      })),
-      skipDuplicates: true,
-    });
-  });
-
-  await logAction({
-    action: "UPDATE",
-    entity: "RolePermission",
-    entityId: role.id,
-    schoolId: ctx.schoolId,
-    userId: ctx.userId,
-    metadata: { permissionKeys: parsed.data.permissionKeys },
-  });
-
-  revalidatePath("/settings/roles");
-  revalidatePath("/settings/permissions");
-  return { status: "success", message: "Role permissions updated." };
 }
 
 export async function assignRoleToUser(

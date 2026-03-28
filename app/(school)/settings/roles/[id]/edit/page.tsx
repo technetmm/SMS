@@ -17,32 +17,18 @@ export default async function EditRolePage({
 
   if (!schoolId) return null;
 
-  const [role, permissions, rolePermissions] = await Promise.all([
-    prisma.role.findFirst({
-      where: { id, schoolId },
-      select: { id: true, name: true },
-    }),
-    prisma.permission.findMany({
-      select: { key: true, category: true },
-      orderBy: [{ category: "asc" }, { key: "asc" }],
-    }),
-    prisma.rolePermission.findMany({
-      where: { roleId: id },
-      select: { permission: { select: { key: true } } },
-    }),
-  ]);
+  const role = await prisma.role.findFirst({
+    where: { id, schoolId },
+    select: { id: true, name: true },
+  });
 
   if (!role) {
     redirect("/settings/roles");
   }
 
-  const enabledSet = new Set(rolePermissions.map((item) => item.permission.key));
-
   return (
     <RoleEditForms
       role={role}
-      permissions={permissions}
-      enabledPermissionKeys={enabledSet}
       showCreatedToast={query.created === "1"}
     />
   );

@@ -1,12 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { buildExcelBuffer } from "@/lib/export/excel";
 import { buildSimpleTablePdfBuffer } from "@/lib/export/pdf";
 import { saveExportFile } from "@/lib/export/storage";
 import { logAction } from "@/lib/audit-log";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type ExportState = {
   status: "idle" | "success" | "error";
@@ -19,7 +18,7 @@ function stamp(prefix: string) {
 }
 
 export async function exportStudentsToExcel(): Promise<ExportState> {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const students = await prisma.student.findMany({
@@ -54,7 +53,7 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
 }
 
 export async function exportStaffToExcel(): Promise<ExportState> {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const staff = await prisma.staff.findMany({
@@ -89,7 +88,7 @@ export async function exportStaffToExcel(): Promise<ExportState> {
 }
 
 export async function exportAttendanceToExcel(): Promise<ExportState> {
-  await requirePermission(PERMISSIONS.feeReport);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const attendance = await prisma.attendance.findMany({
@@ -133,7 +132,7 @@ export async function exportAttendanceToExcel(): Promise<ExportState> {
 }
 
 export async function exportPaymentsToPDF(): Promise<ExportState> {
-  await requirePermission(PERMISSIONS.feeReport);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const payments = await prisma.invoice.findMany({

@@ -3,11 +3,10 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
 import { StudentStatus, UserRole } from "@/app/generated/prisma/enums";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StudentActionState = {
   status: "idle" | "success" | "error";
@@ -18,7 +17,7 @@ export async function createStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -111,7 +110,7 @@ export async function getStudents({
   query?: string;
   status?: StudentStatus | "ALL";
 } = {}) {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const where: Record<string, unknown> = { schoolId };
@@ -142,7 +141,7 @@ export async function getStudents({
 }
 
 export async function getStudentById(id: string) {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.student.findFirst({
@@ -154,7 +153,7 @@ export async function updateStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
@@ -205,7 +204,7 @@ export async function deleteStudent(
   _prevState: StudentActionState,
   formData: FormData,
 ): Promise<StudentActionState> {
-  await requirePermission(PERMISSIONS.studentUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const id = formData.get("id");

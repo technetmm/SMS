@@ -1,12 +1,11 @@
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
 import { TimetableForm } from "@/components/timetable/timetable-form";
 import { createTimetableSlot } from "@/app/(school)/timetable/actions";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function CreateTimetablePage() {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const [staff, sections] = await Promise.all([

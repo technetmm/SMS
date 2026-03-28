@@ -17,9 +17,7 @@ export default async function StaffPage() {
         actions={
           <div className="flex items-center gap-2">
             <ExportMenu
-              items={[
-                { label: "Export Excel", action: exportStaffToExcel },
-              ]}
+              items={[{ label: "Export Excel", action: exportStaffToExcel }]}
             />
             <Button asChild>
               <Link href="/staff/create">New Staff</Link>

@@ -9,7 +9,6 @@ import {
   Mail,
   Palette,
   Shield,
-  ShieldEllipsis,
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -21,7 +20,6 @@ const navItems = [
   { href: "/settings/change-password", label: "Change Password", icon: KeyRound },
   { href: "/settings/2fa", label: "Two-Factor Auth", icon: LockKeyhole },
   { href: "/settings/roles", label: "Roles", icon: Shield },
-  { href: "/settings/permissions", label: "Permissions", icon: ShieldEllipsis },
   { href: "/settings/security", label: "Security", icon: ShieldCheck },
 ];
 

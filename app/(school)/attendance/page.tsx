@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requirePermission } from "@/lib/rbac";
+import { requireSchoolAdminAccess } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
 import { EnrollmentAttendanceForm } from "@/components/enrollments/enrollment-attendance-form";
 import { EnrollmentAttendanceTable } from "@/components/enrollments/enrollment-attendance-table";
@@ -13,14 +13,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export default async function AttendancePage({
   searchParams,
 }: {
   searchParams: Promise<{ sectionId?: string; studentId?: string; date?: string }>;
 }) {
-  await requirePermission(PERMISSIONS.classUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenantId();
   const params = await searchParams;
 

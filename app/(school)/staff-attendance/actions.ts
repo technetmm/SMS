@@ -3,9 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { staffAttendanceSchema } from "@/lib/validators";
-import { PERMISSIONS } from "@/lib/permission-keys";
 
 export type StaffAttendanceActionState = {
   status: "idle" | "success" | "error";
@@ -13,7 +12,7 @@ export type StaffAttendanceActionState = {
 };
 
 export async function getStaffAttendance() {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.staffAttendance.findMany({
@@ -41,7 +40,7 @@ export async function markStaffAttendance(
   _prev: StaffAttendanceActionState,
   formData: FormData,
 ): Promise<StaffAttendanceActionState> {
-  await requirePermission(PERMISSIONS.staffUpdate);
+  await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
