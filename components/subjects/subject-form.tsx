@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { SubjectActionState } from "@/app/(school)/subjects/actions";
+import type { SubjectActionState } from "@/app/(school)/school/subjects/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,7 @@ export function SubjectForm({ mode, action, initialData }: SubjectFormProps) {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/subjects");
+      router.push("/school/subjects");
       router.refresh();
     }
     if (state.status === "error") {

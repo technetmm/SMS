@@ -1,6 +1,7 @@
 import { forbidden, unauthorized } from "next/navigation";
 import { getServerAuth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { prisma } from "@/lib/prisma/client";
 
 async function getSessionUser() {
   const session = await getServerAuth();
@@ -43,5 +44,27 @@ export async function requireSuperAdminAccess() {
   if (user.role !== UserRole.SUPER_ADMIN) {
     forbidden();
   }
+  return user;
+}
+
+export async function requireSchoolOwnerAdminAccess() {
+  const user = await getSessionUser();
+  if (user.role !== UserRole.SCHOOL_ADMIN || !user.schoolId) {
+    forbidden();
+  }
+
+  const ownerState = await prisma.user.findFirst({
+    where: {
+      id: user.id,
+      schoolId: user.schoolId,
+      role: UserRole.SCHOOL_ADMIN,
+    },
+    select: { isSchoolOwner: true },
+  });
+
+  if (!ownerState?.isSchoolOwner) {
+    forbidden();
+  }
+
   return user;
 }

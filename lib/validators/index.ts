@@ -12,6 +12,7 @@ import {
   StudentStatus,
   StaffStatus,
   UserRole,
+  BillingType,
 } from "@/app/generated/prisma/enums";
 
 export const studentCreateSchema = z.object({
@@ -49,6 +50,10 @@ export const classCreateSchema = z.object({
   courseId: z.string().min(1),
   classType: z.nativeEnum(ClassType),
   programType: z.nativeEnum(ProgramType),
+  billingType: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? BillingType.ONE_TIME : value),
+    z.nativeEnum(BillingType),
+  ),
   fee: z.preprocess(
     (value) => (value === "" || value === null || value === undefined ? 0 : value),
     z.coerce.number().nonnegative("Fee cannot be negative"),
@@ -162,6 +167,7 @@ export const staffAttendanceSchema = z.object({
 export const enrollmentCreateSchema = z.object({
   studentId: z.string().min(1, "Student is required"),
   sectionId: z.string().min(1, "Section is required"),
+  enrolledAt: z.coerce.date(),
   discountType: z
     .enum(["NONE", "FIXED", "PERCENT"])
     .optional()

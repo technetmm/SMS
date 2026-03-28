@@ -4,7 +4,7 @@ import { useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { DayOfWeek } from "@/app/generated/prisma/enums";
-import { moveTimetableSlot } from "@/app/(school)/timetable/actions";
+import { moveTimetableSlot } from "@/app/(school)/school/timetable/actions";
 import { cn } from "@/lib/utils";
 import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
 

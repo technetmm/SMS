@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   updateProgress,
   type EnrollmentActionState,
-} from "@/app/(school)/enrollments/actions";
+} from "@/app/(school)/school/enrollments/actions";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 

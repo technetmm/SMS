@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { addPayment, type BillingActionState } from "@/app/(school)/invoices/actions";
+import { addPayment, type BillingActionState } from "@/app/(school)/school/invoices/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";

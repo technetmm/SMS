@@ -8,7 +8,7 @@ import {
   disableTwoFactor,
   startTwoFactorSetup,
   verifyTwoFactorSetup,
-} from "@/app/(school)/settings/actions";
+} from "@/app/(school)/school/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

@@ -51,6 +51,8 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.role = user.role;
         token.schoolId = user.schoolId ?? null;
+        token.isSchoolOwner =
+          (user as typeof user & { isSchoolOwner?: boolean }).isSchoolOwner ?? false;
       }
 
       return token;
@@ -60,6 +62,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = String(token.id ?? "");
         session.user.role = token.role as typeof session.user.role;
         session.user.schoolId = token.schoolId as string | null;
+        session.user.isSchoolOwner = Boolean(token.isSchoolOwner);
       }
       return session;
     },

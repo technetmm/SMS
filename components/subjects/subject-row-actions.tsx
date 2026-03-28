@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteSubject, type SubjectActionState } from "@/app/(school)/subjects/actions";
+import { deleteSubject, type SubjectActionState } from "@/app/(school)/school/subjects/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -35,7 +35,7 @@ export function SubjectRowActions({ id, name }: { id: string; name: string }) {
   return (
     <div className="flex justify-end gap-2">
       <Button asChild size="sm" variant="outline">
-        <Link href={`/subjects/${id}/edit`}>Edit</Link>
+        <Link href={`/school/subjects/${id}/edit`}>Edit</Link>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

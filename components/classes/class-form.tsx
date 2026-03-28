@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ClassActionState } from "@/app/(school)/classes/actions";
+import type { ClassActionState } from "@/app/(school)/school/classes/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClassType, Currency, ProgramType } from "@/app/generated/prisma/enums";
+import { BillingType, ClassType, Currency, ProgramType } from "@/app/generated/prisma/enums";
 
 const initialState: ClassActionState = { status: "idle" };
 
@@ -31,6 +31,7 @@ type ClassFormProps = {
     name: string;
     classType: ClassType;
     programType: ProgramType;
+    billingType: BillingType;
     courseId: string;
     fee: number;
     feeCurrency: Currency;
@@ -49,7 +50,7 @@ export function ClassForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/classes");
+      router.push("/school/classes");
       router.refresh();
     }
     if (state.status === "error") {
@@ -139,6 +140,22 @@ export function ClassForm({
                 <SelectItem value={ClassType.ONE_ON_ONE}>One-on-One</SelectItem>
                 <SelectItem value={ClassType.PRIVATE}>Private</SelectItem>
                 <SelectItem value={ClassType.GROUP}>Group</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="billingType">Billing Type</Label>
+            <Select
+              name="billingType"
+              defaultValue={initialData?.billingType ?? BillingType.ONE_TIME}
+            >
+              <SelectTrigger id="billingType" className="w-full">
+                <SelectValue placeholder="Select billing type" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value={BillingType.ONE_TIME}>One-time</SelectItem>
+                <SelectItem value={BillingType.MONTHLY}>Monthly</SelectItem>
               </SelectContent>
             </Select>
           </div>

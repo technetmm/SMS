@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { SectionActionState } from "@/app/(school)/sections/actions";
+import type { SectionActionState } from "@/app/(school)/school/sections/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,8 +75,7 @@ export function SectionForm({
   const [selectedClass, setSelectedClass] = useState<Option | null>(
     initialClass,
   );
-  const [selectedStaff, setSelectedStaff] =
-    useState<Option[]>(initialStaff);
+  const [selectedStaff, setSelectedStaff] = useState<Option[]>(initialStaff);
 
   // `initialData` is stable for the lifetime of the page render (server component),
   // so we don't need to sync state from props via an effect.
@@ -84,7 +83,7 @@ export function SectionForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/sections");
+      router.push("/school/sections");
       router.refresh();
     }
     if (state.status === "error") {
@@ -106,12 +105,7 @@ export function SectionForm({
       ) : null}
       <input type="hidden" name="classId" value={selectedClass?.id ?? ""} />
       {selectedStaff.map((staff) => (
-        <input
-          key={staff.id}
-          type="hidden"
-          name="staffIds"
-          value={staff.id}
-        />
+        <input key={staff.id} type="hidden" name="staffIds" value={staff.id} />
       ))}
 
       <Card>
@@ -215,7 +209,7 @@ export function SectionForm({
               name="capacity"
               type="number"
               min={1}
-              defaultValue={initialData?.capacity?.toString() ?? "30"}
+              defaultValue={initialData?.capacity?.toString() ?? "3"}
             />
           </div>
         </CardContent>

@@ -17,11 +17,11 @@ export default async function proxy(req: NextRequest) {
   const schoolId = token.schoolId as string | null | undefined;
   const pathname = req.nextUrl.pathname;
 
-  if (role === UserRole.SUPER_ADMIN && pathname.startsWith("/dashboard")) {
+  if (role === UserRole.SUPER_ADMIN && pathname.startsWith("/school/dashboard")) {
     return NextResponse.redirect(new URL("/platform/dashboard", req.url));
   }
 
-  if (matchesPath(pathname, "/dashboard")) {
+  if (matchesPath(pathname, "/school/dashboard")) {
     if (role === UserRole.TEACHER) {
       return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
     }
@@ -55,23 +55,23 @@ export default async function proxy(req: NextRequest) {
   }
 
   const schoolAdminOnlyPaths = [
-    "/dashboard",
-    "/analytics",
-    "/students",
-    "/staff",
-    "/subjects",
-    "/courses",
-    "/classes",
-    "/sections",
-    "/enrollments",
-    "/attendance",
-    "/staff-attendance",
-    "/timetable",
-    "/invoices",
-    "/payments",
-    "/payroll",
-    "/exports",
-    "/settings",
+    "/school/dashboard",
+    "/school/analytics",
+    "/school/students",
+    "/school/staff",
+    "/school/subjects",
+    "/school/courses",
+    "/school/classes",
+    "/school/sections",
+    "/school/enrollments",
+    "/school/attendance",
+    "/school/staff-attendance",
+    "/school/timetable",
+    "/school/invoices",
+    "/school/payments",
+    "/school/payroll",
+    "/school/exports",
+    "/school/settings",
   ];
 
   const isSchoolAdminRoute = schoolAdminOnlyPaths.some((route) =>
@@ -103,24 +103,24 @@ export default async function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     "/platform/:path*",
-    "/dashboard/:path*",
+    "/school/dashboard/:path*",
     "/teacher/:path*",
     "/student/:path*",
-    "/analytics/:path*",
-    "/students/:path*",
-    "/subjects/:path*",
-    "/courses/:path*",
-    "/classes/:path*",
-    "/sections/:path*",
-    "/enrollments/:path*",
-    "/attendance/:path*",
-    "/staff-attendance/:path*",
-    "/timetable/:path*",
-    "/invoices/:path*",
-    "/payments/:path*",
-    "/payroll/:path*",
-    "/exports/:path*",
-    "/staff/:path*",
-    "/settings/:path*",
+    "/school/analytics/:path*",
+    "/school/students/:path*",
+    "/school/subjects/:path*",
+    "/school/courses/:path*",
+    "/school/classes/:path*",
+    "/school/sections/:path*",
+    "/school/enrollments/:path*",
+    "/school/attendance/:path*",
+    "/school/staff-attendance/:path*",
+    "/school/timetable/:path*",
+    "/school/invoices/:path*",
+    "/school/payments/:path*",
+    "/school/payroll/:path*",
+    "/school/exports/:path*",
+    "/school/staff/:path*",
+    "/school/settings/:path*",
   ],
 };

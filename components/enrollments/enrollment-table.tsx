@@ -1,4 +1,4 @@
-import { getEnrollments } from "@/app/(school)/enrollments/actions";
+import { getEnrollments } from "@/app/(school)/school/enrollments/actions";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,

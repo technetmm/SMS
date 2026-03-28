@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getTimetable, deleteTimetableSlot } from "@/app/(school)/timetable/actions";
+import { getTimetable, deleteTimetableSlot } from "@/app/(school)/school/timetable/actions";
 import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -54,7 +54,7 @@ export async function TimetableTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/timetable/${slot.id}/edit`}>Edit</Link>
+                    <Link href={`/school/timetable/${slot.id}/edit`}>Edit</Link>
                   </Button>
                   <form action={deleteTimetableSlot}>
                     <input type="hidden" name="id" value={slot.id} />

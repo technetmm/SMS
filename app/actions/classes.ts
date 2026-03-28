@@ -50,7 +50,7 @@ export async function createClass(
     return { status: "error", message: "Unable to create class." };
   }
 
-  revalidatePath("/classes");
+  revalidatePath("/school/classes");
   return { status: "success", message: "Class created successfully." };
 }
 
@@ -113,6 +113,6 @@ export async function createSection(
     return { status: "error", message: "Unable to create section." };
   }
 
-  revalidatePath("/classes");
+  revalidatePath("/school/classes");
   return { status: "success", message: "Section created successfully." };
 }

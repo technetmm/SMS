@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { disableTwoFactor } from "@/app/(school)/settings/actions";
+import { disableTwoFactor } from "@/app/(school)/school/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -44,7 +44,7 @@ export function SecuritySettings({
               checked={twoFactorEnabled}
               onCheckedChange={(checked) => {
                 if (checked && !twoFactorEnabled) {
-                  router.push("/settings/2fa");
+                  router.push("/school/settings/2fa");
                   return;
                 }
                 if (!checked && twoFactorEnabled) {
@@ -89,7 +89,7 @@ export function SecuritySettings({
                 </DialogContent>
               </Dialog>
             ) : (
-              <Button variant="outline" onClick={() => router.push("/settings/2fa")}>
+              <Button variant="outline" onClick={() => router.push("/school/settings/2fa")}>
                 Enable
               </Button>
             )}

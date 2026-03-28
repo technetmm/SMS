@@ -79,6 +79,7 @@ export async function signup(
           passwordHash,
           role: UserRole.SCHOOL_ADMIN,
           schoolId: tenant.id,
+          isSchoolOwner: true,
         },
       });
     });
@@ -95,4 +96,3 @@ export async function signup(
     };
   }
 }
-

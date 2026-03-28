@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const LABELS: Record<string, string> = {
+  school: "School",
   dashboard: "Dashboard",
   platform: "Platform",
   tenants: "Tenants",

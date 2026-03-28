@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getSections, deleteSection } from "@/app/(school)/sections/actions";
+import { getSections, deleteSection } from "@/app/(school)/school/sections/actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -60,7 +60,7 @@ export async function SectionTable() {
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button asChild size="sm" variant="outline">
-                      <Link href={`/sections/${section.id}/edit`}>Edit</Link>
+                      <Link href={`/school/sections/${section.id}/edit`}>Edit</Link>
                     </Button>
                     <form action={deleteSection}>
                       <input type="hidden" name="id" value={section.id} />

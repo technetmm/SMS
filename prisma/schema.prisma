@@ -82,6 +82,22 @@ enum PaymentStatus {
   PAID
 }
 
+enum BillingType {
+  ONE_TIME
+  MONTHLY
+}
+
+enum InvoiceType {
+  ONE_TIME
+  MONTHLY
+}
+
+enum DiscountType {
+  NONE
+  FIXED
+  PERCENT
+}
+
 enum Currency {
   USD
   MMK
@@ -105,6 +121,7 @@ model User {
   image            String?
   role             UserRole  @default(SCHOOL_ADMIN)
   schoolId         String?
+  isSchoolOwner    Boolean   @default(false)
   passwordHash     String?
   twoFactorSecret  String?
   twoFactorEnabled Boolean   @default(false)
@@ -116,7 +133,6 @@ model User {
   school         Tenant?              @relation(fields: [schoolId], references: [id])
   staffProfile   Staff?
   studentProfile Student?
-  roles          UserRoleAssignment[]
   auditLogs      AuditLog[]
   accounts       Account[]
   sessions       Session[]
@@ -128,13 +144,13 @@ model Tenant {
   slug      String    @unique
   plan      Plan      @default(FREE)
   isActive  Boolean   @default(true)
+  billingDayOfMonth Int @default(5)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   isDeleted Boolean   @default(false)
   deletedAt DateTime?
 
   users           User[]
-  roles           Role[]
   staff           Staff[]
   students        Student[]
   subjects        Subject[]
@@ -190,34 +206,6 @@ model Subscription {
   deletedAt            DateTime?
 
   tenant Tenant @relation(fields: [schoolId], references: [id])
-}
-
-model Role {
-  id        String   @id @default(cuid())
-  name      String
-  schoolId  String
-  isSystem  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  school Tenant               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  users  UserRoleAssignment[]
-
-  @@unique([schoolId, name])
-  @@index([schoolId])
-}
-
-model UserRoleAssignment {
-  id        String   @id @default(cuid())
-  userId    String
-  roleId    String
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, roleId])
-  @@index([roleId])
 }
 
 model Staff {
@@ -341,6 +329,7 @@ model Class {
   courseId    String
   classType   ClassType
   programType ProgramType
+  billingType BillingType @default(ONE_TIME)
   fee         Decimal     @default(0)
   feeCurrency Currency    @default(MMK)
   createdAt   DateTime    @default(now())
@@ -475,6 +464,13 @@ model Enrollment {
   schoolId   String
   studentId  String
   sectionId  String
+  billingType BillingType     @default(ONE_TIME)
+  billingDayOfMonth Int       @default(5)
+  monthlyBillingActive Boolean @default(false)
+  monthlyStartYear Int?
+  monthlyStartMonth Int?
+  discountType DiscountType @default(NONE)
+  discountValue Decimal @default(0)
   enrolledAt DateTime         @default(now())
   status     EnrollmentStatus @default(ACTIVE)
   isDeleted  Boolean          @default(false)
@@ -536,6 +532,9 @@ model Invoice {
   schoolId       String
   studentId      String
   enrollmentId   String
+  invoiceType    InvoiceType   @default(ONE_TIME)
+  billingYear    Int?
+  billingMonth   Int?
   originalAmount Decimal
   discount       Decimal       @default(0)
   finalAmount    Decimal
@@ -552,7 +551,7 @@ model Invoice {
   enrollment Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   payments   Payment[]
 
-  @@unique([enrollmentId])
+  @@unique([enrollmentId, billingYear, billingMonth])
   @@index([schoolId])
   @@index([studentId])
   @@index([enrollmentId])

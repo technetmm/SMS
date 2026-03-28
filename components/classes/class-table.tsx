@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getClasses, deleteClass } from "@/app/(school)/classes/actions";
+import { getClasses, deleteClass } from "@/app/(school)/school/classes/actions";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -51,7 +51,7 @@ export async function ClassTable() {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/classes/${klass.id}/edit`}>Edit</Link>
+                    <Link href={`/school/classes/${klass.id}/edit`}>Edit</Link>
                   </Button>
                   <form action={deleteClass}>
                     <input type="hidden" name="id" value={klass.id} />

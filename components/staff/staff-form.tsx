@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   createStaff,
   type StaffActionState,
-} from "@/app/(school)/staff/actions";
+} from "@/app/(school)/school/staff/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 
 const initialState: StaffActionState = { status: "idle" };
 
@@ -31,7 +30,7 @@ export function StaffForm() {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Staff created");
-      router.push("/staff");
+      router.push("/school/staff");
       router.refresh();
     }
     if (state.status === "error") {
@@ -59,7 +58,11 @@ export function StaffForm() {
               required
             />
           </div>
-          <DatePickerField name="dob" label="Date of birth" />
+          <div className="grid gap-2">
+            <Label htmlFor="dob">Date of birth</Label>
+            <Input id="dob" name="dob" type="date" required />
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue="MALE">
@@ -134,8 +137,14 @@ export function StaffForm() {
               required
             />
           </div>
-          <DatePickerField name="hireDate" label="Hire date" />
-          <DatePickerField name="exitDate" label="Exit date" />
+          <div className="grid gap-2">
+            <Label htmlFor="hireDate">Hire date</Label>
+            <Input id="hireDate" name="hireDate" type="date" required />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="exitDate">Exit date</Label>
+            <Input id="exitDate" name="exitDate" type="date" />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue="ACTIVE">

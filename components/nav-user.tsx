@@ -34,10 +34,10 @@ const menuItems = [
   },
   {
     name: "Settings",
-    href: "/settings",
+    href: "/school/settings",
     icon: <Settings2Icon />,
   },
-  { name: "Security", href: "/settings/security", icon: <ShieldCheckIcon /> },
+  { name: "Security", href: "/school/settings/security", icon: <ShieldCheckIcon /> },
 ];
 
 export function NavUser({

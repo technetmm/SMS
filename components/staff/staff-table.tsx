@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getStaff, deleteStaff } from "@/app/(school)/staff/actions";
+import { getStaff, deleteStaff } from "@/app/(school)/school/staff/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +10,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { enumLabel, STAFF_STATUS_LABELS } from "@/lib/enum-labels";
+import {
+  enumLabel,
+  STAFF_STATUS_LABELS,
+  USER_ROLE_LABELS,
+} from "@/lib/enum-labels";
+
+function formatRole(role: string) {
+  return role
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
 
 export async function StaffTable() {
   const staff = await getStaff();
@@ -24,6 +36,7 @@ export async function StaffTable() {
             <TableHead>Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Phone</TableHead>
+            <TableHead>Role</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Hire Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -36,6 +49,9 @@ export async function StaffTable() {
               <TableCell>{staff.email}</TableCell>
               <TableCell>{staff.phone ?? "-"}</TableCell>
               <TableCell>
+                {enumLabel(staff.user.role, USER_ROLE_LABELS)}
+              </TableCell>
+              <TableCell>
                 <Badge
                   variant={staff.status === "ACTIVE" ? "default" : "outline"}
                 >
@@ -46,10 +62,10 @@ export async function StaffTable() {
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/staff/${staff.id}`}>View</Link>
+                    <Link href={`/school/staff/${staff.id}`}>View</Link>
                   </Button>
                   <Button asChild size="sm" variant="default">
-                    <Link href={`/staff/${staff.id}/edit`}>Edit</Link>
+                    <Link href={`/school/staff/${staff.id}/edit`}>Edit</Link>
                   </Button>
                   <form action={deleteStaff}>
                     <input type="hidden" name="id" value={staff.id} />
@@ -64,7 +80,7 @@ export async function StaffTable() {
           {staff.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
                 No staff yet.

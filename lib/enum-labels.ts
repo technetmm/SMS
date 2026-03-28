@@ -68,6 +68,23 @@ export const DAY_OF_WEEK_LABELS: Record<string, string> = {
   SUN: "Sun",
 };
 
+export const BILLING_TYPE_LABELS: Record<string, string> = {
+  ONE_TIME: "One-time",
+  MONTHLY: "Monthly",
+};
+
+export const INVOICE_TYPE_LABELS: Record<string, string> = {
+  ONE_TIME: "One-time",
+  MONTHLY: "Monthly",
+};
+
+export const USER_ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "Super Admin",
+  SCHOOL_ADMIN: "Admin",
+  TEACHER: "Teacher",
+  STUDENT: "Student",
+};
+
 export function enumLabel<T extends string>(
   value: T,
   labels: Record<string, string>,

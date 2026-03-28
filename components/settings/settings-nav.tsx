@@ -3,24 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Building2,
   Image as ImageIcon,
   KeyRound,
   LockKeyhole,
   Mail,
   Palette,
-  Shield,
   ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { href: "/settings/theme", label: "Theme", icon: Palette },
-  { href: "/settings/profile-photo", label: "Profile Photo", icon: ImageIcon },
-  { href: "/settings/change-email", label: "Change Email", icon: Mail },
-  { href: "/settings/change-password", label: "Change Password", icon: KeyRound },
-  { href: "/settings/2fa", label: "Two-Factor Auth", icon: LockKeyhole },
-  { href: "/settings/roles", label: "Roles", icon: Shield },
-  { href: "/settings/security", label: "Security", icon: ShieldCheck },
+  { href: "/school/settings/school-profile", label: "School Info", icon: Building2 },
+  { href: "/school/settings/theme", label: "Theme", icon: Palette },
+  { href: "/school/settings/profile-photo", label: "Profile Photo", icon: ImageIcon },
+  { href: "/school/settings/change-email", label: "Change Email", icon: Mail },
+  { href: "/school/settings/change-password", label: "Change Password", icon: KeyRound },
+  { href: "/school/settings/2fa", label: "Two-Factor Auth", icon: LockKeyhole },
+  { href: "/school/settings/security", label: "Security", icon: ShieldCheck },
 ];
 
 export function SettingsNav() {

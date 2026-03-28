@@ -1,4 +1,4 @@
-import { getCourses } from "@/app/(school)/courses/actions";
+import { getCourses } from "@/app/(school)/school/courses/actions";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseRowActions } from "@/components/courses/course-row-actions";

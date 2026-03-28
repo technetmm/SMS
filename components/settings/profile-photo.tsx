@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(school)/settings/actions";
+import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(school)/school/settings/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

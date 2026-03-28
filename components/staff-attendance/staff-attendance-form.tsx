@@ -3,11 +3,10 @@
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import type { StaffAttendanceActionState } from "@/app/(school)/staff-attendance/actions";
+import type { StaffAttendanceActionState } from "@/app/(school)/school/staff-attendance/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 import {
   Select,
   SelectContent,
@@ -29,6 +28,7 @@ import {
   useComboboxAnchor,
 } from "@/components/ui/combobox";
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
+import { Input } from "../ui/input";
 
 const initialState: StaffAttendanceActionState = { status: "idle" };
 
@@ -91,9 +91,7 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
             <Combobox
               items={staff}
               value={selectedStaff}
-              onValueChange={(value: Option | null) =>
-                setSelectedStaff(value)
-              }
+              onValueChange={(value: Option | null) => setSelectedStaff(value)}
               itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={staffAnchor} className="w-full">
@@ -154,7 +152,16 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
             </Combobox>
           </div>
 
-          <DatePickerField name="date" label="Date" defaultValue={today} />
+          <div className="grid gap-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              defaultValue={today}
+              required
+            />
+          </div>
 
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>

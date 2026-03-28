@@ -6,11 +6,10 @@ import { toast } from "sonner";
 import {
   markAttendance,
   type EnrollmentActionState,
-} from "@/app/(school)/enrollments/actions";
+} from "@/app/(school)/school/enrollments/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 import {
   Select,
   SelectContent,
@@ -18,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 const initialState: EnrollmentActionState = { status: "idle" };
 
@@ -69,7 +69,16 @@ export function EnrollmentAttendanceForm({
             </Select>
           </div>
 
-          <DatePickerField name="date" label="Date" defaultValue={defaultDate} />
+          <div className="grid gap-2">
+            <Label htmlFor="date">Date</Label>
+            <Input
+              id="date"
+              name="date"
+              type="date"
+              defaultValue={defaultDate}
+              required
+            />
+          </div>
 
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>

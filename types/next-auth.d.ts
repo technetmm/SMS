@@ -8,6 +8,7 @@ declare module "next-auth" {
       id: string;
       role: UserRole;
       schoolId?: string | null;
+      isSchoolOwner?: boolean;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -17,6 +18,7 @@ declare module "next-auth" {
   interface User {
     role: UserRole;
     schoolId?: string | null;
+    isSchoolOwner?: boolean;
   }
 }
 
@@ -25,5 +27,6 @@ declare module "next-auth/jwt" {
     id?: string;
     role?: UserRole;
     schoolId?: string | null;
+    isSchoolOwner?: boolean;
   }
 }

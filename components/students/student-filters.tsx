@@ -55,7 +55,7 @@ export function StudentFilters({
         <Button
           type="button"
           variant="outline"
-          onClick={() => (window.location.href = "/students")}
+          onClick={() => (window.location.href = "/school/students")}
         >
           Reset
         </Button>

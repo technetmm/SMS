@@ -1,16 +1,19 @@
 import { StaffStatus } from "@/app/generated/prisma/enums";
 
-export const staffStatusColor = (status: StaffStatus) => {
+export const staffStatusColor = (
+  status: StaffStatus,
+  className: string = "text",
+) => {
   switch (status) {
     case StaffStatus.ACTIVE:
-      return "text-[#28A745]";
+      return className + "-[#28A745]";
     case StaffStatus.ONLEAVE:
-      return "text-[#F39C12]";
+      return className + "-[#F39C12]";
     case StaffStatus.RESIGNED:
-      return "text-[#3498DB]";
+      return className + "-[#3498DB]";
     case StaffStatus.TERMINATED:
-      return "text-[#E74C3C]";
+      return className + "-[#E74C3C]";
     default:
-      return "text-foreground";
+      return className + "-foreground";
   }
 };

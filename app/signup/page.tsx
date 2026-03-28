@@ -23,7 +23,7 @@ async function SignupPageContent() {
   }
 
   if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
-    redirect("/dashboard");
+    redirect("/school/dashboard");
   }
 
   if (session?.user?.role === UserRole.TEACHER) {

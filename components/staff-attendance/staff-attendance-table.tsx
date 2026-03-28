@@ -1,4 +1,4 @@
-import { getStaffAttendance } from "@/app/(school)/staff-attendance/actions";
+import { getStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
 import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import {

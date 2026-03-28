@@ -1,4 +1,4 @@
-import { getSubjects } from "@/app/(school)/subjects/actions";
+import { getSubjects } from "@/app/(school)/school/subjects/actions";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getStudents } from "@/app/(school)/students/actions";
+import { getStudents } from "@/app/(school)/school/students/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,10 +58,10 @@ export async function StudentTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/students/${student.id}`}>View</Link>
+                    <Link href={`/school/students/${student.id}`}>View</Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/students/${student.id}/edit`}>Edit</Link>
+                  <Button asChild size="sm" variant="default">
+                    <Link href={`/school/students/${student.id}/edit`}>Edit</Link>
                   </Button>
                   <StudentRowActions id={student.id} name={student.name} />
                 </div>

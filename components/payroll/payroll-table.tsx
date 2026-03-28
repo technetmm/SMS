@@ -1,4 +1,4 @@
-import { getPayrolls } from "@/app/(school)/payroll/actions";
+import { getPayrolls } from "@/app/(school)/school/payroll/actions";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,

@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   updateStaff,
   type StaffActionState,
-} from "@/app/(school)/staff/actions";
+} from "@/app/(school)/school/staff/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +20,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 
 type StaffFormData = {
   id: string;
@@ -50,7 +49,7 @@ export function StaffEditForm({ staff }: { staff: StaffFormData }) {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Staff updated");
-      router.push(`/staff/${staff.id}`);
+      router.push(`/school/staff/${staff.id}`);
       router.refresh();
     }
     if (state.status === "error") {
@@ -80,11 +79,16 @@ export function StaffEditForm({ staff }: { staff: StaffFormData }) {
               required
             />
           </div>
-          <DatePickerField
-            name="dob"
-            label="Date of birth"
-            defaultValue={staff.dob}
-          />
+          <div className="grid gap-2">
+            <Label htmlFor="dob">Date of birth</Label>
+            <Input
+              id="dob"
+              name="dob"
+              type="date"
+              defaultValue={staff.dob}
+              required
+            />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="gender">Gender</Label>
             <Select name="gender" defaultValue={staff.gender}>
@@ -165,16 +169,26 @@ export function StaffEditForm({ staff }: { staff: StaffFormData }) {
               required
             />
           </div>
-          <DatePickerField
-            name="hireDate"
-            label="Hire date"
-            defaultValue={staff.hireDate}
-          />
-          <DatePickerField
-            name="exitDate"
-            label="Exit date"
-            defaultValue={staff.exitDate ?? ""}
-          />
+          <div className="grid gap-2">
+            <Label htmlFor="hireDate">Hire date</Label>
+            <Input
+              id="hireDate"
+              name="hireDate"
+              type="date"
+              defaultValue={staff.hireDate}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="exitDate">Exit date</Label>
+            <Input
+              id="exitDate"
+              name="exitDate"
+              type="date"
+              defaultValue={staff.exitDate ?? ""}
+              required
+            />
+          </div>
           <div className="grid gap-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue={staff.status}>

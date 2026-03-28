@@ -38,10 +38,10 @@ const schoolNavGroups = [
   {
     label: "Overview",
     items: [
-      { title: "Dashboard", url: "/dashboard", icon: <LayoutDashboardIcon /> },
+      { title: "Dashboard", url: "/school/dashboard", icon: <LayoutDashboardIcon /> },
       {
         title: "Analytics",
-        url: "/analytics",
+        url: "/school/analytics",
         icon: <BarChart3Icon />,
       },
     ],
@@ -49,32 +49,32 @@ const schoolNavGroups = [
   {
     label: "People",
     items: [
-      { title: "Students", url: "/students", icon: <UsersIcon /> },
-      { title: "Staff", url: "/staff", icon: <UserRoundIcon /> },
+      { title: "Students", url: "/school/students", icon: <UsersIcon /> },
+      { title: "Staff", url: "/school/staff", icon: <UserRoundIcon /> },
     ],
   },
   {
     label: "Academics",
     items: [
-      { title: "Subjects", url: "/subjects", icon: <BookOpenTextIcon /> },
-      { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
-      { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
-      { title: "Sections", url: "/sections", icon: <TvMinimalIcon /> },
-      { title: "Enrollments", url: "/enrollments", icon: <ListChecksIcon /> },
+      { title: "Subjects", url: "/school/subjects", icon: <BookOpenTextIcon /> },
+      { title: "Courses", url: "/school/courses", icon: <BookOpenIcon /> },
+      { title: "Classes", url: "/school/classes", icon: <GraduationCapIcon /> },
+      { title: "Sections", url: "/school/sections", icon: <TvMinimalIcon /> },
+      { title: "Enrollments", url: "/school/enrollments", icon: <ListChecksIcon /> },
     ],
   },
   {
     label: "Schedule",
     items: [
-      { title: "Timetable", url: "/timetable", icon: <CalendarClockIcon /> },
+      { title: "Timetable", url: "/school/timetable", icon: <CalendarClockIcon /> },
       {
         title: "Student Attendance",
-        url: "/attendance",
+        url: "/school/attendance",
         icon: <CalendarDaysIcon />,
       },
       {
         title: "Staff Attendance",
-        url: "/staff-attendance",
+        url: "/school/staff-attendance",
         icon: <ClipboardCheckIcon />,
       },
     ],
@@ -82,10 +82,10 @@ const schoolNavGroups = [
   {
     label: "Finance",
     items: [
-      { title: "Invoices", url: "/invoices", icon: <FileTextIcon /> },
-      { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
-      { title: "Payroll", url: "/payroll", icon: <ReceiptIcon /> },
-      { title: "Exports", url: "/exports", icon: <FileDownIcon /> },
+      { title: "Invoices", url: "/school/invoices", icon: <FileTextIcon /> },
+      { title: "Payments", url: "/school/payments", icon: <CreditCardIcon /> },
+      { title: "Payroll", url: "/school/payroll", icon: <ReceiptIcon /> },
+      { title: "Exports", url: "/school/exports", icon: <FileDownIcon /> },
     ],
   },
 ];
@@ -153,12 +153,12 @@ export function AppSidebar({
       ? "/teacher/dashboard"
       : isStudent
         ? "/student/dashboard"
-        : "/dashboard";
+        : "/school/dashboard";
   const settingsHref = isPlatform
     ? "/platform/settings"
     : isTeacher || isStudent
       ? homeHref
-      : "/settings";
+      : "/school/settings";
 
   return (
     <Sidebar variant="inset" {...props}>

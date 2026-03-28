@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { DayOfWeek } from "@/app/generated/prisma/enums";
-import type { TimetableActionState } from "@/app/(school)/timetable/actions";
+import type { TimetableActionState } from "@/app/(school)/school/timetable/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -99,7 +99,7 @@ export function TimetableForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/timetable");
+      router.push("/school/timetable");
       router.refresh();
     }
     if (state.status === "error") {
@@ -258,7 +258,7 @@ export function TimetableForm({
 
       <div className="flex items-center justify-end gap-2">
         <Button asChild variant="outline">
-          <Link href="/timetable">Cancel</Link>
+          <Link href="/school/timetable">Cancel</Link>
         </Button>
         <SubmitButton
           label={mode === "create" ? "Create Slot" : "Save Changes"}
