@@ -98,7 +98,7 @@ export async function createStaff(
 
     await enqueueEmail({
       to: parsed.data.email,
-      subject: "Welcome to LMS",
+      subject: "Welcome to Technet SMS",
       body: `Hi ${parsed.data.name}, your staff account is ready.`,
       delayMs: 2000,
     });

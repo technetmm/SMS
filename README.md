@@ -1,6 +1,6 @@
-# LMS SaaS Infrastructure
+# SMS SaaS Infrastructure
 
-Production-ready infra stack for a multi-tenant LMS:
+Production-ready infra stack for a multi-tenant SMS:
 
 - Next.js app (standalone)
 - BullMQ worker

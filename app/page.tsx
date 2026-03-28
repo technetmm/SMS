@@ -12,7 +12,7 @@ import {
 } from "@/components/landing/landing-sections";
 
 export const metadata: Metadata = {
-  title: "Technet LMS SaaS | Multi-Tenant School Management",
+  title: "Technet SMS SaaS | Multi-Tenant School Management",
   description:
     "Run your school operations on one secure platform. Manage students, staff, classes, payments, and reports in minutes.",
 };

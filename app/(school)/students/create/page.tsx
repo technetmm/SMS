@@ -11,7 +11,7 @@ export default async function CreateStudentPage() {
     <div className="space-y-6">
       <PageHeader
         title="Create Student"
-        description="Add a new student record to the LMS."
+        description="Add a new student record to the SMS."
         actions={
           <Button asChild variant="outline">
             <Link href="/students">Back to Students</Link>

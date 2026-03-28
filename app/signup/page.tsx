@@ -7,7 +7,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { SignupForm } from "@/components/signup/signup-form";
 
 export const metadata: Metadata = {
-  title: "Create School Account | Technet LMS",
+  title: "Create School Account | Technet SMS",
   description: "Sign up your school and create a secure tenant admin account.",
 };
 
@@ -43,7 +43,7 @@ async function SignupPageContent() {
             Multi-tenant onboarding
           </p>
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Start your LMS school in minutes.
+            Start your SMS school in minutes.
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
             We will create your tenant and your SCHOOL_ADMIN user account in one

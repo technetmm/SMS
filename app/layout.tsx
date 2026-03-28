@@ -20,9 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Technet LMS",
+  title: "Technet SMS",
   description:
-    "Learning management system for students, classes, and payments.",
+    "School management system for students, classes, and payments.",
 };
 
 export default function RootLayout({

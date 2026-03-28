@@ -8,10 +8,10 @@ export function LandingHero() {
     <section className="mx-auto flex w-full max-w-6xl flex-col items-start gap-6 px-6 py-16 md:py-24">
       <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground">
         <Shield className="h-3.5 w-3.5" />
-        Built for multi-tenant LMS teams
+        Built for multi-tenant SMS teams
       </p>
       <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-        One platform to run every school in your LMS SaaS.
+        One platform to run every school in your SMS SaaS.
       </h1>
       <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
         Launch tenant onboarding, manage classrooms, track attendance, and automate billing with a
@@ -126,7 +126,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border/60 py-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-2 px-6 text-sm text-muted-foreground md:flex-row md:items-center">
-        <p>© {new Date().getFullYear()} Technet LMS SaaS. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Technet SMS SaaS. All rights reserved.</p>
         <div className="flex items-center gap-4">
           <Link href="/login" className="hover:text-foreground">
             Login
@@ -139,4 +139,3 @@ export function Footer() {
     </footer>
   );
 }
-

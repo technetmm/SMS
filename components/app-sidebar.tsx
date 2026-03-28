@@ -171,7 +171,7 @@ export function AppSidebar({
                   <LayoutDashboardIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Technet LMS</span>
+                  <span className="truncate font-medium">Technet SMS</span>
                   <span className="truncate text-xs">
                     {isPlatform ? "Platform" : "School"}
                   </span>

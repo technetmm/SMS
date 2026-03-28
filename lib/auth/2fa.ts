@@ -1,7 +1,7 @@
 import { authenticator } from "otplib";
 import QRCode from "qrcode";
 
-const ISSUER = "Technet LMS";
+const ISSUER = "Technet SMS";
 
 export function generateTwoFactorSecret() {
   return authenticator.generateSecret();
