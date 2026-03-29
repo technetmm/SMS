@@ -1,0 +1,6 @@
+ALTER TABLE "User"
+ADD COLUMN IF NOT EXISTS "emailVerifiedAt" TIMESTAMP(3);
+
+UPDATE "User"
+SET "emailVerifiedAt" = COALESCE("emailVerifiedAt", CURRENT_TIMESTAMP)
+WHERE "role" = 'SCHOOL_ADMIN';

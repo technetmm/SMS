@@ -13,6 +13,7 @@ import {
   DEVICE_APPROVAL_EXPIRED_CODE,
   DEVICE_APPROVAL_TTL_MS,
 } from "@/lib/auth/device-approval";
+import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth/email-verification";
 import {
   expirePendingDeviceApprovalsForUser,
   finalizeDeviceApprovalRequest,
@@ -74,6 +75,7 @@ export const authOptions: NextAuthOptions = {
             role: true,
             schoolId: true,
             isSchoolOwner: true,
+            emailVerifiedAt: true,
             passwordHash: true,
             activeSessionId: true,
             activeSessionExpiresAt: true,
@@ -88,6 +90,10 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isValid) return null;
+
+        if (user.role === "SCHOOL_ADMIN" && !user.emailVerifiedAt) {
+          throw new Error(EMAIL_NOT_VERIFIED_CODE);
+        }
 
         const now = new Date();
         const hasActiveSession =

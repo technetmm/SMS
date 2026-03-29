@@ -25,6 +25,10 @@ import {
   DEVICE_APPROVAL_REQUIRED_MESSAGE,
   extractDeviceApprovalToken,
 } from "@/lib/auth/device-approval";
+import {
+  EMAIL_NOT_VERIFIED_CODE,
+  EMAIL_NOT_VERIFIED_MESSAGE,
+} from "@/lib/auth/email-verification";
 import { SESSION_LOCK_ERROR_CODE, SESSION_LOCK_ERROR_MESSAGE } from "@/lib/auth/session-lock";
 
 export default function LoginPage() {
@@ -33,6 +37,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [approvalToken, setApprovalToken] = useState<string | null>(null);
+  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const lastCredentialsRef = useRef<{ email: string; password: string } | null>(null);
 
   async function attemptSignIn(email: string, password: string, token?: string) {
@@ -49,6 +54,7 @@ export default function LoginPage() {
     event.preventDefault();
     if (isSubmitting) return;
     setError(null);
+    setUnverifiedEmail(null);
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
@@ -59,6 +65,14 @@ export default function LoginPage() {
     const result = await attemptSignIn(email, password);
 
     if (result?.error) {
+      if (result.error === EMAIL_NOT_VERIFIED_CODE) {
+        setUnverifiedEmail(email);
+        setError(EMAIL_NOT_VERIFIED_MESSAGE);
+        toast.error(EMAIL_NOT_VERIFIED_MESSAGE);
+        setIsSubmitting(false);
+        return;
+      }
+
       const deviceApprovalToken = extractDeviceApprovalToken(result.error);
       if (deviceApprovalToken) {
         setApprovalToken(deviceApprovalToken);
@@ -89,6 +103,7 @@ export default function LoginPage() {
         ? SESSION_LOCK_ERROR_MESSAGE
         : "Invalid email or password.";
 
+      setUnverifiedEmail(null);
       setError(message);
       toast.error(message);
       setIsSubmitting(false);
@@ -96,6 +111,7 @@ export default function LoginPage() {
     }
 
     toast.success("Signed in successfully.");
+    setUnverifiedEmail(null);
     setApprovalToken(null);
     router.push("/");
   }
@@ -214,6 +230,17 @@ export default function LoginPage() {
             </InputGroup>
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
+          {unverifiedEmail ? (
+            <p className="text-sm text-muted-foreground">
+              Verify your email here:{" "}
+              <Link
+                href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                Enter verification code
+              </Link>
+            </p>
+          ) : null}
           <Button
             type="submit"
             className="w-full"
