@@ -81,36 +81,44 @@ export function DeviceApprovalListener() {
     if (!request || loading) return;
     setLoading(action);
 
-    const res = await fetch("/api/auth/device-approvals/respond", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ requestId: request.id, action }),
-    });
+    try {
+      const res = await fetch("/api/auth/device-approvals/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ requestId: request.id, action }),
+      });
 
-    const data = (await res.json().catch(() => ({}))) as {
-      status?: string;
-      error?: string;
-    };
+      const data = (await res.json().catch(() => ({}))) as {
+        status?: string;
+        error?: string;
+      };
 
-    if (!res.ok) {
-      toast.error(data.error ?? "Unable to process login request.");
+      console.log("Device approval response:", {
+        status: data.status,
+        error: data.error,
+      });
+
+      if (!res.ok) {
+        toast.error(data.error ?? "Unable to process login request.");
+        setLoading(null);
+        return;
+      }
+
+      if (action === "deny") {
+        toast.success("Login request denied.");
+        setRequest(null);
+        setLoading(null);
+        return;
+      }
+
+      toast.success("Login approved. This device will be signed out.");
+      await signOut({ callbackUrl: "/login" });
+    } catch {
+      toast.error("Unable to process login request.");
       setLoading(null);
-      return;
     }
-
-    if (action === "deny") {
-      toast.success("Login request denied.");
-      setRequest(null);
-      setLoading(null);
-      return;
-    }
-
-    toast.success("Login approved. This device will be signed out.");
-    await signOut({ callbackUrl: "/login" });
   }
-
-  console.log("Pending device approval request:", request);
 
   return (
     <Dialog open={Boolean(request)}>

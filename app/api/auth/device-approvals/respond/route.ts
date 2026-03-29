@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
 import { SESSION_LOCK_TTL_MS } from "@/lib/auth/session-lock";
+import { finalizeDeviceApprovalRequest } from "@/lib/auth/device-approval-lifecycle";
 
 const requestSchema = z.object({
   requestId: z.string().min(1),
@@ -47,20 +48,21 @@ export async function POST(request: NextRequest) {
   }
 
   if (approvalRequest.expiresAt.getTime() <= now.getTime()) {
-    await prisma.loginApprovalRequest.update({
-      where: { id: approvalRequest.id },
-      data: { status: "EXPIRED" },
+    await finalizeDeviceApprovalRequest(prisma, {
+      requestId: approvalRequest.id,
+      userId,
+      outcome: "EXPIRED",
+      now,
     });
     return NextResponse.json({ error: "Request expired", status: "EXPIRED" }, { status: 410 });
   }
 
   if (parsed.data.action === "deny") {
-    await prisma.loginApprovalRequest.update({
-      where: { id: approvalRequest.id },
-      data: {
-        status: "DENIED",
-        deniedAt: now,
-      },
+    await finalizeDeviceApprovalRequest(prisma, {
+      requestId: approvalRequest.id,
+      userId,
+      outcome: "DENIED",
+      now,
     });
 
     return NextResponse.json({ status: "DENIED" });
@@ -82,15 +84,14 @@ export async function POST(request: NextRequest) {
       return false;
     }
 
-    await tx.loginApprovalRequest.update({
-      where: { id: approvalRequest.id },
-      data: {
-        status: "APPROVED",
-        approvedAt: now,
-      },
+    const finalized = await finalizeDeviceApprovalRequest(tx, {
+      requestId: approvalRequest.id,
+      userId,
+      outcome: "APPROVED",
+      now,
     });
 
-    return true;
+    return finalized;
   });
 
   if (!transferred) {

@@ -69,6 +69,9 @@ export async function main() {
   await prisma.loginApprovalRequest.deleteMany({
     where: { userId: superAdmin.id },
   });
+  await prisma.notification.deleteMany({
+    where: { userId: superAdmin.id },
+  });
 
   console.log("Seed completed:");
   console.log(`- Super admin: ${superAdmin.email}`);

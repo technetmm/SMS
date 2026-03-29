@@ -14,6 +14,10 @@ import {
   DEVICE_APPROVAL_TTL_MS,
 } from "@/lib/auth/device-approval";
 import {
+  expirePendingDeviceApprovalsForUser,
+  finalizeDeviceApprovalRequest,
+} from "@/lib/auth/device-approval-lifecycle";
+import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
@@ -115,12 +119,12 @@ export const authOptions: NextAuthOptions = {
           }
 
           if (approvalRequest.expiresAt.getTime() <= now.getTime()) {
-            if (approvalRequest.status === "PENDING") {
-              await prisma.loginApprovalRequest.update({
-                where: { id: approvalRequest.id },
-                data: { status: "EXPIRED" },
-              });
-            }
+            await finalizeDeviceApprovalRequest(prisma, {
+              requestId: approvalRequest.id,
+              userId: user.id,
+              outcome: "EXPIRED",
+              now,
+            });
             throw new Error(DEVICE_APPROVAL_EXPIRED_CODE);
           }
 
@@ -171,12 +175,6 @@ export const authOptions: NextAuthOptions = {
           now.getTime() + SESSION_LOCK_TTL_MS,
         );
 
-        console.log("Attempting to lock user session", {
-          userId: user.id,
-          sessionId,
-          activeSessionExpiresAt,
-        });
-
         const locked = await (
           prisma.user as unknown as {
             updateMany: (args: unknown) => Promise<{ count: number }>;
@@ -196,12 +194,6 @@ export const authOptions: NextAuthOptions = {
           },
         });
 
-        console.log("User session locked", {
-          userId: user.id,
-          sessionId,
-          locked: locked.count,
-        });
-
         if (locked.count > 0) {
           return {
             ...user,
@@ -213,14 +205,9 @@ export const authOptions: NextAuthOptions = {
           throw new Error(SESSION_LOCK_ERROR_CODE);
         }
 
-        await prisma.loginApprovalRequest.updateMany({
-          where: {
-            userId: user.id,
-            currentSessionId: user.activeSessionId,
-            status: "PENDING",
-            expiresAt: { lte: now },
-          },
-          data: { status: "EXPIRED" },
+        await expirePendingDeviceApprovalsForUser(user.id, {
+          currentSessionId: user.activeSessionId,
+          now,
         });
 
         const existingPending = await prisma.loginApprovalRequest.findFirst({

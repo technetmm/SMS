@@ -1,29 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { prisma } from "@/lib/prisma/client";
+import { expirePendingDeviceApprovalsForUser } from "@/lib/auth/device-approval-lifecycle";
 
 export async function GET(request: NextRequest) {
   const token = await getToken({ req: request });
   const userId = typeof token?.id === "string" ? token.id : null;
+  const sessionId = typeof token?.sessionId === "string" ? token.sessionId : null;
 
-  if (!userId) {
+  if (!userId || !sessionId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const now = new Date();
 
-  await prisma.loginApprovalRequest.updateMany({
-    where: {
-      userId,
-      status: "PENDING",
-      expiresAt: { lte: now },
-    },
-    data: { status: "EXPIRED" },
+  await expirePendingDeviceApprovalsForUser(userId, {
+    currentSessionId: sessionId,
+    now,
   });
 
   const requests = await prisma.loginApprovalRequest.findMany({
     where: {
       userId,
+      currentSessionId: sessionId,
       status: "PENDING",
       expiresAt: { gt: now },
     },

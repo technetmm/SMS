@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { finalizeDeviceApprovalRequest } from "@/lib/auth/device-approval-lifecycle";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -13,6 +14,7 @@ export async function GET(request: Request) {
     where: { publicToken: token },
     select: {
       id: true,
+      userId: true,
       status: true,
       expiresAt: true,
     },
@@ -24,9 +26,11 @@ export async function GET(request: Request) {
 
   const now = new Date();
   if (approvalRequest.status === "PENDING" && approvalRequest.expiresAt.getTime() <= now.getTime()) {
-    await prisma.loginApprovalRequest.update({
-      where: { id: approvalRequest.id },
-      data: { status: "EXPIRED" },
+    await finalizeDeviceApprovalRequest(prisma, {
+      requestId: approvalRequest.id,
+      userId: approvalRequest.userId,
+      outcome: "EXPIRED",
+      now,
     });
     return NextResponse.json({ status: "EXPIRED" });
   }
