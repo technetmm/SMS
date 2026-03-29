@@ -114,6 +114,14 @@ enum DayOfWeek {
   SUN
 }
 
+enum LoginApprovalStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+  CONSUMED
+}
+
 model User {
   id               String    @id @default(cuid())
   name             String?
@@ -138,6 +146,7 @@ model User {
   auditLogs      AuditLog[]
   accounts       Account[]
   sessions       Session[]
+  loginApprovalRequests LoginApprovalRequest[]
 }
 
 model Tenant {
@@ -649,4 +658,25 @@ model VerificationToken {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
+}
+
+model LoginApprovalRequest {
+  id                String              @id @default(cuid())
+  userId            String
+  publicToken       String              @unique
+  requestedSessionId String
+  currentSessionId  String
+  status            LoginApprovalStatus @default(PENDING)
+  expiresAt         DateTime
+  approvedAt        DateTime?
+  deniedAt          DateTime?
+  requestedIp       String?
+  requestedUserAgent String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, expiresAt])
+  @@index([userId, currentSessionId, status])
 }

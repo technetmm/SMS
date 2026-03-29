@@ -35,7 +35,7 @@ export async function main() {
 
   const passwordHash = await bcrypt.hash(superAdminPassword, 10);
 
-  await prisma.user.upsert({
+  const superAdmin = await prisma.user.upsert({
     where: { email: superAdminEmail },
     update: {
       name: superAdminName,
@@ -43,6 +43,10 @@ export async function main() {
       schoolId: null,
       isSchoolOwner: false,
       passwordHash,
+      twoFactorSecret: null,
+      twoFactorEnabled: false,
+      activeSessionId: null,
+      activeSessionExpiresAt: null,
       isDeleted: false,
       deletedAt: null,
     },
@@ -53,11 +57,21 @@ export async function main() {
       passwordHash,
       schoolId: null,
       isSchoolOwner: false,
+      twoFactorSecret: null,
+      twoFactorEnabled: false,
+      activeSessionId: null,
+      activeSessionExpiresAt: null,
     },
+    select: { id: true, email: true },
+  });
+
+  // Keep seeded admin usable by removing stale device-approval requests.
+  await prisma.loginApprovalRequest.deleteMany({
+    where: { userId: superAdmin.id },
   });
 
   console.log("Seed completed:");
-  console.log(`- Super admin: ${superAdminEmail}`);
+  console.log(`- Super admin: ${superAdmin.email}`);
 }
 
 main()

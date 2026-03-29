@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { getServerAuth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppBreadcrumb } from "@/components/shared/app-breadcrumb";
+import { DeviceApprovalListener } from "@/components/auth/device-approval-listener";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const session = await getServerAuth();
@@ -37,6 +38,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         schoolId={session.user.schoolId ?? null}
       />
       <SidebarInset>
+        <DeviceApprovalListener />
         <header className="sticky top-0 flex h-16 shrink-0 items-center gap-2 bg-background rounded-t-xl">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
