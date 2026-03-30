@@ -5,11 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function VerifyEmailPage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string }>;
+  searchParams: Promise<{ email?: string; emailSend?: string }>;
 }) {
   const params = await searchParams;
   const initialEmail =
     typeof params.email === "string" ? params.email.trim().toLowerCase() : "";
+  const emailSendFailed = params.emailSend === "failed";
 
   return (
     <Card className="w-full">
@@ -20,7 +21,10 @@ export default async function VerifyEmailPage({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <VerifyEmailForm initialEmail={initialEmail} />
+        <VerifyEmailForm
+          initialEmail={initialEmail}
+          emailSendFailed={emailSendFailed}
+        />
         <p className="text-center text-sm text-muted-foreground">
           Already verified?{" "}
           <Link

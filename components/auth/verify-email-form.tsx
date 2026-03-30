@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { RefreshCwIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -10,15 +11,36 @@ import {
 } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Field, FieldDescription, FieldLabel } from "../ui/field";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 
-const initialState: VerifyEmailActionState = {
-  status: "idle",
-};
+const initialState: VerifyEmailActionState = { status: "idle" };
 
-export function VerifyEmailForm({ initialEmail }: { initialEmail: string }) {
+export function VerifyEmailForm({
+  initialEmail,
+  emailSendFailed = false,
+}: {
+  initialEmail: string;
+  emailSendFailed?: boolean;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState(initialEmail);
+  const [code, setCode] = useState("");
   const [verifyState, verifyAction] = useActionState(
     verifySignupEmailAction,
     initialState,
@@ -60,7 +82,14 @@ export function VerifyEmailForm({ initialEmail }: { initialEmail: string }) {
 
   return (
     <div className="space-y-5">
-      <form action={verifyAction} className="space-y-4">
+      {emailSendFailed ? (
+        <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          We created your account, but we could not send the verification code.
+          Please click <span className="font-medium">Resend Code</span>.
+        </div>
+      ) : null}
+
+      <form action={verifyAction} className="space-y-5">
         <div className="grid gap-2">
           <Label htmlFor="verify-email">Email</Label>
           <Input
@@ -74,16 +103,41 @@ export function VerifyEmailForm({ initialEmail }: { initialEmail: string }) {
         </div>
 
         <div className="grid gap-2">
-          <Label htmlFor="verify-code">Verification Code</Label>
-          <Input
+          <div className="flex items-center justify-between">
+            <Label htmlFor="verify-code">Verification Code</Label>
+            <Button
+              type="submit"
+              form="resend-code-form"
+              variant={emailSendFailed ? "default" : "outline"}
+              size="xs"
+            >
+              <RefreshCwIcon />
+              {emailSendFailed ? "Resend Now" : "Resend"}
+            </Button>
+          </div>
+          <InputOTP
             id="verify-code"
             name="code"
-            inputMode="numeric"
-            pattern="[0-9]{6}"
+            value={code}
+            onChange={setCode}
             maxLength={6}
-            placeholder="123456"
+            pattern={REGEXP_ONLY_DIGITS}
+            inputMode="numeric"
             required
-          />
+            autoComplete="one-time-code"
+          >
+            <InputOTPGroup className="*:data-[slot=input-otp-slot]:h-11 *:data-[slot=input-otp-slot]:w-10 *:data-[slot=input-otp-slot]:text-base sm:*:data-[slot=input-otp-slot]:h-12 sm:*:data-[slot=input-otp-slot]:w-11 sm:*:data-[slot=input-otp-slot]:text-lg">
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator className="mx-2" />
+            <InputOTPGroup className="*:data-[slot=input-otp-slot]:h-11 *:data-[slot=input-otp-slot]:w-10 *:data-[slot=input-otp-slot]:text-base sm:*:data-[slot=input-otp-slot]:h-12 sm:*:data-[slot=input-otp-slot]:w-11 sm:*:data-[slot=input-otp-slot]:text-lg">
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
         </div>
 
         <Button type="submit" className="w-full">
@@ -91,11 +145,8 @@ export function VerifyEmailForm({ initialEmail }: { initialEmail: string }) {
         </Button>
       </form>
 
-      <form action={resendAction} className="space-y-3">
+      <form id="resend-code-form" action={resendAction}>
         <input type="hidden" name="email" value={email} readOnly />
-        <Button type="submit" variant="outline" className="w-full">
-          Resend Code
-        </Button>
       </form>
     </div>
   );

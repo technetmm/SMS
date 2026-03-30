@@ -6,7 +6,10 @@ import { Prisma } from "@/app/generated/prisma/client";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { enqueueEmail } from "@/lib/queue";
-import { signupSchema, type SignupActionState } from "@/app/lib/validations/signup-schema";
+import {
+  signupSchema,
+  type SignupActionState,
+} from "@/app/lib/validations/signup-schema";
 import {
   buildSignupEmailVerificationIdentifier,
   buildSignupVerificationEmailBody,
@@ -80,28 +83,36 @@ export async function signup(
     };
   }
 
-  let createdTenantId: string | null = null;
-  let createdUserId: string | null = null;
-
   try {
     const [emailExists, slugExists] = await Promise.all([
-      prisma.user.findUnique({ where: { email: normalizedEmail }, select: { id: true } }),
-      prisma.tenant.findUnique({ where: { slug: tenantSlug }, select: { id: true } }),
+      prisma.user.findUnique({
+        where: { email: normalizedEmail },
+        select: { id: true },
+      }),
+      prisma.tenant.findUnique({
+        where: { slug: tenantSlug },
+        select: { id: true },
+      }),
     ]);
 
     if (emailExists) {
-      return { success: false, fieldErrors: { email: ["Email is already in use."] } };
+      return {
+        success: false,
+        fieldErrors: { email: ["Email is already in use."] },
+      };
     }
 
     if (slugExists) {
-      return { success: false, fieldErrors: { slug: ["Slug is already taken."] } };
+      return {
+        success: false,
+        fieldErrors: { slug: ["Slug is already taken."] },
+      };
     }
 
     const passwordHash = await bcrypt.hash(data.password, 12);
     const verificationCode = generateEmailVerificationCode();
-    const verificationTokenHash = await hashEmailVerificationCode(
-      verificationCode,
-    );
+    const verificationTokenHash =
+      await hashEmailVerificationCode(verificationCode);
     const verificationExpiresAt = new Date(
       Date.now() + SIGNUP_EMAIL_VERIFICATION_TTL_MS,
     );
@@ -114,7 +125,6 @@ export async function signup(
         },
         select: { id: true },
       });
-      createdTenantId = tenant.id;
 
       const user = await tx.user.create({
         data: {
@@ -128,7 +138,6 @@ export async function signup(
         },
         select: { id: true },
       });
-      createdUserId = user.id;
 
       const identifier = buildSignupEmailVerificationIdentifier(user.id);
       await tx.verificationToken.deleteMany({
@@ -162,31 +171,24 @@ export async function signup(
       emailQueued = false;
     }
 
-    if (!emailQueued) {
-      if (createdUserId && createdTenantId) {
-        const userId = createdUserId;
-        const tenantId = createdTenantId;
-        await prisma.$transaction(async (tx) => {
-          await tx.verificationToken.deleteMany({
-            where: {
-              identifier: buildSignupEmailVerificationIdentifier(userId),
-            },
-          });
-          await tx.$executeRaw`DELETE FROM "User" WHERE id = ${userId}`;
-          await tx.$executeRaw`DELETE FROM "Tenant" WHERE id = ${tenantId}`;
-        });
-      }
+    console.log("signup enqueueEmail", {
+      email: normalizedEmail,
+      emailQueued,
+    });
 
+    if (!emailQueued) {
       return {
-        success: false,
+        success: true,
         message:
-          "We could not send your verification code right now. Please try again.",
+          "School account created, but we could not send the verification code yet. Please use Resend Code.",
+        redirectTo: `/verify-email?email=${encodeURIComponent(normalizedEmail)}&emailSend=failed`,
       };
     }
 
     return {
       success: true,
-      message: "School account created. Check your email for the verification code.",
+      message:
+        "School account created. Check your email for the verification code.",
       redirectTo: `/verify-email?email=${encodeURIComponent(normalizedEmail)}`,
     };
   } catch (error) {
@@ -204,20 +206,6 @@ export async function signup(
         message:
           "Database schema is out of date. Please run migrations and try again.",
       };
-    }
-
-    if (createdUserId && createdTenantId) {
-      const userId = createdUserId;
-      const tenantId = createdTenantId;
-      await prisma.$transaction(async (tx) => {
-        await tx.verificationToken.deleteMany({
-          where: {
-            identifier: buildSignupEmailVerificationIdentifier(userId),
-          },
-        });
-        await tx.$executeRaw`DELETE FROM "User" WHERE id = ${userId}`;
-        await tx.$executeRaw`DELETE FROM "Tenant" WHERE id = ${tenantId}`;
-      });
     }
 
     return {
@@ -239,7 +227,8 @@ export async function verifySignupEmailAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.errors[0]?.message ?? "Invalid verification request.",
+      message:
+        parsed.error.errors[0]?.message ?? "Invalid verification request.",
     };
   }
 
@@ -373,9 +362,8 @@ export async function resendSignupEmailCodeAction(
   }
 
   const verificationCode = generateEmailVerificationCode();
-  const verificationTokenHash = await hashEmailVerificationCode(
-    verificationCode,
-  );
+  const verificationTokenHash =
+    await hashEmailVerificationCode(verificationCode);
   const verificationExpiresAt = new Date(
     Date.now() + SIGNUP_EMAIL_VERIFICATION_TTL_MS,
   );
@@ -388,15 +376,24 @@ export async function resendSignupEmailCodeAction(
     },
   });
 
-  const emailQueued = await enqueueEmail({
-    to: email,
-    subject: "Your new verification code for Technet SMS",
-    body: buildSignupVerificationEmailBody({
-      adminName: user.name ?? "Admin",
-      schoolName: user.school?.name ?? "your school",
-      code: verificationCode,
-    }),
-  });
+  let emailQueued = false;
+  try {
+    emailQueued = await enqueueEmail({
+      to: email,
+      subject: "Your new verification code for Technet SMS",
+      body: buildSignupVerificationEmailBody({
+        adminName: user.name ?? "Admin",
+        schoolName: user.school?.name ?? "your school",
+        code: verificationCode,
+      }),
+    });
+  } catch (error) {
+    console.error("resendSignupEmailCodeAction enqueueEmail failed", {
+      email,
+      error,
+    });
+    emailQueued = false;
+  }
 
   if (!emailQueued) {
     await prisma.verificationToken.deleteMany({

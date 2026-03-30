@@ -43,7 +43,6 @@ function createTransporter() {
     host,
     port,
     secure,
-    service: "gmail",
     auth: { user, pass },
   });
 
@@ -74,6 +73,13 @@ export async function processEmailJob(data: EmailJobPayload) {
   const from = resolveSenderAddress();
 
   try {
+    console.log("Sending email", {
+      to: data.to,
+      subject: data.subject,
+      hasText: Boolean(text),
+      hasHtml: Boolean(html),
+    });
+
     const info = await transporter.sendMail({
       from,
       to: data.to,
@@ -88,11 +94,13 @@ export async function processEmailJob(data: EmailJobPayload) {
       messageId: info.messageId,
     });
   } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown email transport error.";
     console.error("Email delivery failed", {
       to: data.to,
       subject: data.subject,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorMessage,
     });
-    throw new Error("Email delivery failed.");
+    throw new Error(`Email delivery failed: ${errorMessage}`);
   }
 }

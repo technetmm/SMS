@@ -1,7 +1,9 @@
 import { type ConnectionOptions, Queue } from "bullmq";
 
 const redisUrl = process.env.REDIS_URL;
-const connection: ConnectionOptions | null = redisUrl ? { url: redisUrl } : null;
+const connection: ConnectionOptions | null = redisUrl
+  ? { url: redisUrl }
+  : null;
 
 export const auditLogQueue = connection
   ? new Queue("audit-log", { connection })
@@ -54,7 +56,9 @@ export async function enqueueEmail(payload: {
 
   const legacyBody = payload.body?.trim();
   const textBody = payload.textBody?.trim() || legacyBody;
-  const htmlBody = payload.htmlBody?.trim() || (legacyBody ? textToSimpleHtml(legacyBody) : undefined);
+  const htmlBody =
+    payload.htmlBody?.trim() ||
+    (legacyBody ? textToSimpleHtml(legacyBody) : undefined);
 
   if (!textBody && !htmlBody) {
     throw new Error("Email payload requires body, textBody, or htmlBody.");

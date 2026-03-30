@@ -105,6 +105,16 @@ Development (hot reload):
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
+Local email delivery (signup verification/resend):
+
+- Set real SMTP values in `.env` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`).
+- For Gmail, use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and a Google App Password.
+- Run the email worker process; queueing alone is not delivery:
+
+```bash
+pnpm worker:email
+```
+
 Production:
 
 - Use built images
