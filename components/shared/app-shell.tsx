@@ -20,7 +20,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, image: true },
+    select: {
+      name: true,
+      email: true,
+      image: true,
+      school: { select: { name: true } },
+    },
   });
 
   if (!user) {
@@ -37,6 +42,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         }}
         role={session.user.role}
         schoolId={session.user.schoolId ?? null}
+        schoolName={user.school?.name ?? null}
       />
       <SidebarInset>
         <DeviceApprovalListener />

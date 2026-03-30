@@ -38,7 +38,11 @@ const schoolNavGroups = [
   {
     label: "Overview",
     items: [
-      { title: "Dashboard", url: "/school/dashboard", icon: <LayoutDashboardIcon /> },
+      {
+        title: "Dashboard",
+        url: "/school/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
       {
         title: "Analytics",
         url: "/school/analytics",
@@ -56,17 +60,29 @@ const schoolNavGroups = [
   {
     label: "Academics",
     items: [
-      { title: "Subjects", url: "/school/subjects", icon: <BookOpenTextIcon /> },
+      {
+        title: "Subjects",
+        url: "/school/subjects",
+        icon: <BookOpenTextIcon />,
+      },
       { title: "Courses", url: "/school/courses", icon: <BookOpenIcon /> },
       { title: "Classes", url: "/school/classes", icon: <GraduationCapIcon /> },
       { title: "Sections", url: "/school/sections", icon: <TvMinimalIcon /> },
-      { title: "Enrollments", url: "/school/enrollments", icon: <ListChecksIcon /> },
+      {
+        title: "Enrollments",
+        url: "/school/enrollments",
+        icon: <ListChecksIcon />,
+      },
     ],
   },
   {
     label: "Schedule",
     items: [
-      { title: "Timetable", url: "/school/timetable", icon: <CalendarClockIcon /> },
+      {
+        title: "Timetable",
+        url: "/school/timetable",
+        icon: <CalendarClockIcon />,
+      },
       {
         title: "Student Attendance",
         url: "/school/attendance",
@@ -134,6 +150,7 @@ export function AppSidebar({
   user,
   role,
   schoolId,
+  schoolName,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -143,6 +160,7 @@ export function AppSidebar({
   };
   role: UserRole;
   schoolId: string | null;
+  schoolName?: string | null;
 }) {
   const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
   const isTeacher = role === UserRole.TEACHER;
@@ -159,6 +177,7 @@ export function AppSidebar({
     : isTeacher || isStudent
       ? homeHref
       : "/school/settings";
+  const subtitle = isPlatform ? "Platform" : schoolName?.trim() || "School";
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -172,9 +191,7 @@ export function AppSidebar({
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Technet SMS</span>
-                  <span className="truncate text-xs">
-                    {isPlatform ? "Platform" : "School"}
-                  </span>
+                  <span className="truncate text-xs">{subtitle}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
