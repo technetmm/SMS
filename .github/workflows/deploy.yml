@@ -38,7 +38,7 @@ jobs:
   migration-gate:
     runs-on: ubuntu-latest
     needs: quality-gate
-    if: ${{ github.event_name == 'push' && secrets.PRODUCTION_DATABASE_URL != '' }}
+    if: github.event_name == 'push'
     permissions:
       contents: read
     steps:
@@ -61,26 +61,24 @@ jobs:
 
       - name: Check migration status (production DB)
         env:
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL != '' && secrets.PRODUCTION_DIRECT_URL || secrets.PRODUCTION_DATABASE_URL }}
-        run: pnpm db:migrate:status
-
-  migration-gate-skipped:
-    runs-on: ubuntu-latest
-    needs: quality-gate
-    if: ${{ github.event_name == 'push' && secrets.PRODUCTION_DATABASE_URL == '' }}
-    steps:
-      - name: Skip migration gate
+          PRODUCTION_DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          PRODUCTION_DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL }}
         run: |
-          echo "Skipping migration status check because PRODUCTION_DATABASE_URL is not configured."
-          echo "Set PRODUCTION_DATABASE_URL (and optional PRODUCTION_DIRECT_URL) repository secrets to enable this gate."
+          if [ -z "$PRODUCTION_DATABASE_URL" ]; then
+            echo "Skipping migration status check because PRODUCTION_DATABASE_URL is not configured."
+            echo "Set PRODUCTION_DATABASE_URL (and optional PRODUCTION_DIRECT_URL) repository secrets to enable this gate."
+            exit 0
+          fi
+
+          export DATABASE_URL="$PRODUCTION_DATABASE_URL"
+          export DIRECT_URL="${PRODUCTION_DIRECT_URL:-$PRODUCTION_DATABASE_URL}"
+          pnpm db:migrate:status
 
   ready-for-vercel:
     runs-on: ubuntu-latest
     needs:
       - quality-gate
       - migration-gate
-      - migration-gate-skipped
     if: ${{ always() }}
     steps:
       - name: Assert release gates passed
@@ -91,10 +89,6 @@ jobs:
           fi
           if [[ "${{ needs.migration-gate.result }}" != "success" && "${{ needs.migration-gate.result }}" != "skipped" ]]; then
             echo "migration-gate failed"
-            exit 1
-          fi
-          if [[ "${{ needs.migration-gate-skipped.result }}" != "success" && "${{ needs.migration-gate-skipped.result }}" != "skipped" ]]; then
-            echo "migration-gate-skipped failed"
             exit 1
           fi
           echo "Release gate passed. Vercel Git integration can proceed with deploy."
