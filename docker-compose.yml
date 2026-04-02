@@ -1,0 +1,202 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: lms-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-lms_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-lms_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lms-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: lms-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lms-net
+
+  app:
+    image: ${APP_IMAGE:-ghcr.io/example/lms:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lms-app
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD_ENCODED:-postgres}@postgres:5432/${POSTGRES_DB:-lms_db}?schema=public
+      REDIS_URL: redis://redis:6379
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:8080}
+      AUTH_SECRET: ${AUTH_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - lms-net
+
+  worker:
+    image: ${WORKER_IMAGE:-ghcr.io/example/lms-worker:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: lms-worker
+    restart: always
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD_ENCODED:-postgres}@postgres:5432/${POSTGRES_DB:-lms_db}?schema=public
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - lms-net
+
+  migrate:
+    image: ${WORKER_IMAGE:-ghcr.io/example/lms-worker:latest}
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: lms-migrate
+    profiles: ["tools"]
+    restart: "no"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD_ENCODED:-postgres}@postgres:5432/${POSTGRES_DB:-lms_db}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["pnpm", "prisma", "migrate", "deploy"]
+    networks:
+      - lms-net
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: lms-nginx
+    restart: always
+    ports:
+      - "${NGINX_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./infra/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./infra/certbot/www:/var/www/certbot
+    depends_on:
+      - app
+    networks:
+      - lms-net
+
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: lms-prometheus
+    restart: always
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - lms-net
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    container_name: lms-grafana
+    restart: always
+    env_file:
+      - .env
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - lms-net
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.2
+    container_name: lms-elasticsearch
+    restart: always
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - lms-net
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.15.2
+    container_name: lms-logstash
+    restart: always
+    volumes:
+      - ./infra/logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "${LOGSTASH_BEATS_PORT:-15044}:5044"
+      - "${LOGSTASH_TCP_PORT:-15000}:5000"
+    depends_on:
+      - elasticsearch
+    networks:
+      - lms-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.2
+    container_name: lms-kibana
+    restart: always
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - lms-net
+
+volumes:
+  postgres-data:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+  elasticsearch-data:
+
+networks:
+  lms-net:
+    driver: bridge
