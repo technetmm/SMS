@@ -12,6 +12,13 @@ export function resolveAuthSecret() {
   const legacySecret = readEnv("NEXTAUTH_SECRET");
   if (legacySecret) return legacySecret;
 
+  return undefined;
+}
+
+export function requireAuthSecret() {
+  const secret = resolveAuthSecret();
+  if (secret) return secret;
+
   throw new Error(
     "Missing auth secret. Set AUTH_SECRET (preferred) or NEXTAUTH_SECRET.",
   );
