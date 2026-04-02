@@ -3,7 +3,7 @@ export type ScheduleSlot = {
   startTime: string;
   endTime: string;
   room?: string | null;
-  teacherId?: string | null;
+  staffId?: string | null;
 };
 
 function toMinutes(time: string) {
@@ -23,9 +23,9 @@ export function hasScheduleConflict(existing: ScheduleSlot[], candidate: Schedul
 
     const roomConflict =
       candidate.room && slot.room && slot.room === candidate.room;
-    const teacherConflict =
-      candidate.teacherId && slot.teacherId && slot.teacherId === candidate.teacherId;
+    const staffConflict =
+      candidate.staffId && slot.staffId && slot.staffId === candidate.staffId;
 
-    return overlaps && (roomConflict || teacherConflict);
+    return overlaps && (roomConflict || staffConflict);
   });
 }

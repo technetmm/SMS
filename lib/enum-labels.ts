@@ -16,7 +16,7 @@ export const STUDENT_STATUS_LABELS: Record<string, string> = {
   GRADUATED: "Graduated",
 };
 
-export const TEACHER_STATUS_LABELS: Record<string, string> = {
+export const STAFF_STATUS_LABELS: Record<string, string> = {
   ACTIVE: "Active",
   ONLEAVE: "On Leave",
   RESIGNED: "Resigned",
@@ -53,17 +53,36 @@ export const ATTENDANCE_STATUS_LABELS: Record<string, string> = {
 };
 
 export const PAYMENT_STATUS_LABELS: Record<string, string> = {
-  PAID: "Paid",
   UNPAID: "Unpaid",
+  PARTIAL: "Partial",
+  PAID: "Paid",
 };
 
-export const PERMISSION_LABELS: Record<string, string> = {
-  MANAGE_STUDENTS: "Manage Students",
-  MANAGE_TEACHERS: "Manage Teachers",
-  MANAGE_CLASSES: "Manage Classes",
-  VIEW_REPORTS: "View Reports",
-  MANAGE_SUBSCRIPTIONS: "Manage Subscriptions",
-  MANAGE_TENANTS: "Manage Tenants",
+export const DAY_OF_WEEK_LABELS: Record<string, string> = {
+  MON: "Mon",
+  TUE: "Tue",
+  WED: "Wed",
+  THU: "Thu",
+  FRI: "Fri",
+  SAT: "Sat",
+  SUN: "Sun",
+};
+
+export const BILLING_TYPE_LABELS: Record<string, string> = {
+  ONE_TIME: "One-time",
+  MONTHLY: "Monthly",
+};
+
+export const INVOICE_TYPE_LABELS: Record<string, string> = {
+  ONE_TIME: "One-time",
+  MONTHLY: "Monthly",
+};
+
+export const USER_ROLE_LABELS: Record<string, string> = {
+  SUPER_ADMIN: "Super Admin",
+  SCHOOL_ADMIN: "Admin",
+  TEACHER: "Teacher",
+  STUDENT: "Student",
 };
 
 export function enumLabel<T extends string>(

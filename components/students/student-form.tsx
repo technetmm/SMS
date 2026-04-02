@@ -8,7 +8,7 @@ import {
   createStudent,
   updateStudent,
   type StudentActionState,
-} from "@/app/(school)/students/actions";
+} from "@/app/(school)/school/students/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 
 type StudentFormData = {
   id?: string;
@@ -52,7 +51,7 @@ export function StudentForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Student saved");
-      router.push("/students");
+      router.push("/school/students");
       router.refresh();
     }
     if (state.status === "error") {
@@ -77,6 +76,7 @@ export function StudentForm({
               id="name"
               name="name"
               defaultValue={initialData?.name}
+              placeholder="Student name"
               required
             />
           </div>
@@ -93,11 +93,16 @@ export function StudentForm({
               </SelectContent>
             </Select>
           </div>
-          <DatePickerField
-            name="dob"
-            label="Date of birth"
-            defaultValue={initialData?.dob}
-          />
+          <div className="grid gap-2">
+            <Label htmlFor="dob">Date of birth</Label>
+            <Input
+              id="dob"
+              name="dob"
+              type="date"
+              defaultValue={initialData?.dob}
+              required
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -111,6 +116,7 @@ export function StudentForm({
             <Input
               id="fatherName"
               name="fatherName"
+              placeholder="Father name"
               defaultValue={initialData?.fatherName ?? ""}
             />
           </div>
@@ -119,6 +125,7 @@ export function StudentForm({
             <Input
               id="motherName"
               name="motherName"
+              placeholder="Mother name"
               defaultValue={initialData?.motherName ?? ""}
             />
           </div>
@@ -144,6 +151,7 @@ export function StudentForm({
             <Textarea
               id="address"
               name="address"
+              placeholder="Address"
               defaultValue={initialData?.address ?? ""}
             />
           </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { changePasswordAction } from "@/app/(school)/settings/actions";
+import { changePasswordAction } from "@/app/(school)/school/settings/actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

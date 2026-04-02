@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createClass, createSection } from "@/app/actions/classes";
@@ -30,7 +30,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SubmitButton } from "@/components/shared/submit-button";
-import type { ClassActionState } from "@/app/actions/classes";
 import {
   Combobox,
   ComboboxChip,
@@ -50,7 +49,7 @@ type CourseOption = {
   name: string;
 };
 
-type TeacherOption = {
+type StaffOption = {
   id: string;
   name: string;
 };
@@ -64,7 +63,7 @@ type ClassItem = {
   sections: Array<{
     id: string;
     name: string;
-    teacher: { user: { name: string | null } } | null;
+    staff: { user: { name: string | null } } | null;
   }>;
 };
 
@@ -79,66 +78,69 @@ function uniqueById<T extends { id: string }>(items: T[]) {
 
 export function ClassesView({
   courses,
-  teachers,
+  staff,
   classes,
 }: {
   courses: CourseOption[];
-  teachers: TeacherOption[];
+  staff: StaffOption[];
   classes: ClassItem[];
 }) {
   const router = useRouter();
   const [classDialogOpen, setClassDialogOpen] = useState(false);
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
   const [selectedSectionClass, setSelectedSectionClass] = useState<ClassItem | null>(null);
-  const [selectedTeachers, setSelectedTeachers] = useState<TeacherOption[]>([]);
+  const [selectedStaff, setSelectedStaff] = useState<StaffOption[]>([]);
   const sectionClassAnchor = useComboboxAnchor();
-  const sectionTeacherAnchor = useComboboxAnchor();
-  const initialState: ClassActionState = { status: "idle" };
-  const [classState, classFormAction] = useActionState(
-    createClass,
-    initialState,
-  );
-  const [sectionState, sectionFormAction] = useActionState(
-    createSection,
-    initialState,
-  );
+  const sectionStaffAnchor = useComboboxAnchor();
+  const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (classState.status === "success") {
-      setClassDialogOpen(false);
-      toast.success(classState.message ?? "Class created");
-      router.refresh();
-    }
-    if (classState.status === "error") {
-      toast.error(classState.message ?? "Unable to create class");
-    }
-  }, [classState, router]);
+  function resetSectionDraft() {
+    setSelectedSectionClass(null);
+    setSelectedStaff([]);
+  }
 
-  useEffect(() => {
-    if (sectionState.status === "success") {
-      setSectionDialogOpen(false);
-      setSelectedSectionClass(null);
-      setSelectedTeachers([]);
-      toast.success(sectionState.message ?? "Section created");
-      router.refresh();
-    }
-    if (sectionState.status === "error") {
-      toast.error(sectionState.message ?? "Unable to create section");
-    }
-  }, [sectionState, router]);
+  function handleSectionDialogChange(open: boolean) {
+    setSectionDialogOpen(open);
+    if (!open) resetSectionDraft();
+  }
 
-  useEffect(() => {
-    if (!sectionDialogOpen) {
-      setSelectedSectionClass(null);
-      setSelectedTeachers([]);
-    }
-  }, [sectionDialogOpen]);
+  function handleClassSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await createClass({ status: "idle" }, formData);
+      if (result.status === "success") {
+        setClassDialogOpen(false);
+        toast.success(result.message ?? "Class created");
+        router.refresh();
+        event.currentTarget.reset();
+        return;
+      }
+      toast.error(result.message ?? "Unable to create class");
+    });
+  }
 
   function handleSectionSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!selectedSectionClass) {
       event.preventDefault();
       toast.error("Please select a class.");
+      return;
     }
+
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(async () => {
+      const result = await createSection({ status: "idle" }, formData);
+      if (result.status === "success") {
+        setSectionDialogOpen(false);
+        resetSectionDraft();
+        toast.success(result.message ?? "Section created");
+        router.refresh();
+        event.currentTarget.reset();
+        return;
+      }
+      toast.error(result.message ?? "Unable to create section");
+    });
   }
 
   return (
@@ -146,13 +148,13 @@ export function ClassesView({
       <div className="flex flex-wrap gap-3">
         <Dialog open={classDialogOpen} onOpenChange={setClassDialogOpen}>
           <DialogTrigger asChild>
-            <Button>New Class</Button>
+            <Button disabled={pending}>New Class</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-130">
             <DialogHeader>
               <DialogTitle>Create Class</DialogTitle>
             </DialogHeader>
-            <form action={classFormAction} className="space-y-4">
+            <form onSubmit={handleClassSubmit} className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="class-name">Class name</Label>
                 <Input id="class-name" name="name" required />
@@ -200,24 +202,24 @@ export function ClassesView({
                 </Select>
               </div>
               <div className="flex justify-end">
-                <SubmitButton label="Create class" />
+                <SubmitButton label="Create class" loadingLabel="Creating..." />
               </div>
             </form>
           </DialogContent>
         </Dialog>
-        <Dialog open={sectionDialogOpen} onOpenChange={setSectionDialogOpen}>
+        <Dialog open={sectionDialogOpen} onOpenChange={handleSectionDialogChange}>
           <DialogTrigger asChild>
-            <Button variant="outline">New Section</Button>
+            <Button variant="outline" disabled={pending}>New Section</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-130">
             <DialogHeader>
               <DialogTitle>Create Section</DialogTitle>
             </DialogHeader>
-            <form action={sectionFormAction} onSubmit={handleSectionSubmit} className="space-y-4">
+            <form onSubmit={handleSectionSubmit} className="space-y-4">
               <input type="hidden" name="classId" value={selectedSectionClass?.id ?? ""} />
-              <input type="hidden" name="teacherId" value={selectedTeachers[0]?.id ?? ""} />
-              {selectedTeachers.map((teacher) => (
-                <input key={teacher.id} type="hidden" name="teacherIds" value={teacher.id} />
+              <input type="hidden" name="staffId" value={selectedStaff[0]?.id ?? ""} />
+              {selectedStaff.map((staff) => (
+                <input key={staff.id} type="hidden" name="staffIds" value={staff.id} />
               ))}
               <div className="grid gap-2">
                 <Label htmlFor="section-name">Section name</Label>
@@ -255,34 +257,34 @@ export function ClassesView({
                 </Combobox>
               </div>
               <div className="grid gap-2">
-                <Label>Teachers (Multiple)</Label>
+                <Label>Staff (Multiple)</Label>
                 <Combobox
                   multiple
                   autoHighlight
-                  items={teachers}
-                  value={selectedTeachers}
-                  onValueChange={(value: TeacherOption[]) =>
-                    setSelectedTeachers(uniqueById(value))
+                  items={staff}
+                  value={selectedStaff}
+                  onValueChange={(value: StaffOption[]) =>
+                    setSelectedStaff(uniqueById(value))
                   }
                   itemToStringLabel={(item) => item?.name ?? ""}
                 >
-                  <ComboboxChips ref={sectionTeacherAnchor} className="w-full">
+                  <ComboboxChips ref={sectionStaffAnchor} className="w-full">
                     <ComboboxValue>
                       {(values) => (
                         <>
-                          {values.map((value: TeacherOption) => (
+                          {values.map((value: StaffOption) => (
                             <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                           ))}
-                          <ComboboxChipsInput placeholder="Search teachers..." />
+                          <ComboboxChipsInput placeholder="Search staff..." />
                         </>
                       )}
                     </ComboboxValue>
                   </ComboboxChips>
-                  <ComboboxContent anchor={sectionTeacherAnchor}>
-                    <ComboboxInput placeholder="Search teachers..." />
-                    <ComboboxEmpty>No teachers found.</ComboboxEmpty>
+                  <ComboboxContent anchor={sectionStaffAnchor}>
+                    <ComboboxInput placeholder="Search staff..." />
+                    <ComboboxEmpty>No staff found.</ComboboxEmpty>
                     <ComboboxList>
-                      {(item: TeacherOption) => (
+                      {(item: StaffOption) => (
                         <ComboboxItem key={item.id} value={item}>
                           {item.name}
                         </ComboboxItem>
@@ -291,8 +293,8 @@ export function ClassesView({
                   </ComboboxContent>
                 </Combobox>
                 <p className="text-xs text-muted-foreground">
-                  Multiple teachers can be selected. Current schema assigns the first selected
-                  teacher to this section.
+                  Multiple staff can be selected. Current schema assigns the first selected
+                  staff to this section.
                 </p>
               </div>
               <div className="grid gap-2">
@@ -339,7 +341,7 @@ export function ClassesView({
                       item.sections.map((section) => (
                         <span key={section.id} className="text-sm">
                           {section.name} ·{" "}
-                          {section.teacher?.user.name ?? "Unassigned"}
+                          {section.staff?.user.name ?? "Unassigned"}
                         </span>
                       ))
                     )}

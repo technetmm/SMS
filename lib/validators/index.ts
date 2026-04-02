@@ -1,11 +1,17 @@
 import { z } from "zod";
 import {
   ClassType,
+  DayOfWeek,
+  AttendanceStatus,
+  EnrollmentStatus,
   Gender,
   MaritalStatus,
+  PaymentStatus,
   ProgramType,
   StudentStatus,
-  TeacherStatus,
+  StaffStatus,
+  UserRole,
+  BillingType,
 } from "@/app/generated/prisma/enums";
 
 export const studentCreateSchema = z.object({
@@ -43,12 +49,20 @@ export const classCreateSchema = z.object({
   courseId: z.string().min(1),
   classType: z.nativeEnum(ClassType),
   programType: z.nativeEnum(ProgramType),
+  billingType: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? BillingType.ONE_TIME : value),
+    z.nativeEnum(BillingType),
+  ),
+  fee: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().nonnegative("Fee cannot be negative"),
+  ),
 });
 
 export const sectionCreateSchema = z.object({
   classId: z.string().min(1),
   name: z.string().min(1, "Section name is required"),
-  teacherId: z.string().optional(),
+  staffId: z.string().optional(),
   room: z.string().optional(),
   capacity: z.preprocess(
     (value) => (value === "" ? undefined : value),
@@ -56,15 +70,15 @@ export const sectionCreateSchema = z.object({
   ),
 });
 
-export const sectionMultiTeacherSchema = z.object({
+export const sectionMultiStaffSchema = z.object({
   id: z.string().optional(),
   classId: z.string().min(1, "Class is required"),
   name: z.string().min(1, "Section name is required"),
-  teacherIds: z.array(z.string().min(1)).optional().default([]),
+  staffIds: z.array(z.string().min(1)).optional().default([]),
   room: z.string().optional(),
   capacity: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.coerce.number().int().positive().optional(),
+    (value) => (value === "" || value === null || value === undefined ? 30 : value),
+    z.coerce.number().int().positive("Capacity must be at least 1"),
   ),
 });
 
@@ -87,7 +101,7 @@ export const courseUpdateSchema = courseCreateSchema.extend({
   id: z.string().min(1, "Course id is required"),
 });
 
-export const teacherCreateSchema = z.object({
+export const staffCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   jobTitle: z.string().min(2, "Job title is required"),
   nrcNumber: z.string().min(3, "NRC number is required"),
@@ -100,7 +114,7 @@ export const teacherCreateSchema = z.object({
   phone: z.string().min(6).optional(),
   hireDate: z.coerce.date(),
   exitDate: z.coerce.date().optional(),
-  status: z.nativeEnum(TeacherStatus),
+  status: z.nativeEnum(StaffStatus),
   ratePerSection: z.preprocess(
     (value) => (value === "" || value === null ? undefined : value),
     z.coerce.number().nonnegative("Rate per section cannot be negative").optional(),
@@ -109,8 +123,101 @@ export const teacherCreateSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const teacherUpdateSchema = teacherCreateSchema
+export const staffUpdateSchema = staffCreateSchema
   .omit({ password: true })
   .extend({
-    id: z.string().min(1, "Teacher id is required"),
+    id: z.string().min(1, "Staff id is required"),
   });
+
+const timeString = z
+  .string()
+  .regex(/^\d{2}:\d{2}$/, "Time must be in HH:mm format");
+
+export const timetableSlotSchema = z
+  .object({
+    id: z.string().optional(),
+    sectionId: z.string().min(1, "Section is required"),
+    staffId: z.string().min(1, "Staff is required"),
+    dayOfWeek: z.nativeEnum(DayOfWeek),
+    startTime: timeString,
+    endTime: timeString,
+    room: z.string().optional(),
+  })
+  .refine(
+    (value) => {
+      const [sH, sM] = value.startTime.split(":").map(Number);
+      const [eH, eM] = value.endTime.split(":").map(Number);
+      return eH * 60 + eM > sH * 60 + sM;
+    },
+    { message: "End time must be after start time", path: ["endTime"] },
+  );
+
+export const staffAttendanceSchema = z.object({
+  staffId: z.string().min(1, "Staff is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  date: z.coerce.date(),
+  status: z.nativeEnum(AttendanceStatus),
+});
+
+export const enrollmentCreateSchema = z.object({
+  studentId: z.string().min(1, "Student is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  enrolledAt: z.coerce.date(),
+  discountType: z
+    .enum(["NONE", "FIXED", "PERCENT"])
+    .optional()
+    .default("NONE"),
+  discountValue: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().min(0, "Discount must be >= 0"),
+  ),
+});
+
+export const enrollmentUpdateSchema = z.object({
+  id: z.string().min(1, "Enrollment id is required"),
+  status: z.nativeEnum(EnrollmentStatus),
+});
+
+export const enrollmentAttendanceSchema = z.object({
+  enrollmentId: z.string().min(1, "Enrollment is required"),
+  date: z.coerce.date(),
+  status: z.nativeEnum(AttendanceStatus),
+});
+
+export const enrollmentProgressSchema = z.object({
+  enrollmentId: z.string().min(1, "Enrollment is required"),
+  progress: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
+  remark: z.string().optional(),
+});
+
+export const invoiceUpdateSchema = z.object({
+  id: z.string().min(1, "Invoice id is required"),
+  status: z.nativeEnum(PaymentStatus),
+});
+
+export const enrollmentActorRoleSchema = z.nativeEnum(UserRole).refine(
+  (role) => role === UserRole.SCHOOL_ADMIN || role === UserRole.SUPER_ADMIN,
+  { message: "Only staff/admin can enroll students." },
+);
+
+export const paymentCreateSchema = z.object({
+  invoiceId: z.string().min(1, "Invoice is required"),
+  amount: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().positive("Payment amount must be greater than 0"),
+  ),
+  method: z.string().min(2, "Payment method is required"),
+});
+
+export const refundCreateSchema = z.object({
+  paymentId: z.string().min(1, "Payment is required"),
+  amount: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z.coerce.number().positive("Refund amount must be greater than 0"),
+  ),
+  reason: z.string().optional(),
+});
+
+export const payrollGenerateSchema = z.object({
+  month: z.coerce.date(),
+});

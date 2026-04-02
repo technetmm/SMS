@@ -1,18 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useActionState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { disableTwoFactor } from "@/app/(school)/settings/actions";
+import { disableTwoFactor } from "@/app/(school)/school/settings/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-
-const initialState = { status: "idle" as const };
 
 export function SecuritySettings({
   lastLogin,
@@ -24,16 +21,7 @@ export function SecuritySettings({
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
-  const [state, formAction] = useActionState(disableTwoFactor, initialState);
-
-  useEffect(() => {
-    if (state.status === "success") {
-      toast.success(state.message ?? "2FA disabled");
-      setDialogOpen(false);
-      router.refresh();
-    }
-    if (state.status === "error") toast.error(state.message ?? "Unable to disable 2FA");
-  }, [router, state]);
+  const [pending, startTransition] = useTransition();
 
   return (
     <Card>
@@ -56,7 +44,7 @@ export function SecuritySettings({
               checked={twoFactorEnabled}
               onCheckedChange={(checked) => {
                 if (checked && !twoFactorEnabled) {
-                  router.push("/settings/2fa");
+                  router.push("/school/settings/2fa");
                   return;
                 }
                 if (!checked && twoFactorEnabled) {
@@ -73,17 +61,35 @@ export function SecuritySettings({
                   <DialogHeader>
                     <DialogTitle>Disable 2FA</DialogTitle>
                   </DialogHeader>
-                  <form action={formAction} className="space-y-3">
+                  <form
+                    className="space-y-3"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      const formData = new FormData(event.currentTarget);
+                      startTransition(async () => {
+                        const result = await disableTwoFactor({ status: "idle" }, formData);
+                        if (result.status === "success") {
+                          toast.success(result.message ?? "2FA disabled");
+                          setDialogOpen(false);
+                          router.refresh();
+                          return;
+                        }
+                        toast.error(result.message ?? "Unable to disable 2FA");
+                      });
+                    }}
+                  >
                     <div className="grid gap-2">
                       <Label htmlFor="disable-password">Confirm password</Label>
                       <Input id="disable-password" name="password" type="password" required />
                     </div>
-                    <Button type="submit">Disable 2FA</Button>
+                    <Button type="submit" disabled={pending}>
+                      {pending ? "Disabling..." : "Disable 2FA"}
+                    </Button>
                   </form>
                 </DialogContent>
               </Dialog>
             ) : (
-              <Button variant="outline" onClick={() => router.push("/settings/2fa")}>
+              <Button variant="outline" onClick={() => router.push("/school/settings/2fa")}>
                 Enable
               </Button>
             )}

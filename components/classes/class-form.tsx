@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { ClassActionState } from "@/app/(school)/classes/actions";
+import type { ClassActionState } from "@/app/(school)/school/classes/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  BillingType,
+  ClassType,
+  ProgramType,
+} from "@/app/generated/prisma/enums";
 
 const initialState: ClassActionState = { status: "idle" };
 
@@ -28,20 +33,27 @@ type ClassFormProps = {
   initialData?: {
     id: string;
     name: string;
-    classType: "ONE_ON_ONE" | "PRIVATE" | "GROUP";
-    programType: "REGULAR" | "INTENSIVE";
+    classType: ClassType;
+    programType: ProgramType;
+    billingType: BillingType;
     courseId: string;
+    fee: number;
   };
 };
 
-export function ClassForm({ mode, action, courses, initialData }: ClassFormProps) {
+export function ClassForm({
+  mode,
+  action,
+  courses,
+  initialData,
+}: ClassFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
 
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/classes");
+      router.push("/school/classes");
       router.refresh();
     }
     if (state.status === "error") {
@@ -57,12 +69,19 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
 
       <Card>
         <CardHeader>
-          <CardTitle>{mode === "create" ? "Create Class" : "Edit Class"}</CardTitle>
+          <CardTitle>
+            {mode === "create" ? "Create Class" : "Edit Class"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="name">Class Name</Label>
-            <Input id="name" name="name" defaultValue={initialData?.name ?? ""} required />
+            <Input
+              id="name"
+              name="name"
+              defaultValue={initialData?.name ?? ""}
+              required
+            />
           </div>
 
           <div className="grid gap-2 md:col-span-2">
@@ -82,28 +101,67 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
           </div>
 
           <div className="grid gap-2">
+            <Label htmlFor="fee">Class Fee</Label>
+            <Input
+              id="fee"
+              name="fee"
+              type="number"
+              step="0.01"
+              min="0"
+              defaultValue={initialData?.fee ?? 0}
+              required
+            />
+          </div>
+
+          <div className="grid gap-2">
             <Label htmlFor="classType">Class Type</Label>
-            <Select name="classType" defaultValue={initialData?.classType ?? "GROUP"}>
+            <Select
+              name="classType"
+              defaultValue={initialData?.classType ?? "GROUP"}
+            >
               <SelectTrigger id="classType" className="w-full">
                 <SelectValue placeholder="Select class type" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="ONE_ON_ONE">One-on-One</SelectItem>
-                <SelectItem value="PRIVATE">Private</SelectItem>
-                <SelectItem value="GROUP">Group</SelectItem>
+                <SelectItem value={ClassType.ONE_ON_ONE}>One-on-One</SelectItem>
+                <SelectItem value={ClassType.PRIVATE}>Private</SelectItem>
+                <SelectItem value={ClassType.GROUP}>Group</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="billingType">Billing Type</Label>
+            <Select
+              name="billingType"
+              defaultValue={initialData?.billingType ?? BillingType.ONE_TIME}
+            >
+              <SelectTrigger id="billingType" className="w-full">
+                <SelectValue placeholder="Select billing type" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value={BillingType.ONE_TIME}>One-time</SelectItem>
+                <SelectItem value={BillingType.MONTHLY}>Monthly</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="programType">Program Type</Label>
-            <Select name="programType" defaultValue={initialData?.programType ?? "REGULAR"}>
+            <Select
+              name="programType"
+              defaultValue={initialData?.programType ?? "REGULAR"}
+            >
               <SelectTrigger id="programType" className="w-full">
                 <SelectValue placeholder="Select program type" />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="REGULAR">Regular</SelectItem>
-                <SelectItem value="INTENSIVE">Intensive</SelectItem>
+                <SelectItem value={ProgramType.REGULAR}>
+                  Regular ( 2 days )
+                </SelectItem>
+                <SelectItem value={ProgramType.INTENSIVE}>
+                  Intensive ( 4 days )
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -119,4 +177,3 @@ export function ClassForm({ mode, action, courses, initialData }: ClassFormProps
     </form>
   );
 }
-

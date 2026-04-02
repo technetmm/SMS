@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/breadcrumb";
 
 const LABELS: Record<string, string> = {
+  school: "School",
   dashboard: "Dashboard",
   platform: "Platform",
   tenants: "Tenants",
@@ -27,7 +28,6 @@ const LABELS: Record<string, string> = {
   "2fa": "Two-Factor Auth",
   security: "Security",
   theme: "Theme",
-  permissions: "Permissions",
 };
 
 function toTitleCase(segment: string) {

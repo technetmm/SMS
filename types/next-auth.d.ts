@@ -7,8 +7,8 @@ declare module "next-auth" {
     user: {
       id: string;
       role: UserRole;
-      tenantId?: string | null;
-      permissions?: string[];
+      schoolId?: string | null;
+      isSchoolOwner?: boolean;
       name?: string | null;
       email?: string | null;
       image?: string | null;
@@ -17,8 +17,9 @@ declare module "next-auth" {
 
   interface User {
     role: UserRole;
-    tenantId?: string | null;
-    permissions?: string[];
+    schoolId?: string | null;
+    isSchoolOwner?: boolean;
+    sessionId?: string;
   }
 }
 
@@ -26,7 +27,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     id?: string;
     role?: UserRole;
-    tenantId?: string | null;
-    permissions?: string[];
+    schoolId?: string | null;
+    isSchoolOwner?: boolean;
+    sessionId?: string;
   }
 }

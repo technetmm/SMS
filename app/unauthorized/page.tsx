@@ -10,9 +10,12 @@ export default async function UnauthorizedPage() {
   const link = session
     ? checkRole(session.user, "SUPER_ADMIN")
       ? "/platform/dashboard"
-      : checkRole(session.user, "SCHOOL_ADMIN") ||
-          checkRole(session.user, "TEACHER")
-        ? "/dashboard"
+      : checkRole(session.user, "SCHOOL_ADMIN")
+        ? "/school/dashboard"
+        : checkRole(session.user, "TEACHER")
+          ? "/teacher/dashboard"
+          : checkRole(session.user, "STUDENT")
+            ? "/student/dashboard"
         : "/login"
     : "/login";
 

@@ -1,4 +1,5 @@
 import PDFDocument from "pdfkit";
+import { getPdfFontPath } from "@/lib/export/pdf-font";
 
 export async function buildSimpleTablePdfBuffer({
   title,
@@ -11,7 +12,12 @@ export async function buildSimpleTablePdfBuffer({
   headers: string[];
   rows: string[][];
 }) {
-  const doc = new PDFDocument({ margin: 40, size: "A4" });
+  const fontPath = getPdfFontPath();
+  if (!fontPath) {
+    throw new Error("Unable to resolve bundled TTF font for PDF rendering.");
+  }
+  const doc = new PDFDocument({ margin: 40, size: "A4", font: fontPath });
+
   const chunks: Buffer[] = [];
 
   const bufferPromise = new Promise<Buffer>((resolve, reject) => {
@@ -33,7 +39,7 @@ export async function buildSimpleTablePdfBuffer({
   const columnWidth = 500 / Math.max(1, headers.length);
 
   headers.forEach((header, index) => {
-    doc.font("Helvetica-Bold").fontSize(10).text(header, startX + index * columnWidth, y, {
+    doc.fontSize(10).text(header, startX + index * columnWidth, y, {
       width: columnWidth,
     });
   });
@@ -44,7 +50,7 @@ export async function buildSimpleTablePdfBuffer({
 
   for (const row of rows) {
     row.forEach((cell, index) => {
-      doc.font("Helvetica").fontSize(9).fillColor("#111").text(cell, startX + index * columnWidth, y, {
+      doc.fontSize(9).fillColor("#111").text(cell, startX + index * columnWidth, y, {
         width: columnWidth,
       });
     });

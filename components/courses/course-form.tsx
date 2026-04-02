@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { CourseActionState } from "@/app/(school)/courses/actions";
+import type { CourseActionState } from "@/app/(school)/school/courses/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,6 @@ import {
   useComboboxAnchor,
   ComboboxInput,
 } from "@/components/ui/combobox";
-import { uniqueBy } from "@/lib/helper";
 
 const initialState: CourseActionState = { status: "idle" };
 
@@ -58,19 +57,15 @@ export function CourseForm({
 }: CourseFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(
-    uniqueBy(initialData?.subjects ?? []),
+  const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(() =>
+    uniqueSubjects(initialData?.subjects ?? []),
   );
   const anchor = useComboboxAnchor();
 
   useEffect(() => {
-    setSelectedSubjects(uniqueSubjects(initialData?.subjects ?? []));
-  }, [initialData?.subjects]);
-
-  useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/courses");
+      router.push("/school/courses");
       router.refresh();
     }
     if (state.status === "error") {
@@ -106,7 +101,7 @@ export function CourseForm({
             {mode === "create" ? "Create Course" : "Edit Course"}
           </CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4">
+        <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
             <Label htmlFor="name">Course name</Label>
             <Input
@@ -153,10 +148,10 @@ export function CourseForm({
                 </ComboboxList>
               </ComboboxContent>
             </Combobox>
-            <p className="text-xs text-muted-foreground">
-              You can select multiple subjects for one course.
-            </p>
           </div>
+          <p className="text-xs text-muted-foreground">
+            You can select multiple subjects for one course.
+          </p>
         </CardContent>
       </Card>
 

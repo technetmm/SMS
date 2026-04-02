@@ -1,17 +1,29 @@
 import Link from "next/link";
-import { getStudents } from "@/app/(school)/students/actions";
+import { getStudents } from "@/app/(school)/school/students/actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { StudentRowActions } from "@/components/students/student-row-actions";
-import { enumLabel, GENDER_LABELS, STUDENT_STATUS_LABELS } from "@/lib/enum-labels";
+import {
+  enumLabel,
+  GENDER_LABELS,
+  STUDENT_STATUS_LABELS,
+} from "@/lib/enum-labels";
+import { StudentStatus } from "@/app/generated/prisma/enums";
 
 export async function StudentTable({
   query,
   status,
 }: {
   query?: string;
-  status?: "ACTIVE" | "INACTIVE" | "GRADUATED" | "ALL";
+  status?: StudentStatus | "ALL";
 }) {
   const students = await getStudents({ query, status });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
@@ -36,7 +48,9 @@ export async function StudentTable({
               <TableCell>{enumLabel(student.gender, GENDER_LABELS)}</TableCell>
               <TableCell>{student.phone ?? "-"}</TableCell>
               <TableCell>
-                <Badge variant={student.status === "ACTIVE" ? "default" : "outline"}>
+                <Badge
+                  variant={student.status === "ACTIVE" ? "default" : "outline"}
+                >
                   {enumLabel(student.status, STUDENT_STATUS_LABELS)}
                 </Badge>
               </TableCell>
@@ -44,10 +58,10 @@ export async function StudentTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/students/${student.id}`}>View</Link>
+                    <Link href={`/school/students/${student.id}`}>View</Link>
                   </Button>
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/students/${student.id}/edit`}>Edit</Link>
+                  <Button asChild size="sm" variant="default">
+                    <Link href={`/school/students/${student.id}/edit`}>Edit</Link>
                   </Button>
                   <StudentRowActions id={student.id} name={student.name} />
                 </div>
@@ -56,7 +70,10 @@ export async function StudentTable({
           ))}
           {students.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
                 No students found.
               </TableCell>
             </TableRow>

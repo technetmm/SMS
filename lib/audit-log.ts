@@ -7,7 +7,7 @@ type LogInput = {
   action: string;
   entity: string;
   entityId?: string | null;
-  tenantId?: string | null;
+  schoolId?: string | null;
   userId?: string | null;
   metadata?: Record<string, unknown> | null;
 };
@@ -15,12 +15,12 @@ type LogInput = {
 export async function logAction(input: LogInput) {
   const session = await getServerAuth();
   const userId = input.userId ?? session?.user?.id ?? null;
-  const tenantId = input.tenantId ?? session?.user?.tenantId ?? null;
+  const schoolId = input.schoolId ?? session?.user?.schoolId ?? null;
 
   try {
     const queued = await enqueueAuditLog({
       userId,
-      tenantId,
+      schoolId,
       action: input.action,
       entity: input.entity,
       entityId: input.entityId ?? null,
@@ -33,7 +33,7 @@ export async function logAction(input: LogInput) {
           action: input.action,
           entity: input.entity,
           entityId: input.entityId ?? null,
-          tenantId,
+          schoolId,
           userId,
           metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
         },

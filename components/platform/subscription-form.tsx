@@ -7,7 +7,6 @@ import {
   createSubscription,
   type PlatformActionState,
 } from "@/app/(platform)/actions";
-import { DatePickerField } from "@/components/shared/date-picker-field";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Label } from "@/components/ui/label";
 import {
@@ -17,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "../ui/input";
 
 type TenantOption = {
   id: string;
@@ -40,9 +40,9 @@ export function SubscriptionForm({ tenants }: { tenants: TenantOption[] }) {
   return (
     <form action={formAction} className="grid gap-4 md:grid-cols-2">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="tenantId">Tenant</Label>
-        <Select name="tenantId">
-          <SelectTrigger id="tenantId" className="w-full">
+        <Label htmlFor="schoolId">Tenant</Label>
+        <Select name="schoolId">
+          <SelectTrigger id="schoolId" className="w-full">
             <SelectValue placeholder="Select tenant" />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -80,7 +80,16 @@ export function SubscriptionForm({ tenants }: { tenants: TenantOption[] }) {
           </SelectContent>
         </Select>
       </div>
-      <DatePickerField name="currentPeriodEnd" label="Period end" />
+
+      <div className="grid gap-2">
+        <Label htmlFor="currentPeriodEnd">Period end</Label>
+        <Input
+          id="currentPeriodEnd"
+          name="currentPeriodEnd"
+          type="date"
+          required
+        />
+      </div>
       <div className="md:col-span-2">
         <SubmitButton label="Create Subscription" loadingLabel="Creating..." />
       </div>

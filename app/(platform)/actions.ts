@@ -3,11 +3,11 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
-import { requirePermission } from "@/lib/rbac";
+import { requireSuperAdminAccess } from "@/lib/rbac";
 import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
-import { Permission, Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
+import {Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -25,7 +25,7 @@ const tenantUpdateSchema = tenantSchema.extend({
 });
 
 const subscriptionSchema = z.object({
-  tenantId: z.string().min(1, "Tenant is required"),
+  schoolId: z.string().min(1, "Tenant is required"),
   plan: z.nativeEnum(Plan),
   status: z.nativeEnum(SubscriptionStatus),
   currentPeriodEnd: z.string().optional(),
@@ -42,7 +42,7 @@ export async function createTenant(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = tenantSchema.safeParse(raw);
@@ -78,7 +78,7 @@ export async function updateTenant(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = tenantUpdateSchema.safeParse(raw);
@@ -117,7 +117,7 @@ export async function updateTenant(
 }
 
 export async function toggleTenantStatus(formData: FormData) {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -148,7 +148,7 @@ export async function toggleTenantStatus(formData: FormData) {
 }
 
 export async function deleteTenant(formData: FormData) {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -167,7 +167,7 @@ export async function deleteTenant(formData: FormData) {
 }
 
 export async function restoreTenant(formData: FormData) {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -192,7 +192,7 @@ export async function createSubscription(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(Permission.MANAGE_SUBSCRIPTIONS);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = subscriptionSchema.safeParse(raw);
@@ -201,7 +201,7 @@ export async function createSubscription(
   }
 
   await createOrUpdateSubscription({
-    tenantId: parsed.data.tenantId,
+    schoolId: parsed.data.schoolId,
     plan: parsed.data.plan,
     status: parsed.data.status,
     currentPeriodEnd: parsed.data.currentPeriodEnd
@@ -213,7 +213,7 @@ export async function createSubscription(
     action: "CREATE",
     entity: "Subscription",
     metadata: {
-      tenantId: parsed.data.tenantId,
+      schoolId: parsed.data.schoolId,
       plan: parsed.data.plan,
       status: parsed.data.status,
     },
@@ -228,7 +228,7 @@ export async function updateSubscription(
   _prevState: PlatformActionState,
   formData: FormData,
 ): Promise<PlatformActionState> {
-  await requirePermission(Permission.MANAGE_SUBSCRIPTIONS);
+  await requireSuperAdminAccess();
 
   const raw = formDataToObject(formData);
   const parsed = subscriptionUpdateSchema.safeParse(raw);
@@ -238,7 +238,7 @@ export async function updateSubscription(
 
   const current = await prisma.subscription.findFirst({
     where: { id: parsed.data.id },
-    select: { tenantId: true },
+    select: { schoolId: true },
   });
   if (!current) {
     return { status: "error", message: "Subscription not found." };
@@ -247,7 +247,7 @@ export async function updateSubscription(
   if (parsed.data.status === SubscriptionStatus.ACTIVE) {
     await prisma.subscription.updateMany({
       where: {
-        tenantId: current.tenantId,
+        schoolId: current.schoolId,
         id: { not: parsed.data.id },
         isActive: true,
       },
@@ -284,7 +284,7 @@ export async function updateSubscription(
 }
 
 export async function cancelSubscription(formData: FormData) {
-  await requirePermission(Permission.MANAGE_SUBSCRIPTIONS);
+  await requireSuperAdminAccess();
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
@@ -308,17 +308,17 @@ export async function cancelSubscription(formData: FormData) {
 }
 
 export async function getTenants() {
-  await requirePermission(Permission.MANAGE_TENANTS);
+  await requireSuperAdminAccess();
   return prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     include: {
-      _count: { select: { users: true, students: true, teachers: true } },
+      _count: { select: { users: true, students: true, staff: true } },
     },
   });
 }
 
 export async function getSubscriptions() {
-  await requirePermission(Permission.MANAGE_SUBSCRIPTIONS);
+  await requireSuperAdminAccess();
   return prisma.subscription.findMany({
     orderBy: { createdAt: "desc" },
     include: { tenant: true },
@@ -326,7 +326,7 @@ export async function getSubscriptions() {
 }
 
 export async function getActivityLogs() {
-  await requirePermission(Permission.VIEW_REPORTS);
+  await requireSuperAdminAccess();
   return prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 25,
@@ -338,7 +338,7 @@ export async function getActivityLogs() {
 }
 
 export async function getPlatformDashboardData() {
-  await requirePermission(Permission.VIEW_REPORTS);
+  await requireSuperAdminAccess();
 
   const [tenants, subscriptions] = await Promise.all([
     prisma.tenant.findMany({

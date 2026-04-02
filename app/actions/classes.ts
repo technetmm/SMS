@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { Permission } from "@/app/generated/prisma/enums";
 import { getPrismaClient } from "@/lib/prisma-tenant";
-import { requirePermission, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { classCreateSchema, sectionCreateSchema } from "@/lib/validators";
 import { getServerAuth } from "@/auth";
@@ -18,8 +17,8 @@ export async function createClass(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});
 
@@ -32,7 +31,7 @@ export async function createClass(
   try {
     const created = await prismaTenant.class.create({
       data: {
-        tenantId,
+        schoolId,
         name: parsed.data.name,
         courseId: parsed.data.courseId,
         classType: parsed.data.classType,
@@ -44,14 +43,14 @@ export async function createClass(
       action: "CREATE",
       entity: "Class",
       entityId: created.id,
-      tenantId,
+      schoolId,
       metadata: { name: parsed.data.name, courseId: parsed.data.courseId },
     });
   } catch {
     return { status: "error", message: "Unable to create class." };
   }
 
-  revalidatePath("/classes");
+  revalidatePath("/school/classes");
   return { status: "success", message: "Class created successfully." };
 }
 
@@ -59,14 +58,14 @@ export async function createSection(
   _prevState: ClassActionState,
   formData: FormData,
 ): Promise<ClassActionState> {
-  await requirePermission(Permission.MANAGE_CLASSES);
-  const tenantId = await requireTenant();
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
   const session = await getServerAuth();
   const prismaTenant = getPrismaClient(session ?? {});
 
   const raw = formDataToObject(formData);
-  const teacherIds = formData
-    .getAll("teacherIds")
+  const staffIds = formData
+    .getAll("staffIds")
     .map((value) => String(value))
     .filter(Boolean);
 
@@ -81,7 +80,7 @@ export async function createSection(
   try {
     const created = await prismaTenant.section.create({
       data: {
-        tenantId,
+        schoolId,
         classId: parsed.data.classId,
         name: parsed.data.name,
         room: parsed.data.room,
@@ -89,11 +88,11 @@ export async function createSection(
       },
     });
 
-    if (teacherIds.length > 0) {
-      await prismaTenant.sectionTeacher.createMany({
-        data: teacherIds.map((teacherId) => ({
+    if (staffIds.length > 0) {
+      await prismaTenant.sectionStaff.createMany({
+        data: staffIds.map((staffId) => ({
           sectionId: created.id,
-          teacherId,
+          staffId,
         })),
         skipDuplicates: true,
       });
@@ -103,17 +102,17 @@ export async function createSection(
       action: "CREATE",
       entity: "Section",
       entityId: created.id,
-      tenantId,
+      schoolId,
       metadata: {
         classId: parsed.data.classId,
         name: parsed.data.name,
-        teacherIds,
+        staffIds,
       },
     });
   } catch {
     return { status: "error", message: "Unable to create section." };
   }
 
-  revalidatePath("/classes");
+  revalidatePath("/school/classes");
   return { status: "success", message: "Section created successfully." };
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
-import { useEffect, useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteStudent } from "@/app/(school)/students/actions";
+import { deleteStudent } from "@/app/(school)/school/students/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -23,24 +22,30 @@ export function StudentRowActions({
   name: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState(deleteStudent, initialState);
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (state.status === "success") {
-      toast.success(state.message ?? "Student deleted");
-      setOpen(false);
-      router.refresh();
-    }
-    if (state.status === "error") {
-      toast.error(state.message ?? "Unable to delete student");
-    }
-  }, [state]);
+  const runDelete = () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("id", id);
+      const state = await deleteStudent(initialState, formData);
+      if (state.status === "success") {
+        toast.success(state.message ?? "Student deleted");
+        setOpen(false);
+        router.refresh();
+        return;
+      }
+      if (state.status === "error") {
+        toast.error(state.message ?? "Unable to delete student");
+      }
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive">
+        <Button size="sm" variant="destructive" disabled={pending}>
           Delete
         </Button>
       </DialogTrigger>
@@ -51,15 +56,14 @@ export function StudentRowActions({
         <p className="text-sm text-muted-foreground">
           This will permanently remove {name}. This action cannot be undone.
         </p>
-        <form action={formAction} className="flex justify-end gap-2">
-          <input type="hidden" name="id" value={id} />
+        <div className="flex justify-end gap-2">
           <Button type="button" variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button type="submit" variant="destructive">
-            Delete
+          <Button type="button" variant="destructive" disabled={pending} onClick={runDelete}>
+            {pending ? "Deleting..." : "Delete"}
           </Button>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,6 +1,6 @@
 import { forbidden, unauthorized } from "next/navigation";
 import { getServerAuth } from "@/auth";
-import { Permission, UserRole } from "@/app/generated/prisma/enums";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 
 async function getSessionUser() {
@@ -11,29 +11,6 @@ async function getSessionUser() {
   return session.user;
 }
 
-export async function canAccess(userId: string, permission: Permission) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { id: true, role: true, isDeleted: true },
-  });
-
-  if (!user || user.isDeleted) return false;
-  if (user.role === UserRole.SUPER_ADMIN) return true;
-
-  const [roleHit, userHit] = await Promise.all([
-    prisma.rolePermission.findFirst({
-      where: { role: user.role, permission },
-      select: { id: true },
-    }),
-    prisma.userPermission.findFirst({
-      where: { userId, permission },
-      select: { id: true },
-    }),
-  ]);
-
-  return Boolean(roleHit || userHit);
-}
-
 export async function requireRole(role: UserRole) {
   const user = await getSessionUser();
   if (user.role !== role) {
@@ -42,19 +19,50 @@ export async function requireRole(role: UserRole) {
   return user;
 }
 
-export async function requireTenant() {
+export async function requireSchool() {
   const user = await getSessionUser();
-  if (!user.tenantId) {
+  if (!user.schoolId) {
     forbidden();
   }
-  return user.tenantId;
+  return user.schoolId;
 }
 
-export async function requirePermission(permission: Permission) {
-  const user = await getSessionUser();
+export async function requireTenant() {
+  return requireSchool();
+}
 
-  const allowed = await canAccess(user.id, permission);
-  if (!allowed) {
+export async function requireSchoolAdminAccess() {
+  const user = await getSessionUser();
+  if (user.role !== UserRole.SCHOOL_ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+    forbidden();
+  }
+  return user;
+}
+
+export async function requireSuperAdminAccess() {
+  const user = await getSessionUser();
+  if (user.role !== UserRole.SUPER_ADMIN) {
+    forbidden();
+  }
+  return user;
+}
+
+export async function requireSchoolOwnerAdminAccess() {
+  const user = await getSessionUser();
+  if (user.role !== UserRole.SCHOOL_ADMIN || !user.schoolId) {
+    forbidden();
+  }
+
+  const ownerState = await prisma.user.findFirst({
+    where: {
+      id: user.id,
+      schoolId: user.schoolId,
+      role: UserRole.SCHOOL_ADMIN,
+    },
+    select: { isSchoolOwner: true },
+  });
+
+  if (!ownerState?.isSchoolOwner) {
     forbidden();
   }
 

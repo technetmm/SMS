@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getClasses, deleteClass } from "@/app/(school)/classes/actions";
+import { getClasses, deleteClass } from "@/app/(school)/school/classes/actions";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -9,14 +9,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-function formatValue(value: string) {
-  return value.replace(/_/g, " ");
-}
+import { dateFormatter, money } from "@/lib/helper";
+import {
+  CLASS_TYPE_LABELS,
+  enumLabel,
+  PROGRAM_TYPE_LABELS,
+} from "@/lib/enum-labels";
 
 export async function ClassTable() {
   const classes = await getClasses();
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -27,6 +28,7 @@ export async function ClassTable() {
             <TableHead>Course</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Program Type</TableHead>
+            <TableHead className="text-right">Fee</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -36,13 +38,20 @@ export async function ClassTable() {
             <TableRow key={klass.id}>
               <TableCell className="font-medium">{klass.name}</TableCell>
               <TableCell>{klass.course.name}</TableCell>
-              <TableCell>{formatValue(klass.classType)}</TableCell>
-              <TableCell>{formatValue(klass.programType)}</TableCell>
-              <TableCell>{formatter.format(klass.createdAt)}</TableCell>
+              <TableCell>
+                {enumLabel(klass.classType, CLASS_TYPE_LABELS)}
+              </TableCell>
+              <TableCell>
+                {enumLabel(klass.programType, PROGRAM_TYPE_LABELS)}
+              </TableCell>
+              <TableCell className="text-right">
+                {money("MMK").format(Number(klass.fee))}
+              </TableCell>
+              <TableCell>{dateFormatter.format(klass.createdAt)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/classes/${klass.id}/edit`}>Edit</Link>
+                    <Link href={`/school/classes/${klass.id}/edit`}>Edit</Link>
                   </Button>
                   <form action={deleteClass}>
                     <input type="hidden" name="id" value={klass.id} />
@@ -56,7 +65,10 @@ export async function ClassTable() {
           ))}
           {classes.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell
+                colSpan={7}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
                 No classes yet. Create your first class.
               </TableCell>
             </TableRow>
@@ -66,4 +78,3 @@ export async function ClassTable() {
     </div>
   );
 }
-

@@ -12,9 +12,9 @@ import {
 } from "@/components/landing/landing-sections";
 
 export const metadata: Metadata = {
-  title: "Technet LMS SaaS | Multi-Tenant School Management",
+  title: "Technet SMS SaaS | Multi-Tenant School Management",
   description:
-    "Run your school operations on one secure platform. Manage students, teachers, classes, payments, and reports in minutes.",
+    "Run your school operations on one secure platform. Manage students, staff, classes, payments, and reports in minutes.",
 };
 
 export default async function HomePage() {
@@ -24,8 +24,16 @@ export default async function HomePage() {
     redirect("/platform/dashboard");
   }
 
-  if (session?.user) {
-    redirect("/dashboard");
+  if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
+    redirect("/school/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.TEACHER) {
+    redirect("/teacher/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.STUDENT) {
+    redirect("/student/dashboard");
   }
 
   return (

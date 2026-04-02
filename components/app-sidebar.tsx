@@ -1,9 +1,10 @@
 "use client";
 
-import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import * as React from "react";
 import Link from "next/link";
+
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -15,33 +16,120 @@ import {
 } from "@/components/ui/sidebar";
 import {
   CalendarDaysIcon,
+  CalendarClockIcon,
+  ClipboardCheckIcon,
   CreditCardIcon,
+  BarChart3Icon,
+  ReceiptIcon,
+  FileDownIcon,
+  FileTextIcon,
   LayoutDashboardIcon,
-  Settings2Icon,
-  ShieldCheckIcon,
   UsersIcon,
   GraduationCapIcon,
   UserRoundIcon,
   BookOpenIcon,
-  FolderTreeIcon,
+  BookOpenTextIcon,
+  ListChecksIcon,
+  TvMinimalIcon,
 } from "lucide-react";
 import { UserRole } from "@/app/generated/prisma/enums";
 
-const schoolNavMain = [
-  { title: "Dashboard", url: "/dashboard", icon: <LayoutDashboardIcon /> },
-  { title: "Students", url: "/students", icon: <UsersIcon /> },
-  { title: "Teachers", url: "/teachers", icon: <UserRoundIcon /> },
-  { title: "Subjects", url: "/subjects", icon: <FolderTreeIcon /> },
-  { title: "Courses", url: "/courses", icon: <BookOpenIcon /> },
-  { title: "Classes", url: "/classes", icon: <GraduationCapIcon /> },
-  { title: "Sections", url: "/sections", icon: <GraduationCapIcon /> },
-  { title: "Attendance", url: "/attendance", icon: <CalendarDaysIcon /> },
-  { title: "Payments", url: "/payments", icon: <CreditCardIcon /> },
+const schoolNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/school/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
+      {
+        title: "Analytics",
+        url: "/school/analytics",
+        icon: <BarChart3Icon />,
+      },
+    ],
+  },
+  {
+    label: "People",
+    items: [
+      { title: "Students", url: "/school/students", icon: <UsersIcon /> },
+      { title: "Staff", url: "/school/staff", icon: <UserRoundIcon /> },
+    ],
+  },
+  {
+    label: "Academics",
+    items: [
+      {
+        title: "Subjects",
+        url: "/school/subjects",
+        icon: <BookOpenTextIcon />,
+      },
+      { title: "Courses", url: "/school/courses", icon: <BookOpenIcon /> },
+      { title: "Classes", url: "/school/classes", icon: <GraduationCapIcon /> },
+      { title: "Sections", url: "/school/sections", icon: <TvMinimalIcon /> },
+      {
+        title: "Enrollments",
+        url: "/school/enrollments",
+        icon: <ListChecksIcon />,
+      },
+    ],
+  },
+  {
+    label: "Schedule",
+    items: [
+      {
+        title: "Timetable",
+        url: "/school/timetable",
+        icon: <CalendarClockIcon />,
+      },
+      {
+        title: "Student Attendance",
+        url: "/school/attendance",
+        icon: <CalendarDaysIcon />,
+      },
+      {
+        title: "Staff Attendance",
+        url: "/school/staff-attendance",
+        icon: <ClipboardCheckIcon />,
+      },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { title: "Invoices", url: "/school/invoices", icon: <FileTextIcon /> },
+      { title: "Payments", url: "/school/payments", icon: <CreditCardIcon /> },
+      { title: "Payroll", url: "/school/payroll", icon: <ReceiptIcon /> },
+      { title: "Exports", url: "/school/exports", icon: <FileDownIcon /> },
+    ],
+  },
 ];
 
-const schoolNavSecondary = [
-  { title: "Settings", url: "/settings", icon: <Settings2Icon /> },
-  { title: "Security", url: "/settings/security", icon: <ShieldCheckIcon /> },
+const teacherNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/teacher/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
+    ],
+  },
+];
+
+const studentNavGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        title: "Dashboard",
+        url: "/student/dashboard",
+        icon: <LayoutDashboardIcon />,
+      },
+    ],
+  },
 ];
 
 const platformNavMain = [
@@ -58,19 +146,11 @@ const platformNavMain = [
   },
 ];
 
-const platformNavSecondary = [
-  { title: "Settings", url: "/platform/settings", icon: <Settings2Icon /> },
-  {
-    title: "Security",
-    url: "/platform/settings/security",
-    icon: <ShieldCheckIcon />,
-  },
-];
-
 export function AppSidebar({
   user,
   role,
-  tenantId,
+  schoolId,
+  schoolName,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: {
@@ -79,12 +159,25 @@ export function AppSidebar({
     avatar: string;
   };
   role: UserRole;
-  tenantId: string | null;
+  schoolId: string | null;
+  schoolName?: string | null;
 }) {
-  const isPlatform = role === UserRole.SUPER_ADMIN && !tenantId;
-  const navMain = isPlatform ? platformNavMain : schoolNavMain;
-  const navSecondary = isPlatform ? platformNavSecondary : schoolNavSecondary;
-  const homeHref = isPlatform ? "/platform/dashboard" : "/dashboard";
+  const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
+  const isTeacher = role === UserRole.TEACHER;
+  const isStudent = role === UserRole.STUDENT;
+  const homeHref = isPlatform
+    ? "/platform/dashboard"
+    : isTeacher
+      ? "/teacher/dashboard"
+      : isStudent
+        ? "/student/dashboard"
+        : "/school/dashboard";
+  const settingsHref = isPlatform
+    ? "/platform/settings"
+    : isTeacher || isStudent
+      ? homeHref
+      : "/school/settings";
+  const subtitle = isPlatform ? "Platform" : schoolName?.trim() || "School";
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -97,7 +190,8 @@ export function AppSidebar({
                   <LayoutDashboardIcon className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Technet LMS</span>
+                  <span className="truncate font-medium">Technet SMS</span>
+                  <span className="truncate text-xs">{subtitle}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -105,13 +199,18 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
-        {navSecondary.length ? (
-          <NavSecondary items={navSecondary} className="mt-auto" />
-        ) : null}
+        {isPlatform ? (
+          <NavMain label="Platform" items={platformNavMain} />
+        ) : isTeacher ? (
+          <NavMain groups={teacherNavGroups} />
+        ) : isStudent ? (
+          <NavMain groups={studentNavGroups} />
+        ) : (
+          <NavMain groups={schoolNavGroups} />
+        )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={user} settingsHref={settingsHref} />
       </SidebarFooter>
     </Sidebar>
   );

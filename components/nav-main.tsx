@@ -1,89 +1,99 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
-import { ChevronRightIcon } from "lucide-react"
+  useSidebar,
+} from "@/components/ui/sidebar";
 
-export function NavMain({
-  items,
-}: {
-  items: {
-    title: string
-    url: string
-    icon: React.ReactNode
-    isActive?: boolean
-    items?: {
-      title: string
-      url: string
-    }[]
-  }[]
-}) {
-  const pathname = usePathname()
+type NavItem = {
+  title: string;
+  url: string;
+  icon: React.ReactNode;
+  items?: Array<{ title: string; url: string }>;
+};
+
+type NavGroup = {
+  label: string;
+  items: NavItem[];
+};
+
+function isActivePath(pathname: string, url: string) {
+  return pathname === url || pathname.startsWith(`${url}/`);
+}
+
+function NavItems({ items }: { items: NavItem[] }) {
+  const pathname = usePathname();
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
-      <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                asChild
-                tooltip={item.title}
-                isActive={pathname === item.url}
-              >
-                <Link href={item.url}>
-                  {item.icon}
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-              {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRightIcon
-                      />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton
-                            asChild
-                            isActive={pathname === subItem.url}
-                          >
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </>
-              ) : null}
+    <SidebarMenuSub>
+      {items.map((item) => (
+        <SidebarMenuSubItem key={item.title}>
+          <SidebarMenuSubButton
+            asChild
+            isActive={isActivePath(pathname, item.url)}
+          >
+            <a href={item.url}>
+              {item.icon}
+              {item.title}
+            </a>
+          </SidebarMenuSubButton>
+        </SidebarMenuSubItem>
+      ))}
+    </SidebarMenuSub>
+  );
+}
+
+export function NavMain({
+  label = "Navigation",
+  items,
+  groups,
+}: {
+  label?: string;
+  items?: NavItem[];
+  groups?: NavGroup[];
+}) {
+  const sidebar = useSidebar();
+
+  const renderGroups = (navGroups: NavGroup[]) => {
+    return (
+      <>
+        {navGroups.map((group) => {
+          if (sidebar.state === "collapsed") {
+            return (
+              <SidebarGroup key={group.label}>
+                <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                <NavItems items={group.items} />
+              </SidebarGroup>
+            );
+          }
+
+          return (
+            <SidebarMenuItem key={group.label}>
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              {group.items?.length ? <NavItems items={group.items} /> : null}
             </SidebarMenuItem>
-          </Collapsible>
-        ))}
-      </SidebarMenu>
-    </SidebarGroup>
-  )
+          );
+        })}
+      </>
+    );
+  };
+
+  return (
+    <div>
+      {groups?.length ? (
+        renderGroups(groups)
+      ) : (
+        <SidebarGroup>
+          <SidebarGroupLabel>{label}</SidebarGroupLabel>
+          <NavItems items={items ?? []} />
+        </SidebarGroup>
+      )}
+    </div>
+  );
 }

@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { getServerAuth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppBreadcrumb } from "@/components/shared/app-breadcrumb";
+import { DeviceApprovalListener } from "@/components/auth/device-approval-listener";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
   const session = await getServerAuth();
@@ -18,7 +20,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { name: true, email: true, image: true },
+    select: {
+      name: true,
+      email: true,
+      image: true,
+      school: { select: { name: true } },
+    },
   });
 
   if (!user) {
@@ -34,10 +41,12 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
           avatar: user.image ?? "",
         }}
         role={session.user.role}
-        tenantId={session.user.tenantId ?? null}
+        schoolId={session.user.schoolId ?? null}
+        schoolName={user.school?.name ?? null}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
+        <DeviceApprovalListener />
+        <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between gap-2 rounded-t-xl bg-background">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
@@ -45,6 +54,9 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               className="mr-2 data-[orientation=vertical]:h-4 mt-2"
             />
             <AppBreadcrumb />
+          </div>
+          <div className="px-4">
+            <NotificationBell />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">{children}</div>

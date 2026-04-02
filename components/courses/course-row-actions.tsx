@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect, useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteCourse, type CourseActionState } from "@/app/(school)/courses/actions";
+import { deleteCourse, type CourseActionState } from "@/app/(school)/school/courses/actions";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -12,29 +12,35 @@ const initialState: CourseActionState = { status: "idle" };
 
 export function CourseRowActions({ id, name }: { id: string; name: string }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useActionState(deleteCourse, initialState);
   const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
-  useEffect(() => {
-    if (state.status === "success") {
-      toast.success(state.message ?? "Course deleted");
-      setOpen(false);
-      router.refresh();
-    }
-    if (state.status === "error") {
-      toast.error(state.message ?? "Unable to delete course");
-    }
-  }, [router, state]);
+  const runDelete = () => {
+    startTransition(async () => {
+      const formData = new FormData();
+      formData.set("id", id);
+      const state = await deleteCourse(initialState, formData);
+      if (state.status === "success") {
+        toast.success(state.message ?? "Course deleted");
+        setOpen(false);
+        router.refresh();
+        return;
+      }
+      if (state.status === "error") {
+        toast.error(state.message ?? "Unable to delete course");
+      }
+    });
+  };
 
   return (
     <div className="flex justify-end gap-2">
       <Button asChild size="sm" variant="outline">
-        <Link href={`/courses/${id}/edit`}>Edit</Link>
+        <Link href={`/school/courses/${id}/edit`}>Edit</Link>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="destructive">
+          <Button size="sm" variant="destructive" disabled={pending}>
             Delete
           </Button>
         </DialogTrigger>
@@ -45,18 +51,16 @@ export function CourseRowActions({ id, name }: { id: string; name: string }) {
           <p className="text-sm text-muted-foreground">
             This will delete <strong>{name}</strong>. This action cannot be undone.
           </p>
-          <form action={formAction} className="flex justify-end gap-2">
-            <input type="hidden" name="id" value={id} />
+          <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="destructive">
-              Delete
+            <Button type="button" variant="destructive" disabled={pending} onClick={runDelete}>
+              {pending ? "Deleting..." : "Delete"}
             </Button>
-          </form>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
-

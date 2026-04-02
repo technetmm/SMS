@@ -3,7 +3,7 @@ import { Prisma } from "../../app/generated/prisma/client";
 
 export async function processAuditLogJob(data: {
   userId?: string | null;
-  tenantId?: string | null;
+  schoolId?: string | null;
   action: string;
   entity: string;
   entityId?: string | null;
@@ -12,7 +12,7 @@ export async function processAuditLogJob(data: {
   await prisma.auditLog.create({
     data: {
       userId: data.userId ?? null,
-      tenantId: data.tenantId ?? null,
+      schoolId: data.schoolId ?? null,
       action: data.action,
       entity: data.entity,
       entityId: data.entityId ?? null,

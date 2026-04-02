@@ -7,7 +7,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { SignupForm } from "@/components/signup/signup-form";
 
 export const metadata: Metadata = {
-  title: "Create School Account | Technet LMS",
+  title: "Create School Account | Technet SMS",
   description: "Sign up your school and create a secure tenant admin account.",
 };
 
@@ -22,8 +22,16 @@ async function SignupPageContent() {
     redirect("/platform/dashboard");
   }
 
-  if (session?.user) {
-    redirect("/dashboard");
+  if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
+    redirect("/school/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.TEACHER) {
+    redirect("/teacher/dashboard");
+  }
+
+  if (session?.user?.role === UserRole.STUDENT) {
+    redirect("/student/dashboard");
   }
 
   return (
@@ -35,15 +43,19 @@ async function SignupPageContent() {
             Multi-tenant onboarding
           </p>
           <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Start your LMS school in minutes.
+            Start your SMS school in minutes.
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
-            We will create your tenant and your SCHOOL_ADMIN user account in one transaction.
-            After signup, you can sign in and manage teachers, students, classes, and billing.
+            We will create your tenant and your SCHOOL_ADMIN user account in one
+            transaction. After signup, you can sign in and manage staff,
+            students, classes, and billing.
           </p>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link
+              href="/login"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               Sign in
             </Link>
           </p>

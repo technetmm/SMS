@@ -13,3 +13,20 @@ export function uniqueBy(items: any[], key: string = "id") {
     return true;
   });
 }
+
+export const dateFormatter = new Intl.DateTimeFormat("en-US", {
+  dateStyle: "medium",
+});
+
+const moneyCache = new Map<string, Intl.NumberFormat>();
+export const money = (currency: string) => {
+  const cached = moneyCache.get(currency);
+  if (cached) return cached;
+  const fmt = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  });
+  moneyCache.set(currency, fmt);
+  return fmt;
+};
