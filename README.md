@@ -64,6 +64,20 @@ Seed from worker container:
 docker compose exec worker pnpm prisma db seed
 ```
 
+Supabase migration flow (recommended for Vercel deployments):
+
+```bash
+# 1) Set DATABASE_URL (pooler) and DIRECT_URL (direct DB) in .env
+# 2) Check migration status
+pnpm db:migrate:status
+
+# 3) Apply existing migrations safely
+pnpm db:migrate:deploy
+
+# 4) Generate Prisma client
+pnpm db:generate
+```
+
 ## 4) SSL (Certbot + NGINX)
 
 Set your domain/email in `.env`:
@@ -140,3 +154,50 @@ Apply:
 ```bash
 kubectl apply -f k8s/
 ```
+
+## 9) Vercel + Supabase + Render (Production)
+
+Vercel project is linked via `.vercel/project.json` (`technetmm`).
+
+Deployment topology:
+
+- Web app: Vercel (Git auto-deploy from `main`)
+- Worker: Render worker service (`render.yaml`)
+- Shared backing services: Supabase Postgres + Redis
+
+Set these Vercel environment variables (Production/Preview as needed):
+
+- `DATABASE_URL` (Supabase pooled URL)
+- `DIRECT_URL` (Supabase direct DB URL)
+- `AUTH_SECRET` (canonical auth secret; `NEXTAUTH_SECRET` is only a legacy fallback)
+- `NEXTAUTH_URL` (your Vercel app URL)
+- `REDIS_URL` (shared Redis for BullMQ)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
+- `FROM_EMAIL`, `FROM_NAME`
+
+Configure Vercel Git integration:
+
+- Connect this repository to the linked Vercel project.
+- Enable Preview deployments for pull requests.
+- Set Production Branch to `main`.
+
+Run migrations against Supabase before first production cutover:
+
+```bash
+pnpm db:migrate:status
+pnpm db:migrate:deploy
+pnpm db:generate
+```
+
+Release gates in CI (`.github/workflows/deploy.yml`):
+
+- Always gate on `pnpm db:generate` + `pnpm build`.
+- On pushes to `main`, also gate on `pnpm db:migrate:status` if `PRODUCTION_DATABASE_URL` secret is configured.
+- Optional secret: `PRODUCTION_DIRECT_URL` (falls back to `PRODUCTION_DATABASE_URL` if omitted).
+- Local equivalent checks: `pnpm release:build-gate` and `pnpm release:check`.
+
+Background workers do not run persistently on Vercel. Deploy `render.yaml` to Render as a worker service:
+
+- Build command: `pnpm install --frozen-lockfile && pnpm db:generate`
+- Start command: `pnpm worker:start`
+- Use the same `DATABASE_URL`, `DIRECT_URL`, `REDIS_URL`, `AUTH_SECRET`, and SMTP env vars as production.

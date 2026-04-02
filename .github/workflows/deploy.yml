@@ -1,15 +1,16 @@
-name: Build and Deploy
+name: Vercel Release Gate
 
 on:
+  pull_request:
+    branches: ["main"]
   push:
     branches: ["main"]
 
 jobs:
-  build-and-push:
+  quality-gate:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,45 +29,72 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
       - name: Build app
         run: pnpm build
 
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push app image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/app:latest
-
-      - name: Build and push worker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.worker
-          push: true
-          tags: ghcr.io/${{ github.repository }}/worker:latest
-
-  deploy:
+  migration-gate:
     runs-on: ubuntu-latest
-    needs: build-and-push
+    needs: quality-gate
+    if: ${{ github.event_name == 'push' && secrets.PRODUCTION_DATABASE_URL != '' }}
+    permissions:
+      contents: read
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            export APP_IMAGE=ghcr.io/${{ github.repository }}/app:latest
-            export WORKER_IMAGE=ghcr.io/${{ github.repository }}/worker:latest
-            docker compose pull
-            docker compose up -d --remove-orphans
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check migration status (production DB)
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.PRODUCTION_DIRECT_URL != '' && secrets.PRODUCTION_DIRECT_URL || secrets.PRODUCTION_DATABASE_URL }}
+        run: pnpm db:migrate:status
+
+  migration-gate-skipped:
+    runs-on: ubuntu-latest
+    needs: quality-gate
+    if: ${{ github.event_name == 'push' && secrets.PRODUCTION_DATABASE_URL == '' }}
+    steps:
+      - name: Skip migration gate
+        run: |
+          echo "Skipping migration status check because PRODUCTION_DATABASE_URL is not configured."
+          echo "Set PRODUCTION_DATABASE_URL (and optional PRODUCTION_DIRECT_URL) repository secrets to enable this gate."
+
+  ready-for-vercel:
+    runs-on: ubuntu-latest
+    needs:
+      - quality-gate
+      - migration-gate
+      - migration-gate-skipped
+    if: ${{ always() }}
+    steps:
+      - name: Assert release gates passed
+        run: |
+          if [[ "${{ needs.quality-gate.result }}" != "success" ]]; then
+            echo "quality-gate failed"
+            exit 1
+          fi
+          if [[ "${{ needs.migration-gate.result }}" != "success" && "${{ needs.migration-gate.result }}" != "skipped" ]]; then
+            echo "migration-gate failed"
+            exit 1
+          fi
+          if [[ "${{ needs.migration-gate-skipped.result }}" != "success" && "${{ needs.migration-gate-skipped.result }}" != "skipped" ]]; then
+            echo "migration-gate-skipped failed"
+            exit 1
+          fi
+          echo "Release gate passed. Vercel Git integration can proceed with deploy."

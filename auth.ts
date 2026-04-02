@@ -22,6 +22,7 @@ import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
+import { resolveAuthSecret } from "@/lib/auth/env";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -51,7 +52,7 @@ function getHeaderValue(req: unknown, headerName: string) {
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+  secret: resolveAuthSecret(),
   pages: { signIn: "/login" },
   providers: [
     CredentialsProvider({
