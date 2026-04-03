@@ -5,13 +5,24 @@ const connection: ConnectionOptions | null = redisUrl
   ? { url: redisUrl }
   : null;
 
-export const auditLogQueue = connection
-  ? new Queue("audit-log", { connection })
-  : null;
+let auditLogQueue: Queue | null = null;
+let emailQueue: Queue | null = null;
 
-export const emailQueue = connection
-  ? new Queue("email", { connection })
-  : null;
+function getAuditLogQueue() {
+  if (!connection) return null;
+  if (!auditLogQueue) {
+    auditLogQueue = new Queue("audit-log", { connection });
+  }
+  return auditLogQueue;
+}
+
+function getEmailQueue() {
+  if (!connection) return null;
+  if (!emailQueue) {
+    emailQueue = new Queue("email", { connection });
+  }
+  return emailQueue;
+}
 
 function escapeHtml(value: string) {
   return value
@@ -34,14 +45,23 @@ export async function enqueueAuditLog(payload: {
   entityId?: string | null;
   metadata?: Record<string, unknown> | null;
 }) {
-  if (!auditLogQueue) return false;
-  await auditLogQueue.add("log", payload, {
-    attempts: 3,
-    backoff: { type: "exponential", delay: 1000 },
-    removeOnComplete: 1000,
-    removeOnFail: 1000,
-  });
-  return true;
+  const queue = getAuditLogQueue();
+  if (!queue) return false;
+
+  try {
+    await queue.add("log", payload, {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 1000 },
+      removeOnComplete: 1000,
+      removeOnFail: 1000,
+    });
+    return true;
+  } catch (error) {
+    console.error("enqueueAuditLog failed", {
+      error: error instanceof Error ? error.message : "Unknown queue error",
+    });
+    return false;
+  }
 }
 
 export async function enqueueEmail(payload: {
@@ -52,7 +72,8 @@ export async function enqueueEmail(payload: {
   htmlBody?: string;
   delayMs?: number;
 }) {
-  if (!emailQueue) return false;
+  const queue = getEmailQueue();
+  if (!queue) return false;
 
   const legacyBody = payload.body?.trim();
   const textBody = payload.textBody?.trim() || legacyBody;
@@ -64,22 +85,29 @@ export async function enqueueEmail(payload: {
     throw new Error("Email payload requires body, textBody, or htmlBody.");
   }
 
-  await emailQueue.add(
-    "sendEmail",
-    {
-      to: payload.to,
-      subject: payload.subject,
-      body: legacyBody,
-      textBody,
-      htmlBody,
-    },
-    {
-      attempts: 3,
-      delay: payload.delayMs ?? 0,
-      backoff: { type: "exponential", delay: 1000 },
-      removeOnComplete: 1000,
-      removeOnFail: 1000,
-    },
-  );
-  return true;
+  try {
+    await queue.add(
+      "sendEmail",
+      {
+        to: payload.to,
+        subject: payload.subject,
+        body: legacyBody,
+        textBody,
+        htmlBody,
+      },
+      {
+        attempts: 3,
+        delay: payload.delayMs ?? 0,
+        backoff: { type: "exponential", delay: 1000 },
+        removeOnComplete: 1000,
+        removeOnFail: 1000,
+      },
+    );
+    return true;
+  } catch (error) {
+    console.error("enqueueEmail failed", {
+      error: error instanceof Error ? error.message : "Unknown queue error",
+    });
+    return false;
+  }
 }
