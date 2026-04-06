@@ -7,11 +7,10 @@ import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { enqueueEmail } from "@/lib/queue";
+import { processEmailJob } from "@/lib/jobs/email.job";
 import { logAction } from "@/lib/audit-log";
 import { getServerAuth } from "@/auth";
 import { z } from "zod";
-import { toast } from "sonner";
 
 export type StaffActionState = {
   status: "idle" | "success" | "error";
@@ -104,12 +103,18 @@ export async function createStaff(
       createdStaffId = staff.id;
     });
 
-    await enqueueEmail({
-      to: parsed.data.email,
-      subject: "Welcome to Technet SMS",
-      body: `Hi ${parsed.data.name}, your staff account is ready.`,
-      delayMs: 2000,
-    });
+    try {
+      await processEmailJob({
+        to: parsed.data.email,
+        subject: "Welcome to Technet SMS",
+        body: `Hi ${parsed.data.name}, your staff account is ready.`,
+      });
+    } catch (emailError) {
+      console.error("createStaff processEmailJob failed", {
+        email: parsed.data.email,
+        error: emailError,
+      });
+    }
 
     await logAction({
       action: "CREATE",

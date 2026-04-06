@@ -1,7 +1,5 @@
 import { getServerAuth } from "@/auth";
-import { Prisma } from "@/app/generated/prisma/client";
-import { prisma } from "@/lib/prisma/client";
-import { enqueueAuditLog } from "@/lib/queue";
+import { processAuditLogJob } from "@/lib/jobs/audit-log.job";
 
 type LogInput = {
   action: string;
@@ -18,7 +16,7 @@ export async function logAction(input: LogInput) {
   const schoolId = input.schoolId ?? session?.user?.schoolId ?? null;
 
   try {
-    const queued = await enqueueAuditLog({
+    await processAuditLogJob({
       userId,
       schoolId,
       action: input.action,
@@ -26,19 +24,6 @@ export async function logAction(input: LogInput) {
       entityId: input.entityId ?? null,
       metadata: input.metadata ?? null,
     });
-
-    if (!queued) {
-      await prisma.auditLog.create({
-        data: {
-          action: input.action,
-          entity: input.entity,
-          entityId: input.entityId ?? null,
-          schoolId,
-          userId,
-          metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
-        },
-      });
-    }
   } catch (error) {
     console.error("Failed to write audit log", error);
   }
