@@ -10,4 +10,4 @@ COPY . .
 RUN pnpm prisma generate
 
 ENV NODE_ENV=production
-CMD ["pnpm", "tsx", "lib/workers/index.ts"]
+CMD ["pnpm", "prisma", "migrate", "deploy"]

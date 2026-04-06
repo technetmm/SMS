@@ -5,7 +5,7 @@ import { z } from "zod";
 import { Prisma } from "@/app/generated/prisma/client";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
-import { enqueueEmail } from "@/lib/queue";
+import { processEmailJob } from "@/lib/jobs/email.job";
 import {
   signupSchema,
   type SignupActionState,
@@ -152,9 +152,9 @@ export async function signup(
       });
     });
 
-    let emailQueued = false;
+    let emailSent = false;
     try {
-      emailQueued = await enqueueEmail({
+      await processEmailJob({
         to: normalizedEmail,
         subject: "Verify your email for Technet SMS",
         body: buildSignupVerificationEmailBody({
@@ -163,20 +163,21 @@ export async function signup(
           code: verificationCode,
         }),
       });
+      emailSent = true;
     } catch (error) {
-      console.error("signup enqueueEmail failed", {
+      console.error("signup processEmailJob failed", {
         email: normalizedEmail,
         error,
       });
-      emailQueued = false;
+      emailSent = false;
     }
 
-    console.log("signup enqueueEmail", {
+    console.log("signup processEmailJob", {
       email: normalizedEmail,
-      emailQueued,
+      emailSent,
     });
 
-    if (!emailQueued) {
+    if (!emailSent) {
       return {
         success: true,
         message:
@@ -376,9 +377,9 @@ export async function resendSignupEmailCodeAction(
     },
   });
 
-  let emailQueued = false;
+  let emailSent = false;
   try {
-    emailQueued = await enqueueEmail({
+    await processEmailJob({
       to: email,
       subject: "Your new verification code for Technet SMS",
       body: buildSignupVerificationEmailBody({
@@ -387,15 +388,16 @@ export async function resendSignupEmailCodeAction(
         code: verificationCode,
       }),
     });
+    emailSent = true;
   } catch (error) {
-    console.error("resendSignupEmailCodeAction enqueueEmail failed", {
+    console.error("resendSignupEmailCodeAction processEmailJob failed", {
       email,
       error,
     });
-    emailQueued = false;
+    emailSent = false;
   }
 
-  if (!emailQueued) {
+  if (!emailSent) {
     await prisma.verificationToken.deleteMany({
       where: {
         identifier,

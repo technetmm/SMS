@@ -3,7 +3,6 @@
 Production-ready infra stack for a multi-tenant SMS:
 
 - Next.js app (standalone)
-- BullMQ worker
 - PostgreSQL
 - Redis
 - NGINX reverse proxy
@@ -58,10 +57,10 @@ Run migration with the dedicated tools container:
 docker compose --profile tools run --rm migrate
 ```
 
-Seed from worker container:
+Seed from migrate container:
 
 ```bash
-docker compose exec worker pnpm prisma db seed
+docker compose --profile tools run --rm migrate pnpm prisma db seed
 ```
 
 Supabase migration flow (recommended for Vercel deployments):
@@ -123,11 +122,7 @@ Local email delivery (signup verification/resend):
 
 - Set real SMTP values in `.env` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`).
 - For Gmail, use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and a Google App Password.
-- Run the email worker process; queueing alone is not delivery:
-
-```bash
-pnpm worker:email
-```
+- Email is sent directly by app server actions once SMTP is configured.
 
 Production:
 
@@ -144,7 +139,6 @@ Manifests are in `k8s/`:
 - `configmap.yaml`
 - `secret.example.yaml`
 - `app-deployment.yaml`
-- `worker-deployment.yaml`
 - `app-service.yaml`
 - `ingress.yaml`
 - `hpa.yaml`
@@ -155,14 +149,13 @@ Apply:
 kubectl apply -f k8s/
 ```
 
-## 9) Vercel + Supabase + Render (Production)
+## 9) Vercel + Supabase (Production)
 
 Vercel project is linked via `.vercel/project.json` (`technetmm`).
 
 Deployment topology:
 
 - Web app: Vercel (Git auto-deploy from `main`)
-- Worker: Render worker service (`render.yaml`)
 - Shared backing services: Supabase Postgres + Redis
 
 Set these Vercel environment variables (Production/Preview as needed):
@@ -171,7 +164,6 @@ Set these Vercel environment variables (Production/Preview as needed):
 - `DIRECT_URL` (Supabase direct DB URL)
 - `AUTH_SECRET` (canonical auth secret; `NEXTAUTH_SECRET` is only a legacy fallback)
 - `NEXTAUTH_URL` (your Vercel app URL)
-- `REDIS_URL` (shared Redis for BullMQ)
 - `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
 - `FROM_EMAIL`, `FROM_NAME`
 
@@ -196,8 +188,4 @@ Release gates in CI (`.github/workflows/deploy.yml`):
 - Optional secret: `PRODUCTION_DIRECT_URL` (falls back to `PRODUCTION_DATABASE_URL` if omitted).
 - Local equivalent checks: `pnpm release:build-gate` and `pnpm release:check`.
 
-Background workers do not run persistently on Vercel. Deploy `render.yaml` to Render as a worker service:
-
-- Build command: `pnpm install --frozen-lockfile && pnpm db:generate`
-- Start command: `pnpm worker:start`
-- Use the same `DATABASE_URL`, `DIRECT_URL`, `REDIS_URL`, `AUTH_SECRET`, and SMTP env vars as production.
+Monthly invoice generation is currently manual-trigger only (no persistent background worker).
