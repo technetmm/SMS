@@ -56,6 +56,8 @@ export function EnrollmentCreateForm({
     () => sections.find((section) => section.id === selectedSectionId) ?? null,
     [sections, selectedSectionId],
   );
+  const isFixedDiscount = discountType === "FIXED";
+  const isPercentDiscount = discountType === "PERCENT";
   const pricing = useMemo(() => {
     const originalAmount = Number(selectedSection?.perStudentFee ?? 0);
     const parsedDiscount = Number(discountValue || 0);
@@ -157,6 +159,20 @@ export function EnrollmentCreateForm({
             />
           </div>
 
+          <div className="grid gap-2 md:col-span-2">
+            <Label htmlFor="sectionFee">Section Fee ({currency})</Label>
+            <Input
+              id="sectionFee"
+              value={
+                selectedSection
+                  ? formatMoney(pricing.originalAmount, currency)
+                  : `Select section to view fee in ${currency}`
+              }
+              readOnly
+              className="bg-muted/40"
+            />
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="discountType">Discount Type</Label>
             <Select
@@ -178,7 +194,13 @@ export function EnrollmentCreateForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="discountValue">Discount Value</Label>
+            <Label htmlFor="discountValue">
+              {isFixedDiscount
+                ? `Discount Value (${currency})`
+                : isPercentDiscount
+                  ? "Discount Value (%)"
+                  : "Discount Value"}
+            </Label>
             <Input
               id="discountValue"
               name="discountValue"
@@ -189,6 +211,13 @@ export function EnrollmentCreateForm({
               placeholder="0"
               onChange={(event) => setDiscountValue(event.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              {isFixedDiscount
+                ? `Enter the discount amount in ${currency}.`
+                : isPercentDiscount
+                  ? "Enter the discount percentage."
+                  : `Discounts use the school's default currency (${currency}) when fixed amount is selected.`}
+            </p>
           </div>
 
           <div className="md:col-span-2 rounded-lg border bg-muted/30 p-3">
