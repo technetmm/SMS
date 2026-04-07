@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { getClasses, deleteClass } from "@/app/(school)/school/classes/actions";
+import {
+  getPaginatedClasses,
+  deleteClass,
+} from "@/app/(school)/school/classes/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -11,13 +15,14 @@ import {
 } from "@/components/ui/table";
 import { dateFormatter, formatMoney } from "@/lib/helper";
 import {
+  BILLING_TYPE_LABELS,
   CLASS_TYPE_LABELS,
   enumLabel,
   PROGRAM_TYPE_LABELS,
 } from "@/lib/enum-labels";
 
-export async function ClassTable() {
-  const classes = await getClasses();
+export async function ClassTable({ page }: { page: number }) {
+  const classes = await getPaginatedClasses({ page });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -28,13 +33,14 @@ export async function ClassTable() {
             <TableHead>Course</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Program Type</TableHead>
+            <TableHead>Billing Type</TableHead>
             <TableHead className="text-right">Fee</TableHead>
             <TableHead>Created At</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {classes.map((klass) => (
+          {classes.items.map((klass) => (
             <TableRow key={klass.id}>
               <TableCell className="font-medium">{klass.name}</TableCell>
               <TableCell>{klass.course.name}</TableCell>
@@ -43,6 +49,9 @@ export async function ClassTable() {
               </TableCell>
               <TableCell>
                 {enumLabel(klass.programType, PROGRAM_TYPE_LABELS)}
+              </TableCell>
+              <TableCell>
+                {enumLabel(klass.billingType, BILLING_TYPE_LABELS)}
               </TableCell>
               <TableCell className="text-right">
                 {formatMoney(Number(klass.fee), klass.tenant.currency)}
@@ -63,7 +72,7 @@ export async function ClassTable() {
               </TableCell>
             </TableRow>
           ))}
-          {classes.length === 0 ? (
+          {classes.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -75,6 +84,7 @@ export async function ClassTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={classes} pathname="/school/classes" />
     </div>
   );
 }

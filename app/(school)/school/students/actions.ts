@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
 import { StudentStatus, UserRole } from "@/app/generated/prisma/enums";
 
@@ -123,6 +124,52 @@ export async function getStudents({
       status: true,
       createdAt: true,
     },
+  });
+}
+
+export async function getPaginatedStudents({
+  page,
+  query,
+  status,
+}: {
+  page: number;
+  query?: string;
+  status?: StudentStatus | "ALL";
+}) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const where: Record<string, unknown> = { schoolId };
+
+  if (status && status !== "ALL") {
+    where.status = status;
+  }
+
+  if (query) {
+    where.OR = [
+      { name: { contains: query, mode: "insensitive" } },
+      { phone: { contains: query, mode: "insensitive" } },
+    ];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.student.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.student.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          gender: true,
+          phone: true,
+          status: true,
+          createdAt: true,
+        },
+      }),
   });
 }
 

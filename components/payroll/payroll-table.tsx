@@ -1,4 +1,5 @@
-import { getPayrolls } from "@/app/(school)/school/payroll/actions";
+import { getPaginatedPayrolls } from "@/app/(school)/school/payroll/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -10,8 +11,8 @@ import {
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/helper";
 
-export async function PayrollTable() {
-  const rows = await getPayrolls();
+export async function PayrollTable({ page }: { page: number }) {
+  const rows = await getPaginatedPayrolls({ page });
   const monthFormatter = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
@@ -29,7 +30,7 @@ export async function PayrollTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => (
+          {rows.items.map((row) => (
             <TableRow key={row.id}>
               <TableCell className="font-medium">
                 {monthFormatter.format(row.month)}
@@ -43,7 +44,7 @@ export async function PayrollTable() {
               </TableCell>
             </TableRow>
           ))}
-          {rows.length === 0 ? (
+          {rows.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
                 No payroll generated yet.
@@ -52,6 +53,7 @@ export async function PayrollTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={rows} pathname="/school/payroll" />
     </div>
   );
 }

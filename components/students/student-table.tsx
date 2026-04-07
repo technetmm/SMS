@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getStudents } from "@/app/(school)/school/students/actions";
+import { getPaginatedStudents } from "@/app/(school)/school/students/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +20,17 @@ import {
 import { StudentStatus } from "@/app/generated/prisma/enums";
 
 export async function StudentTable({
+  page,
   query,
   status,
+  searchParams,
 }: {
+  page: number;
   query?: string;
   status?: StudentStatus | "ALL";
+  searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const students = await getStudents({ query, status });
+  const students = await getPaginatedStudents({ page, query, status });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -42,7 +47,7 @@ export async function StudentTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {students.map((student) => (
+          {students.items.map((student) => (
             <TableRow key={student.id}>
               <TableCell className="font-medium">{student.name}</TableCell>
               <TableCell>{enumLabel(student.gender, GENDER_LABELS)}</TableCell>
@@ -68,7 +73,7 @@ export async function StudentTable({
               </TableCell>
             </TableRow>
           ))}
-          {students.length === 0 ? (
+          {students.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={6}
@@ -80,6 +85,11 @@ export async function StudentTable({
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={students}
+        pathname="/school/students"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

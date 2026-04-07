@@ -8,7 +8,8 @@ import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
 import { Plan, SubscriptionStatus, UserRole } from "@/app/generated/prisma/enums";
-import { getPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
+import { getPaginatedPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
+import { paginateQuery } from "@/lib/pagination";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -318,11 +319,45 @@ export async function getTenants() {
   });
 }
 
+export async function getPaginatedTenants({ page }: { page: number }) {
+  await requireSuperAdminAccess();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.tenant.count(),
+    query: ({ skip, take }) =>
+      prisma.tenant.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: {
+          _count: { select: { users: true, students: true, staff: true } },
+        },
+      }),
+  });
+}
+
 export async function getSubscriptions() {
   await requireSuperAdminAccess();
   return prisma.subscription.findMany({
     orderBy: { createdAt: "desc" },
     include: { tenant: true },
+  });
+}
+
+export async function getPaginatedSubscriptions({ page }: { page: number }) {
+  await requireSuperAdminAccess();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.subscription.count(),
+    query: ({ skip, take }) =>
+      prisma.subscription.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: { tenant: true },
+      }),
   });
 }
 
@@ -338,32 +373,64 @@ export async function getActivityLogs() {
   });
 }
 
-export async function getPlatformDashboardData() {
+export async function getPlatformDashboardData({
+  schoolsPage,
+  subscriptionsPage,
+  devicePage,
+}: {
+  schoolsPage: number;
+  subscriptionsPage: number;
+  devicePage: number;
+}) {
   await requireSuperAdminAccess();
 
-  const [tenants, subscriptions, deviceApprovalRequests] = await Promise.all([
-    prisma.tenant.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: { select: { users: true } },
-      },
-      take: 20,
+  const [
+    tenants,
+    subscriptions,
+    deviceApprovalRequests,
+    totalSchools,
+    activeSubscriptions,
+    activePlans,
+  ] = await Promise.all([
+    paginateQuery({
+      page: schoolsPage,
+      count: () => prisma.tenant.count(),
+      query: ({ skip, take }) =>
+        prisma.tenant.findMany({
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          include: {
+            _count: { select: { users: true } },
+          },
+        }),
+    }),
+    paginateQuery({
+      page: subscriptionsPage,
+      count: () => prisma.subscription.count(),
+      query: ({ skip, take }) =>
+        prisma.subscription.findMany({
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          include: { tenant: true },
+        }),
+    }),
+    getPaginatedPendingDeviceApprovalRows(
+      { role: UserRole.SUPER_ADMIN },
+      { page: devicePage },
+    ),
+    prisma.tenant.count(),
+    prisma.subscription.count({
+      where: { isActive: true },
     }),
     prisma.subscription.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { tenant: true },
-      take: 20,
+      where: { isActive: true },
+      select: { plan: true },
     }),
-    getPendingDeviceApprovalRows({ role: UserRole.SUPER_ADMIN }),
   ]);
 
-  const totalSchools = await prisma.tenant.count();
-  const activeSubscriptions = await prisma.subscription.count({
-    where: { isActive: true },
-  });
-
-  const monthlyRevenue = subscriptions
-    .filter((sub) => sub.isActive)
+  const monthlyRevenue = activePlans
     .reduce((sum, sub) => {
       const price =
         sub.plan === "FREE"

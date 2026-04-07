@@ -28,6 +28,7 @@ import {
   getBillingPeriod,
   normalizeBillingDay,
 } from "@/lib/billing";
+import { paginateQuery } from "@/lib/pagination";
 
 export type EnrollmentActionState = {
   status: "idle" | "success" | "error";
@@ -298,6 +299,81 @@ export async function getEnrollments(filters?: {
   });
 }
 
+export async function getPaginatedEnrollments({
+  page,
+}: {
+  page: number;
+}) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.enrollment.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.enrollment.findMany({
+        where: { schoolId },
+        orderBy: [{ createdAt: "desc" }],
+        skip,
+        take,
+        select: {
+          id: true,
+          status: true,
+          enrolledAt: true,
+          student: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          tenant: {
+            select: {
+              currency: true,
+            },
+          },
+          section: {
+            select: {
+              id: true,
+              name: true,
+              class: {
+                select: {
+                  name: true,
+                  fee: true,
+                  billingType: true,
+                },
+              },
+            },
+          },
+          invoices: {
+            select: {
+              id: true,
+              invoiceType: true,
+              billingYear: true,
+              billingMonth: true,
+              originalAmount: true,
+              discount: true,
+              finalAmount: true,
+              paidAmount: true,
+              status: true,
+              dueDate: true,
+            },
+            orderBy: { createdAt: "desc" },
+            take: 1,
+          },
+          progress: {
+            select: {
+              id: true,
+              progress: true,
+              remark: true,
+              updatedAt: true,
+            },
+            take: 1,
+          },
+        },
+      }),
+  });
+}
+
 export async function getEnrollmentFormOptions() {
   const actor = await requireEnrollmentActor();
   if (!actor.ok) {
@@ -488,6 +564,66 @@ export async function getAttendanceRecords(filters?: {
         },
       },
     },
+  });
+}
+
+export async function getPaginatedAttendanceRecords({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: {
+    enrollmentId?: string;
+    sectionId?: string;
+    studentId?: string;
+    date?: Date;
+  };
+}) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const where = {
+    schoolId,
+    ...(filters?.enrollmentId ? { enrollmentId: filters.enrollmentId } : {}),
+    ...(filters?.date ? { date: filters.date } : {}),
+    ...(filters?.sectionId || filters?.studentId
+      ? {
+          enrollment: {
+            ...(filters.sectionId ? { sectionId: filters.sectionId } : {}),
+            ...(filters.studentId ? { studentId: filters.studentId } : {}),
+          },
+        }
+      : {}),
+  };
+
+  return paginateQuery({
+    page,
+    count: () => prisma.attendance.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.attendance.findMany({
+        where,
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        skip,
+        take,
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          enrollmentId: true,
+          enrollment: {
+            select: {
+              student: { select: { id: true, name: true } },
+              section: {
+                select: {
+                  id: true,
+                  name: true,
+                  class: { select: { name: true } },
+                },
+              },
+            },
+          },
+        },
+      }),
   });
 }
 

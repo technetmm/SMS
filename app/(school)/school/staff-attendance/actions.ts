@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { staffAttendanceSchema } from "@/lib/validators";
 
@@ -33,6 +34,37 @@ export async function getStaffAttendance() {
       },
       createdAt: true,
     },
+  });
+}
+
+export async function getPaginatedStaffAttendance({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.staffAttendance.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.staffAttendance.findMany({
+        where: { schoolId },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        skip,
+        take,
+        select: {
+          id: true,
+          date: true,
+          status: true,
+          staff: { select: { id: true, name: true } },
+          section: {
+            select: {
+              id: true,
+              name: true,
+              class: { select: { id: true, name: true } },
+            },
+          },
+          createdAt: true,
+        },
+      }),
   });
 }
 

@@ -3,9 +3,16 @@ import { requireSchoolAdminAccess } from "@/lib/rbac";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { EnrollmentTable } from "@/components/enrollments/enrollment-table";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function EnrollmentsPage() {
+export default async function EnrollmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdminAccess();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
 
   return (
     <div className="space-y-6">
@@ -18,7 +25,7 @@ export default async function EnrollmentsPage() {
           </Button>
         }
       />
-      <EnrollmentTable />
+      <EnrollmentTable page={page} />
     </div>
   );
 }

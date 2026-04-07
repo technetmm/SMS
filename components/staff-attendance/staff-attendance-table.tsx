@@ -1,4 +1,5 @@
-import { getStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
+import { getPaginatedStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,8 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function StaffAttendanceTable() {
-  const logs = await getStaffAttendance();
+export async function StaffAttendanceTable({ page }: { page: number }) {
+  const logs = await getPaginatedStaffAttendance({ page });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -26,7 +27,7 @@ export async function StaffAttendanceTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {logs.map((log) => (
+          {logs.items.map((log) => (
             <TableRow key={log.id}>
               <TableCell className="font-medium">{formatter.format(log.date)}</TableCell>
               <TableCell>{log.staff.name}</TableCell>
@@ -45,7 +46,7 @@ export async function StaffAttendanceTable() {
               </TableCell>
             </TableRow>
           ))}
-          {logs.length === 0 ? (
+          {logs.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
                 No staff attendance records yet.
@@ -54,6 +55,7 @@ export async function StaffAttendanceTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={logs} pathname="/school/staff-attendance" />
     </div>
   );
 }

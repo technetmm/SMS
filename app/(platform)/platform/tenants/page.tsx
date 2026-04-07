@@ -1,13 +1,21 @@
-import { getTenants } from "@/app/(platform)/actions";
+import { getPaginatedTenants } from "@/app/(platform)/actions";
 import Link from "next/link";
 import { deleteTenant, toggleTenantStatus } from "@/app/(platform)/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function TenantsPage() {
-  const tenants = await getTenants();
+export default async function TenantsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
+  const tenants = await getPaginatedTenants({ page });
 
   return (
     <div className="space-y-6">
@@ -40,7 +48,7 @@ export default async function TenantsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {tenants.map((tenant) => (
+              {tenants.items.map((tenant) => (
                 <TableRow key={tenant.id}>
                   <TableCell className="font-medium">{tenant.name}</TableCell>
                   <TableCell>{tenant.slug}</TableCell>
@@ -73,7 +81,7 @@ export default async function TenantsPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {tenants.length === 0 ? (
+              {tenants.totalCount === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="py-8 text-center text-sm text-muted-foreground">
                     No tenants created yet.
@@ -82,6 +90,7 @@ export default async function TenantsPage() {
               ) : null}
             </TableBody>
           </Table>
+          <TablePagination pagination={tenants} pathname="/platform/tenants" />
         </CardContent>
       </Card>
     </div>

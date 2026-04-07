@@ -1,16 +1,24 @@
 import {
-  getSubscriptions,
+  getPaginatedSubscriptions,
   getTenants,
 } from "@/app/(platform)/actions";
 import { SubscriptionForm } from "@/components/platform/subscription-form";
 import { SubscriptionRowEditor } from "@/components/platform/subscription-row-editor";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function SubscriptionsPage() {
+export default async function SubscriptionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
   const [subscriptions, tenants] = await Promise.all([
-    getSubscriptions(),
+    getPaginatedSubscriptions({ page }),
     getTenants(),
   ]);
 
@@ -42,7 +50,7 @@ export default async function SubscriptionsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {subscriptions.map((subscription) => (
+                {subscriptions.items.map((subscription) => (
                   <TableRow key={subscription.id}>
                   <TableCell className="font-medium">
                     {subscription.tenant.name}
@@ -70,7 +78,7 @@ export default async function SubscriptionsPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-              {subscriptions.length === 0 ? (
+              {subscriptions.totalCount === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
                     No subscriptions yet.
@@ -79,6 +87,10 @@ export default async function SubscriptionsPage() {
               ) : null}
             </TableBody>
           </Table>
+          <TablePagination
+            pagination={subscriptions}
+            pathname="/platform/subscriptions"
+          />
         </CardContent>
       </Card>
     </div>

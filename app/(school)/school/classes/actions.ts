@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { classCreateSchema } from "@/lib/validators";
 import { requireSchoolAdmin } from "@/lib/permissions";
+import { paginateQuery } from "@/lib/pagination";
 import { requireTenantId } from "@/lib/tenant";
 
 export type ClassActionState = {
@@ -74,6 +75,35 @@ export async function getClasses() {
       course: { select: { id: true, name: true } },
       _count: { select: { sections: true } },
     },
+  });
+}
+
+export async function getPaginatedClasses({ page }: { page: number }) {
+  await requireSchoolAdmin();
+  const schoolId = await requireTenantId();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.class.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.class.findMany({
+        where: { schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          classType: true,
+          programType: true,
+          billingType: true,
+          fee: true,
+          createdAt: true,
+          tenant: { select: { currency: true } },
+          course: { select: { id: true, name: true } },
+          _count: { select: { sections: true } },
+        },
+      }),
   });
 }
 

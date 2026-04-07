@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { subjectCreateSchema, subjectUpdateSchema } from "@/lib/validators";
 
@@ -58,6 +59,33 @@ export async function getSubjects() {
         },
       },
     },
+  });
+}
+
+export async function getPaginatedSubjects({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.subject.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.subject.findMany({
+        where: { schoolId },
+        orderBy: { name: "asc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          _count: {
+            select: {
+              courses: true,
+            },
+          },
+        },
+      }),
   });
 }
 

@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EnrollmentAttendanceForm } from "@/components/enrollments/enrollment-attendance-form";
 import { EnrollmentAttendanceTable } from "@/components/enrollments/enrollment-attendance-table";
 import {
-  getAttendanceRecords,
+  getPaginatedAttendanceRecords,
   getEnrollments,
 } from "@/app/(school)/school/enrollments/actions";
 import { requireTenantId } from "@/lib/tenant";
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { parsePageParam } from "@/lib/pagination";
 
 export default async function AttendancePage({
   searchParams,
@@ -21,12 +22,14 @@ export default async function AttendancePage({
     sectionId?: string;
     studentId?: string;
     date?: string;
+    page?: string;
   }>;
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenantId();
   const params = await searchParams;
 
+  const page = parsePageParam(params.page);
   const [enrollments, students, sections, rows] = await Promise.all([
     getEnrollments(),
     prisma.student.findMany({
@@ -39,10 +42,13 @@ export default async function AttendancePage({
       orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
       select: { id: true, name: true, class: { select: { name: true } } },
     }),
-    getAttendanceRecords({
-      studentId: params.studentId || undefined,
-      sectionId: params.sectionId || undefined,
-      date: params.date ? new Date(`${params.date}T00:00:00Z`) : undefined,
+    getPaginatedAttendanceRecords({
+      page,
+      filters: {
+        studentId: params.studentId || undefined,
+        sectionId: params.sectionId || undefined,
+        date: params.date ? new Date(`${params.date}T00:00:00Z`) : undefined,
+      },
     }),
   ]);
   const today = new Date().toISOString().slice(0, 10);
@@ -123,7 +129,16 @@ export default async function AttendancePage({
         </CardContent>
       </Card>
 
-      <EnrollmentAttendanceTable rows={rows} />
+      <EnrollmentAttendanceTable
+        rows={rows}
+        pathname="/school/attendance"
+        searchParams={{
+          studentId: params.studentId,
+          sectionId: params.sectionId,
+          date: params.date,
+          page: params.page,
+        }}
+      />
     </div>
   );
 }

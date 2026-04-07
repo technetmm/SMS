@@ -1,14 +1,22 @@
 import { DeviceApprovalTable } from "@/components/auth/device-approval-table";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma/client";
-import { getPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
+import { getPaginatedPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { StatCard } from "@/components/shared/stat-card";
 import { RevenueChart } from "@/components/shared/revenue-chart";
 import { Currency } from "@/app/generated/prisma/enums";
 import { formatMoney } from "@/lib/helper";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
   const [sessionUser, schoolId] = await Promise.all([
     requireSchoolAdminAccess(),
     requireTenant(),
@@ -33,10 +41,13 @@ export default async function DashboardPage() {
       where: { id: schoolId },
       select: { currency: true },
     }),
-    getPendingDeviceApprovalRows({
-      role: sessionUser.role,
-      schoolId: sessionUser.schoolId,
-    }),
+    getPaginatedPendingDeviceApprovalRows(
+      {
+        role: sessionUser.role,
+        schoolId: sessionUser.schoolId,
+      },
+      { page },
+    ),
   ]);
 
   const monthlyRevenue =
@@ -68,10 +79,14 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Staff & Student Device Approval Requests</CardTitle>
+        <CardTitle>Staff & Student Device Approval Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <DeviceApprovalTable initialRequests={deviceApprovalRequests} />
+          <DeviceApprovalTable initialRequests={deviceApprovalRequests.items} />
+          <TablePagination
+            pagination={deviceApprovalRequests}
+            pathname="/school/dashboard"
+          />
         </CardContent>
       </Card>
     </div>

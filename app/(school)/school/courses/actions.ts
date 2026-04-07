@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { courseCreateSchema, courseUpdateSchema } from "@/lib/validators";
 
@@ -95,6 +96,44 @@ export async function getCourses() {
     ...course,
     subjects: course.subjects.map((mapping) => mapping.subject),
   }));
+}
+
+export async function getPaginatedCourses({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const result = await paginateQuery({
+    page,
+    count: () => prisma.course.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.course.findMany({
+        where: { schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          subjects: {
+            select: { subject: { select: { id: true, name: true } } },
+          },
+          _count: {
+            select: {
+              classes: true,
+            },
+          },
+        },
+      }),
+  });
+
+  return {
+    ...result,
+    items: result.items.map((course) => ({
+      ...course,
+      subjects: course.subjects.map((mapping) => mapping.subject),
+    })),
+  };
 }
 
 export async function getCourseById(id: string) {

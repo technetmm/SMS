@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getTimetable, deleteTimetableSlot } from "@/app/(school)/school/timetable/actions";
+import { getPaginatedTimetable, getTimetable, deleteTimetableSlot } from "@/app/(school)/school/timetable/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,11 +14,22 @@ import {
 } from "@/components/ui/table";
 
 export async function TimetableTable({
+  page,
   slots: slotsProp,
 }: {
+  page?: number;
   slots?: Awaited<ReturnType<typeof getTimetable>>;
 } = {}) {
-  const slots = slotsProp ?? (await getTimetable());
+  const slots =
+    slotsProp != null
+      ? {
+          items: slotsProp,
+          page: 1,
+          pageSize: slotsProp.length,
+          totalCount: slotsProp.length,
+          totalPages: 1,
+        }
+      : await getPaginatedTimetable({ page: page ?? 1 });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -33,7 +45,7 @@ export async function TimetableTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {slots.map((slot) => (
+          {slots.items.map((slot) => (
             <TableRow key={slot.id}>
               <TableCell>{enumLabel(slot.dayOfWeek, DAY_OF_WEEK_LABELS)}</TableCell>
               <TableCell className="font-medium">
@@ -66,7 +78,7 @@ export async function TimetableTable({
               </TableCell>
             </TableRow>
           ))}
-          {slots.length === 0 ? (
+          {slots.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                 No timetable slots yet. Create your first slot.
@@ -75,6 +87,9 @@ export async function TimetableTable({
           ) : null}
         </TableBody>
       </Table>
+      {slotsProp == null ? (
+        <TablePagination pagination={slots} pathname="/school/timetable" />
+      ) : null}
     </div>
   );
 }

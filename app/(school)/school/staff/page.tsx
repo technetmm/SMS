@@ -5,9 +5,16 @@ import { Button } from "@/components/ui/button";
 import { StaffTable } from "@/components/staff/staff-table";
 import { ExportMenu } from "@/components/shared/export-menu";
 import { exportStaffToExcel } from "@/app/(school)/school/exports/actions";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function StaffPage() {
+export default async function StaffPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdmin();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
 
   return (
     <div className="space-y-6">
@@ -25,7 +32,7 @@ export default async function StaffPage() {
           </div>
         }
       />
-      <StaffTable />
+      <StaffTable page={page} />
     </div>
   );
 }

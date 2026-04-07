@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { payrollGenerateSchema } from "@/lib/validators";
 
@@ -32,6 +33,32 @@ export async function getPayrolls() {
       staff: { select: { id: true, name: true } },
       createdAt: true,
     },
+  });
+}
+
+export async function getPaginatedPayrolls({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.payroll.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.payroll.findMany({
+        where: { schoolId },
+        orderBy: [{ month: "desc" }, { createdAt: "desc" }],
+        skip,
+        take,
+        select: {
+          id: true,
+          month: true,
+          totalSections: true,
+          totalAmount: true,
+          tenant: { select: { currency: true } },
+          staff: { select: { id: true, name: true } },
+          createdAt: true,
+        },
+      }),
   });
 }
 

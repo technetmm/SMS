@@ -1,4 +1,5 @@
-import { getEnrollments } from "@/app/(school)/school/enrollments/actions";
+import { getPaginatedEnrollments } from "@/app/(school)/school/enrollments/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -13,8 +14,8 @@ import { formatMoney } from "@/lib/helper";
 import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enrollment-status-form";
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
 
-export async function EnrollmentTable() {
-  const rows = await getEnrollments();
+export async function EnrollmentTable({ page }: { page: number }) {
+  const rows = await getPaginatedEnrollments({ page });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -31,7 +32,7 @@ export async function EnrollmentTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => {
+          {rows.items.map((row) => {
             const latestInvoice = row.invoices[0];
             const latestProgress = row.progress[0];
             const progressValue = latestProgress?.progress ?? 0;
@@ -124,7 +125,7 @@ export async function EnrollmentTable() {
               </TableRow>
             );
           })}
-          {rows.length === 0 ? (
+          {rows.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
                 No enrollments yet.
@@ -133,6 +134,7 @@ export async function EnrollmentTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={rows} pathname="/school/enrollments" />
     </div>
   );
 }

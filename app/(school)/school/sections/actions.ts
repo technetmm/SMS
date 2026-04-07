@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { sectionMultiStaffSchema } from "@/lib/validators";
 import { requireSchoolAdmin } from "@/lib/permissions";
 import { requireTenantId } from "@/lib/tenant";
@@ -139,6 +140,46 @@ export async function getSections() {
         },
       },
     },
+  });
+}
+
+export async function getPaginatedSections({ page }: { page: number }) {
+  await requireSchoolAdmin();
+  const schoolId = await requireTenantId();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.section.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.section.findMany({
+        where: { schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          room: true,
+          capacity: true,
+          createdAt: true,
+          enrollments: {
+            select: {
+              status: true,
+            },
+          },
+          class: { select: { id: true, name: true } },
+          staffMappings: {
+            select: {
+              staff: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      }),
   });
 }
 

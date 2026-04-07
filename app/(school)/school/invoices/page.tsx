@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getInvoices } from "@/app/(school)/school/invoices/actions";
+import { getPaginatedInvoices } from "@/app/(school)/school/invoices/actions";
 import { PageHeader } from "@/components/shared/page-header";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -18,12 +18,16 @@ import {
   PAYMENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
 import { formatMoney } from "@/lib/helper";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function InvoicesPage() {
-  const invoices = await getInvoices();
-  if (!Array.isArray(invoices)) {
-    redirect("/school/dashboard");
-  }
+export default async function InvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
+  const invoices = await getPaginatedInvoices({ page });
 
   return (
     <div className="space-y-6">
@@ -49,7 +53,7 @@ export default async function InvoicesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => {
+            {invoices.items.map((invoice) => {
               const remaining = Math.max(
                 0,
                 Number(invoice.finalAmount) - Number(invoice.paidAmount),
@@ -118,7 +122,7 @@ export default async function InvoicesPage() {
                 </TableRow>
               );
             })}
-            {invoices.length === 0 ? (
+            {invoices.totalCount === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={10}
@@ -130,6 +134,7 @@ export default async function InvoicesPage() {
             ) : null}
           </TableBody>
         </Table>
+        <TablePagination pagination={invoices} pathname="/school/invoices" />
       </div>
     </div>
   );

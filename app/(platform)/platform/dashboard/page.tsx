@@ -5,6 +5,7 @@ import {
 import { ActivityTimeline } from "@/components/activity-timeline";
 import { DeviceApprovalTable } from "@/components/auth/device-approval-table";
 import { StatCard } from "@/components/shared/stat-card";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -17,10 +18,27 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { PlatformRevenueChart } from "@/components/platform/platform-revenue-chart";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function PlatformDashboardPage() {
+export default async function PlatformDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    devicePage?: string;
+    schoolsPage?: string;
+    subscriptionsPage?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const devicePage = parsePageParam(params.devicePage);
+  const schoolsPage = parsePageParam(params.schoolsPage);
+  const subscriptionsPage = parsePageParam(params.subscriptionsPage);
   const [data, activityLogs] = await Promise.all([
-    getPlatformDashboardData(),
+    getPlatformDashboardData({
+      devicePage,
+      schoolsPage,
+      subscriptionsPage,
+    }),
     getActivityLogs(),
   ]);
 
@@ -78,8 +96,18 @@ export default async function PlatformDashboardPage() {
         </CardHeader>
         <CardContent>
           <DeviceApprovalTable
-            initialRequests={data.deviceApprovalRequests}
+            initialRequests={data.deviceApprovalRequests.items}
             showSchool
+          />
+          <TablePagination
+            pagination={data.deviceApprovalRequests}
+            pathname="/platform/dashboard"
+            searchParams={{
+              devicePage: params.devicePage,
+              schoolsPage: params.schoolsPage,
+              subscriptionsPage: params.subscriptionsPage,
+            }}
+            pageParamName="devicePage"
           />
         </CardContent>
       </Card>
@@ -101,7 +129,7 @@ export default async function PlatformDashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.tenants.map((tenant) => (
+                {data.tenants.items.map((tenant) => (
                   <TableRow key={tenant.id}>
                     <TableCell className="font-medium">{tenant.name}</TableCell>
                     <TableCell>{tenant.plan}</TableCell>
@@ -127,8 +155,28 @@ export default async function PlatformDashboardPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {data.tenants.totalCount === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="py-8 text-center text-sm text-muted-foreground"
+                    >
+                      No schools yet.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
+            <TablePagination
+              pagination={data.tenants}
+              pathname="/platform/dashboard"
+              searchParams={{
+                devicePage: params.devicePage,
+                schoolsPage: params.schoolsPage,
+                subscriptionsPage: params.subscriptionsPage,
+              }}
+              pageParamName="schoolsPage"
+            />
           </CardContent>
         </Card>
 
@@ -147,7 +195,7 @@ export default async function PlatformDashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.subscriptions.map((subscription) => (
+                {data.subscriptions.items.map((subscription) => (
                   <TableRow key={subscription.id}>
                     <TableCell className="font-medium">
                       {subscription.tenant.name}
@@ -171,8 +219,28 @@ export default async function PlatformDashboardPage() {
                     </TableCell>
                   </TableRow>
                 ))}
+                {data.subscriptions.totalCount === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={4}
+                      className="py-8 text-center text-sm text-muted-foreground"
+                    >
+                      No subscriptions yet.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
+            <TablePagination
+              pagination={data.subscriptions}
+              pathname="/platform/dashboard"
+              searchParams={{
+                devicePage: params.devicePage,
+                schoolsPage: params.schoolsPage,
+                subscriptionsPage: params.subscriptionsPage,
+              }}
+              pageParamName="subscriptionsPage"
+            />
           </CardContent>
         </Card>
       </div>
