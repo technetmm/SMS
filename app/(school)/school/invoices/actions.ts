@@ -7,6 +7,7 @@ import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
+import { generateMonthlyInvoices } from "@/lib/monthly-invoices";
 import {
   enrollmentActorRoleSchema,
   paymentCreateSchema,
@@ -420,4 +421,36 @@ export async function generateInvoicePDF(invoiceId: string) {
     status: "success" as const,
     url: `/school/invoices/${invoice.id}/pdf`,
   };
+}
+
+export async function generateMissingMonthlyInvoices(
+  _prevState: BillingActionState,
+  _formData: FormData,
+): Promise<BillingActionState> {
+  const actor = await requireStaffOrAdmin();
+  if (!actor.ok) return { status: "error", message: actor.message };
+
+  try {
+    const result = await generateMonthlyInvoices({
+      now: new Date(),
+      schoolId: actor.schoolId,
+      currentPeriodOnly: false,
+      respectCurrentPeriodDueDateGate: false,
+    });
+
+    revalidatePath("/school/invoices");
+    revalidatePath("/school/payments");
+    revalidatePath("/school/enrollments");
+
+    return {
+      status: "success",
+      message: `Created ${result.created} invoice${result.created === 1 ? "" : "s"} and skipped ${result.existing} existing invoice${result.existing === 1 ? "" : "s"}${result.gated > 0 ? ` (${result.gated} gated)` : ""}.`,
+    };
+  } catch (error) {
+    console.error("generateMissingMonthlyInvoices failed", error);
+    return {
+      status: "error",
+      message: "Unable to generate monthly invoices.",
+    };
+  }
 }

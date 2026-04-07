@@ -62,6 +62,10 @@ export default async function StudentDetailPage({
               <span>{formatDate(student.dob)}</span>
             </div>
             <div className="flex justify-between">
+              <span className="text-muted-foreground">Admission Date</span>
+              <span>{formatDate(student.admissionDate)}</span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-muted-foreground">Status</span>
               <Badge variant={student.status === "ACTIVE" ? "default" : "outline"}>
                 {enumLabel(student.status, STUDENT_STATUS_LABELS)}

@@ -42,7 +42,7 @@ export async function StudentTable({
             <TableHead>Gender</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created At</TableHead>
+            <TableHead>Admission Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -59,7 +59,7 @@ export async function StudentTable({
                   {enumLabel(student.status, STUDENT_STATUS_LABELS)}
                 </Badge>
               </TableCell>
-              <TableCell>{formatter.format(student.createdAt)}</TableCell>
+              <TableCell>{formatter.format(student.admissionDate)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">

@@ -26,7 +26,8 @@ type StudentFormData = {
   id?: string;
   name: string;
   gender: "MALE" | "FEMALE" | "OTHER";
-  dob: string;
+  dob?: string | null;
+  admissionDate: string;
   fatherName?: string | null;
   motherName?: string | null;
   phone?: string | null;
@@ -99,7 +100,16 @@ export function StudentForm({
               id="dob"
               name="dob"
               type="date"
-              defaultValue={initialData?.dob}
+              defaultValue={initialData?.dob ?? ""}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="admissionDate">Admission Date</Label>
+            <Input
+              id="admissionDate"
+              name="admissionDate"
+              type="date"
+              defaultValue={initialData?.admissionDate}
               required
             />
           </div>
