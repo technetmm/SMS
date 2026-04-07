@@ -17,7 +17,10 @@ import {
 export const studentCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   gender: z.nativeEnum(Gender),
-  dob: z.coerce.date(),
+  dob: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? null : value),
+    z.coerce.date().nullable(),
+  ),
   admissionDate: z.coerce.date(),
   fatherName: z.string().optional(),
   motherName: z.string().optional(),

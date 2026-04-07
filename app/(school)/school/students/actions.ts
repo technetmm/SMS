@@ -260,10 +260,7 @@ export async function deleteStudent(
     return { status: "error", message: "Student not found" };
   }
 
-  if (
-    student._count.enrollments > 0 ||
-    student._count.invoices > 0
-  ) {
+  if (student._count.enrollments > 0 || student._count.invoices > 0) {
     return {
       status: "error",
       message: "Student has related records. Remove them first.",

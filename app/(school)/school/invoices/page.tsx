@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPaginatedInvoices } from "@/app/(school)/school/invoices/actions";
+import { InvoiceGenerateForm } from "@/components/invoices/invoice-generate-form";
 import { PageHeader } from "@/components/shared/page-header";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export default async function InvoicesPage({
       <PageHeader
         title="Invoices"
         description="Manage discounts, partial payments, refunds, and invoice documents."
+        actions={<InvoiceGenerateForm />}
       />
 
       <div className="rounded-lg border bg-background">
