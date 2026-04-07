@@ -266,7 +266,8 @@ model Student {
   branchId   String?
   name       String
   gender     Gender
-  dob        DateTime
+  dob        DateTime?
+  admissionDate DateTime
   fatherName String?
   motherName String?
   phone      String?

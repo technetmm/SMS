@@ -18,6 +18,7 @@ export const studentCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   gender: z.nativeEnum(Gender),
   dob: z.coerce.date(),
+  admissionDate: z.coerce.date(),
   fatherName: z.string().optional(),
   motherName: z.string().optional(),
   phone: z

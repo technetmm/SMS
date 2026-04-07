@@ -47,6 +47,7 @@ export default async function EditStudentPage({
           name: student.name,
           gender: student.gender,
           dob: toDateInput(student.dob),
+          admissionDate: toDateInput(student.admissionDate),
           fatherName: student.fatherName,
           motherName: student.motherName,
           phone: student.phone,

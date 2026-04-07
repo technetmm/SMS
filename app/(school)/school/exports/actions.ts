@@ -31,14 +31,14 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
       gender: true,
       phone: true,
       status: true,
-      createdAt: true,
+      admissionDate: true,
     },
   });
 
   const buffer = await buildExcelBuffer({
     sheetName: "Students",
-    headers: ["Name", "Gender", "Phone", "Status", "Created At"],
-    rows: students.map((s) => [s.name, s.gender, s.phone ?? "-", s.status, s.createdAt]),
+    headers: ["Name", "Gender", "Phone", "Status", "Admission Date"],
+    rows: students.map((s) => [s.name, s.gender, s.phone ?? "-", s.status, s.admissionDate]),
   });
 
   const filename = `${stamp("students")}.xlsx`;

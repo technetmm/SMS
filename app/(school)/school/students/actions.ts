@@ -73,6 +73,7 @@ export async function createStudent(
           name: parsed.data.name,
           gender: parsed.data.gender,
           dob: parsed.data.dob,
+          admissionDate: parsed.data.admissionDate,
           fatherName: parsed.data.fatherName,
           motherName: parsed.data.motherName,
           phone: parsed.data.phone,
@@ -122,7 +123,7 @@ export async function getStudents({
       gender: true,
       phone: true,
       status: true,
-      createdAt: true,
+      admissionDate: true,
     },
   });
 }
@@ -167,7 +168,7 @@ export async function getPaginatedStudents({
           gender: true,
           phone: true,
           status: true,
-          createdAt: true,
+          admissionDate: true,
         },
       }),
   });
@@ -217,6 +218,7 @@ export async function updateStudent(
         name: parsed.data.name,
         gender: parsed.data.gender,
         dob: parsed.data.dob,
+        admissionDate: parsed.data.admissionDate,
         fatherName: parsed.data.fatherName,
         motherName: parsed.data.motherName,
         phone: parsed.data.phone,
