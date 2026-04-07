@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { DayOfWeek} from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { timetableSlotSchema } from "@/lib/validators";
 import { rangesOverlap } from "@/lib/time";
@@ -34,6 +35,43 @@ export async function getTimetable() {
       section: { select: { id: true, name: true, class: { select: { id: true, name: true } } } },
       createdAt: true,
     },
+  });
+}
+
+export async function getPaginatedTimetable({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.timetable.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.timetable.findMany({
+        where: { schoolId },
+        orderBy: [
+          { dayOfWeek: "asc" },
+          { startTime: "asc" },
+          { createdAt: "desc" },
+        ],
+        skip,
+        take,
+        select: {
+          id: true,
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          room: true,
+          staff: { select: { id: true, name: true } },
+          section: {
+            select: {
+              id: true,
+              name: true,
+              class: { select: { id: true, name: true } },
+            },
+          },
+          createdAt: true,
+        },
+      }),
   });
 }
 

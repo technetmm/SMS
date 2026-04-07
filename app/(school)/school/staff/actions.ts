@@ -9,6 +9,7 @@ import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { processEmailJob } from "@/lib/jobs/email.job";
 import { logAction } from "@/lib/audit-log";
+import { paginateQuery } from "@/lib/pagination";
 import { getServerAuth } from "@/auth";
 import { z } from "zod";
 
@@ -153,6 +154,37 @@ export async function getStaff() {
       status: true,
       hireDate: true,
     },
+  });
+}
+
+export async function getPaginatedStaff({ page }: { page: number }) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return paginateQuery({
+    page,
+    count: () => prisma.staff.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.staff.findMany({
+        where: { schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          userId: true,
+          user: {
+            select: {
+              role: true,
+            },
+          },
+          name: true,
+          email: true,
+          phone: true,
+          status: true,
+          hireDate: true,
+        },
+      }),
   });
 }
 

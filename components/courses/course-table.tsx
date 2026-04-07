@@ -1,10 +1,11 @@
-import { getCourses } from "@/app/(school)/school/courses/actions";
+import { getPaginatedCourses } from "@/app/(school)/school/courses/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseRowActions } from "@/components/courses/course-row-actions";
 
-export async function CourseTable() {
-  const courses = await getCourses();
+export async function CourseTable({ page }: { page: number }) {
+  const courses = await getPaginatedCourses({ page });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -20,7 +21,7 @@ export async function CourseTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {courses.map((course) => (
+          {courses.items.map((course) => (
             <TableRow key={course.id}>
               <TableCell className="font-medium">{course.name}</TableCell>
               <TableCell>
@@ -45,7 +46,7 @@ export async function CourseTable() {
               </TableCell>
             </TableRow>
           ))}
-          {courses.length === 0 ? (
+          {courses.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
                 No courses yet. Create your first course to start building classes.
@@ -54,6 +55,7 @@ export async function CourseTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={courses} pathname="/school/courses" />
     </div>
   );
 }

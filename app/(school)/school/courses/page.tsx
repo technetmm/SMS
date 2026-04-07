@@ -3,9 +3,16 @@ import { requireSchoolAdmin } from "@/lib/permissions";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { CourseTable } from "@/components/courses/course-table";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function CoursesPage() {
+export default async function CoursesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdmin();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
 
   return (
     <div className="space-y-6">
@@ -18,7 +25,7 @@ export default async function CoursesPage() {
           </Button>
         }
       />
-      <CourseTable />
+      <CourseTable page={page} />
     </div>
   );
 }

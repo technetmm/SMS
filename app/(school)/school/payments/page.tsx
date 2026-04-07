@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { requireSchoolAdmin } from "@/lib/permissions";
 import { ExportMenu } from "@/components/shared/export-menu";
 import { exportPaymentsToPDF } from "@/app/(school)/school/exports/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -16,24 +17,37 @@ import { requireTenantId } from "@/lib/tenant";
 import { enumLabel, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/helper";
+import { paginateQuery, parsePageParam } from "@/lib/pagination";
 
-export default async function PaymentsPage() {
+export default async function PaymentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdmin();
   const schoolId = await requireTenantId();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
 
-  const invoices = await prisma.invoice.findMany({
-    where: { schoolId },
-    orderBy: { createdAt: "desc" },
-    take: 200,
-    select: {
-      id: true,
-      finalAmount: true,
-      paidAmount: true,
-      status: true,
-      dueDate: true,
-      tenant: { select: { currency: true } },
-      student: { select: { name: true } },
-    },
+  const invoices = await paginateQuery({
+    page,
+    count: () => prisma.invoice.count({ where: { schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.invoice.findMany({
+        where: { schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          finalAmount: true,
+          paidAmount: true,
+          status: true,
+          dueDate: true,
+          tenant: { select: { currency: true } },
+          student: { select: { name: true } },
+        },
+      }),
   });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
@@ -65,7 +79,7 @@ export default async function PaymentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((invoice) => (
+              {invoices.items.map((invoice) => (
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.id}</TableCell>
                   <TableCell>{invoice.student.name}</TableCell>
@@ -85,7 +99,7 @@ export default async function PaymentsPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {invoices.length === 0 ? (
+              {invoices.totalCount === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={6}
@@ -97,6 +111,7 @@ export default async function PaymentsPage() {
               ) : null}
             </TableBody>
           </Table>
+          <TablePagination pagination={invoices} pathname="/school/payments" />
         </CardContent>
       </Card>
     </div>

@@ -1,4 +1,5 @@
-import { getSubjects } from "@/app/(school)/school/subjects/actions";
+import { getPaginatedSubjects } from "@/app/(school)/school/subjects/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -11,8 +12,8 @@ import {
 import { SubjectRowActions } from "@/components/subjects/subject-row-actions";
 import { dateFormatter } from "@/lib/helper";
 
-export async function SubjectTable() {
-  const subjects = await getSubjects();
+export async function SubjectTable({ page }: { page: number }) {
+  const subjects = await getPaginatedSubjects({ page });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -26,7 +27,7 @@ export async function SubjectTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {subjects.map((subject) => (
+          {subjects.items.map((subject) => (
             <TableRow key={subject.id}>
               <TableCell className="font-medium">{subject.name}</TableCell>
               <TableCell>
@@ -40,7 +41,7 @@ export async function SubjectTable() {
               </TableCell>
             </TableRow>
           ))}
-          {subjects.length === 0 ? (
+          {subjects.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={4}
@@ -52,6 +53,7 @@ export async function SubjectTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={subjects} pathname="/school/subjects" />
     </div>
   );
 }

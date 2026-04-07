@@ -1,8 +1,9 @@
 import Link from "next/link";
 import {
-  getSections,
+  getPaginatedSections,
   deleteSection,
 } from "@/app/(school)/school/sections/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,8 +15,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function SectionTable() {
-  const sections = await getSections();
+export async function SectionTable({ page }: { page: number }) {
+  const sections = await getPaginatedSections({ page });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -33,7 +34,7 @@ export async function SectionTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sections.map((section) => {
+          {sections.items.map((section) => {
             const activeEnrollments = section.enrollments.filter(
               (item) => item.status === "ACTIVE",
             ).length;
@@ -82,7 +83,7 @@ export async function SectionTable() {
               </TableRow>
             );
           })}
-          {sections.length === 0 ? (
+          {sections.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -94,6 +95,7 @@ export async function SectionTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination pagination={sections} pathname="/school/sections" />
     </div>
   );
 }

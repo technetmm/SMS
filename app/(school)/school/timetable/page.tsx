@@ -5,9 +5,16 @@ import { TimetableTable } from "@/components/timetable/timetable-table";
 import { DragDropWeekTimetable } from "@/components/timetable/drag-drop-week";
 import { requireSchoolAdminAccess } from "@/lib/rbac";
 import { getTimetable } from "@/app/(school)/school/timetable/actions";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function TimetablePage() {
+export default async function TimetablePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdminAccess();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
   const slots = await getTimetable();
 
   return (
@@ -22,7 +29,7 @@ export default async function TimetablePage() {
         }
       />
       <DragDropWeekTimetable slots={slots} />
-      <TimetableTable slots={slots} />
+      <TimetableTable page={page} />
     </div>
   );
 }

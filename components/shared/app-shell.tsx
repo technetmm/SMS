@@ -44,7 +44,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         schoolName={user.school?.name ?? null}
       />
       <SidebarInset>
-        <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between gap-2 rounded-t-xl bg-background">
+        <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between gap-2 rounded-t-xl bg-background z-50">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator

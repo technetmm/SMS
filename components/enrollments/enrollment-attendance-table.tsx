@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { TablePagination } from "@/components/shared/table-pagination";
 import {
   Table,
   TableBody,
@@ -19,7 +20,21 @@ type AttendanceRow = {
   };
 };
 
-export function EnrollmentAttendanceTable({ rows }: { rows: AttendanceRow[] }) {
+export function EnrollmentAttendanceTable({
+  rows,
+  pathname,
+  searchParams,
+}: {
+  rows: {
+    items: AttendanceRow[];
+    page: number;
+    pageSize: number;
+    totalCount: number;
+    totalPages: number;
+  };
+  pathname: string;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -34,7 +49,7 @@ export function EnrollmentAttendanceTable({ rows }: { rows: AttendanceRow[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => (
+          {rows.items.map((row) => (
             <TableRow key={row.id}>
               <TableCell>{formatter.format(row.date)}</TableCell>
               <TableCell className="font-medium">{row.enrollment.student.name}</TableCell>
@@ -49,7 +64,7 @@ export function EnrollmentAttendanceTable({ rows }: { rows: AttendanceRow[] }) {
               </TableCell>
             </TableRow>
           ))}
-          {rows.length === 0 ? (
+          {rows.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
                 No attendance records yet.
@@ -58,6 +73,11 @@ export function EnrollmentAttendanceTable({ rows }: { rows: AttendanceRow[] }) {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={rows}
+        pathname={pathname}
+        searchParams={searchParams}
+      />
     </div>
   );
 }

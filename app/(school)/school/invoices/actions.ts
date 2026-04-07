@@ -6,6 +6,7 @@ import { PaymentStatus, UserRole } from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import {
   enrollmentActorRoleSchema,
   paymentCreateSchema,
@@ -106,6 +107,67 @@ export async function getInvoices() {
         },
       },
     },
+  });
+}
+
+export async function getPaginatedInvoices({ page }: { page: number }) {
+  const actor = await requireStaffOrAdmin();
+  if (!actor.ok) {
+    return paginateQuery({
+      page,
+      count: async () => 0,
+      query: async () => [],
+    });
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.invoice.count({ where: { schoolId: actor.schoolId } }),
+    query: ({ skip, take }) =>
+      prisma.invoice.findMany({
+        where: { schoolId: actor.schoolId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          invoiceType: true,
+          billingYear: true,
+          billingMonth: true,
+          status: true,
+          originalAmount: true,
+          discount: true,
+          finalAmount: true,
+          paidAmount: true,
+          dueDate: true,
+          createdAt: true,
+          tenant: { select: { currency: true } },
+          student: { select: { id: true, name: true } },
+          enrollment: {
+            select: {
+              section: {
+                select: {
+                  id: true,
+                  name: true,
+                  class: { select: { name: true } },
+                },
+              },
+            },
+          },
+          payments: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              amount: true,
+              method: true,
+              createdAt: true,
+              refunds: {
+                select: { id: true, amount: true, reason: true, createdAt: true },
+              },
+            },
+          },
+        },
+      }),
   });
 }
 

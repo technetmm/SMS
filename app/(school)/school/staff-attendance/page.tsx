@@ -4,10 +4,17 @@ import { PageHeader } from "@/components/shared/page-header";
 import { StaffAttendanceForm } from "@/components/staff-attendance/staff-attendance-form";
 import { StaffAttendanceTable } from "@/components/staff-attendance/staff-attendance-table";
 import { markStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
+import { parsePageParam } from "@/lib/pagination";
 
-export default async function StaffAttendancePage() {
+export default async function StaffAttendancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const { page: pageParam } = await searchParams;
+  const page = parsePageParam(pageParam);
 
   const [staff, sections] = await Promise.all([
     prisma.staff.findMany({
@@ -36,7 +43,7 @@ export default async function StaffAttendancePage() {
           name: `${section.class.name} • ${section.name}`,
         }))}
       />
-      <StaffAttendanceTable />
+      <StaffAttendanceTable page={page} />
     </div>
   );
 }
