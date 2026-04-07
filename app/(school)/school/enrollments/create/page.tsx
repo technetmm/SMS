@@ -8,7 +8,7 @@ import { requireSchoolAdmin } from "@/lib/permissions";
 export default async function CreateEnrollmentPage() {
   await requireSchoolAdmin();
 
-  const { students, sections } = await getEnrollmentFormOptions();
+  const { students, sections, currency } = await getEnrollmentFormOptions();
 
   return (
     <div className="space-y-6">
@@ -21,7 +21,11 @@ export default async function CreateEnrollmentPage() {
           </Button>
         }
       />
-      <EnrollmentCreateForm students={students} sections={sections} />
+      <EnrollmentCreateForm
+        students={students}
+        sections={sections}
+        currency={currency}
+      />
     </div>
   );
 }

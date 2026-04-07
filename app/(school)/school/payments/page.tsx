@@ -3,11 +3,19 @@ import { requireSchoolAdmin } from "@/lib/permissions";
 import { ExportMenu } from "@/components/shared/export-menu";
 import { exportPaymentsToPDF } from "@/app/(school)/school/exports/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { prisma } from "@/lib/prisma/client";
 import { requireTenantId } from "@/lib/tenant";
 import { enumLabel, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
+import { formatMoney } from "@/lib/helper";
 
 export default async function PaymentsPage() {
   await requireSchoolAdmin();
@@ -23,6 +31,7 @@ export default async function PaymentsPage() {
       paidAmount: true,
       status: true,
       dueDate: true,
+      tenant: { select: { currency: true } },
       student: { select: { name: true } },
     },
   });
@@ -35,9 +44,7 @@ export default async function PaymentsPage() {
         description="Track monthly fees, deposits, and invoice status."
         actions={
           <ExportMenu
-            items={[
-              { label: "Export PDF", action: exportPaymentsToPDF },
-            ]}
+            items={[{ label: "Export PDF", action: exportPaymentsToPDF }]}
           />
         }
       />
@@ -62,11 +69,17 @@ export default async function PaymentsPage() {
                 <TableRow key={invoice.id}>
                   <TableCell className="font-medium">{invoice.id}</TableCell>
                   <TableCell>{invoice.student.name}</TableCell>
-                  <TableCell>${Number(invoice.finalAmount).toFixed(2)}</TableCell>
-                  <TableCell>${Number(invoice.paidAmount).toFixed(2)}</TableCell>
+                  <TableCell>
+                    {formatMoney(Number(invoice.finalAmount), invoice.tenant.currency)}
+                  </TableCell>
+                  <TableCell>
+                    {formatMoney(Number(invoice.paidAmount), invoice.tenant.currency)}
+                  </TableCell>
                   <TableCell>{formatter.format(invoice.dueDate)}</TableCell>
                   <TableCell>
-                    <Badge variant={invoice.status === "PAID" ? "default" : "outline"}>
+                    <Badge
+                      variant={invoice.status === "PAID" ? "default" : "outline"}
+                    >
                       {enumLabel(invoice.status, PAYMENT_STATUS_LABELS)}
                     </Badge>
                   </TableCell>
@@ -74,7 +87,10 @@ export default async function PaymentsPage() {
               ))}
               {invoices.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="py-10 text-center text-sm text-muted-foreground"
+                  >
                     No invoices yet.
                   </TableCell>
                 </TableRow>

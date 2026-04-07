@@ -23,7 +23,7 @@ export async function GET(
       finalAmount: true,
       paidAmount: true,
       status: true,
-      tenant: { select: { name: true } },
+      tenant: { select: { name: true, currency: true } },
       student: { select: { name: true } },
       enrollment: {
         select: {
@@ -44,6 +44,7 @@ export async function GET(
 
   const pdf = await buildInvoicePdfBuffer({
     schoolName: invoice.tenant.name,
+    currency: invoice.tenant.currency,
     invoiceId: invoice.id,
     createdAt: invoice.createdAt,
     studentName: invoice.student.name,

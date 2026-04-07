@@ -17,7 +17,13 @@ export default async function SchoolProfilePage() {
     }),
     prisma.tenant.findFirst({
       where: { id: session.user.schoolId },
-      select: { name: true, slug: true, isActive: true, billingDayOfMonth: true },
+      select: {
+        name: true,
+        slug: true,
+        currency: true,
+        isActive: true,
+        billingDayOfMonth: true,
+      },
     }),
   ]);
 

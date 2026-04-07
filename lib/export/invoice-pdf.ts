@@ -1,8 +1,11 @@
 import PDFDocument from "pdfkit";
+import { Currency } from "@/app/generated/prisma/enums";
 import { getPdfFontPath } from "@/lib/export/pdf-font";
+import { formatMoney } from "@/lib/helper";
 
 export async function buildInvoicePdfBuffer(input: {
   schoolName: string;
+  currency: Currency;
   invoiceId: string;
   createdAt: Date;
   studentName: string;
@@ -43,17 +46,18 @@ export async function buildInvoicePdfBuffer(input: {
 
   doc.moveDown(1);
   doc.fontSize(12).text(`Student: ${input.studentName}`);
-  doc.text(`Section: ${input.className} • ${input.sectionName}`);
+  doc.text(`Section: ${input.className} / ${input.sectionName}`);
   doc.text(`Status: ${input.status}`);
+  doc.text(`Currency: ${input.currency}`);
 
   doc.moveDown(1);
   doc.text("Fee Breakdown");
   doc.moveDown(0.3);
-  doc.text(`Original Fee: $${input.originalAmount.toFixed(2)}`);
-  doc.text(`Discount: $${input.discount.toFixed(2)}`);
-  doc.text(`Final Amount: $${input.finalAmount.toFixed(2)}`);
-  doc.text(`Paid Amount: $${input.paidAmount.toFixed(2)}`);
-  doc.text(`Remaining: $${remaining.toFixed(2)}`);
+  doc.text(`Original Fee: ${formatMoney(input.originalAmount, input.currency)}`);
+  doc.text(`Discount: ${formatMoney(input.discount, input.currency)}`);
+  doc.text(`Final Amount: ${formatMoney(input.finalAmount, input.currency)}`);
+  doc.text(`Paid Amount: ${formatMoney(input.paidAmount, input.currency)}`);
+  doc.text(`Remaining: ${formatMoney(remaining, input.currency)}`);
 
   doc.end();
   return done;

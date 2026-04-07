@@ -1,3 +1,4 @@
+import { Currency } from "@/app/generated/prisma/enums";
 import { z } from "zod";
 
 export const changeEmailSchema = z.object({
@@ -19,6 +20,9 @@ export const changePasswordSchema = z
 export const schoolProfileSchema = z.object({
   name: z.string().trim().min(2, "School name must be at least 2 characters."),
   slug: z.string().trim().min(2, "Slug is required."),
+  currency: z.nativeEnum(Currency, {
+    errorMap: () => ({ message: "Select a valid currency." }),
+  }),
   billingDayOfMonth: z.coerce
     .number()
     .int("Billing day must be a whole number")

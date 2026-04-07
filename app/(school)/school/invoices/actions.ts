@@ -80,6 +80,7 @@ export async function getInvoices() {
       paidAmount: true,
       dueDate: true,
       createdAt: true,
+      tenant: { select: { currency: true } },
       student: { select: { id: true, name: true } },
       enrollment: {
         select: {
@@ -126,6 +127,7 @@ export async function getInvoiceById(id: string) {
       paidAmount: true,
       dueDate: true,
       createdAt: true,
+      tenant: { select: { currency: true } },
       student: { select: { id: true, name: true } },
       enrollment: {
         select: {

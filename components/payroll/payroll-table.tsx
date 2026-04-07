@@ -8,17 +8,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatMoney } from "@/lib/helper";
 
 export async function PayrollTable() {
   const rows = await getPayrolls();
   const monthFormatter = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
-  });
-  const money = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "MMK",
-    maximumFractionDigits: 2,
   });
 
   return (
@@ -42,7 +38,9 @@ export async function PayrollTable() {
               <TableCell className="text-right">
                 <Badge variant="outline">{row.totalSections}</Badge>
               </TableCell>
-              <TableCell className="text-right">{money.format(Number(row.totalAmount))}</TableCell>
+              <TableCell className="text-right">
+                {formatMoney(Number(row.totalAmount), row.tenant.currency)}
+              </TableCell>
             </TableRow>
           ))}
           {rows.length === 0 ? (

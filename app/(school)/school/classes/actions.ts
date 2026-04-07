@@ -70,6 +70,7 @@ export async function getClasses() {
       billingType: true,
       fee: true,
       createdAt: true,
+      tenant: { select: { currency: true } },
       course: { select: { id: true, name: true } },
       _count: { select: { sections: true } },
     },

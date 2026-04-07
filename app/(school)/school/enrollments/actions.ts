@@ -4,6 +4,7 @@ import { getServerAuth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import {
   BillingType,
+  Currency,
   DiscountType,
   EnrollmentStatus,
   InvoiceType,
@@ -250,6 +251,11 @@ export async function getEnrollments(filters?: {
           name: true,
         },
       },
+      tenant: {
+        select: {
+          currency: true,
+        },
+      },
       section: {
         select: {
           id: true,
@@ -295,11 +301,11 @@ export async function getEnrollments(filters?: {
 export async function getEnrollmentFormOptions() {
   const actor = await requireEnrollmentActor();
   if (!actor.ok) {
-    return { students: [], sections: [] };
+    return { students: [], sections: [], currency: Currency.USD };
   }
 
   const schoolId = actor.schoolId;
-  const [students, sections, activeEnrollmentCounts] = await Promise.all([
+  const [students, sections, activeEnrollmentCounts, tenant] = await Promise.all([
     prisma.student.findMany({
       where: { schoolId, status: "ACTIVE" },
       orderBy: { name: "asc" },
@@ -320,6 +326,10 @@ export async function getEnrollmentFormOptions() {
       where: { schoolId, status: EnrollmentStatus.ACTIVE },
       _count: { _all: true },
     }),
+    prisma.tenant.findFirst({
+      where: { id: schoolId },
+      select: { currency: true },
+    }),
   ]);
 
   const enrolledMap = new Map(
@@ -327,6 +337,7 @@ export async function getEnrollmentFormOptions() {
   );
 
   return {
+    currency: tenant?.currency ?? Currency.USD,
     students,
     sections: sections.map((section) => {
       const enrolledCount = enrolledMap.get(section.id) ?? 0;

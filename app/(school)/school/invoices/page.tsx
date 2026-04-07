@@ -17,6 +17,7 @@ import {
   INVOICE_TYPE_LABELS,
   PAYMENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
+import { formatMoney } from "@/lib/helper";
 
 export default async function InvoicesPage() {
   const invoices = await getInvoices();
@@ -61,7 +62,7 @@ export default async function InvoicesPage() {
                   </TableCell>
                   <TableCell>{invoice.student.name}</TableCell>
                   <TableCell>
-                    {invoice.enrollment.section.class.name} •{" "}
+                    {invoice.enrollment.section.class.name} /{" "}
                     {invoice.enrollment.section.name}
                   </TableCell>
                   <TableCell>
@@ -73,12 +74,20 @@ export default async function InvoicesPage() {
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    {Number(invoice.finalAmount).toFixed(2)}
+                    {formatMoney(
+                      Number(invoice.finalAmount),
+                      invoice.tenant.currency,
+                    )}
                   </TableCell>
                   <TableCell>
-                    ${Number(invoice.paidAmount).toFixed(2)}
+                    {formatMoney(
+                      Number(invoice.paidAmount),
+                      invoice.tenant.currency,
+                    )}
                   </TableCell>
-                  <TableCell>${remaining.toFixed(2)}</TableCell>
+                  <TableCell>
+                    {formatMoney(remaining, invoice.tenant.currency)}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={

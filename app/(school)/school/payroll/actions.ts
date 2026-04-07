@@ -28,6 +28,7 @@ export async function getPayrolls() {
       month: true,
       totalSections: true,
       totalAmount: true,
+      tenant: { select: { currency: true } },
       staff: { select: { id: true, name: true } },
       createdAt: true,
     },

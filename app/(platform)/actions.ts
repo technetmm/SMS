@@ -7,7 +7,8 @@ import { requireSuperAdminAccess } from "@/lib/rbac";
 import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
-import {Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
+import { Plan, SubscriptionStatus, UserRole } from "@/app/generated/prisma/enums";
+import { getPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -340,7 +341,7 @@ export async function getActivityLogs() {
 export async function getPlatformDashboardData() {
   await requireSuperAdminAccess();
 
-  const [tenants, subscriptions] = await Promise.all([
+  const [tenants, subscriptions, deviceApprovalRequests] = await Promise.all([
     prisma.tenant.findMany({
       orderBy: { createdAt: "desc" },
       include: {
@@ -353,6 +354,7 @@ export async function getPlatformDashboardData() {
       include: { tenant: true },
       take: 20,
     }),
+    getPendingDeviceApprovalRows({ role: UserRole.SUPER_ADMIN }),
   ]);
 
   const totalSchools = await prisma.tenant.count();
@@ -380,5 +382,6 @@ export async function getPlatformDashboardData() {
     monthlyRevenue,
     tenants,
     subscriptions,
+    deviceApprovalRequests,
   };
 }
