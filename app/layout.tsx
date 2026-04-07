@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/shared/theme-provider";
 import { AuthSessionProvider } from "@/components/shared/session-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -21,8 +22,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Technet SMS",
-  description:
-    "School management system for students, classes, and payments.",
+  description: "School management system for students, classes, and payments.",
 };
 
 export default function RootLayout({
@@ -55,6 +55,7 @@ export default function RootLayout({
             <Toaster position={"top-right"} />
           </TooltipProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
