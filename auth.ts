@@ -15,6 +15,7 @@ import {
 } from "@/lib/auth/device-approval";
 import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth/email-verification";
 import {
+  clearPendingDeviceApprovalsForUser,
   expirePendingDeviceApprovalsForUser,
   finalizeDeviceApprovalRequest,
 } from "@/lib/auth/device-approval-lifecycle";
@@ -104,6 +105,7 @@ export const authOptions: NextAuthOptions = {
           user.activeSessionExpiresAt.getTime() > now.getTime();
 
         if (
+          user.role !== "SUPER_ADMIN" &&
           parsed.data.approvalToken &&
           parsed.data.approvalToken !== String(undefined) &&
           parsed.data.approvalToken !== String(null)
@@ -210,6 +212,34 @@ export const authOptions: NextAuthOptions = {
 
         if (!hasActiveSession || !user.activeSessionId) {
           throw new Error(SESSION_LOCK_ERROR_CODE);
+        }
+
+        if (user.role === "SUPER_ADMIN") {
+          await clearPendingDeviceApprovalsForUser(user.id, { now });
+
+          const transferred = await (
+            prisma.user as unknown as {
+              updateMany: (args: unknown) => Promise<{ count: number }>;
+            }
+          ).updateMany({
+            where: {
+              id: user.id,
+              activeSessionId: user.activeSessionId,
+            },
+            data: {
+              activeSessionId: sessionId,
+              activeSessionExpiresAt,
+            },
+          });
+
+          if (transferred.count === 0) {
+            throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          return {
+            ...user,
+            sessionId,
+          };
         }
 
         await expirePendingDeviceApprovalsForUser(user.id, {

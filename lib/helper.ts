@@ -1,4 +1,4 @@
-import { UserRole } from "@/app/generated/prisma/enums";
+import { Currency, UserRole } from "@/app/generated/prisma/enums";
 import { Session } from "next-auth";
 
 export const checkRole = (user: Session["user"], role: UserRole) => {
@@ -19,7 +19,7 @@ export const dateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const moneyCache = new Map<string, Intl.NumberFormat>();
-export const money = (currency: string) => {
+export const money = (currency: Currency | string) => {
   const cached = moneyCache.get(currency);
   if (cached) return cached;
   const fmt = new Intl.NumberFormat("en-US", {
@@ -30,3 +30,10 @@ export const money = (currency: string) => {
   moneyCache.set(currency, fmt);
   return fmt;
 };
+
+export function formatMoney(
+  amount: number | string,
+  currency: Currency | string,
+) {
+  return money(currency).format(Number(amount));
+}

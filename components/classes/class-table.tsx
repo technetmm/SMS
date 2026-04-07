@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { dateFormatter, money } from "@/lib/helper";
+import { dateFormatter, formatMoney } from "@/lib/helper";
 import {
   CLASS_TYPE_LABELS,
   enumLabel,
@@ -45,7 +45,7 @@ export async function ClassTable() {
                 {enumLabel(klass.programType, PROGRAM_TYPE_LABELS)}
               </TableCell>
               <TableCell className="text-right">
-                {money("MMK").format(Number(klass.fee))}
+                {formatMoney(Number(klass.fee), klass.tenant.currency)}
               </TableCell>
               <TableCell>{dateFormatter.format(klass.createdAt)}</TableCell>
               <TableCell className="text-right">

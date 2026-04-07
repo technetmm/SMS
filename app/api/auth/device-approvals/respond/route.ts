@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { UserRole } from "@/app/generated/prisma/enums";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma/client";
 import { SESSION_LOCK_TTL_MS } from "@/lib/auth/session-lock";
 import { finalizeDeviceApprovalRequest } from "@/lib/auth/device-approval-lifecycle";
+import { canApproveDeviceRequest } from "@/lib/auth/device-approval-queue";
 
 const requestSchema = z.object({
   requestId: z.string().min(1),
@@ -12,9 +14,12 @@ const requestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   const token = await getToken({ req: request });
-  const userId = typeof token?.id === "string" ? token.id : null;
+  const approverId = typeof token?.id === "string" ? token.id : null;
+  const approverRole = token?.role;
+  const approverSchoolId =
+    typeof token?.schoolId === "string" ? token.schoolId : null;
 
-  if (!userId) {
+  if (!approverId || typeof approverRole !== "string") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -28,19 +33,40 @@ export async function POST(request: NextRequest) {
   const approvalRequest = await prisma.loginApprovalRequest.findFirst({
     where: {
       id: parsed.data.requestId,
-      userId,
     },
     select: {
       id: true,
+      userId: true,
       status: true,
       currentSessionId: true,
       requestedSessionId: true,
       expiresAt: true,
+      user: {
+        select: {
+          role: true,
+          schoolId: true,
+        },
+      },
     },
   });
 
   if (!approvalRequest) {
     return NextResponse.json({ error: "Request not found" }, { status: 404 });
+  }
+
+  if (
+    !canApproveDeviceRequest(
+      {
+        role: approverRole as UserRole,
+        schoolId: approverSchoolId,
+      },
+      {
+        role: approvalRequest.user.role,
+        schoolId: approvalRequest.user.schoolId,
+      },
+    )
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   if (approvalRequest.status !== "PENDING") {
@@ -50,7 +76,7 @@ export async function POST(request: NextRequest) {
   if (approvalRequest.expiresAt.getTime() <= now.getTime()) {
     await finalizeDeviceApprovalRequest(prisma, {
       requestId: approvalRequest.id,
-      userId,
+      userId: approvalRequest.userId,
       outcome: "EXPIRED",
       now,
     });
@@ -60,7 +86,7 @@ export async function POST(request: NextRequest) {
   if (parsed.data.action === "deny") {
     await finalizeDeviceApprovalRequest(prisma, {
       requestId: approvalRequest.id,
-      userId,
+      userId: approvalRequest.userId,
       outcome: "DENIED",
       now,
     });
@@ -71,7 +97,7 @@ export async function POST(request: NextRequest) {
   const transferred = await prisma.$transaction(async (tx) => {
     const lockResult = await tx.user.updateMany({
       where: {
-        id: userId,
+        id: approvalRequest.userId,
         activeSessionId: approvalRequest.currentSessionId,
       },
       data: {
@@ -86,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     const finalized = await finalizeDeviceApprovalRequest(tx, {
       requestId: approvalRequest.id,
-      userId,
+      userId: approvalRequest.userId,
       outcome: "APPROVED",
       now,
     });

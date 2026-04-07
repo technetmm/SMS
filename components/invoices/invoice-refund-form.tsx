@@ -3,7 +3,11 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { addRefund, type BillingActionState } from "@/app/(school)/school/invoices/actions";
+import { Currency } from "@/app/generated/prisma/enums";
+import {
+  addRefund,
+  type BillingActionState,
+} from "@/app/(school)/school/invoices/actions";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -14,12 +18,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SubmitButton } from "@/components/shared/submit-button";
+import { formatMoney } from "@/lib/helper";
 
 const initialState: BillingActionState = { status: "idle" };
 
 export function InvoiceRefundForm({
+  currency,
   payments,
 }: {
+  currency: Currency;
   payments: Array<{ id: string; amount: string }>;
 }) {
   const router = useRouter();
@@ -46,15 +53,23 @@ export function InvoiceRefundForm({
           <SelectContent position="popper">
             {payments.map((payment) => (
               <SelectItem key={payment.id} value={payment.id}>
-                {payment.id.slice(0, 8)} - ${Number(payment.amount).toFixed(2)}
+                {payment.id.slice(0, 8)} -{" "}
+                {formatMoney(Number(payment.amount), currency)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="refund-amount">Refund Amount</Label>
-        <Input id="refund-amount" name="amount" type="number" min={0.01} step="0.01" required />
+        <Label htmlFor="refund-amount">Refund Amount ({currency})</Label>
+        <Input
+          id="refund-amount"
+          name="amount"
+          type="number"
+          min={0.01}
+          step="0.01"
+          required
+        />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="refund-reason">Reason</Label>

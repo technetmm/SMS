@@ -10,6 +10,7 @@ import {
   INVOICE_TYPE_LABELS,
   PAYMENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
+import { formatMoney } from "@/lib/helper";
 import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
 import { InvoiceRefundForm } from "@/components/invoices/invoice-refund-form";
 
@@ -41,7 +42,9 @@ export default async function InvoiceDetailPage({
               <Link href="/school/invoices">Back</Link>
             </Button>
             <Button asChild>
-              <Link href={`/school/invoices/${invoice.id}/pdf`}>Download Invoice</Link>
+              <Link href={`/school/invoices/${invoice.id}/pdf`}>
+                Download Invoice
+              </Link>
             </Button>
           </div>
         }
@@ -53,27 +56,32 @@ export default async function InvoiceDetailPage({
             <CardTitle>Original Fee</CardTitle>
           </CardHeader>
           <CardContent>
-            ${Number(invoice.originalAmount).toFixed(2)}
+            {formatMoney(Number(invoice.originalAmount), invoice.tenant.currency)}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Discount</CardTitle>
           </CardHeader>
-          <CardContent>${Number(invoice.discount).toFixed(2)}</CardContent>
+          <CardContent>
+            {formatMoney(Number(invoice.discount), invoice.tenant.currency)}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Final Fee</CardTitle>
           </CardHeader>
-          <CardContent>${Number(invoice.finalAmount).toFixed(2)}</CardContent>
+          <CardContent>
+            {formatMoney(Number(invoice.finalAmount), invoice.tenant.currency)}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>Paid / Remaining</CardTitle>
           </CardHeader>
           <CardContent>
-            ${Number(invoice.paidAmount).toFixed(2)} / ${remaining.toFixed(2)}
+            {formatMoney(Number(invoice.paidAmount), invoice.tenant.currency)} /{" "}
+            {formatMoney(remaining, invoice.tenant.currency)}
           </CardContent>
         </Card>
       </div>
@@ -87,7 +95,7 @@ export default async function InvoiceDetailPage({
             <strong>Student:</strong> {invoice.student.name}
           </p>
           <p>
-            <strong>Section:</strong> {invoice.enrollment.section.class.name} •{" "}
+            <strong>Section:</strong> {invoice.enrollment.section.class.name} /{" "}
             {invoice.enrollment.section.name}
           </p>
           <p>
@@ -99,6 +107,9 @@ export default async function InvoiceDetailPage({
             {invoice.billingYear && invoice.billingMonth
               ? `${invoice.billingYear}-${String(invoice.billingMonth).padStart(2, "0")}`
               : "-"}
+          </p>
+          <p>
+            <strong>Currency:</strong> {invoice.tenant.currency}
           </p>
           <div>
             <strong>Status:</strong>{" "}
@@ -114,7 +125,10 @@ export default async function InvoiceDetailPage({
           <CardTitle>Add Payment</CardTitle>
         </CardHeader>
         <CardContent>
-          <InvoicePaymentForm invoiceId={invoice.id} />
+          <InvoicePaymentForm
+            invoiceId={invoice.id}
+            currency={invoice.tenant.currency}
+          />
         </CardContent>
       </Card>
 
@@ -124,6 +138,7 @@ export default async function InvoiceDetailPage({
         </CardHeader>
         <CardContent>
           <InvoiceRefundForm
+            currency={invoice.tenant.currency}
             payments={invoice.payments.map((payment) => ({
               id: payment.id,
               amount: payment.amount.toString(),
@@ -140,8 +155,8 @@ export default async function InvoiceDetailPage({
           {invoice.payments.map((payment) => (
             <div key={payment.id} className="rounded-md border p-3 text-sm">
               <p>
-                <strong>{payment.method}</strong> • $
-                {Number(payment.amount).toFixed(2)} •{" "}
+                <strong>{payment.method}</strong> /{" "}
+                {formatMoney(Number(payment.amount), invoice.tenant.currency)} /{" "}
                 {new Intl.DateTimeFormat("en-US", {
                   dateStyle: "medium",
                   timeStyle: "short",
@@ -151,8 +166,12 @@ export default async function InvoiceDetailPage({
                 <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                   {payment.refunds.map((refund) => (
                     <p key={refund.id}>
-                      Refund: ${Number(refund.amount).toFixed(2)} •{" "}
-                      {refund.reason ?? "No reason"}
+                      Refund:{" "}
+                      {formatMoney(
+                        Number(refund.amount),
+                        invoice.tenant.currency,
+                      )}{" "}
+                      / {refund.reason ?? "No reason"}
                     </p>
                   ))}
                 </div>

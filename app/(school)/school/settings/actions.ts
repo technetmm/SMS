@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getServerAuth } from "@/auth";
 import { logAction } from "@/lib/audit-log";
+import { Currency } from "@/app/generated/prisma/enums";
 import {
   changeEmailSchema,
   changePasswordSchema,
@@ -379,6 +380,7 @@ export async function updateSchoolProfileAction(
   const parsed = schoolProfileSchema.safeParse({
     name: getFormValue(formData, "name"),
     slug: getFormValue(formData, "slug"),
+    currency: getFormValue(formData, "currency") as Currency,
     billingDayOfMonth: getFormValue(formData, "billingDayOfMonth"),
   });
   if (!parsed.success) {
@@ -403,6 +405,7 @@ export async function updateSchoolProfileAction(
     data: {
       name: parsed.data.name.trim(),
       slug,
+      currency: parsed.data.currency,
       billingDayOfMonth: parsed.data.billingDayOfMonth,
     },
   });
@@ -417,6 +420,7 @@ export async function updateSchoolProfileAction(
       operation: "update_school_profile",
       slug,
       name: parsed.data.name.trim(),
+      currency: parsed.data.currency,
       billingDayOfMonth: parsed.data.billingDayOfMonth,
     },
   });

@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { enumLabel, ENROLLMENT_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
+import { formatMoney } from "@/lib/helper";
 import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enrollment-status-form";
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
 
@@ -58,17 +59,40 @@ export async function EnrollmentTable() {
                 <TableCell>
                   {latestInvoice ? (
                     <div className="space-y-1 text-sm">
-                      <p>Final: ${Number(latestInvoice.finalAmount).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Original ${Number(latestInvoice.originalAmount).toFixed(2)} | Discount $
-                        {Number(latestInvoice.discount).toFixed(2)}
+                      <p>
+                        Final:{" "}
+                        {formatMoney(
+                          Number(latestInvoice.finalAmount),
+                          row.tenant.currency,
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Paid ${Number(latestInvoice.paidAmount).toFixed(2)} | Remaining $
-                        {Math.max(
-                          0,
-                          Number(latestInvoice.finalAmount) - Number(latestInvoice.paidAmount),
-                        ).toFixed(2)}
+                        Original{" "}
+                        {formatMoney(
+                          Number(latestInvoice.originalAmount),
+                          row.tenant.currency,
+                        )}{" "}
+                        | Discount{" "}
+                        {formatMoney(
+                          Number(latestInvoice.discount),
+                          row.tenant.currency,
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Paid{" "}
+                        {formatMoney(
+                          Number(latestInvoice.paidAmount),
+                          row.tenant.currency,
+                        )}{" "}
+                        | Remaining{" "}
+                        {formatMoney(
+                          Math.max(
+                            0,
+                            Number(latestInvoice.finalAmount) -
+                              Number(latestInvoice.paidAmount),
+                          ),
+                          row.tenant.currency,
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Due {formatter.format(latestInvoice.dueDate)}

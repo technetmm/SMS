@@ -18,16 +18,19 @@ import {
 } from "@/components/ui/select";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
-import { BillingType } from "@/app/generated/prisma/enums";
+import { BillingType, Currency } from "@/app/generated/prisma/enums";
+import { formatMoney } from "@/lib/helper";
 
 const initialState: EnrollmentActionState = { status: "idle" };
 
 type Option = { id: string; name: string };
 
 export function EnrollmentCreateForm({
+  currency,
   students,
   sections,
 }: {
+  currency: Currency;
   students: Option[];
   sections: Array<{
     id: string;
@@ -40,9 +43,11 @@ export function EnrollmentCreateForm({
   }>;
 }) {
   const router = useRouter();
-  const todayLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60_000)
-    .toISOString()
-    .slice(0, 10);
+  const [todayLocal] = useState(() => {
+    return new Date(Date.now() - new Date().getTimezoneOffset() * 60_000)
+      .toISOString()
+      .slice(0, 10);
+  });
   const [state, formAction] = useActionState(enrollStudent, initialState);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [discountType, setDiscountType] = useState<"NONE" | "FIXED" | "PERCENT">("NONE");
@@ -51,6 +56,8 @@ export function EnrollmentCreateForm({
     () => sections.find((section) => section.id === selectedSectionId) ?? null,
     [sections, selectedSectionId],
   );
+  const isFixedDiscount = discountType === "FIXED";
+  const isPercentDiscount = discountType === "PERCENT";
   const pricing = useMemo(() => {
     const originalAmount = Number(selectedSection?.perStudentFee ?? 0);
     const parsedDiscount = Number(discountValue || 0);
@@ -117,7 +124,7 @@ export function EnrollmentCreateForm({
                     disabled={section.isFull}
                   >
                     {section.name} ({section.enrolledCount} / {section.capacity}{" "}
-                    seats, fee ${Number(section.perStudentFee).toFixed(2)})
+                    seats, fee {formatMoney(Number(section.perStudentFee), currency)})
                     {section.isFull ? " - Section is full" : ""}
                   </SelectItem>
                 ))}
@@ -152,6 +159,20 @@ export function EnrollmentCreateForm({
             />
           </div>
 
+          <div className="grid gap-2 md:col-span-2">
+            <Label htmlFor="sectionFee">Section Fee ({currency})</Label>
+            <Input
+              id="sectionFee"
+              value={
+                selectedSection
+                  ? formatMoney(pricing.originalAmount, currency)
+                  : `Select section to view fee in ${currency}`
+              }
+              readOnly
+              className="bg-muted/40"
+            />
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="discountType">Discount Type</Label>
             <Select
@@ -173,7 +194,13 @@ export function EnrollmentCreateForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="discountValue">Discount Value</Label>
+            <Label htmlFor="discountValue">
+              {isFixedDiscount
+                ? `Discount Value (${currency})`
+                : isPercentDiscount
+                  ? "Discount Value (%)"
+                  : "Discount Value"}
+            </Label>
             <Input
               id="discountValue"
               name="discountValue"
@@ -184,20 +211,27 @@ export function EnrollmentCreateForm({
               placeholder="0"
               onChange={(event) => setDiscountValue(event.target.value)}
             />
+            <p className="text-xs text-muted-foreground">
+              {isFixedDiscount
+                ? `Enter the discount amount in ${currency}.`
+                : isPercentDiscount
+                  ? "Enter the discount percentage."
+                  : `Discounts use the school's default currency (${currency}) when fixed amount is selected.`}
+            </p>
           </div>
 
           <div className="md:col-span-2 rounded-lg border bg-muted/30 p-3">
             <p className="text-sm">
-              <span className="text-muted-foreground">Original fee: </span>$
-              {pricing.originalAmount.toFixed(2)}
+              <span className="text-muted-foreground">Original fee: </span>
+              {formatMoney(pricing.originalAmount, currency)}
             </p>
             <p className="text-sm">
-              <span className="text-muted-foreground">Discount: </span>$
-              {pricing.discountAmount.toFixed(2)}
+              <span className="text-muted-foreground">Discount: </span>
+              {formatMoney(pricing.discountAmount, currency)}
             </p>
             <p className="text-sm font-semibold">
-              <span className="text-muted-foreground">Total amount: </span>$
-              {pricing.totalAmount.toFixed(2)}
+              <span className="text-muted-foreground">Total amount: </span>
+              {formatMoney(pricing.totalAmount, currency)}
             </p>
           </div>
         </CardContent>

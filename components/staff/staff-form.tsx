@@ -54,7 +54,7 @@ export function StaffForm() {
             <Input
               id="nrcNumber"
               name="nrcNumber"
-              placeholder="12/LAMANA(N)123456"
+              placeholder="12/LaMaNa(N)123456"
               required
             />
           </div>

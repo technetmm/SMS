@@ -3,6 +3,7 @@ import {
   getPlatformDashboardData,
 } from "@/app/(platform)/actions";
 import { ActivityTimeline } from "@/components/activity-timeline";
+import { DeviceApprovalTable } from "@/components/auth/device-approval-table";
 import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -70,6 +71,18 @@ export default async function PlatformDashboardPage() {
           </ul>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Admin Device Approval Requests</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DeviceApprovalTable
+            initialRequests={data.deviceApprovalRequests}
+            showSchool
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>

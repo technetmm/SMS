@@ -6,9 +6,9 @@ export const DEVICE_APPROVAL_TTL_MS = 2 * 60 * 1000;
 export const DEVICE_APPROVAL_POLL_INTERVAL_MS = 3000;
 
 export const DEVICE_APPROVAL_REQUIRED_MESSAGE =
-  "Approve this login from your existing device.";
+  "This login request is waiting for approval.";
 export const DEVICE_APPROVAL_DENIED_MESSAGE =
-  "Login request was denied on your other device.";
+  "Login request was denied by an approver.";
 export const DEVICE_APPROVAL_EXPIRED_MESSAGE =
   "Login approval request expired. Please try signing in again.";
 

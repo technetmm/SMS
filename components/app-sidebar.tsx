@@ -30,6 +30,7 @@ import {
   BookOpenIcon,
   BookOpenTextIcon,
   ListChecksIcon,
+  ShieldCheckIcon,
   TvMinimalIcon,
 } from "lucide-react";
 import { UserRole } from "@/app/generated/prisma/enums";
@@ -47,6 +48,11 @@ const schoolNavGroups = [
         title: "Analytics",
         url: "/school/analytics",
         icon: <BarChart3Icon />,
+      },
+      {
+        title: "Device Approvals",
+        url: "/school/device-approvals",
+        icon: <ShieldCheckIcon />,
       },
     ],
   },
@@ -137,6 +143,11 @@ const platformNavMain = [
     title: "Dashboard",
     url: "/platform/dashboard",
     icon: <LayoutDashboardIcon />,
+  },
+  {
+    title: "Device Approvals",
+    url: "/platform/device-approvals",
+    icon: <ShieldCheckIcon />,
   },
   { title: "Tenants", url: "/platform/tenants", icon: <UsersIcon /> },
   {

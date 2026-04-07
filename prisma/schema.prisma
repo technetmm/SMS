@@ -156,6 +156,7 @@ model Tenant {
   name              String
   slug              String    @unique
   plan              Plan      @default(FREE)
+  currency          Currency  @default(USD)
   isActive          Boolean   @default(true)
   billingDayOfMonth Int       @default(5)
   createdAt         DateTime  @default(now())

@@ -2,11 +2,19 @@
 
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
+import { Currency } from "@/app/generated/prisma/enums";
 import { updateSchoolProfileAction, type ActionState } from "@/app/(school)/school/settings/actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const initialState: ActionState = { status: "idle" };
 
@@ -14,6 +22,7 @@ type SchoolProfileFormProps = {
   tenant: {
     name: string;
     slug: string;
+    currency: Currency;
     isActive: boolean;
     billingDayOfMonth: number;
   };
@@ -37,7 +46,7 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
         <CardTitle>School Profile</CardTitle>
         <CardDescription>
           {canEdit
-            ? "Update your school name and slug."
+            ? "Update your school name, slug, and default currency."
             : "Only the school owner admin can update school info."}
         </CardDescription>
       </CardHeader>
@@ -71,6 +80,23 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
               readOnly
               className="bg-muted/40"
             />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="school-currency">Currency</Label>
+            <Select
+              name="currency"
+              defaultValue={tenant.currency}
+              disabled={!canEdit}
+            >
+              <SelectTrigger id="school-currency" className="w-full">
+                <SelectValue placeholder="Select currency" />
+              </SelectTrigger>
+              <SelectContent position="popper">
+                <SelectItem value={Currency.USD}>USD</SelectItem>
+                <SelectItem value={Currency.MMK}>MMK</SelectItem>
+                <SelectItem value={Currency.THB}>THB</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="billing-day">Monthly billing day (1-28)</Label>
