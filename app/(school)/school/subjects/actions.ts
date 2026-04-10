@@ -6,10 +6,17 @@ import { formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { subjectCreateSchema, subjectUpdateSchema } from "@/lib/validators";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type SubjectActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type SubjectTableFilters = {
+  q?: string;
+  createdFrom?: Date;
+  createdTo?: Date;
 };
 
 export async function createSubject(
@@ -62,16 +69,34 @@ export async function getSubjects() {
   });
 }
 
-export async function getPaginatedSubjects({ page }: { page: number }) {
+export async function getPaginatedSubjects({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: SubjectTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.q) {
+    where.name = containsInsensitive(filters.q);
+  }
+
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.subject.count({ where: { schoolId } }),
+    count: () => prisma.subject.count({ where }),
     query: ({ skip, take }) =>
       prisma.subject.findMany({
-        where: { schoolId },
+        where,
         orderBy: { name: "asc" },
         skip,
         take,

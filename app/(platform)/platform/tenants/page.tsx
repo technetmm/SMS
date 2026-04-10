@@ -1,5 +1,6 @@
 import { getPaginatedTenants } from "@/app/(platform)/actions";
 import Link from "next/link";
+import { Plan } from "@/app/generated/prisma/enums";
 import { deleteTenant, toggleTenantStatus } from "@/app/(platform)/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,15 +8,48 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { parsePageParam } from "@/lib/pagination";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { parseDateRangeParams, parseEnumParam, parseTextParam } from "@/lib/table-filters";
 
 export default async function TenantsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    plan?: string;
+    isActive?: string;
+    createdFrom?: string;
+    createdTo?: string;
+  }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const params = await searchParams;
+  const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
-  const tenants = await getPaginatedTenants({ page });
+  const q = parseTextParam(params.q);
+  const plan = parseEnumParam(params.plan, [
+    Plan.FREE,
+    Plan.BASIC,
+    Plan.PREMIUM,
+  ] as const);
+  const isActiveRaw = parseEnumParam(params.isActive, ["true", "false"] as const);
+  const isActive = isActiveRaw == null ? undefined : isActiveRaw === "true";
+  const createdRange = parseDateRangeParams({
+    from: params.createdFrom,
+    to: params.createdTo,
+  });
+
+  const tenants = await getPaginatedTenants({
+    page,
+    filters: {
+      q,
+      plan,
+      isActive,
+      createdFrom: createdRange.from,
+      createdTo: createdRange.to,
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -28,6 +62,71 @@ export default async function TenantsPage({
             </Button>
           </div>
         </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 md:grid-cols-4" method="get">
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="q">Search</Label>
+              <Input id="q" name="q" defaultValue={q} placeholder="Name or slug" />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="plan">Plan</Label>
+              <select
+                id="plan"
+                name="plan"
+                defaultValue={plan ?? ""}
+                className="h-9 rounded-md border bg-background px-3 text-sm"
+              >
+                <option value="">All</option>
+                <option value="FREE">Free</option>
+                <option value="BASIC">Basic</option>
+                <option value="PREMIUM">Premium</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="isActive">Status</Label>
+              <select
+                id="isActive"
+                name="isActive"
+                defaultValue={isActiveRaw ?? ""}
+                className="h-9 rounded-md border bg-background px-3 text-sm"
+              >
+                <option value="">All</option>
+                <option value="true">Active</option>
+                <option value="false">Disabled</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createdFrom">Created From</Label>
+              <Input
+                id="createdFrom"
+                name="createdFrom"
+                type="date"
+                defaultValue={parseTextParam(params.createdFrom)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="createdTo">Created To</Label>
+              <Input
+                id="createdTo"
+                name="createdTo"
+                type="date"
+                defaultValue={parseTextParam(params.createdTo)}
+              />
+            </div>
+            <div className="flex items-end gap-2">
+              <Button type="submit">Apply</Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/platform/tenants">Reset</Link>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
       </Card>
 
       <Card>
@@ -90,7 +189,17 @@ export default async function TenantsPage({
               ) : null}
             </TableBody>
           </Table>
-          <TablePagination pagination={tenants} pathname="/platform/tenants" />
+          <TablePagination
+            pagination={tenants}
+            pathname="/platform/tenants"
+            searchParams={{
+              q: params.q,
+              plan: params.plan,
+              isActive: params.isActive,
+              createdFrom: params.createdFrom,
+              createdTo: params.createdTo,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

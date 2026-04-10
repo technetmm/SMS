@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { getPaginatedStaff, deleteStaff } from "@/app/(school)/school/staff/actions";
+import {
+  getPaginatedStaff,
+  deleteStaff,
+  type StaffTableFilters,
+} from "@/app/(school)/school/staff/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,8 +21,16 @@ import {
   USER_ROLE_LABELS,
 } from "@/lib/enum-labels";
 
-export async function StaffTable({ page }: { page: number }) {
-  const staff = await getPaginatedStaff({ page });
+export async function StaffTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: StaffTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const staff = await getPaginatedStaff({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -82,7 +94,11 @@ export async function StaffTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={staff} pathname="/school/staff" />
+      <TablePagination
+        pagination={staff}
+        pathname="/school/staff"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

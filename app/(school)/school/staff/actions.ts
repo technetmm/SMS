@@ -12,10 +12,19 @@ import { logAction } from "@/lib/audit-log";
 import { paginateQuery } from "@/lib/pagination";
 import { getServerAuth } from "@/auth";
 import { z } from "zod";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type StaffActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type StaffTableFilters = {
+  q?: string;
+  role?: "SCHOOL_ADMIN" | "TEACHER";
+  status?: "ACTIVE" | "ONLEAVE" | "RESIGNED" | "TERMINATED";
+  hireFrom?: Date;
+  hireTo?: Date;
 };
 
 export type StaffSystemRoleActionState = {
@@ -157,16 +166,42 @@ export async function getStaff() {
   });
 }
 
-export async function getPaginatedStaff({ page }: { page: number }) {
+export async function getPaginatedStaff({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: StaffTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.status) where.status = filters.status;
+  if (filters?.role) {
+    where.user = { role: filters.role };
+  }
+  if (filters?.hireFrom || filters?.hireTo) {
+    where.hireDate = {
+      ...(filters.hireFrom ? { gte: filters.hireFrom } : {}),
+      ...(filters.hireTo ? { lte: filters.hireTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      { email: containsInsensitive(filters.q) },
+      { phone: containsInsensitive(filters.q) },
+      { user: { email: containsInsensitive(filters.q) } },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.staff.count({ where: { schoolId } }),
+    count: () => prisma.staff.count({ where }),
     query: ({ skip, take }) =>
       prisma.staff.findMany({
-        where: { schoolId },
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take,

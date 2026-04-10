@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { parsePageParam } from "@/lib/pagination";
+import { AttendanceStatus } from "@/app/generated/prisma/enums";
+import { parseDateRangeParams, parseEnumParam, parseTextParam } from "@/lib/table-filters";
 
 export default async function AttendancePage({
   searchParams,
@@ -22,12 +24,27 @@ export default async function AttendancePage({
     sectionId?: string;
     studentId?: string;
     date?: string;
+    q?: string;
+    status?: string;
+    dateFrom?: string;
+    dateTo?: string;
     page?: string;
   }>;
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenantId();
   const params = await searchParams;
+  const q = parseTextParam(params.q);
+  const status = parseEnumParam(params.status, [
+    AttendanceStatus.PRESENT,
+    AttendanceStatus.ABSENT,
+    AttendanceStatus.LATE,
+    AttendanceStatus.LEAVE,
+  ] as const);
+  const { from: dateFrom, to: dateTo } = parseDateRangeParams({
+    from: params.dateFrom,
+    to: params.dateTo,
+  });
 
   const page = parsePageParam(params.page);
   const [enrollments, students, sections, rows] = await Promise.all([
@@ -48,6 +65,10 @@ export default async function AttendancePage({
         studentId: params.studentId || undefined,
         sectionId: params.sectionId || undefined,
         date: params.date ? new Date(`${params.date}T00:00:00Z`) : undefined,
+        q,
+        status,
+        dateFrom,
+        dateTo,
       },
     }),
   ]);
@@ -117,6 +138,37 @@ export default async function AttendancePage({
               />
             </div>
 
+            <div className="grid gap-2">
+              <Label htmlFor="q">Search</Label>
+              <Input id="q" name="q" defaultValue={q} placeholder="Student, section, class" />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                name="status"
+                defaultValue={status ?? ""}
+                className="h-9 rounded-md border bg-background px-3 text-sm"
+              >
+                <option value="">All statuses</option>
+                <option value="PRESENT">Present</option>
+                <option value="ABSENT">Absent</option>
+                <option value="LATE">Late</option>
+                <option value="LEAVE">Leave</option>
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="dateFrom">Date From</Label>
+              <Input id="dateFrom" name="dateFrom" type="date" defaultValue={parseTextParam(params.dateFrom)} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="dateTo">Date To</Label>
+              <Input id="dateTo" name="dateTo" type="date" defaultValue={parseTextParam(params.dateTo)} />
+            </div>
+
             <div className="flex items-end gap-2">
               <Button type="submit" variant="default">
                 Apply
@@ -136,6 +188,10 @@ export default async function AttendancePage({
           studentId: params.studentId,
           sectionId: params.sectionId,
           date: params.date,
+          q: params.q,
+          status: params.status,
+          dateFrom: params.dateFrom,
+          dateTo: params.dateTo,
           page: params.page,
         }}
       />

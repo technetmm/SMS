@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { generateMonthlyInvoices } from "@/lib/monthly-invoices";
+import { containsInsensitive } from "@/lib/table-filters";
 import {
   enrollmentActorRoleSchema,
   paymentCreateSchema,
@@ -17,6 +18,16 @@ import {
 export type BillingActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type InvoiceTableFilters = {
+  q?: string;
+  status?: PaymentStatus;
+  invoiceType?: InvoiceType;
+  dueFrom?: Date;
+  dueTo?: Date;
+  finalMin?: number;
+  finalMax?: number;
 };
 
 function resolveInvoiceStatus(
@@ -111,7 +122,13 @@ export async function getInvoices() {
   });
 }
 
-export async function getPaginatedInvoices({ page }: { page: number }) {
+export async function getPaginatedInvoices({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: InvoiceTableFilters;
+}) {
   const actor = await requireStaffOrAdmin();
   if (!actor.ok) {
     return paginateQuery({
@@ -120,13 +137,40 @@ export async function getPaginatedInvoices({ page }: { page: number }) {
       query: async () => [],
     });
   }
+  const where: Record<string, unknown> = { schoolId: actor.schoolId };
+
+  if (filters?.status) where.status = filters.status;
+  if (filters?.invoiceType) where.invoiceType = filters.invoiceType;
+
+  if (filters?.dueFrom || filters?.dueTo) {
+    where.dueDate = {
+      ...(filters.dueFrom ? { gte: filters.dueFrom } : {}),
+      ...(filters.dueTo ? { lte: filters.dueTo } : {}),
+    };
+  }
+
+  if (filters?.finalMin != null || filters?.finalMax != null) {
+    where.finalAmount = {
+      ...(filters.finalMin != null ? { gte: filters.finalMin } : {}),
+      ...(filters.finalMax != null ? { lte: filters.finalMax } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { id: containsInsensitive(filters.q) },
+      { student: { name: containsInsensitive(filters.q) } },
+      { enrollment: { section: { name: containsInsensitive(filters.q) } } },
+      { enrollment: { section: { class: { name: containsInsensitive(filters.q) } } } },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.invoice.count({ where: { schoolId: actor.schoolId } }),
+    count: () => prisma.invoice.count({ where }),
     query: ({ skip, take }) =>
       prisma.invoice.findMany({
-        where: { schoolId: actor.schoolId },
+        where,
         orderBy: { dueDate: "desc" },
         skip,
         take,

@@ -30,10 +30,18 @@ import {
   normalizeBillingDay,
 } from "@/lib/billing";
 import { paginateQuery } from "@/lib/pagination";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type EnrollmentActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type EnrollmentTableFilters = {
+  q?: string;
+  status?: EnrollmentStatus;
+  enrolledFrom?: Date;
+  enrolledTo?: Date;
 };
 
 const ENROLLMENT_ALLOWED_ROLES = new Set<UserRole>([
@@ -321,17 +329,42 @@ export async function getEnrollments(filters?: {
   });
 }
 
-export async function getPaginatedEnrollments({ page }: { page: number }) {
+export async function getPaginatedEnrollments({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: EnrollmentTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId, isDeleted: false };
+
+  if (filters?.status) {
+    where.status = filters.status;
+  }
+
+  if (filters?.enrolledFrom || filters?.enrolledTo) {
+    where.enrolledAt = {
+      ...(filters.enrolledFrom ? { gte: filters.enrolledFrom } : {}),
+      ...(filters.enrolledTo ? { lte: filters.enrolledTo } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { student: { name: containsInsensitive(filters.q) } },
+      { section: { name: containsInsensitive(filters.q) } },
+      { section: { class: { name: containsInsensitive(filters.q) } } },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () =>
-      prisma.enrollment.count({ where: { schoolId, isDeleted: false } }),
+    count: () => prisma.enrollment.count({ where }),
     query: ({ skip, take }) =>
       prisma.enrollment.findMany({
-        where: { schoolId, isDeleted: false },
+        where,
         orderBy: [{ enrolledAt: "desc" }],
         skip,
         take,
@@ -930,16 +963,29 @@ export async function getPaginatedAttendanceRecords({
     enrollmentId?: string;
     sectionId?: string;
     studentId?: string;
+    status?: "PRESENT" | "ABSENT" | "LATE" | "LEAVE";
+    q?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
     date?: Date;
   };
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
-  const where = {
+  const where: Record<string, unknown> = {
     schoolId,
     ...(filters?.enrollmentId ? { enrollmentId: filters.enrollmentId } : {}),
+    ...(filters?.status ? { status: filters.status } : {}),
     ...(filters?.date ? { date: filters.date } : {}),
+    ...(filters?.dateFrom || filters?.dateTo
+      ? {
+          date: {
+            ...(filters.dateFrom ? { gte: filters.dateFrom } : {}),
+            ...(filters.dateTo ? { lte: filters.dateTo } : {}),
+          },
+        }
+      : {}),
     ...(filters?.sectionId || filters?.studentId
       ? {
           enrollment: {
@@ -949,6 +995,18 @@ export async function getPaginatedAttendanceRecords({
         }
       : {}),
   };
+
+  if (filters?.q) {
+    where.OR = [
+      { enrollment: { student: { name: containsInsensitive(filters.q) } } },
+      { enrollment: { section: { name: containsInsensitive(filters.q) } } },
+      {
+        enrollment: {
+          section: { class: { name: containsInsensitive(filters.q) } },
+        },
+      },
+    ];
+  }
 
   return paginateQuery({
     page,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   getPaginatedSections,
   deleteSection,
+  type SectionTableFilters,
 } from "@/app/(school)/school/sections/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
@@ -15,8 +16,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function SectionTable({ page }: { page: number }) {
-  const sections = await getPaginatedSections({ page });
+export async function SectionTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: SectionTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const sections = await getPaginatedSections({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -95,7 +104,11 @@ export async function SectionTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={sections} pathname="/school/sections" />
+      <TablePagination
+        pagination={sections}
+        pathname="/school/sections"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

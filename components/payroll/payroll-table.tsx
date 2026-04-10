@@ -1,4 +1,7 @@
-import { getPaginatedPayrolls } from "@/app/(school)/school/payroll/actions";
+import {
+  getPaginatedPayrolls,
+  type PayrollTableFilters,
+} from "@/app/(school)/school/payroll/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,8 +14,16 @@ import {
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/helper";
 
-export async function PayrollTable({ page }: { page: number }) {
-  const rows = await getPaginatedPayrolls({ page });
+export async function PayrollTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: PayrollTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const rows = await getPaginatedPayrolls({ page, filters });
   const monthFormatter = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
@@ -53,7 +64,11 @@ export async function PayrollTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={rows} pathname="/school/payroll" />
+      <TablePagination
+        pagination={rows}
+        pathname="/school/payroll"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

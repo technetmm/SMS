@@ -1,4 +1,7 @@
-import { getPaginatedEnrollments } from "@/app/(school)/school/enrollments/actions";
+import {
+  getPaginatedEnrollments,
+  type EnrollmentTableFilters,
+} from "@/app/(school)/school/enrollments/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,8 +18,16 @@ import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enro
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
 import { EnrollmentRowActions } from "@/components/enrollments/enrollment-row-actions";
 
-export async function EnrollmentTable({ page }: { page: number }) {
-  const rows = await getPaginatedEnrollments({ page });
+export async function EnrollmentTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: EnrollmentTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const rows = await getPaginatedEnrollments({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -139,7 +150,11 @@ export async function EnrollmentTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={rows} pathname="/school/enrollments" />
+      <TablePagination
+        pagination={rows}
+        pathname="/school/enrollments"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

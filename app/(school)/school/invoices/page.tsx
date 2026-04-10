@@ -20,15 +20,63 @@ import {
 } from "@/lib/enum-labels";
 import { formatMoney } from "@/lib/helper";
 import { parsePageParam } from "@/lib/pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  parseDateRangeParams,
+  parseEnumParam,
+  parseNumberParam,
+  parseTextParam,
+} from "@/lib/table-filters";
+import { InvoiceType, PaymentStatus } from "@/app/generated/prisma/enums";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    status?: string;
+    invoiceType?: string;
+    dueFrom?: string;
+    dueTo?: string;
+    finalMin?: string;
+    finalMax?: string;
+  }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const params = await searchParams;
+  const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
-  const invoices = await getPaginatedInvoices({ page });
+  const q = parseTextParam(params.q);
+  const status = parseEnumParam(params.status, [
+    PaymentStatus.UNPAID,
+    PaymentStatus.PARTIAL,
+    PaymentStatus.PAID,
+  ] as const);
+  const invoiceType = parseEnumParam(params.invoiceType, [
+    InvoiceType.ONE_TIME,
+    InvoiceType.MONTHLY,
+  ] as const);
+  const { from: dueFrom, to: dueTo } = parseDateRangeParams({
+    from: params.dueFrom,
+    to: params.dueTo,
+  });
+  const finalMin = parseNumberParam(params.finalMin);
+  const finalMax = parseNumberParam(params.finalMax);
+
+  const invoices = await getPaginatedInvoices({
+    page,
+    filters: { q, status, invoiceType, dueFrom, dueTo, finalMin, finalMax },
+  });
 
   return (
     <div className="space-y-6">
@@ -37,6 +85,98 @@ export default async function InvoicesPage({
         description="Manage discounts, partial payments, refunds, and invoice documents."
         actions={<InvoiceGenerateForm />}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 md:grid-cols-4" method="get">
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="q">Search</Label>
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder="Invoice, student, class, section"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <Select name="status" value={status}>
+                <SelectTrigger id="status" className="w-full">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent position={"popper"}>
+                  <SelectGroup>
+                    <SelectItem value="UNPAID">Unpaid</SelectItem>
+                    <SelectItem value="PARTIAL">Partial</SelectItem>
+                    <SelectItem value="PAID">Paid</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="invoiceType">Invoice Type</Label>
+              <Select name="invoiceType" value={status}>
+                <SelectTrigger id="invoiceType" className="w-full">
+                  <SelectValue placeholder="Select invoice type" />
+                </SelectTrigger>
+                <SelectContent position={"popper"}>
+                  <SelectGroup>
+                    <SelectItem value="ONE_TIME">One Time</SelectItem>
+                    <SelectItem value="MONTHLY">Monthly</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dueFrom">Due From</Label>
+              <Input
+                id="dueFrom"
+                name="dueFrom"
+                type="date"
+                defaultValue={parseTextParam(params.dueFrom)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="dueTo">Due To</Label>
+              <Input
+                id="dueTo"
+                name="dueTo"
+                type="date"
+                defaultValue={parseTextParam(params.dueTo)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="finalMin">Final Min</Label>
+              <Input
+                id="finalMin"
+                name="finalMin"
+                type="number"
+                step="0.01"
+                defaultValue={params.finalMin}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="finalMax">Final Max</Label>
+              <Input
+                id="finalMax"
+                name="finalMax"
+                type="number"
+                step="0.01"
+                defaultValue={params.finalMax}
+              />
+            </div>
+            <div className="flex items-end gap-2">
+              <Button type="submit">Apply</Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/school/invoices">Reset</Link>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       <div className="rounded-lg border bg-background">
         <Table>
@@ -136,7 +276,20 @@ export default async function InvoicesPage({
             ) : null}
           </TableBody>
         </Table>
-        <TablePagination pagination={invoices} pathname="/school/invoices" />
+        <TablePagination
+          pagination={invoices}
+          pathname="/school/invoices"
+          searchParams={{
+            q: params.q,
+            status: params.status,
+            invoiceType: params.invoiceType,
+            dueFrom: params.dueFrom,
+            dueTo: params.dueTo,
+            finalMin: params.finalMin,
+            finalMax: params.finalMax,
+            page: params.page,
+          }}
+        />
       </div>
     </div>
   );

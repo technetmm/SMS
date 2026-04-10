@@ -1,4 +1,7 @@
-import { getPaginatedStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
+import {
+  getPaginatedStaffAttendance,
+  type StaffAttendanceTableFilters,
+} from "@/app/(school)/school/staff-attendance/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
@@ -11,8 +14,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function StaffAttendanceTable({ page }: { page: number }) {
-  const logs = await getPaginatedStaffAttendance({ page });
+export async function StaffAttendanceTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: StaffAttendanceTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const logs = await getPaginatedStaffAttendance({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -55,7 +66,11 @@ export async function StaffAttendanceTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={logs} pathname="/school/staff-attendance" />
+      <TablePagination
+        pagination={logs}
+        pathname="/school/staff-attendance"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

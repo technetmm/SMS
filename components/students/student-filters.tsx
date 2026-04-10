@@ -14,15 +14,22 @@ import {
 export function StudentFilters({
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
 }: {
   query?: string;
   status?: string;
+  gender?: string;
+  admissionFrom?: string;
+  admissionTo?: string;
 }) {
   const [selectedStatus, setSelectedStatus] = useState(status ?? "ALL");
+  const [selectedGender, setSelectedGender] = useState(gender ?? "ALL");
 
   return (
-    <form className="flex flex-col gap-3 md:flex-row md:items-end">
-      <div className="grid gap-2 md:w-64">
+    <form className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-2">
         <label className="text-sm font-medium" htmlFor="q">
           Search
         </label>
@@ -33,7 +40,7 @@ export function StudentFilters({
           defaultValue={query}
         />
       </div>
-      <div className="grid gap-2 md:w-52">
+      <div className="grid gap-2">
         <label className="text-sm font-medium" htmlFor="status">
           Status
         </label>
@@ -50,7 +57,46 @@ export function StudentFilters({
         </Select>
         <input type="hidden" name="status" value={selectedStatus} />
       </div>
-      <div className="flex gap-2">
+      <div className="grid gap-2">
+        <label className="text-sm font-medium" htmlFor="gender">
+          Gender
+        </label>
+        <Select value={selectedGender} onValueChange={setSelectedGender}>
+          <SelectTrigger id="gender" className="w-full">
+            <SelectValue placeholder="All genders" />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value="ALL">All</SelectItem>
+            <SelectItem value="MALE">Male</SelectItem>
+            <SelectItem value="FEMALE">Female</SelectItem>
+            <SelectItem value="OTHER">Other</SelectItem>
+          </SelectContent>
+        </Select>
+        <input type="hidden" name="gender" value={selectedGender} />
+      </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium" htmlFor="admissionFrom">
+          Admission From
+        </label>
+        <Input
+          id="admissionFrom"
+          name="admissionFrom"
+          type="date"
+          defaultValue={admissionFrom}
+        />
+      </div>
+      <div className="grid gap-2">
+        <label className="text-sm font-medium" htmlFor="admissionTo">
+          Admission To
+        </label>
+        <Input
+          id="admissionTo"
+          name="admissionTo"
+          type="date"
+          defaultValue={admissionTo}
+        />
+      </div>
+      <div className="flex gap-2 items-end">
         <Button type="submit">Apply</Button>
         <Button
           type="button"
