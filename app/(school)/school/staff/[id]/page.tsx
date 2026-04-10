@@ -82,7 +82,10 @@ export default async function StaffDetailPage({
         }
       />
 
-      <StaffSystemRoleManager userId={staff.userId} currentRole={staff.user.role} />
+      <StaffSystemRoleManager
+        userId={staff.userId}
+        currentRole={staff.user.role}
+      />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
@@ -169,36 +172,28 @@ export default async function StaffDetailPage({
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Hire date</p>
                 <p className="font-medium">
-                  {staff?.hireDate
-                    ? dateFormatter.format(staff.hireDate)
-                    : "-"}
+                  {staff?.hireDate ? dateFormatter.format(staff.hireDate) : "-"}
                 </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Exit date</p>
                 <p className="font-medium">
-                  {staff.exitDate
-                    ? dateFormatter.format(staff.exitDate)
-                    : "-"}
+                  {staff.exitDate ? dateFormatter.format(staff.exitDate) : "-"}
                 </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">
                   Rate per section
                 </p>
-                <p className="font-medium">
-                  {staff.ratePerSection.toString()}
-                </p>
+                <p className="font-medium">{staff.ratePerSection.toString()}</p>
               </div>
               <div className="flex items-center justify-between rounded-xl border p-3">
                 <div>
                   <p className="text-xs text-muted-foreground">Status</p>
 
                   <p
-                    className={cn(
-                      "font-medium",
-                      staffStatusColor(staff.status),
-                    )}
+                    className={"font-medium"}
+                    style={{ color: staffStatusColor(staff.status) }}
                   >
                     {enumLabel(staff.status, STAFF_STATUS_LABELS)}
                   </p>

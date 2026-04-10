@@ -13,6 +13,7 @@ import { enumLabel, ENROLLMENT_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/li
 import { formatMoney } from "@/lib/helper";
 import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enrollment-status-form";
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
+import { EnrollmentRowActions } from "@/components/enrollments/enrollment-row-actions";
 
 export async function EnrollmentTable({ page }: { page: number }) {
   const rows = await getPaginatedEnrollments({ page });
@@ -29,6 +30,7 @@ export async function EnrollmentTable({ page }: { page: number }) {
             <TableHead>Enrolled Date</TableHead>
             <TableHead>Auto Invoice</TableHead>
             <TableHead>Progress</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -122,12 +124,15 @@ export async function EnrollmentTable({ page }: { page: number }) {
                     />
                   </div>
                 </TableCell>
+                <TableCell className="text-right">
+                  <EnrollmentRowActions id={row.id} studentName={row.student.name} />
+                </TableCell>
               </TableRow>
             );
           })}
           {rows.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                 No enrollments yet.
               </TableCell>
             </TableRow>

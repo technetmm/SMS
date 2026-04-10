@@ -182,6 +182,21 @@ export const enrollmentUpdateSchema = z.object({
   status: z.nativeEnum(EnrollmentStatus),
 });
 
+export const enrollmentDetailsUpdateSchema = z.object({
+  id: z.string().min(1, "Enrollment id is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  enrolledAt: z.coerce.date(),
+  status: z.nativeEnum(EnrollmentStatus),
+  discountType: z
+    .enum(["NONE", "FIXED", "PERCENT"])
+    .optional()
+    .default("NONE"),
+  discountValue: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().min(0, "Discount must be >= 0"),
+  ),
+});
+
 export const enrollmentAttendanceSchema = z.object({
   enrollmentId: z.string().min(1, "Enrollment is required"),
   date: z.coerce.date(),

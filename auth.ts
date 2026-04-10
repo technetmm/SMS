@@ -81,6 +81,8 @@ export const authOptions: NextAuthOptions = {
             passwordHash: true,
             activeSessionId: true,
             activeSessionExpiresAt: true,
+            activeSessionUserAgent: true,
+            activeSessionIp: true,
           },
         });
 
@@ -98,6 +100,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         const now = new Date();
+        const xForwardedFor = getHeaderValue(req, "x-forwarded-for");
+        const requestedIp = xForwardedFor?.split(",")[0]?.trim() ?? null;
+        const requestedUserAgent = getHeaderValue(req, "user-agent");
         const hasActiveSession =
           Boolean(user.activeSessionId) &&
           Boolean(user.activeSessionExpiresAt) &&
@@ -200,6 +205,8 @@ export const authOptions: NextAuthOptions = {
           data: {
             activeSessionId: sessionId,
             activeSessionExpiresAt,
+            activeSessionUserAgent: requestedUserAgent,
+            activeSessionIp: requestedIp,
           },
         });
 
@@ -229,6 +236,46 @@ export const authOptions: NextAuthOptions = {
             data: {
               activeSessionId: sessionId,
               activeSessionExpiresAt,
+              activeSessionUserAgent: requestedUserAgent,
+              activeSessionIp: requestedIp,
+            },
+          });
+
+          if (transferred.count === 0) {
+            throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          return {
+            ...user,
+            sessionId,
+          };
+        }
+
+        const isSameBrowserSessionReclaim =
+          Boolean(requestedUserAgent) &&
+          Boolean(user.activeSessionUserAgent) &&
+          requestedUserAgent === user.activeSessionUserAgent;
+
+        if (isSameBrowserSessionReclaim) {
+          await expirePendingDeviceApprovalsForUser(user.id, {
+            currentSessionId: user.activeSessionId,
+            now,
+          });
+
+          const transferred = await (
+            prisma.user as unknown as {
+              updateMany: (args: unknown) => Promise<{ count: number }>;
+            }
+          ).updateMany({
+            where: {
+              id: user.id,
+              activeSessionId: user.activeSessionId,
+            },
+            data: {
+              activeSessionId: sessionId,
+              activeSessionExpiresAt,
+              activeSessionUserAgent: requestedUserAgent,
+              activeSessionIp: requestedIp,
             },
           });
 
@@ -264,9 +311,6 @@ export const authOptions: NextAuthOptions = {
           );
         }
 
-        const xForwardedFor = getHeaderValue(req, "x-forwarded-for");
-        const requestedIp = xForwardedFor?.split(",")[0]?.trim() ?? null;
-        const requestedUserAgent = getHeaderValue(req, "user-agent");
         const approvalExpiresAt = new Date(
           now.getTime() + DEVICE_APPROVAL_TTL_MS,
         );
@@ -342,6 +386,8 @@ export const authOptions: NextAuthOptions = {
             data: {
               activeSessionId: null,
               activeSessionExpiresAt: null,
+              activeSessionUserAgent: null,
+              activeSessionIp: null,
             },
           });
         }
@@ -383,6 +429,8 @@ export const authOptions: NextAuthOptions = {
           data: {
             activeSessionId: null,
             activeSessionExpiresAt: null,
+            activeSessionUserAgent: null,
+            activeSessionIp: null,
           },
         });
         return;
@@ -397,6 +445,8 @@ export const authOptions: NextAuthOptions = {
         data: {
           activeSessionId: null,
           activeSessionExpiresAt: null,
+          activeSessionUserAgent: null,
+          activeSessionIp: null,
         },
       });
     },

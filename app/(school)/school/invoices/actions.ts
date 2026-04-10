@@ -127,7 +127,7 @@ export async function getPaginatedInvoices({ page }: { page: number }) {
     query: ({ skip, take }) =>
       prisma.invoice.findMany({
         where: { schoolId: actor.schoolId },
-        orderBy: { createdAt: "desc" },
+        orderBy: { dueDate: "desc" },
         skip,
         take,
         select: {
@@ -163,7 +163,12 @@ export async function getPaginatedInvoices({ page }: { page: number }) {
               method: true,
               createdAt: true,
               refunds: {
-                select: { id: true, amount: true, reason: true, createdAt: true },
+                select: {
+                  id: true,
+                  amount: true,
+                  reason: true,
+                  createdAt: true,
+                },
               },
             },
           },
