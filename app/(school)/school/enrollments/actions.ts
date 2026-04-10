@@ -134,7 +134,9 @@ export async function enrollStudent(
       });
 
       if (duplicate) {
-        throw new Error("This student is already enrolled in the selected section.");
+        throw new Error(
+          "This student is already enrolled in the selected section.",
+        );
       }
 
       const enrolledCount = await tx.enrollment.count({
@@ -149,7 +151,9 @@ export async function enrollStudent(
         throw new Error("Section is full.");
       }
 
-      const originalAmount = new Prisma.Decimal(section.fee).div(section.capacity);
+      const originalAmount = new Prisma.Decimal(section.fee).div(
+        section.capacity,
+      );
       const parsedDiscountType = parsed.data.discountType as DiscountType;
       const parsedDiscountValue = new Prisma.Decimal(parsed.data.discountValue);
       const discount = calculateDiscountAmount({
@@ -172,9 +176,13 @@ export async function enrollStudent(
           billingDayOfMonth,
           monthlyBillingActive: billingType === BillingType.MONTHLY,
           monthlyStartYear:
-            billingType === BillingType.MONTHLY ? enrollmentPeriod.billingYear : null,
+            billingType === BillingType.MONTHLY
+              ? enrollmentPeriod.billingYear
+              : null,
           monthlyStartMonth:
-            billingType === BillingType.MONTHLY ? enrollmentPeriod.billingMonth : null,
+            billingType === BillingType.MONTHLY
+              ? enrollmentPeriod.billingMonth
+              : null,
           discountType: parsedDiscountType,
           discountValue: parsedDiscountValue,
           status: EnrollmentStatus.ACTIVE,
@@ -225,7 +233,10 @@ export async function enrollStudent(
   revalidatePath("/school/students");
   revalidatePath("/school/payments");
   revalidatePath("/school/sections");
-  return { status: "success", message: "Student enrolled and invoice created." };
+  return {
+    status: "success",
+    message: "Student enrolled and invoice created.",
+  };
 }
 
 export async function getEnrollments(filters?: {
@@ -310,21 +321,18 @@ export async function getEnrollments(filters?: {
   });
 }
 
-export async function getPaginatedEnrollments({
-  page,
-}: {
-  page: number;
-}) {
+export async function getPaginatedEnrollments({ page }: { page: number }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return paginateQuery({
     page,
-    count: () => prisma.enrollment.count({ where: { schoolId, isDeleted: false } }),
+    count: () =>
+      prisma.enrollment.count({ where: { schoolId, isDeleted: false } }),
     query: ({ skip, take }) =>
       prisma.enrollment.findMany({
         where: { schoolId, isDeleted: false },
-        orderBy: [{ createdAt: "desc" }],
+        orderBy: [{ enrolledAt: "desc" }],
         skip,
         take,
         select: {
@@ -392,32 +400,33 @@ export async function getEnrollmentFormOptions() {
   }
 
   const schoolId = actor.schoolId;
-  const [students, sections, activeEnrollmentCounts, tenant] = await Promise.all([
-    prisma.student.findMany({
-      where: { schoolId, status: "ACTIVE" },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
-    prisma.section.findMany({
-      where: { schoolId },
-      orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
-      select: {
-        id: true,
-        name: true,
-        capacity: true,
-        class: { select: { name: true, fee: true, billingType: true } },
-      },
-    }),
-    prisma.enrollment.groupBy({
-      by: ["sectionId"],
-      where: { schoolId, status: EnrollmentStatus.ACTIVE },
-      _count: { _all: true },
-    }),
-    prisma.tenant.findFirst({
-      where: { id: schoolId },
-      select: { currency: true },
-    }),
-  ]);
+  const [students, sections, activeEnrollmentCounts, tenant] =
+    await Promise.all([
+      prisma.student.findMany({
+        where: { schoolId, status: "ACTIVE" },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true },
+      }),
+      prisma.section.findMany({
+        where: { schoolId },
+        orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
+        select: {
+          id: true,
+          name: true,
+          capacity: true,
+          class: { select: { name: true, fee: true, billingType: true } },
+        },
+      }),
+      prisma.enrollment.groupBy({
+        by: ["sectionId"],
+        where: { schoolId, status: EnrollmentStatus.ACTIVE },
+        _count: { _all: true },
+      }),
+      prisma.tenant.findFirst({
+        where: { id: schoolId },
+        select: { currency: true },
+      }),
+    ]);
 
   const enrolledMap = new Map(
     activeEnrollmentCounts.map((item) => [item.sectionId, item._count._all]),
@@ -791,7 +800,10 @@ export async function updateEnrollmentDetails(
             discount,
             finalAmount,
             dueDate,
-            status: resolveInvoiceStatus(finalAmount, latestUnpaidInvoice.paidAmount),
+            status: resolveInvoiceStatus(
+              finalAmount,
+              latestUnpaidInvoice.paidAmount,
+            ),
           },
         });
       }
