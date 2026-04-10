@@ -247,6 +247,37 @@ export async function deleteTimetableSlot(formData: FormData) {
   revalidatePath("/school/timetable");
 }
 
+export async function deleteTimetableSlotById(id: string) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  if (!id) {
+    return { status: "error" as const, message: "Slot id is required." };
+  }
+
+  const slot = await prisma.timetable.findFirst({
+    where: { id, schoolId },
+    select: { id: true },
+  });
+
+  if (!slot) {
+    return { status: "error" as const, message: "Timetable slot not found." };
+  }
+
+  try {
+    await prisma.timetable.delete({ where: { id: slot.id } });
+  } catch (error) {
+    return {
+      status: "error" as const,
+      message: error instanceof Error ? error.message : "Unable to delete slot.",
+    };
+  }
+
+  revalidatePath("/school/timetable");
+  revalidatePath("/school/sections");
+  return { status: "success" as const };
+}
+
 export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
@@ -291,5 +322,69 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   }
 
   revalidatePath("/school/timetable");
+  return { status: "success" as const };
+}
+
+export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  if (!id) {
+    return { status: "error" as const, message: "Slot id is required." };
+  }
+
+  const slot = await prisma.timetable.findFirst({
+    where: { id, schoolId },
+    select: {
+      id: true,
+      sectionId: true,
+      staffId: true,
+      dayOfWeek: true,
+      startTime: true,
+      endTime: true,
+      room: true,
+    },
+  });
+
+  if (!slot) {
+    return { status: "error" as const, message: "Timetable slot not found." };
+  }
+
+  if (slot.dayOfWeek === dayOfWeek) {
+    return {
+      status: "error" as const,
+      message: "Choose a different day to paste this slot.",
+    };
+  }
+
+  try {
+    await assertNoStaffConflict({
+      schoolId,
+      staffId: slot.staffId,
+      dayOfWeek,
+      startTime: slot.startTime,
+      endTime: slot.endTime,
+    });
+
+    await prisma.timetable.create({
+      data: {
+        schoolId,
+        sectionId: slot.sectionId,
+        staffId: slot.staffId,
+        dayOfWeek,
+        startTime: slot.startTime,
+        endTime: slot.endTime,
+        room: slot.room,
+      },
+    });
+  } catch (error) {
+    return {
+      status: "error" as const,
+      message: error instanceof Error ? error.message : "Unable to paste slot.",
+    };
+  }
+
+  revalidatePath("/school/timetable");
+  revalidatePath("/school/sections");
   return { status: "success" as const };
 }
