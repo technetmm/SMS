@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { TableFilterSelect } from "@/components/shared/table-filter-select";
 import { parseTextParam } from "@/lib/table-filters";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 export function EnrollmentFilters({
   q,
@@ -65,7 +64,9 @@ export function EnrollmentFilters({
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/enrollments")}
-        >Reset</Button>
+        >
+          Reset
+        </Button>
       </div>
     </form>
   );
