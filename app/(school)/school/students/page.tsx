@@ -9,7 +9,11 @@ import { ExportMenu } from "@/components/shared/export-menu";
 import { exportStudentsToExcel } from "@/app/(school)/school/exports/actions";
 import { StudentStatus } from "@/app/generated/prisma/enums";
 import { parsePageParam } from "@/lib/pagination";
-import { parseDateRangeParams, parseTextParam } from "@/lib/table-filters";
+import {
+  parseDateRangeParams,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
 
 export default async function StudentsPage({
   searchParams,
@@ -28,8 +32,18 @@ export default async function StudentsPage({
   const { q, status: paramsStatus, gender: paramsGender, admissionFrom: admissionFromParam, admissionTo: admissionToParam, page: pageParam } = await searchParams;
 
   const query = typeof q === "string" ? q : "";
-  const status = typeof paramsStatus === "string" ? paramsStatus : "ALL";
-  const gender = parseTextParam(paramsGender) ?? "ALL";
+  const status =
+    parseTableFilterEnumParam(paramsStatus, [
+      StudentStatus.ACTIVE,
+      StudentStatus.INACTIVE,
+      StudentStatus.GRADUATED,
+    ] as const) ?? "ALL";
+  const gender =
+    parseTableFilterEnumParam(paramsGender, [
+      "MALE",
+      "FEMALE",
+      "OTHER",
+    ] as const) ?? "ALL";
   const { from: admissionFrom, to: admissionTo } = parseDateRangeParams({
     from: admissionFromParam,
     to: admissionToParam,

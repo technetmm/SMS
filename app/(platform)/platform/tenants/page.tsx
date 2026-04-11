@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { parsePageParam } from "@/lib/pagination";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { parseDateRangeParams, parseEnumParam, parseTextParam } from "@/lib/table-filters";
+import { TableFilterSelect } from "@/components/shared/table-filter-select";
+import {
+  parseDateRangeParams,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
 
 export default async function TenantsPage({
   searchParams,
@@ -28,12 +33,15 @@ export default async function TenantsPage({
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
-  const plan = parseEnumParam(params.plan, [
+  const plan = parseTableFilterEnumParam(params.plan, [
     Plan.FREE,
     Plan.BASIC,
     Plan.PREMIUM,
   ] as const);
-  const isActiveRaw = parseEnumParam(params.isActive, ["true", "false"] as const);
+  const isActiveRaw = parseTableFilterEnumParam(params.isActive, [
+    "true",
+    "false",
+  ] as const);
   const isActive = isActiveRaw == null ? undefined : isActiveRaw === "true";
   const createdRange = parseDateRangeParams({
     from: params.createdFrom,
@@ -74,33 +82,29 @@ export default async function TenantsPage({
               <Label htmlFor="q">Search</Label>
               <Input id="q" name="q" defaultValue={q} placeholder="Name or slug" />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="plan">Plan</Label>
-              <select
-                id="plan"
-                name="plan"
-                defaultValue={plan ?? ""}
-                className="h-9 rounded-md border bg-background px-3 text-sm"
-              >
-                <option value="">All</option>
-                <option value="FREE">Free</option>
-                <option value="BASIC">Basic</option>
-                <option value="PREMIUM">Premium</option>
-              </select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="isActive">Status</Label>
-              <select
-                id="isActive"
-                name="isActive"
-                defaultValue={isActiveRaw ?? ""}
-                className="h-9 rounded-md border bg-background px-3 text-sm"
-              >
-                <option value="">All</option>
-                <option value="true">Active</option>
-                <option value="false">Disabled</option>
-              </select>
-            </div>
+            <TableFilterSelect
+              id="plan"
+              name="plan"
+              label="Plan"
+              placeholder="All plans"
+              defaultValue={params.plan}
+              options={[
+                { value: "FREE", label: "Free" },
+                { value: "BASIC", label: "Basic" },
+                { value: "PREMIUM", label: "Premium" },
+              ]}
+            />
+            <TableFilterSelect
+              id="isActive"
+              name="isActive"
+              label="Status"
+              placeholder="All statuses"
+              defaultValue={params.isActive}
+              options={[
+                { value: "true", label: "Active" },
+                { value: "false", label: "Disabled" },
+              ]}
+            />
             <div className="grid gap-2">
               <Label htmlFor="createdFrom">Created From</Label>
               <Input

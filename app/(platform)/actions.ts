@@ -439,55 +439,12 @@ export async function getPlatformDashboardData({
   schoolsPage,
   subscriptionsPage,
   devicePage,
-  schoolsFilters,
-  subscriptionsFilters,
-  deviceFilters,
 }: {
   schoolsPage: number;
   subscriptionsPage: number;
   devicePage: number;
-  schoolsFilters?: TenantTableFilters;
-  subscriptionsFilters?: SubscriptionTableFilters;
-  deviceFilters?: {
-    q?: string;
-    requesterRole?: UserRole;
-    createdFrom?: Date;
-    createdTo?: Date;
-    expiresFrom?: Date;
-    expiresTo?: Date;
-  };
 }) {
   await requireSuperAdminAccess();
-  const tenantWhere: Record<string, unknown> = {};
-  if (schoolsFilters?.plan) tenantWhere.plan = schoolsFilters.plan;
-  if (schoolsFilters?.isActive != null) tenantWhere.isActive = schoolsFilters.isActive;
-  if (schoolsFilters?.createdFrom || schoolsFilters?.createdTo) {
-    tenantWhere.createdAt = {
-      ...(schoolsFilters.createdFrom ? { gte: schoolsFilters.createdFrom } : {}),
-      ...(schoolsFilters.createdTo ? { lte: schoolsFilters.createdTo } : {}),
-    };
-  }
-  if (schoolsFilters?.q) {
-    tenantWhere.OR = [
-      { name: containsInsensitive(schoolsFilters.q) },
-      { slug: containsInsensitive(schoolsFilters.q) },
-    ];
-  }
-
-  const subscriptionWhere: Record<string, unknown> = {};
-  if (subscriptionsFilters?.plan) subscriptionWhere.plan = subscriptionsFilters.plan;
-  if (subscriptionsFilters?.status) subscriptionWhere.status = subscriptionsFilters.status;
-  if (subscriptionsFilters?.isActive != null) subscriptionWhere.isActive = subscriptionsFilters.isActive;
-  if (subscriptionsFilters?.periodFrom || subscriptionsFilters?.periodTo) {
-    subscriptionWhere.currentPeriodEnd = {
-      ...(subscriptionsFilters.periodFrom ? { gte: subscriptionsFilters.periodFrom } : {}),
-      ...(subscriptionsFilters.periodTo ? { lte: subscriptionsFilters.periodTo } : {}),
-    };
-  }
-  if (subscriptionsFilters?.q) {
-    subscriptionWhere.OR = [{ tenant: { name: containsInsensitive(subscriptionsFilters.q) } }];
-  }
-
   const [
     tenants,
     subscriptions,
@@ -498,10 +455,9 @@ export async function getPlatformDashboardData({
   ] = await Promise.all([
     paginateQuery({
       page: schoolsPage,
-      count: () => prisma.tenant.count({ where: tenantWhere }),
+      count: () => prisma.tenant.count(),
       query: ({ skip, take }) =>
         prisma.tenant.findMany({
-          where: tenantWhere,
           orderBy: { createdAt: "desc" },
           skip,
           take,
@@ -512,10 +468,9 @@ export async function getPlatformDashboardData({
     }),
     paginateQuery({
       page: subscriptionsPage,
-      count: () => prisma.subscription.count({ where: subscriptionWhere }),
+      count: () => prisma.subscription.count(),
       query: ({ skip, take }) =>
         prisma.subscription.findMany({
-          where: subscriptionWhere,
           orderBy: { createdAt: "desc" },
           skip,
           take,
@@ -524,7 +479,7 @@ export async function getPlatformDashboardData({
     }),
     getPaginatedPendingDeviceApprovalRows(
       { role: UserRole.SUPER_ADMIN },
-      { page: devicePage, filters: deviceFilters },
+      { page: devicePage },
     ),
     prisma.tenant.count(),
     prisma.subscription.count({

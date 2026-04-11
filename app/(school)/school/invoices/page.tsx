@@ -21,23 +21,14 @@ import {
 import { formatMoney } from "@/lib/helper";
 import { parsePageParam } from "@/lib/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   parseDateRangeParams,
-  parseEnumParam,
   parseNumberParam,
+  parseTableFilterEnumParam,
   parseTextParam,
 } from "@/lib/table-filters";
 import { InvoiceType, PaymentStatus } from "@/app/generated/prisma/enums";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { InvoicesFilters } from "@/components/invoices/invoice-filters";
 
 export default async function InvoicesPage({
   searchParams,
@@ -57,12 +48,12 @@ export default async function InvoicesPage({
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
-  const status = parseEnumParam(params.status, [
+  const status = parseTableFilterEnumParam(params.status, [
     PaymentStatus.UNPAID,
     PaymentStatus.PARTIAL,
     PaymentStatus.PAID,
   ] as const);
-  const invoiceType = parseEnumParam(params.invoiceType, [
+  const invoiceType = parseTableFilterEnumParam(params.invoiceType, [
     InvoiceType.ONE_TIME,
     InvoiceType.MONTHLY,
   ] as const);
@@ -91,90 +82,15 @@ export default async function InvoicesPage({
           <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4 md:grid-cols-4" method="get">
-            <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search</Label>
-              <Input
-                id="q"
-                name="q"
-                defaultValue={q}
-                placeholder="Invoice, student, class, section"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <Select name="status" value={status}>
-                <SelectTrigger id="status" className="w-full">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent position={"popper"}>
-                  <SelectGroup>
-                    <SelectItem value="UNPAID">Unpaid</SelectItem>
-                    <SelectItem value="PARTIAL">Partial</SelectItem>
-                    <SelectItem value="PAID">Paid</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="invoiceType">Invoice Type</Label>
-              <Select name="invoiceType" value={status}>
-                <SelectTrigger id="invoiceType" className="w-full">
-                  <SelectValue placeholder="Select invoice type" />
-                </SelectTrigger>
-                <SelectContent position={"popper"}>
-                  <SelectGroup>
-                    <SelectItem value="ONE_TIME">One Time</SelectItem>
-                    <SelectItem value="MONTHLY">Monthly</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dueFrom">Due From</Label>
-              <Input
-                id="dueFrom"
-                name="dueFrom"
-                type="date"
-                defaultValue={parseTextParam(params.dueFrom)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dueTo">Due To</Label>
-              <Input
-                id="dueTo"
-                name="dueTo"
-                type="date"
-                defaultValue={parseTextParam(params.dueTo)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="finalMin">Final Min</Label>
-              <Input
-                id="finalMin"
-                name="finalMin"
-                type="number"
-                step="0.01"
-                defaultValue={params.finalMin}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="finalMax">Final Max</Label>
-              <Input
-                id="finalMax"
-                name="finalMax"
-                type="number"
-                step="0.01"
-                defaultValue={params.finalMax}
-              />
-            </div>
-            <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="outline">
-                <Link href="/school/invoices">Reset</Link>
-              </Button>
-            </div>
-          </form>
+          <InvoicesFilters
+            q={q}
+            status={status}
+            invoiceType={invoiceType}
+            dueFrom={params.dueFrom}
+            dueTo={params.dueTo}
+            finalMin={finalMin}
+            finalMax={finalMax}
+          />
         </CardContent>
       </Card>
 

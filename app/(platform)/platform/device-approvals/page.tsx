@@ -9,8 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { TableFilterSelect } from "@/components/shared/table-filter-select";
 import Link from "next/link";
-import { parseDateRangeParams, parseEnumParam, parseTextParam } from "@/lib/table-filters";
+import {
+  parseDateRangeParams,
+  parseTableFilterEnumParam,
+  parseTextParam,
+  TABLE_FILTER_ALL_VALUE,
+} from "@/lib/table-filters";
 
 export default async function PlatformDeviceApprovalsPage({
   searchParams,
@@ -30,7 +36,7 @@ export default async function PlatformDeviceApprovalsPage({
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
-  const requesterRole = parseEnumParam(params.requesterRole, [
+  const requesterRole = parseTableFilterEnumParam(params.requesterRole, [
     UserRole.SCHOOL_ADMIN,
     UserRole.TEACHER,
     UserRole.STUDENT,
@@ -76,32 +82,60 @@ export default async function PlatformDeviceApprovalsPage({
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
               <Label htmlFor="q">Search</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder="Name, email, school, IP, user agent" />
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder="Name, email, school, IP, user agent"
+              />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="requesterRole">Requester Role</Label>
-              <select id="requesterRole" name="requesterRole" defaultValue={requesterRole ?? ""} className="h-9 rounded-md border bg-background px-3 text-sm">
-                <option value="">All</option>
-                <option value="SCHOOL_ADMIN">School Admin</option>
-                <option value="TEACHER">Teacher</option>
-                <option value="STUDENT">Student</option>
-              </select>
-            </div>
+            <TableFilterSelect
+              id="requesterRole"
+              name="requesterRole"
+              label="Requester Role"
+              placeholder="All roles"
+              defaultValue={params.requesterRole ?? TABLE_FILTER_ALL_VALUE}
+              options={[
+                { value: "SCHOOL_ADMIN", label: "School Admin" },
+                { value: "TEACHER", label: "Teacher" },
+                { value: "STUDENT", label: "Student" },
+              ]}
+            />
             <div className="grid gap-2">
               <Label htmlFor="createdFrom">Requested From</Label>
-              <Input id="createdFrom" name="createdFrom" type="date" defaultValue={parseTextParam(params.createdFrom)} />
+              <Input
+                id="createdFrom"
+                name="createdFrom"
+                type="date"
+                defaultValue={parseTextParam(params.createdFrom)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="createdTo">Requested To</Label>
-              <Input id="createdTo" name="createdTo" type="date" defaultValue={parseTextParam(params.createdTo)} />
+              <Input
+                id="createdTo"
+                name="createdTo"
+                type="date"
+                defaultValue={parseTextParam(params.createdTo)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="expiresFrom">Expires From</Label>
-              <Input id="expiresFrom" name="expiresFrom" type="date" defaultValue={parseTextParam(params.expiresFrom)} />
+              <Input
+                id="expiresFrom"
+                name="expiresFrom"
+                type="date"
+                defaultValue={parseTextParam(params.expiresFrom)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="expiresTo">Expires To</Label>
-              <Input id="expiresTo" name="expiresTo" type="date" defaultValue={parseTextParam(params.expiresTo)} />
+              <Input
+                id="expiresTo"
+                name="expiresTo"
+                type="date"
+                defaultValue={parseTextParam(params.expiresTo)}
+              />
             </div>
             <div className="flex items-end gap-2">
               <Button type="submit">Apply</Button>

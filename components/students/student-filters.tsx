@@ -1,15 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TableFilterSelect } from "@/components/shared/table-filter-select";
 
 export function StudentFilters({
   query,
@@ -24,9 +17,6 @@ export function StudentFilters({
   admissionFrom?: string;
   admissionTo?: string;
 }) {
-  const [selectedStatus, setSelectedStatus] = useState(status ?? "ALL");
-  const [selectedGender, setSelectedGender] = useState(gender ?? "ALL");
-
   return (
     <form className="grid gap-3 md:grid-cols-3">
       <div className="grid gap-2">
@@ -40,40 +30,30 @@ export function StudentFilters({
           defaultValue={query}
         />
       </div>
-      <div className="grid gap-2">
-        <label className="text-sm font-medium" htmlFor="status">
-          Status
-        </label>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger id="status" className="w-full">
-            <SelectValue placeholder="All statuses" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="ALL">All</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
-            <SelectItem value="GRADUATED">Graduated</SelectItem>
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="status" value={selectedStatus} />
-      </div>
-      <div className="grid gap-2">
-        <label className="text-sm font-medium" htmlFor="gender">
-          Gender
-        </label>
-        <Select value={selectedGender} onValueChange={setSelectedGender}>
-          <SelectTrigger id="gender" className="w-full">
-            <SelectValue placeholder="All genders" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="ALL">All</SelectItem>
-            <SelectItem value="MALE">Male</SelectItem>
-            <SelectItem value="FEMALE">Female</SelectItem>
-            <SelectItem value="OTHER">Other</SelectItem>
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="gender" value={selectedGender} />
-      </div>
+      <TableFilterSelect
+        id="status"
+        name="status"
+        label="Status"
+        placeholder="All statuses"
+        defaultValue={status}
+        options={[
+          { value: "ACTIVE", label: "Active" },
+          { value: "INACTIVE", label: "Inactive" },
+          { value: "GRADUATED", label: "Graduated" },
+        ]}
+      />
+      <TableFilterSelect
+        id="gender"
+        name="gender"
+        label="Gender"
+        placeholder="All genders"
+        defaultValue={gender}
+        options={[
+          { value: "MALE", label: "Male" },
+          { value: "FEMALE", label: "Female" },
+          { value: "OTHER", label: "Other" },
+        ]}
+      />
       <div className="grid gap-2">
         <label className="text-sm font-medium" htmlFor="admissionFrom">
           Admission From

@@ -1,3 +1,5 @@
+export const TABLE_FILTER_ALL_VALUE = "ALL";
+
 export function firstParam(value: string | string[] | undefined) {
   if (Array.isArray(value)) {
     return value[0];
@@ -59,10 +61,24 @@ export function parseEnumParam<T extends string>(
   return allowed.includes(raw as T) ? (raw as T) : undefined;
 }
 
+export function parseTableFilterParam(value: string | string[] | undefined) {
+  const raw = parseTextParam(value);
+  if (!raw || raw === TABLE_FILTER_ALL_VALUE) return undefined;
+  return raw;
+}
+
+export function parseTableFilterEnumParam<T extends string>(
+  value: string | string[] | undefined,
+  allowed: readonly T[],
+) {
+  const raw = parseTableFilterParam(value);
+  if (!raw) return undefined;
+  return allowed.includes(raw as T) ? (raw as T) : undefined;
+}
+
 export function containsInsensitive(value: string) {
   return {
     contains: value,
     mode: "insensitive" as const,
   };
 }
-

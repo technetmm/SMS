@@ -2,7 +2,11 @@
 
 import { getServerAuth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { PaymentStatus, UserRole } from "@/app/generated/prisma/enums";
+import {
+  InvoiceType,
+  PaymentStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";

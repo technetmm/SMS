@@ -1,21 +1,18 @@
-import Link from "next/link";
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
 import { markStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
 import { StaffAttendanceForm } from "@/components/staff-attendance/staff-attendance-form";
 import { StaffAttendanceTable } from "@/components/staff-attendance/staff-attendance-table";
 import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { parsePageParam } from "@/lib/pagination";
 import { prisma } from "@/lib/prisma/client";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import {
   parseDateRangeParams,
-  parseEnumParam,
+  parseTableFilterEnumParam,
   parseTextParam,
 } from "@/lib/table-filters";
+import { StaffAttendanceFilter } from "@/components/staff-attendance/staff-attendance-filter";
 
 export default async function StaffAttendancePage({
   searchParams,
@@ -33,7 +30,7 @@ export default async function StaffAttendancePage({
   const params = await searchParams;
   const page = parsePageParam(params.page);
   const q = parseTextParam(params.q);
-  const status = parseEnumParam(params.status, [
+  const status = parseTableFilterEnumParam(params.status, [
     AttendanceStatus.PRESENT,
     AttendanceStatus.ABSENT,
     AttendanceStatus.LATE,
@@ -77,51 +74,12 @@ export default async function StaffAttendancePage({
           <CardTitle>Table Filters</CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="grid gap-4 md:grid-cols-4" method="get">
-            <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder="Staff, section, class" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="status">Status</Label>
-              <select
-                id="status"
-                name="status"
-                defaultValue={status ?? ""}
-                className="h-9 rounded-md border bg-background px-3 text-sm"
-              >
-                <option value="">All</option>
-                <option value="PRESENT">Present</option>
-                <option value="ABSENT">Absent</option>
-                <option value="LATE">Late</option>
-                <option value="LEAVE">Leave</option>
-              </select>
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dateFrom">Date From</Label>
-              <Input
-                id="dateFrom"
-                name="dateFrom"
-                type="date"
-                defaultValue={parseTextParam(params.dateFrom)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="dateTo">Date To</Label>
-              <Input
-                id="dateTo"
-                name="dateTo"
-                type="date"
-                defaultValue={parseTextParam(params.dateTo)}
-              />
-            </div>
-            <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
-              <Button asChild type="button" variant="outline">
-                <Link href="/school/staff-attendance">Reset</Link>
-              </Button>
-            </div>
-          </form>
+          <StaffAttendanceFilter
+            q={q}
+            status={status}
+            dateFrom={params.dateFrom}
+            dateTo={params.dateTo}
+          />
         </CardContent>
       </Card>
 
@@ -139,4 +97,3 @@ export default async function StaffAttendancePage({
     </div>
   );
 }
-
