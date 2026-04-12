@@ -1,4 +1,7 @@
-import { getPaginatedSubjects } from "@/app/(school)/school/subjects/actions";
+import {
+  getPaginatedSubjects,
+  type SubjectTableFilters,
+} from "@/app/(school)/school/subjects/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,8 +15,16 @@ import {
 import { SubjectRowActions } from "@/components/subjects/subject-row-actions";
 import { dateFormatter } from "@/lib/helper";
 
-export async function SubjectTable({ page }: { page: number }) {
-  const subjects = await getPaginatedSubjects({ page });
+export async function SubjectTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: SubjectTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const subjects = await getPaginatedSubjects({ page, filters });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -53,7 +64,11 @@ export async function SubjectTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={subjects} pathname="/school/subjects" />
+      <TablePagination
+        pagination={subjects}
+        pathname="/school/subjects"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

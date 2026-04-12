@@ -7,10 +7,19 @@ import { formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { payrollGenerateSchema } from "@/lib/validators";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type PayrollActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type PayrollTableFilters = {
+  q?: string;
+  monthFrom?: Date;
+  monthTo?: Date;
+  totalMin?: number;
+  totalMax?: number;
 };
 
 function monthStartUTC(value: Date) {
@@ -36,16 +45,41 @@ export async function getPayrolls() {
   });
 }
 
-export async function getPaginatedPayrolls({ page }: { page: number }) {
+export async function getPaginatedPayrolls({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: PayrollTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.monthFrom || filters?.monthTo) {
+    where.month = {
+      ...(filters.monthFrom ? { gte: filters.monthFrom } : {}),
+      ...(filters.monthTo ? { lte: filters.monthTo } : {}),
+    };
+  }
+
+  if (filters?.totalMin != null || filters?.totalMax != null) {
+    where.totalAmount = {
+      ...(filters.totalMin != null ? { gte: filters.totalMin } : {}),
+      ...(filters.totalMax != null ? { lte: filters.totalMax } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [{ staff: { name: containsInsensitive(filters.q) } }];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.payroll.count({ where: { schoolId } }),
+    count: () => prisma.payroll.count({ where }),
     query: ({ skip, take }) =>
       prisma.payroll.findMany({
-        where: { schoolId },
+        where,
         orderBy: [{ month: "desc" }, { createdAt: "desc" }],
         skip,
         take,

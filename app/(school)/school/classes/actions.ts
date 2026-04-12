@@ -7,10 +7,22 @@ import { classCreateSchema } from "@/lib/validators";
 import { requireSchoolAdmin } from "@/lib/permissions";
 import { paginateQuery } from "@/lib/pagination";
 import { requireTenantId } from "@/lib/tenant";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type ClassActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type ClassTableFilters = {
+  q?: string;
+  classType?: "ONE_ON_ONE" | "PRIVATE" | "GROUP";
+  programType?: "REGULAR" | "INTENSIVE";
+  billingType?: "ONE_TIME" | "MONTHLY";
+  createdFrom?: Date;
+  createdTo?: Date;
+  feeMin?: number;
+  feeMax?: number;
 };
 
 export async function createClass(
@@ -78,16 +90,48 @@ export async function getClasses() {
   });
 }
 
-export async function getPaginatedClasses({ page }: { page: number }) {
+export async function getPaginatedClasses({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: ClassTableFilters;
+}) {
   await requireSchoolAdmin();
   const schoolId = await requireTenantId();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.classType) where.classType = filters.classType;
+  if (filters?.programType) where.programType = filters.programType;
+  if (filters?.billingType) where.billingType = filters.billingType;
+
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
+
+  if (filters?.feeMin != null || filters?.feeMax != null) {
+    where.fee = {
+      ...(filters.feeMin != null ? { gte: filters.feeMin } : {}),
+      ...(filters.feeMax != null ? { lte: filters.feeMax } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      { course: { name: containsInsensitive(filters.q) } },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.class.count({ where: { schoolId } }),
+    count: () => prisma.class.count({ where }),
     query: ({ skip, take }) =>
       prisma.class.findMany({
-        where: { schoolId },
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take,

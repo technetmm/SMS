@@ -4,15 +4,40 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { EnrollmentTable } from "@/components/enrollments/enrollment-table";
 import { parsePageParam } from "@/lib/pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  parseDateRangeParams,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
+import { EnrollmentStatus } from "@/app/generated/prisma/enums";
+import { EnrollmentFilters } from "@/components/enrollments/enrollment-filters";
 
 export default async function EnrollmentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    status?: string;
+    enrolledFrom?: string;
+    enrolledTo?: string;
+  }>;
 }) {
   await requireSchoolAdminAccess();
-  const { page: pageParam } = await searchParams;
+  const params = await searchParams;
+  const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
+  const q = parseTextParam(params.q);
+  const status = parseTableFilterEnumParam(params.status, [
+    EnrollmentStatus.ACTIVE,
+    EnrollmentStatus.COMPLETED,
+    EnrollmentStatus.DROPPED,
+  ] as const);
+  const { from: enrolledFrom, to: enrolledTo } = parseDateRangeParams({
+    from: params.enrolledFrom,
+    to: params.enrolledTo,
+  });
 
   return (
     <div className="space-y-6">
@@ -25,7 +50,30 @@ export default async function EnrollmentsPage({
           </Button>
         }
       />
-      <EnrollmentTable page={page} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EnrollmentFilters
+            q={q}
+            status={status}
+            enrolledFrom={params.enrolledFrom}
+            enrolledTo={params.enrolledTo}
+          />
+        </CardContent>
+      </Card>
+      <EnrollmentTable
+        page={page}
+        filters={{ q, status, enrolledFrom, enrolledTo }}
+        searchParams={{
+          q: params.q,
+          status: params.status,
+          enrolledFrom: params.enrolledFrom,
+          enrolledTo: params.enrolledTo,
+          page: params.page,
+        }}
+      />
     </div>
   );
 }

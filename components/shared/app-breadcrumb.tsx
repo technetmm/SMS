@@ -28,6 +28,7 @@ const LABELS: Record<string, string> = {
   "2fa": "Two-Factor Auth",
   security: "Security",
   theme: "Theme",
+  notifications: "Notifications",
 };
 
 function toTitleCase(segment: string) {

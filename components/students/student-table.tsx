@@ -23,14 +23,27 @@ export async function StudentTable({
   page,
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
   searchParams,
 }: {
   page: number;
   query?: string;
   status?: StudentStatus | "ALL";
+  gender?: "ALL" | "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const students = await getPaginatedStudents({ page, query, status });
+  const students = await getPaginatedStudents({
+    page,
+    query,
+    status,
+    gender: gender && gender !== "ALL" ? gender : undefined,
+    admissionFrom,
+    admissionTo,
+  });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (

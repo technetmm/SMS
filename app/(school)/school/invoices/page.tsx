@@ -20,15 +20,54 @@ import {
 } from "@/lib/enum-labels";
 import { formatMoney } from "@/lib/helper";
 import { parsePageParam } from "@/lib/pagination";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  parseDateRangeParams,
+  parseNumberParam,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
+import { InvoiceType, PaymentStatus } from "@/app/generated/prisma/enums";
+import { InvoicesFilters } from "@/components/invoices/invoice-filters";
 
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    status?: string;
+    invoiceType?: string;
+    dueFrom?: string;
+    dueTo?: string;
+    finalMin?: string;
+    finalMax?: string;
+  }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const params = await searchParams;
+  const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
-  const invoices = await getPaginatedInvoices({ page });
+  const q = parseTextParam(params.q);
+  const status = parseTableFilterEnumParam(params.status, [
+    PaymentStatus.UNPAID,
+    PaymentStatus.PARTIAL,
+    PaymentStatus.PAID,
+  ] as const);
+  const invoiceType = parseTableFilterEnumParam(params.invoiceType, [
+    InvoiceType.ONE_TIME,
+    InvoiceType.MONTHLY,
+  ] as const);
+  const { from: dueFrom, to: dueTo } = parseDateRangeParams({
+    from: params.dueFrom,
+    to: params.dueTo,
+  });
+  const finalMin = parseNumberParam(params.finalMin);
+  const finalMax = parseNumberParam(params.finalMax);
+
+  const invoices = await getPaginatedInvoices({
+    page,
+    filters: { q, status, invoiceType, dueFrom, dueTo, finalMin, finalMax },
+  });
 
   return (
     <div className="space-y-6">
@@ -37,6 +76,23 @@ export default async function InvoicesPage({
         description="Manage discounts, partial payments, refunds, and invoice documents."
         actions={<InvoiceGenerateForm />}
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <InvoicesFilters
+            q={q}
+            status={status}
+            invoiceType={invoiceType}
+            dueFrom={params.dueFrom}
+            dueTo={params.dueTo}
+            finalMin={finalMin}
+            finalMax={finalMax}
+          />
+        </CardContent>
+      </Card>
 
       <div className="rounded-lg border bg-background">
         <Table>
@@ -136,7 +192,20 @@ export default async function InvoicesPage({
             ) : null}
           </TableBody>
         </Table>
-        <TablePagination pagination={invoices} pathname="/school/invoices" />
+        <TablePagination
+          pagination={invoices}
+          pathname="/school/invoices"
+          searchParams={{
+            q: params.q,
+            status: params.status,
+            invoiceType: params.invoiceType,
+            dueFrom: params.dueFrom,
+            dueTo: params.dueTo,
+            finalMin: params.finalMin,
+            finalMax: params.finalMax,
+            page: params.page,
+          }}
+        />
       </div>
     </div>
   );

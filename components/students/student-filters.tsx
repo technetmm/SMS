@@ -1,28 +1,25 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TableFilterSelect } from "@/components/shared/table-filter-select";
 
 export function StudentFilters({
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
 }: {
   query?: string;
   status?: string;
+  gender?: string;
+  admissionFrom?: string;
+  admissionTo?: string;
 }) {
-  const [selectedStatus, setSelectedStatus] = useState(status ?? "ALL");
-
   return (
-    <form className="flex flex-col gap-3 md:flex-row md:items-end">
-      <div className="grid gap-2 md:w-64">
+    <form className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-2">
         <label className="text-sm font-medium" htmlFor="q">
           Search
         </label>
@@ -33,24 +30,53 @@ export function StudentFilters({
           defaultValue={query}
         />
       </div>
-      <div className="grid gap-2 md:w-52">
-        <label className="text-sm font-medium" htmlFor="status">
-          Status
+      <TableFilterSelect
+        id="status"
+        name="status"
+        label="Status"
+        placeholder="All statuses"
+        defaultValue={status}
+        options={[
+          { value: "ACTIVE", label: "Active" },
+          { value: "INACTIVE", label: "Inactive" },
+          { value: "GRADUATED", label: "Graduated" },
+        ]}
+      />
+      <TableFilterSelect
+        id="gender"
+        name="gender"
+        label="Gender"
+        placeholder="All genders"
+        defaultValue={gender}
+        options={[
+          { value: "MALE", label: "Male" },
+          { value: "FEMALE", label: "Female" },
+          { value: "OTHER", label: "Other" },
+        ]}
+      />
+      <div className="grid gap-2">
+        <label className="text-sm font-medium" htmlFor="admissionFrom">
+          Admission From
         </label>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger id="status" className="w-full">
-            <SelectValue placeholder="All statuses" />
-          </SelectTrigger>
-          <SelectContent position="popper">
-            <SelectItem value="ALL">All</SelectItem>
-            <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
-            <SelectItem value="GRADUATED">Graduated</SelectItem>
-          </SelectContent>
-        </Select>
-        <input type="hidden" name="status" value={selectedStatus} />
+        <Input
+          id="admissionFrom"
+          name="admissionFrom"
+          type="date"
+          defaultValue={admissionFrom}
+        />
       </div>
-      <div className="flex gap-2">
+      <div className="grid gap-2">
+        <label className="text-sm font-medium" htmlFor="admissionTo">
+          Admission To
+        </label>
+        <Input
+          id="admissionTo"
+          name="admissionTo"
+          type="date"
+          defaultValue={admissionTo}
+        />
+      </div>
+      <div className="flex gap-2 items-end">
         <Button type="submit">Apply</Button>
         <Button
           type="button"

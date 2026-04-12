@@ -10,6 +10,7 @@ import { createOrUpdateSubscription } from "@/lib/subscription";
 import { Plan, SubscriptionStatus, UserRole } from "@/app/generated/prisma/enums";
 import { getPaginatedPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
 import { paginateQuery } from "@/lib/pagination";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -319,14 +320,45 @@ export async function getTenants() {
   });
 }
 
-export async function getPaginatedTenants({ page }: { page: number }) {
+export type TenantTableFilters = {
+  q?: string;
+  plan?: Plan;
+  isActive?: boolean;
+  createdFrom?: Date;
+  createdTo?: Date;
+};
+
+export async function getPaginatedTenants({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: TenantTableFilters;
+}) {
   await requireSuperAdminAccess();
+  const where: Record<string, unknown> = {};
+
+  if (filters?.plan) where.plan = filters.plan;
+  if (filters?.isActive != null) where.isActive = filters.isActive;
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      { slug: containsInsensitive(filters.q) },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.tenant.count(),
+    count: () => prisma.tenant.count({ where }),
     query: ({ skip, take }) =>
       prisma.tenant.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take,
@@ -345,14 +377,44 @@ export async function getSubscriptions() {
   });
 }
 
-export async function getPaginatedSubscriptions({ page }: { page: number }) {
+export type SubscriptionTableFilters = {
+  q?: string;
+  plan?: Plan;
+  status?: SubscriptionStatus;
+  isActive?: boolean;
+  periodFrom?: Date;
+  periodTo?: Date;
+};
+
+export async function getPaginatedSubscriptions({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: SubscriptionTableFilters;
+}) {
   await requireSuperAdminAccess();
+  const where: Record<string, unknown> = {};
+
+  if (filters?.plan) where.plan = filters.plan;
+  if (filters?.status) where.status = filters.status;
+  if (filters?.isActive != null) where.isActive = filters.isActive;
+  if (filters?.periodFrom || filters?.periodTo) {
+    where.currentPeriodEnd = {
+      ...(filters.periodFrom ? { gte: filters.periodFrom } : {}),
+      ...(filters.periodTo ? { lte: filters.periodTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [{ tenant: { name: containsInsensitive(filters.q) } }];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.subscription.count(),
+    count: () => prisma.subscription.count({ where }),
     query: ({ skip, take }) =>
       prisma.subscription.findMany({
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take,
@@ -383,7 +445,6 @@ export async function getPlatformDashboardData({
   devicePage: number;
 }) {
   await requireSuperAdminAccess();
-
   const [
     tenants,
     subscriptions,

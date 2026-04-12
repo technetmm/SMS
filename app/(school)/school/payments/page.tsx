@@ -18,23 +18,73 @@ import { enumLabel, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/helper";
 import { paginateQuery, parsePageParam } from "@/lib/pagination";
+import {
+  parseDateRangeParams,
+  parseNumberParam,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
+import { PaymentStatus } from "@/app/generated/prisma/enums";
+import { PaymentsFilters } from "@/components/payments/payments-filters";
 
 export default async function PaymentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    status?: string;
+    dueFrom?: string;
+    dueTo?: string;
+    totalMin?: string;
+    totalMax?: string;
+  }>;
 }) {
   await requireSchoolAdmin();
   const schoolId = await requireTenantId();
-  const { page: pageParam } = await searchParams;
+  const params = await searchParams;
+  const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
+  const q = parseTextParam(params.q);
+  const status = parseTableFilterEnumParam(params.status, [
+    PaymentStatus.UNPAID,
+    PaymentStatus.PARTIAL,
+    PaymentStatus.PAID,
+  ] as const);
+  const { from: dueFrom, to: dueTo } = parseDateRangeParams({
+    from: params.dueFrom,
+    to: params.dueTo,
+  });
+  const totalMin = parseNumberParam(params.totalMin);
+  const totalMax = parseNumberParam(params.totalMax);
+  const where: Record<string, unknown> = { schoolId };
+
+  if (status) where.status = status;
+  if (dueFrom || dueTo) {
+    where.dueDate = {
+      ...(dueFrom ? { gte: dueFrom } : {}),
+      ...(dueTo ? { lte: dueTo } : {}),
+    };
+  }
+  if (totalMin != null || totalMax != null) {
+    where.finalAmount = {
+      ...(totalMin != null ? { gte: totalMin } : {}),
+      ...(totalMax != null ? { lte: totalMax } : {}),
+    };
+  }
+  if (q) {
+    where.OR = [
+      { id: { contains: q, mode: "insensitive" } },
+      { student: { name: { contains: q, mode: "insensitive" } } },
+    ];
+  }
 
   const invoices = await paginateQuery({
     page,
-    count: () => prisma.invoice.count({ where: { schoolId } }),
+    count: () => prisma.invoice.count({ where }),
     query: ({ skip, take }) =>
       prisma.invoice.findMany({
-        where: { schoolId },
+        where,
         orderBy: { createdAt: "desc" },
         skip,
         take,
@@ -62,6 +112,23 @@ export default async function PaymentsPage({
           />
         }
       />
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Table Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PaymentsFilters
+            q={q}
+            status={status}
+            dueFrom={params.dueFrom}
+            dueTo={params.dueTo}
+            totalMin={params.totalMin}
+            totalMax={params.totalMax}
+          />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Invoices</CardTitle>
@@ -84,15 +151,23 @@ export default async function PaymentsPage({
                   <TableCell className="font-medium">{invoice.id}</TableCell>
                   <TableCell>{invoice.student.name}</TableCell>
                   <TableCell>
-                    {formatMoney(Number(invoice.finalAmount), invoice.tenant.currency)}
+                    {formatMoney(
+                      Number(invoice.finalAmount),
+                      invoice.tenant.currency,
+                    )}
                   </TableCell>
                   <TableCell>
-                    {formatMoney(Number(invoice.paidAmount), invoice.tenant.currency)}
+                    {formatMoney(
+                      Number(invoice.paidAmount),
+                      invoice.tenant.currency,
+                    )}
                   </TableCell>
                   <TableCell>{formatter.format(invoice.dueDate)}</TableCell>
                   <TableCell>
                     <Badge
-                      variant={invoice.status === "PAID" ? "default" : "outline"}
+                      variant={
+                        invoice.status === "PAID" ? "default" : "outline"
+                      }
                     >
                       {enumLabel(invoice.status, PAYMENT_STATUS_LABELS)}
                     </Badge>
@@ -111,7 +186,19 @@ export default async function PaymentsPage({
               ) : null}
             </TableBody>
           </Table>
-          <TablePagination pagination={invoices} pathname="/school/payments" />
+          <TablePagination
+            pagination={invoices}
+            pathname="/school/payments"
+            searchParams={{
+              q: params.q,
+              status: params.status,
+              dueFrom: params.dueFrom,
+              dueTo: params.dueTo,
+              totalMin: params.totalMin,
+              totalMax: params.totalMax,
+              page: params.page,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

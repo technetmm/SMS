@@ -33,6 +33,7 @@ export default async function PlatformDashboardPage({
   const devicePage = parsePageParam(params.devicePage);
   const schoolsPage = parsePageParam(params.schoolsPage);
   const subscriptionsPage = parsePageParam(params.subscriptionsPage);
+
   const [data, activityLogs] = await Promise.all([
     getPlatformDashboardData({
       devicePage,
@@ -103,7 +104,6 @@ export default async function PlatformDashboardPage({
             pagination={data.deviceApprovalRequests}
             pathname="/platform/dashboard"
             searchParams={{
-              devicePage: params.devicePage,
               schoolsPage: params.schoolsPage,
               subscriptionsPage: params.subscriptionsPage,
             }}
@@ -172,7 +172,6 @@ export default async function PlatformDashboardPage({
               pathname="/platform/dashboard"
               searchParams={{
                 devicePage: params.devicePage,
-                schoolsPage: params.schoolsPage,
                 subscriptionsPage: params.subscriptionsPage,
               }}
               pageParamName="schoolsPage"
@@ -237,7 +236,6 @@ export default async function PlatformDashboardPage({
               searchParams={{
                 devicePage: params.devicePage,
                 schoolsPage: params.schoolsPage,
-                subscriptionsPage: params.subscriptionsPage,
               }}
               pageParamName="subscriptionsPage"
             />

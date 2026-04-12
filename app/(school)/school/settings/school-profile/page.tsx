@@ -31,7 +31,10 @@ export default async function SchoolProfilePage() {
     redirect("/login");
   }
 
-  const canEdit = user.role === UserRole.SCHOOL_ADMIN && user.isSchoolOwner;
+  const canEdit =
+    (user.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      user.role === UserRole.SCHOOL_ADMIN) &&
+    user.isSchoolOwner;
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getPaginatedTimetable, getTimetable, deleteTimetableSlot } from "@/app/(school)/school/timetable/actions";
+import {
+  getPaginatedTimetable,
+  getTimetable,
+  deleteTimetableSlot,
+  type TimetableTableFilters,
+} from "@/app/(school)/school/timetable/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
 import { Button } from "@/components/ui/button";
@@ -15,9 +20,13 @@ import {
 
 export async function TimetableTable({
   page,
+  filters,
+  searchParams,
   slots: slotsProp,
 }: {
   page?: number;
+  filters?: TimetableTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
   slots?: Awaited<ReturnType<typeof getTimetable>>;
 } = {}) {
   const slots =
@@ -29,7 +38,7 @@ export async function TimetableTable({
           totalCount: slotsProp.length,
           totalPages: 1,
         }
-      : await getPaginatedTimetable({ page: page ?? 1 });
+      : await getPaginatedTimetable({ page: page ?? 1, filters });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -88,7 +97,11 @@ export async function TimetableTable({
         </TableBody>
       </Table>
       {slotsProp == null ? (
-        <TablePagination pagination={slots} pathname="/school/timetable" />
+        <TablePagination
+          pagination={slots}
+          pathname="/school/timetable"
+          searchParams={searchParams}
+        />
       ) : null}
     </div>
   );

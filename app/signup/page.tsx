@@ -22,6 +22,10 @@ async function SignupPageContent() {
     redirect("/platform/dashboard");
   }
 
+  if (session?.user?.role === UserRole.SCHOOL_SUPER_ADMIN) {
+    redirect("/school/dashboard");
+  }
+
   if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
     redirect("/school/dashboard");
   }
@@ -46,9 +50,9 @@ async function SignupPageContent() {
             Start your SMS school in minutes.
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
-            We will create your tenant and your SCHOOL_ADMIN user account in one
-            transaction. After signup, you can sign in and manage staff,
-            students, classes, and billing.
+            We will create your tenant and your SCHOOL_SUPER_ADMIN user account
+            in one transaction. After verifying your email, you can sign in and
+            manage staff, students, classes, and billing.
           </p>
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}

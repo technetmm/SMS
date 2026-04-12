@@ -6,10 +6,18 @@ import { formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { staffAttendanceSchema } from "@/lib/validators";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type StaffAttendanceActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type StaffAttendanceTableFilters = {
+  q?: string;
+  status?: "PRESENT" | "ABSENT" | "LATE" | "LEAVE";
+  dateFrom?: Date;
+  dateTo?: Date;
 };
 
 export async function getStaffAttendance() {
@@ -37,16 +45,42 @@ export async function getStaffAttendance() {
   });
 }
 
-export async function getPaginatedStaffAttendance({ page }: { page: number }) {
+export async function getPaginatedStaffAttendance({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: StaffAttendanceTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.status) {
+    where.status = filters.status;
+  }
+
+  if (filters?.dateFrom || filters?.dateTo) {
+    where.date = {
+      ...(filters.dateFrom ? { gte: filters.dateFrom } : {}),
+      ...(filters.dateTo ? { lte: filters.dateTo } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { staff: { name: containsInsensitive(filters.q) } },
+      { section: { name: containsInsensitive(filters.q) } },
+      { section: { class: { name: containsInsensitive(filters.q) } } },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.staffAttendance.count({ where: { schoolId } }),
+    count: () => prisma.staffAttendance.count({ where }),
     query: ({ skip, take }) =>
       prisma.staffAttendance.findMany({
-        where: { schoolId },
+        where,
         orderBy: [{ date: "desc" }, { createdAt: "desc" }],
         skip,
         take,

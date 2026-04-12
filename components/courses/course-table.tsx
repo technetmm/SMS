@@ -1,11 +1,22 @@
-import { getPaginatedCourses } from "@/app/(school)/school/courses/actions";
+import {
+  getPaginatedCourses,
+  type CourseTableFilters,
+} from "@/app/(school)/school/courses/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { CourseRowActions } from "@/components/courses/course-row-actions";
 
-export async function CourseTable({ page }: { page: number }) {
-  const courses = await getPaginatedCourses({ page });
+export async function CourseTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: CourseTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const courses = await getPaginatedCourses({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -55,7 +66,11 @@ export async function CourseTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={courses} pathname="/school/courses" />
+      <TablePagination
+        pagination={courses}
+        pathname="/school/courses"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

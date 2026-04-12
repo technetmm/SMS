@@ -23,5 +23,9 @@ export async function requireSuperAdmin() {
 }
 
 export async function requireSchoolAdmin() {
-  return requireRole([UserRole.SCHOOL_ADMIN, UserRole.SUPER_ADMIN]);
+  return requireRole([
+    UserRole.SCHOOL_SUPER_ADMIN,
+    UserRole.SCHOOL_ADMIN,
+    UserRole.SUPER_ADMIN,
+  ]);
 }

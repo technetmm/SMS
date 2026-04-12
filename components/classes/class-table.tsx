@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   getPaginatedClasses,
   deleteClass,
+  type ClassTableFilters,
 } from "@/app/(school)/school/classes/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
@@ -21,8 +22,16 @@ import {
   PROGRAM_TYPE_LABELS,
 } from "@/lib/enum-labels";
 
-export async function ClassTable({ page }: { page: number }) {
-  const classes = await getPaginatedClasses({ page });
+export async function ClassTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: ClassTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const classes = await getPaginatedClasses({ page, filters });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -84,7 +93,11 @@ export async function ClassTable({ page }: { page: number }) {
           ) : null}
         </TableBody>
       </Table>
-      <TablePagination pagination={classes} pathname="/school/classes" />
+      <TablePagination
+        pagination={classes}
+        pathname="/school/classes"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

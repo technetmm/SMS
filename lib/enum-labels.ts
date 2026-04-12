@@ -80,6 +80,7 @@ export const INVOICE_TYPE_LABELS: Record<string, string> = {
 
 export const USER_ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN: "Super Admin",
+  SCHOOL_SUPER_ADMIN: "School Owner",
   SCHOOL_ADMIN: "Admin",
   TEACHER: "Teacher",
   STUDENT: "Student",

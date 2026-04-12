@@ -26,10 +26,14 @@ export type DeviceApprovalQueueRow = {
 
 function buildApproverUserFilter(approver: DeviceApprovalApprover) {
   if (approver.role === UserRole.SUPER_ADMIN) {
-    return { role: UserRole.SCHOOL_ADMIN };
+    return { role: { in: [UserRole.SCHOOL_SUPER_ADMIN, UserRole.SCHOOL_ADMIN] } };
   }
 
-  if (approver.role === UserRole.SCHOOL_ADMIN && approver.schoolId) {
+  if (
+    (approver.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      approver.role === UserRole.SCHOOL_ADMIN) &&
+    approver.schoolId
+  ) {
     return {
       role: { in: [UserRole.TEACHER, UserRole.STUDENT] },
       schoolId: approver.schoolId,
@@ -77,10 +81,16 @@ export function canApproveDeviceRequest(
   requestUser: { role: UserRole; schoolId: string | null },
 ) {
   if (approver.role === UserRole.SUPER_ADMIN) {
-    return requestUser.role === UserRole.SCHOOL_ADMIN;
+    return (
+      requestUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      requestUser.role === UserRole.SCHOOL_ADMIN
+    );
   }
 
-  if (approver.role === UserRole.SCHOOL_ADMIN) {
+  if (
+    approver.role === UserRole.SCHOOL_SUPER_ADMIN ||
+    approver.role === UserRole.SCHOOL_ADMIN
+  ) {
     return (
       approver.schoolId != null &&
       approver.schoolId === requestUser.schoolId &&
@@ -151,9 +161,18 @@ export async function getPaginatedPendingDeviceApprovalRows(
   {
     page,
     now = new Date(),
+    filters,
   }: {
     page: number;
     now?: Date;
+    filters?: {
+      q?: string;
+      requesterRole?: UserRole;
+      createdFrom?: Date;
+      createdTo?: Date;
+      expiresFrom?: Date;
+      expiresTo?: Date;
+    };
   },
 ) {
   const userFilter = await expirePendingRequests(approver, now);
@@ -164,25 +183,59 @@ export async function getPaginatedPendingDeviceApprovalRows(
       query: async () => [],
     });
   }
+  const where: Record<string, unknown> = {
+    status: "PENDING",
+    expiresAt: { gt: now },
+    user: userFilter,
+  };
+
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
+
+  if (filters?.expiresFrom || filters?.expiresTo) {
+    where.expiresAt = {
+      ...(filters.expiresFrom ? { gte: filters.expiresFrom } : {}),
+      ...(filters.expiresTo ? { lte: filters.expiresTo } : {}),
+    };
+  }
+
+  if (filters?.requesterRole) {
+    where.user = {
+      ...userFilter,
+      role: filters.requesterRole,
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { requestedIp: { contains: filters.q, mode: "insensitive" } },
+      { requestedUserAgent: { contains: filters.q, mode: "insensitive" } },
+      {
+        user: {
+          OR: [
+            { name: { contains: filters.q, mode: "insensitive" } },
+            { email: { contains: filters.q, mode: "insensitive" } },
+            { school: { name: { contains: filters.q, mode: "insensitive" } } },
+          ],
+        },
+      },
+    ];
+  }
 
   return paginateQuery({
     page,
     count: () =>
       prisma.loginApprovalRequest.count({
-        where: {
-          status: "PENDING",
-          expiresAt: { gt: now },
-          user: userFilter,
-        },
+        where,
       }),
     query: ({ skip, take }) =>
       prisma.loginApprovalRequest
         .findMany({
-          where: {
-            status: "PENDING",
-            expiresAt: { gt: now },
-            user: userFilter,
-          },
+          where,
           orderBy: { createdAt: "asc" },
           skip,
           take,

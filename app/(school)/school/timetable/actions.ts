@@ -8,10 +8,16 @@ import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { timetableSlotSchema } from "@/lib/validators";
 import { rangesOverlap } from "@/lib/time";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type TimetableActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type TimetableTableFilters = {
+  q?: string;
+  dayOfWeek?: DayOfWeek;
 };
 
 export async function getTimetable() {
@@ -38,16 +44,36 @@ export async function getTimetable() {
   });
 }
 
-export async function getPaginatedTimetable({ page }: { page: number }) {
+export async function getPaginatedTimetable({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: TimetableTableFilters;
+}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.dayOfWeek) {
+    where.dayOfWeek = filters.dayOfWeek;
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { staff: { name: containsInsensitive(filters.q) } },
+      { section: { name: containsInsensitive(filters.q) } },
+      { section: { class: { name: containsInsensitive(filters.q) } } },
+      { room: containsInsensitive(filters.q) },
+    ];
+  }
 
   return paginateQuery({
     page,
-    count: () => prisma.timetable.count({ where: { schoolId } }),
+    count: () => prisma.timetable.count({ where }),
     query: ({ skip, take }) =>
       prisma.timetable.findMany({
-        where: { schoolId },
+        where,
         orderBy: [
           { dayOfWeek: "asc" },
           { startTime: "asc" },

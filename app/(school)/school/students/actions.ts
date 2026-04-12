@@ -8,6 +8,7 @@ import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
 import { StudentStatus, UserRole } from "@/app/generated/prisma/enums";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type StudentActionState = {
   status: "idle" | "success" | "error";
@@ -94,9 +95,15 @@ export async function createStudent(
 export async function getStudents({
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
 }: {
   query?: string;
   status?: StudentStatus | "ALL";
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
 } = {}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
@@ -107,10 +114,22 @@ export async function getStudents({
     where.status = status;
   }
 
+  if (gender) {
+    where.gender = gender;
+  }
+
+  if (admissionFrom || admissionTo) {
+    where.admissionDate = {
+      ...(admissionFrom ? { gte: admissionFrom } : {}),
+      ...(admissionTo ? { lte: admissionTo } : {}),
+    };
+  }
+
   if (query) {
     where.OR = [
-      { name: { contains: query, mode: "insensitive" } },
-      { phone: { contains: query, mode: "insensitive" } },
+      { name: containsInsensitive(query) },
+      { phone: containsInsensitive(query) },
+      { user: { email: containsInsensitive(query) } },
     ];
   }
 
@@ -132,10 +151,16 @@ export async function getPaginatedStudents({
   page,
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
 }: {
   page: number;
   query?: string;
   status?: StudentStatus | "ALL";
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
@@ -146,10 +171,22 @@ export async function getPaginatedStudents({
     where.status = status;
   }
 
+  if (gender) {
+    where.gender = gender;
+  }
+
+  if (admissionFrom || admissionTo) {
+    where.admissionDate = {
+      ...(admissionFrom ? { gte: admissionFrom } : {}),
+      ...(admissionTo ? { lte: admissionTo } : {}),
+    };
+  }
+
   if (query) {
     where.OR = [
-      { name: { contains: query, mode: "insensitive" } },
-      { phone: { contains: query, mode: "insensitive" } },
+      { name: containsInsensitive(query) },
+      { phone: containsInsensitive(query) },
+      { user: { email: containsInsensitive(query) } },
     ];
   }
 
