@@ -16,6 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  useComboboxAnchor,
+} from "@/components/ui/combobox";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { BillingType, Currency } from "@/app/generated/prisma/enums";
@@ -24,6 +33,15 @@ import { formatMoney } from "@/lib/helper";
 const initialState: EnrollmentActionState = { status: "idle" };
 
 type Option = { id: string; name: string };
+type SectionOption = {
+  id: string;
+  name: string;
+  capacity: number;
+  enrolledCount: number;
+  isFull: boolean;
+  perStudentFee: string;
+  billingType: BillingType;
+};
 
 export function EnrollmentCreateForm({
   currency,
@@ -32,36 +50,33 @@ export function EnrollmentCreateForm({
 }: {
   currency: Currency;
   students: Option[];
-  sections: Array<{
-    id: string;
-    name: string;
-    capacity: number;
-    enrolledCount: number;
-    isFull: boolean;
-    perStudentFee: string;
-    billingType: BillingType;
-  }>;
+  sections: SectionOption[];
 }) {
   const router = useRouter();
+  const studentAnchor = useComboboxAnchor();
+  const sectionAnchor = useComboboxAnchor();
   const [todayLocal] = useState(() => {
     return new Date(Date.now() - new Date().getTimezoneOffset() * 60_000)
       .toISOString()
       .slice(0, 10);
   });
   const [state, formAction] = useActionState(enrollStudent, initialState);
-  const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
-  const [discountType, setDiscountType] = useState<"NONE" | "FIXED" | "PERCENT">("NONE");
-  const [discountValue, setDiscountValue] = useState<string>("0");
-  const selectedSection = useMemo(
-    () => sections.find((section) => section.id === selectedSectionId) ?? null,
-    [sections, selectedSectionId],
+  const [selectedStudent, setSelectedStudent] = useState<Option | null>(null);
+  const [selectedSection, setSelectedSection] = useState<SectionOption | null>(
+    null,
   );
+  const [discountType, setDiscountType] = useState<
+    "NONE" | "FIXED" | "PERCENT"
+  >("NONE");
+  const [discountValue, setDiscountValue] = useState<string>("0");
   const isFixedDiscount = discountType === "FIXED";
   const isPercentDiscount = discountType === "PERCENT";
   const pricing = useMemo(() => {
     const originalAmount = Number(selectedSection?.perStudentFee ?? 0);
     const parsedDiscount = Number(discountValue || 0);
-    const safeDiscountValue = Number.isFinite(parsedDiscount) ? Math.max(0, parsedDiscount) : 0;
+    const safeDiscountValue = Number.isFinite(parsedDiscount)
+      ? Math.max(0, parsedDiscount)
+      : 0;
 
     const discountAmount =
       discountType === "PERCENT"
@@ -87,49 +102,81 @@ export function EnrollmentCreateForm({
     }
   }, [router, state]);
 
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    if (!selectedStudent) {
+      event.preventDefault();
+      toast.error("Please select a student.");
+      return;
+    }
+
+    if (!selectedSection) {
+      event.preventDefault();
+      toast.error("Please select a section.");
+    }
+  }
+
   return (
-    <form action={formAction} className="space-y-6">
+    <form action={formAction} onSubmit={handleSubmit} className="space-y-6">
+      <input type="hidden" name="studentId" value={selectedStudent?.id ?? ""} />
+      <input type="hidden" name="sectionId" value={selectedSection?.id ?? ""} />
+
       <Card>
         <CardHeader>
           <CardTitle>Enrollment Details</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="studentId">Student</Label>
-            <Select name="studentId">
-              <SelectTrigger id="studentId" className="w-full">
-                <SelectValue placeholder="Select student" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {students.map((student) => (
-                  <SelectItem key={student.id} value={student.id}>
-                    {student.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Student</Label>
+            <Combobox
+              items={students}
+              value={selectedStudent}
+              onValueChange={(value: Option | null) =>
+                setSelectedStudent(value)
+              }
+              itemToStringLabel={(item) => item?.name ?? ""}
+            >
+              <ComboboxInput placeholder="Select student..." />
+              <ComboboxContent anchor={studentAnchor}>
+                <ComboboxEmpty>No students found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item: Option) => (
+                    <ComboboxItem key={item.id} value={item}>
+                      {item.name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="sectionId">Section</Label>
-            <Select name="sectionId" onValueChange={setSelectedSectionId}>
-              <SelectTrigger id="sectionId" className="w-full">
-                <SelectValue placeholder="Select section" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {sections.map((section) => (
-                  <SelectItem
-                    key={section.id}
-                    value={section.id}
-                    disabled={section.isFull}
-                  >
-                    {section.name} ({section.enrolledCount} / {section.capacity}{" "}
-                    seats, fee {formatMoney(Number(section.perStudentFee), currency)})
-                    {section.isFull ? " - Section is full" : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Section</Label>
+            <Combobox
+              items={sections}
+              value={selectedSection}
+              onValueChange={(value: SectionOption | null) =>
+                setSelectedSection(value)
+              }
+              itemToStringLabel={(item) => item?.name ?? ""}
+            >
+              <ComboboxInput placeholder="Select section..." />
+              <ComboboxContent anchor={sectionAnchor}>
+                <ComboboxEmpty>No sections found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item: SectionOption) => (
+                    <ComboboxItem
+                      key={item.id}
+                      value={item}
+                      disabled={item.isFull}
+                    >
+                      {item.name} ({item.enrolledCount} / {item.capacity} seats,
+                      fee {formatMoney(Number(item.perStudentFee), currency)})
+                      {item.isFull ? " - Section is full" : ""}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
           </div>
 
           <div className="grid gap-2">

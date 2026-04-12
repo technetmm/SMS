@@ -184,6 +184,7 @@ export const enrollmentUpdateSchema = z.object({
 
 export const enrollmentDetailsUpdateSchema = z.object({
   id: z.string().min(1, "Enrollment id is required"),
+  studentId: z.string().min(1, "Student is required"),
   sectionId: z.string().min(1, "Section is required"),
   enrolledAt: z.coerce.date(),
   status: z.nativeEnum(EnrollmentStatus),

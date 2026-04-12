@@ -20,16 +20,11 @@ import {
 } from "@/components/ui/select";
 import {
   Combobox,
-  ComboboxChip,
-  ComboboxChips,
-  ComboboxChipsInput,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-  ComboboxValue,
-  useComboboxAnchor,
 } from "@/components/ui/combobox";
 
 const initialState: TimetableActionState = { status: "idle" };
@@ -74,8 +69,6 @@ export function TimetableForm({
 }: TimetableFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const staffAnchor = useComboboxAnchor();
-  const sectionAnchor = useComboboxAnchor();
 
   const initialStaff = useMemo(
     () => staff.find((item) => item.id === initialData?.staffId) ?? null,
@@ -142,20 +135,10 @@ export function TimetableForm({
               items={staff}
               value={selectedStaff}
               onValueChange={(value: Option | null) => setSelectedStaff(value)}
-              // itemToStringLabel={(item) => item?.name ?? ""}
+              itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={staffAnchor} className="w-full">
-                <ComboboxValue>
-                  {(value) => (
-                    <>
-                      {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search teacher..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={staffAnchor}>
-                <ComboboxInput placeholder="Search teacher..." />
+              <ComboboxInput placeholder="Search teacher..." />
+              <ComboboxContent>
                 <ComboboxEmpty>No staff found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
@@ -178,18 +161,8 @@ export function TimetableForm({
               }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={sectionAnchor} className="w-full">
-                <ComboboxValue>
-                  {(value) => (
-                    <>
-                      {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search section..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={sectionAnchor}>
-                <ComboboxInput placeholder="Search section..." />
+              <ComboboxInput placeholder="Search section..." />
+              <ComboboxContent>
                 <ComboboxEmpty>No sections found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (

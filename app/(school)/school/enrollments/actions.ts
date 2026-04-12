@@ -491,7 +491,7 @@ export async function getEnrollmentEditFormOptions(id: string) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
-  const [enrollment, sections, activeEnrollmentCounts, tenant] =
+  const [enrollment, students, sections, activeEnrollmentCounts, tenant] =
     await Promise.all([
       prisma.enrollment.findFirst({
         where: { id, schoolId, isDeleted: false },
@@ -511,6 +511,11 @@ export async function getEnrollmentEditFormOptions(id: string) {
             },
           },
         },
+      }),
+      prisma.student.findMany({
+        where: { schoolId, status: "ACTIVE" },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true },
       }),
       prisma.section.findMany({
         where: { schoolId, isDeleted: false, class: { isDeleted: false } },
@@ -541,6 +546,7 @@ export async function getEnrollmentEditFormOptions(id: string) {
 
   return {
     currency: tenant?.currency ?? Currency.USD,
+    students,
     enrollment: {
       id: enrollment.id,
       sectionId: enrollment.sectionId,
@@ -707,6 +713,19 @@ export async function updateEnrollmentDetails(
         throw new Error("Enrollment not found.");
       }
 
+      const student = await tx.student.findFirst({
+        where: {
+          id: parsed.data.studentId,
+          schoolId,
+          status: "ACTIVE",
+        },
+        select: { id: true },
+      });
+
+      if (!student) {
+        throw new Error("Selected student is invalid.");
+      }
+
       const sectionRows = await tx.$queryRaw<
         Array<{ capacity: number; fee: string; billingType: BillingType }>
       >`
@@ -725,11 +744,14 @@ export async function updateEnrollmentDetails(
         throw new Error("Selected section is invalid.");
       }
 
-      if (existing.sectionId !== parsed.data.sectionId) {
+      if (
+        existing.studentId !== parsed.data.studentId ||
+        existing.sectionId !== parsed.data.sectionId
+      ) {
         const duplicate = await tx.enrollment.findFirst({
           where: {
             schoolId,
-            studentId: existing.studentId,
+            studentId: parsed.data.studentId,
             sectionId: parsed.data.sectionId,
             isDeleted: false,
             id: { not: existing.id },
@@ -777,6 +799,7 @@ export async function updateEnrollmentDetails(
       await tx.enrollment.update({
         where: { id: existing.id },
         data: {
+          studentId: parsed.data.studentId,
           sectionId: parsed.data.sectionId,
           enrolledAt: parsed.data.enrolledAt,
           status: parsed.data.status,
@@ -824,6 +847,7 @@ export async function updateEnrollmentDetails(
         await tx.invoice.update({
           where: { id: latestUnpaidInvoice.id },
           data: {
+            studentId: parsed.data.studentId,
             invoiceType:
               billingType === BillingType.MONTHLY
                 ? InvoiceType.MONTHLY
@@ -853,6 +877,7 @@ export async function updateEnrollmentDetails(
   revalidatePath("/school/enrollments");
   revalidatePath("/school/attendance");
   revalidatePath("/school/sections");
+  revalidatePath("/school/students");
   revalidatePath("/school/invoices");
   revalidatePath("/school/payments");
   revalidatePath("/school/analytics");
