@@ -32,6 +32,7 @@ export default async function EditEnrollmentPage({
       <EnrollmentEditForm
         currency={data.currency}
         enrollment={data.enrollment}
+        students={data.students}
         sections={data.sections}
       />
     </div>

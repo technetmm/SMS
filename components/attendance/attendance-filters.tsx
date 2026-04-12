@@ -30,6 +30,16 @@ export function AttendanceFilters({
 }) {
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
+      <div className="grid gap-2">
+        <Label htmlFor="q">Search</Label>
+        <Input
+          id="q"
+          name="q"
+          defaultValue={q}
+          placeholder="Student, section, class"
+        />
+      </div>
+
       <TableFilterSelect
         id="studentId"
         name="studentId"
@@ -59,16 +69,6 @@ export function AttendanceFilters({
       <div className="grid gap-2">
         <Label htmlFor="date">Date</Label>
         <Input id="date" name="date" type="date" defaultValue={date ?? ""} />
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="q">Search</Label>
-        <Input
-          id="q"
-          name="q"
-          defaultValue={q}
-          placeholder="Student, section, class"
-        />
       </div>
 
       <TableFilterSelect

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { ClassActionState } from "@/app/(school)/school/classes/actions";
@@ -20,6 +20,14 @@ import {
   ClassType,
   ProgramType,
 } from "@/app/generated/prisma/enums";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "../ui/combobox";
 
 const initialState: ClassActionState = { status: "idle" };
 
@@ -41,6 +49,8 @@ type ClassFormProps = {
   };
 };
 
+type Option = { id: string; name: string };
+
 export function ClassForm({
   mode,
   action,
@@ -49,6 +59,7 @@ export function ClassForm({
 }: ClassFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
+  const [selectedCourse, setSelectedCourse] = useState<Option | null>(null);
 
   useEffect(() => {
     if (state.status === "success") {
@@ -86,7 +97,27 @@ export function ClassForm({
 
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="courseId">Course</Label>
-            <Select name="courseId" defaultValue={initialData?.courseId}>
+
+            <Combobox
+              items={courses}
+              value={selectedCourse}
+              onValueChange={(value: Option | null) => setSelectedCourse(value)}
+              itemToStringLabel={(item) => item?.name ?? ""}
+            >
+              <ComboboxInput placeholder="Search course..." />
+              <ComboboxContent>
+                <ComboboxEmpty>No courses found.</ComboboxEmpty>
+                <ComboboxList>
+                  {(item: Option) => (
+                    <ComboboxItem key={item.id} value={item}>
+                      {item.name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+
+            {/* <Select name="courseId" defaultValue={initialData?.courseId}>
               <SelectTrigger id="courseId" className="w-full">
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
@@ -97,7 +128,7 @@ export function ClassForm({
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+            </Select> */}
           </div>
 
           <div className="grid gap-2">

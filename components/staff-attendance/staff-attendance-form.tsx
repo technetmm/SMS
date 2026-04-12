@@ -94,18 +94,8 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
               onValueChange={(value: Option | null) => setSelectedStaff(value)}
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={staffAnchor} className="w-full">
-                <ComboboxValue>
-                  {(value) => (
-                    <>
-                      {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search staff..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={staffAnchor}>
-                <ComboboxInput placeholder="Search staff..." />
+              <ComboboxInput placeholder="Search staff..." />
+              <ComboboxContent>
                 <ComboboxEmpty>No staff found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
@@ -128,18 +118,8 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
               }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxChips ref={sectionAnchor} className="w-full">
-                <ComboboxValue>
-                  {(value) => (
-                    <>
-                      {value ? <ComboboxChip>{value.name}</ComboboxChip> : null}
-                      <ComboboxChipsInput placeholder="Search section..." />
-                    </>
-                  )}
-                </ComboboxValue>
-              </ComboboxChips>
-              <ComboboxContent anchor={sectionAnchor}>
-                <ComboboxInput placeholder="Search section..." />
+              <ComboboxInput placeholder="Search section..." />
+              <ComboboxContent>
                 <ComboboxEmpty>No sections found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
