@@ -143,11 +143,17 @@ export async function createStaff(
 }
 
 export async function getStaff() {
-  await requireSchoolAdminAccess();
+  const sessionUser = await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.staff.findMany({
-    where: { schoolId },
+    where: {
+      schoolId,
+      userId: { not: sessionUser.id },
+      user: {
+        role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+      },
+    },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -173,13 +179,21 @@ export async function getPaginatedStaff({
   page: number;
   filters?: StaffTableFilters;
 }) {
-  await requireSchoolAdminAccess();
+  const sessionUser = await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
-  const where: Record<string, unknown> = { schoolId };
+  const where: Record<string, unknown> = {
+    schoolId,
+    userId: { not: sessionUser.id },
+    user: {
+      role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+    },
+  };
 
   if (filters?.status) where.status = filters.status;
   if (filters?.role) {
-    where.user = { role: filters.role };
+    where.user = {
+      role: filters.role,
+    };
   }
   if (filters?.hireFrom || filters?.hireTo) {
     where.hireDate = {
@@ -382,6 +396,18 @@ export async function setStaffSystemRole(
   }
   if (!targetUser.staffProfile || targetUser.studentProfile) {
     return { status: "error", message: "Target user is not a staff account." };
+  }
+  const isSchoolAdminDemotion =
+    parsed.data.nextRole === UserRole.TEACHER &&
+    targetUser.role === UserRole.SCHOOL_ADMIN;
+  if (
+    session.user.role === UserRole.SCHOOL_ADMIN &&
+    isSchoolAdminDemotion
+  ) {
+    return {
+      status: "error",
+      message: "SCHOOL_ADMIN cannot demote SCHOOL_ADMIN accounts.",
+    };
   }
   if (targetUser.role === parsed.data.nextRole) {
     return {

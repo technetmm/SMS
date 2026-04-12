@@ -22,13 +22,13 @@ export default async function StaffDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const session = await requireSchoolAdmin();
   const { id } = await params;
 
   if (!id) {
     redirect("/school/staff");
   }
 
-  await requireSchoolAdmin();
   const schoolId = await requireTenantId();
 
   const [staff, sectionCount, timetableSlots] = await Promise.all([
@@ -83,6 +83,7 @@ export default async function StaffDetailPage({
 
       <StaffSystemRoleManager
         userId={staff.userId}
+        actorRole={session.user.role}
         currentRole={staff.user.role}
       />
 

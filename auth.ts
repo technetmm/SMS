@@ -13,7 +13,17 @@ import {
   DEVICE_APPROVAL_EXPIRED_CODE,
   DEVICE_APPROVAL_TTL_MS,
 } from "@/lib/auth/device-approval";
-import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth/email-verification";
+import {
+  buildEmailVerificationIdentifier,
+  buildVerificationEmailBody,
+  buildVerificationEmailSubject,
+  EMAIL_NOT_VERIFIED_CODE,
+  EMAIL_VERIFICATION_RESEND_COOLDOWN_MS,
+  EMAIL_VERIFICATION_TTL_MS,
+  generateEmailVerificationCode,
+  hashEmailVerificationCode,
+  requiresEmailVerification,
+} from "@/lib/auth/email-verification";
 import {
   clearPendingDeviceApprovalsForUser,
   expirePendingDeviceApprovalsForUser,
@@ -24,6 +34,7 @@ import {
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
 import { resolveAuthSecret } from "@/lib/auth/env";
+import { processEmailJob } from "@/lib/jobs/email.job";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -95,7 +106,72 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) return null;
 
-        if (user.role === "SCHOOL_SUPER_ADMIN" && !user.emailVerifiedAt) {
+        if (
+          requiresEmailVerification({
+            role: user.role,
+            emailVerifiedAt: user.emailVerifiedAt,
+            passwordHash: user.passwordHash,
+          })
+        ) {
+          const identifier = buildEmailVerificationIdentifier(user.id);
+          const latestToken = await prisma.verificationToken.findFirst({
+            where: { identifier },
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true },
+          });
+
+          const ageMs = latestToken
+            ? Date.now() - latestToken.createdAt.getTime()
+            : Number.POSITIVE_INFINITY;
+
+          if (ageMs >= EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
+            const verificationCode = generateEmailVerificationCode();
+            const verificationTokenHash =
+              await hashEmailVerificationCode(verificationCode);
+            const verificationExpiresAt = new Date(
+              Date.now() + EMAIL_VERIFICATION_TTL_MS,
+            );
+
+            await prisma.verificationToken.create({
+              data: {
+                identifier,
+                token: verificationTokenHash,
+                expires: verificationExpiresAt,
+              },
+            });
+
+            try {
+              const school = user.schoolId
+                ? await prisma.tenant.findFirst({
+                    where: { id: user.schoolId },
+                    select: { name: true },
+                  })
+                : null;
+
+              await processEmailJob({
+                to: user.email,
+                subject: buildVerificationEmailSubject(),
+                body: buildVerificationEmailBody({
+                  userName: user.name ?? "User",
+                  schoolName: school?.name ?? null,
+                  code: verificationCode,
+                }),
+              });
+
+              await prisma.verificationToken.deleteMany({
+                where: {
+                  identifier,
+                  token: { not: verificationTokenHash },
+                },
+              });
+            } catch (error) {
+              console.error("authorize processEmailJob failed", {
+                email: user.email,
+                error,
+              });
+            }
+          }
+
           throw new Error(EMAIL_NOT_VERIFIED_CODE);
         }
 
