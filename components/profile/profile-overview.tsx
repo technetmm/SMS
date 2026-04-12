@@ -162,63 +162,6 @@ export function ProfileOverview({
         </Card>
 
         <div className="space-y-4">
-          {schoolInfo ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>School Info</CardTitle>
-                <CardDescription>
-                  Tenant details for your school workspace.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="rounded-xl border p-3">
-                  <p className="text-xs text-muted-foreground">School Name</p>
-                  <p className="font-medium">{schoolInfo.name}</p>
-                </div>
-                <div className="rounded-xl border p-3">
-                  <p className="text-xs text-muted-foreground">Slug</p>
-                  <p className="font-medium">{schoolInfo.slug}</p>
-                </div>
-                <div className="rounded-xl border p-3">
-                  <p className="text-xs text-muted-foreground">Currency</p>
-                  <p className="font-medium">{schoolInfo.currency}</p>
-                </div>
-                <div className="rounded-xl border p-3">
-                  <p className="text-xs text-muted-foreground">Billing Day</p>
-                  <p className="font-medium">Day {schoolInfo.billingDayOfMonth}</p>
-                </div>
-                {schoolInfo.plan ? (
-                  <div className="rounded-xl border p-3">
-                    <p className="text-xs text-muted-foreground">Plan</p>
-                    <p className="font-medium">{schoolInfo.plan}</p>
-                  </div>
-                ) : null}
-                {schoolInfo.createdAt ? (
-                  <div className="rounded-xl border p-3">
-                    <p className="text-xs text-muted-foreground">Created</p>
-                    <p className="font-medium">
-                      {dateFormatter.format(schoolInfo.createdAt)}
-                    </p>
-                  </div>
-                ) : null}
-                {schoolInfo.updatedAt ? (
-                  <div className="rounded-xl border p-3">
-                    <p className="text-xs text-muted-foreground">Updated</p>
-                    <p className="font-medium">
-                      {dateFormatter.format(schoolInfo.updatedAt)}
-                    </p>
-                  </div>
-                ) : null}
-                <div className="rounded-xl border p-3">
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <Badge variant={schoolInfo.isActive ? "default" : "outline"}>
-                    {schoolInfo.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
-          ) : null}
-
           {settingsBasePath ? (
             <Card>
               <CardHeader>
@@ -228,15 +171,29 @@ export function ProfileOverview({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button asChild variant="outline" className="w-full justify-between">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full justify-between"
+                >
                   <Link href={`${settingsBasePath}/profile-photo`}>
                     Update profile photo
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full justify-between">
-                  <Link href={`${settingsBasePath}/change-email`}>Change email</Link>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full justify-between"
+                >
+                  <Link href={`${settingsBasePath}/change-email`}>
+                    Change email
+                  </Link>
                 </Button>
-                <Button asChild variant="outline" className="w-full justify-between">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full justify-between"
+                >
                   <Link href={`${settingsBasePath}/change-password`}>
                     Change password
                   </Link>
@@ -246,6 +203,63 @@ export function ProfileOverview({
           ) : null}
         </div>
       </div>
+
+      {schoolInfo ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>School Info</CardTitle>
+            <CardDescription>
+              Tenant details for your school workspace.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="rounded-xl border p-3">
+              <p className="text-xs text-muted-foreground">School Name</p>
+              <p className="font-medium">{schoolInfo.name}</p>
+            </div>
+            <div className="rounded-xl border p-3">
+              <p className="text-xs text-muted-foreground">Slug</p>
+              <p className="font-medium">{schoolInfo.slug}</p>
+            </div>
+            <div className="rounded-xl border p-3">
+              <p className="text-xs text-muted-foreground">Currency</p>
+              <p className="font-medium">{schoolInfo.currency}</p>
+            </div>
+            <div className="rounded-xl border p-3">
+              <p className="text-xs text-muted-foreground">Billing Day</p>
+              <p className="font-medium">Day {schoolInfo.billingDayOfMonth}</p>
+            </div>
+            {schoolInfo.plan ? (
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">Plan</p>
+                <p className="font-medium">{schoolInfo.plan}</p>
+              </div>
+            ) : null}
+            {schoolInfo.createdAt ? (
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">Created</p>
+                <p className="font-medium">
+                  {dateFormatter.format(schoolInfo.createdAt)}
+                </p>
+              </div>
+            ) : null}
+            {schoolInfo.updatedAt ? (
+              <div className="rounded-xl border p-3">
+                <p className="text-xs text-muted-foreground">Updated</p>
+                <p className="font-medium">
+                  {dateFormatter.format(schoolInfo.updatedAt)}
+                </p>
+              </div>
+            ) : null}
+            <div className="rounded-xl border p-3">
+              <p className="text-xs text-muted-foreground">Status</p>
+              <Badge variant={schoolInfo.isActive ? "default" : "outline"}>
+                {schoolInfo.isActive ? "Active" : "Inactive"}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <DetailGrid
         title="Account Details"

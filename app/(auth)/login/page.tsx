@@ -29,7 +29,10 @@ import {
   EMAIL_NOT_VERIFIED_CODE,
   EMAIL_NOT_VERIFIED_MESSAGE,
 } from "@/lib/auth/email-verification";
-import { SESSION_LOCK_ERROR_CODE, SESSION_LOCK_ERROR_MESSAGE } from "@/lib/auth/session-lock";
+import {
+  SESSION_LOCK_ERROR_CODE,
+  SESSION_LOCK_ERROR_MESSAGE,
+} from "@/lib/auth/session-lock";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,9 +41,15 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [approvalToken, setApprovalToken] = useState<string | null>(null);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
-  const lastCredentialsRef = useRef<{ email: string; password: string } | null>(null);
+  const lastCredentialsRef = useRef<{ email: string; password: string } | null>(
+    null,
+  );
 
-  async function attemptSignIn(email: string, password: string, token?: string) {
+  async function attemptSignIn(
+    email: string,
+    password: string,
+    token?: string,
+  ) {
     return signIn("credentials", {
       email,
       password,
@@ -130,9 +139,9 @@ export default function LoginPage() {
       ).catch(() => null);
 
       if (!response || !active) return;
-      const data = (await response.json().catch(() => null)) as
-        | { status?: string }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        status?: string;
+      } | null;
       const status = data?.status;
 
       if (status === "PENDING") return;
@@ -169,8 +178,12 @@ export default function LoginPage() {
         setError(DEVICE_APPROVAL_DENIED_MESSAGE);
         toast.error(DEVICE_APPROVAL_DENIED_MESSAGE);
       } else if (status === "INVALID") {
-        setError("Login approval request is no longer valid. Please sign in again.");
-        toast.error("Login approval request is no longer valid. Please sign in again.");
+        setError(
+          "Login approval request is no longer valid. Please sign in again.",
+        );
+        toast.error(
+          "Login approval request is no longer valid. Please sign in again.",
+        );
       } else {
         setError(DEVICE_APPROVAL_EXPIRED_MESSAGE);
         toast.error(DEVICE_APPROVAL_EXPIRED_MESSAGE);
@@ -199,7 +212,13 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" name="email" type="email" required disabled={isSubmitting} />
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              disabled={isSubmitting}
+            />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
