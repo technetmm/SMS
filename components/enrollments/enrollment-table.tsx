@@ -1,4 +1,8 @@
-import { getEnrollments } from "@/app/(school)/school/enrollments/actions";
+import {
+  getPaginatedEnrollments,
+  type EnrollmentTableFilters,
+} from "@/app/(school)/school/enrollments/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -9,11 +13,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { enumLabel, ENROLLMENT_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
+import { formatMoney } from "@/lib/helper";
 import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enrollment-status-form";
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
+import { EnrollmentRowActions } from "@/components/enrollments/enrollment-row-actions";
 
-export async function EnrollmentTable() {
-  const rows = await getEnrollments();
+export async function EnrollmentTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: EnrollmentTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const rows = await getPaginatedEnrollments({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -27,10 +41,11 @@ export async function EnrollmentTable() {
             <TableHead>Enrolled Date</TableHead>
             <TableHead>Auto Invoice</TableHead>
             <TableHead>Progress</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((row) => {
+          {rows.items.map((row) => {
             const latestInvoice = row.invoices[0];
             const latestProgress = row.progress[0];
             const progressValue = latestProgress?.progress ?? 0;
@@ -58,17 +73,40 @@ export async function EnrollmentTable() {
                 <TableCell>
                   {latestInvoice ? (
                     <div className="space-y-1 text-sm">
-                      <p>Final: ${Number(latestInvoice.finalAmount).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        Original ${Number(latestInvoice.originalAmount).toFixed(2)} | Discount $
-                        {Number(latestInvoice.discount).toFixed(2)}
+                      <p>
+                        Final:{" "}
+                        {formatMoney(
+                          Number(latestInvoice.finalAmount),
+                          row.tenant.currency,
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Paid ${Number(latestInvoice.paidAmount).toFixed(2)} | Remaining $
-                        {Math.max(
-                          0,
-                          Number(latestInvoice.finalAmount) - Number(latestInvoice.paidAmount),
-                        ).toFixed(2)}
+                        Original{" "}
+                        {formatMoney(
+                          Number(latestInvoice.originalAmount),
+                          row.tenant.currency,
+                        )}{" "}
+                        | Discount{" "}
+                        {formatMoney(
+                          Number(latestInvoice.discount),
+                          row.tenant.currency,
+                        )}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Paid{" "}
+                        {formatMoney(
+                          Number(latestInvoice.paidAmount),
+                          row.tenant.currency,
+                        )}{" "}
+                        | Remaining{" "}
+                        {formatMoney(
+                          Math.max(
+                            0,
+                            Number(latestInvoice.finalAmount) -
+                              Number(latestInvoice.paidAmount),
+                          ),
+                          row.tenant.currency,
+                        )}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         Due {formatter.format(latestInvoice.dueDate)}
@@ -97,18 +135,26 @@ export async function EnrollmentTable() {
                     />
                   </div>
                 </TableCell>
+                <TableCell className="text-right">
+                  <EnrollmentRowActions id={row.id} studentName={row.student.name} />
+                </TableCell>
               </TableRow>
             );
           })}
-          {rows.length === 0 ? (
+          {rows.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
                 No enrollments yet.
               </TableCell>
             </TableRow>
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={rows}
+        pathname="/school/enrollments"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

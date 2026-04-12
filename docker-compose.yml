@@ -59,32 +59,11 @@ services:
     networks:
       - lms-net
 
-  worker:
-    image: ${WORKER_IMAGE:-ghcr.io/example/lms-worker:latest}
-    build:
-      context: .
-      dockerfile: Dockerfile.worker
-    container_name: lms-worker
-    restart: always
-    env_file:
-      - .env
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD_ENCODED:-postgres}@postgres:5432/${POSTGRES_DB:-lms_db}?schema=public
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - lms-net
-
   migrate:
-    image: ${WORKER_IMAGE:-ghcr.io/example/lms-worker:latest}
+    image: ${MIGRATE_IMAGE:-ghcr.io/example/lms-migrate:latest}
     build:
       context: .
-      dockerfile: Dockerfile.worker
+      dockerfile: Dockerfile.migrate
     container_name: lms-migrate
     profiles: ["tools"]
     restart: "no"

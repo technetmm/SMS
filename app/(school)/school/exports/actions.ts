@@ -6,6 +6,8 @@ import { buildExcelBuffer } from "@/lib/export/excel";
 import { buildSimpleTablePdfBuffer } from "@/lib/export/pdf";
 import { saveExportFile } from "@/lib/export/storage";
 import { logAction } from "@/lib/audit-log";
+import { Currency } from "@/app/generated/prisma/enums";
+import { formatMoney } from "@/lib/helper";
 
 export type ExportState = {
   status: "idle" | "success" | "error";
@@ -29,14 +31,14 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
       gender: true,
       phone: true,
       status: true,
-      createdAt: true,
+      admissionDate: true,
     },
   });
 
   const buffer = await buildExcelBuffer({
     sheetName: "Students",
-    headers: ["Name", "Gender", "Phone", "Status", "Created At"],
-    rows: students.map((s) => [s.name, s.gender, s.phone ?? "-", s.status, s.createdAt]),
+    headers: ["Name", "Gender", "Phone", "Status", "Admission Date"],
+    rows: students.map((s) => [s.name, s.gender, s.phone ?? "-", s.status, s.admissionDate]),
   });
 
   const filename = `${stamp("students")}.xlsx`;
@@ -135,19 +137,27 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
-  const payments = await prisma.invoice.findMany({
-    where: { schoolId },
-    orderBy: { createdAt: "desc" },
-    take: 1000,
-    select: {
-      finalAmount: true,
-      paidAmount: true,
-      status: true,
-      id: true,
-      dueDate: true,
-      student: { select: { name: true } },
-    },
-  });
+  const [payments, tenant] = await Promise.all([
+    prisma.invoice.findMany({
+      where: { schoolId },
+      orderBy: { createdAt: "desc" },
+      take: 1000,
+      select: {
+        finalAmount: true,
+        paidAmount: true,
+        status: true,
+        id: true,
+        dueDate: true,
+        student: { select: { name: true } },
+      },
+    }),
+    prisma.tenant.findFirst({
+      where: { id: schoolId },
+      select: { currency: true },
+    }),
+  ]);
+
+  const currency = tenant?.currency ?? Currency.USD;
 
   const total = payments.reduce((sum, payment) => sum + Number(payment.finalAmount), 0);
 
@@ -156,15 +166,15 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
     subtitle: `Generated ${new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
-    }).format(new Date())} | Records: ${payments.length} | Total: $${total.toFixed(2)}`,
+    }).format(new Date())} | Records: ${payments.length} | Total: ${formatMoney(total, currency)}`,
     headers: ["Invoice", "Student", "Due Date", "Status", "Final", "Paid"],
     rows: payments.map((payment) => [
       payment.id,
       payment.student.name,
       new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(payment.dueDate),
       payment.status,
-      `$${Number(payment.finalAmount).toFixed(2)}`,
-      `$${Number(payment.paidAmount).toFixed(2)}`,
+      formatMoney(Number(payment.finalAmount), currency),
+      formatMoney(Number(payment.paidAmount), currency),
     ]),
   });
 

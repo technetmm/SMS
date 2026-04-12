@@ -5,8 +5,10 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { studentCreateSchema, studentUpdateSchema } from "@/lib/validators";
 import { StudentStatus, UserRole } from "@/app/generated/prisma/enums";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type StudentActionState = {
   status: "idle" | "success" | "error";
@@ -72,6 +74,7 @@ export async function createStudent(
           name: parsed.data.name,
           gender: parsed.data.gender,
           dob: parsed.data.dob,
+          admissionDate: parsed.data.admissionDate,
           fatherName: parsed.data.fatherName,
           motherName: parsed.data.motherName,
           phone: parsed.data.phone,
@@ -92,9 +95,15 @@ export async function createStudent(
 export async function getStudents({
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
 }: {
   query?: string;
   status?: StudentStatus | "ALL";
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
 } = {}) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
@@ -105,10 +114,22 @@ export async function getStudents({
     where.status = status;
   }
 
+  if (gender) {
+    where.gender = gender;
+  }
+
+  if (admissionFrom || admissionTo) {
+    where.admissionDate = {
+      ...(admissionFrom ? { gte: admissionFrom } : {}),
+      ...(admissionTo ? { lte: admissionTo } : {}),
+    };
+  }
+
   if (query) {
     where.OR = [
-      { name: { contains: query, mode: "insensitive" } },
-      { phone: { contains: query, mode: "insensitive" } },
+      { name: containsInsensitive(query) },
+      { phone: containsInsensitive(query) },
+      { user: { email: containsInsensitive(query) } },
     ];
   }
 
@@ -121,8 +142,72 @@ export async function getStudents({
       gender: true,
       phone: true,
       status: true,
-      createdAt: true,
+      admissionDate: true,
     },
+  });
+}
+
+export async function getPaginatedStudents({
+  page,
+  query,
+  status,
+  gender,
+  admissionFrom,
+  admissionTo,
+}: {
+  page: number;
+  query?: string;
+  status?: StudentStatus | "ALL";
+  gender?: "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
+}) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const where: Record<string, unknown> = { schoolId };
+
+  if (status && status !== "ALL") {
+    where.status = status;
+  }
+
+  if (gender) {
+    where.gender = gender;
+  }
+
+  if (admissionFrom || admissionTo) {
+    where.admissionDate = {
+      ...(admissionFrom ? { gte: admissionFrom } : {}),
+      ...(admissionTo ? { lte: admissionTo } : {}),
+    };
+  }
+
+  if (query) {
+    where.OR = [
+      { name: containsInsensitive(query) },
+      { phone: containsInsensitive(query) },
+      { user: { email: containsInsensitive(query) } },
+    ];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.student.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.student.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          gender: true,
+          phone: true,
+          status: true,
+          admissionDate: true,
+        },
+      }),
   });
 }
 
@@ -170,6 +255,7 @@ export async function updateStudent(
         name: parsed.data.name,
         gender: parsed.data.gender,
         dob: parsed.data.dob,
+        admissionDate: parsed.data.admissionDate,
         fatherName: parsed.data.fatherName,
         motherName: parsed.data.motherName,
         phone: parsed.data.phone,
@@ -211,10 +297,7 @@ export async function deleteStudent(
     return { status: "error", message: "Student not found" };
   }
 
-  if (
-    student._count.enrollments > 0 ||
-    student._count.invoices > 0
-  ) {
+  if (student._count.enrollments > 0 || student._count.invoices > 0) {
     return {
       status: "error",
       message: "Student has related records. Remove them first.",

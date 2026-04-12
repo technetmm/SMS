@@ -1,16 +1,83 @@
 import {
-  getSubscriptions,
+  getPaginatedSubscriptions,
   getTenants,
 } from "@/app/(platform)/actions";
+import { Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
 import { SubscriptionForm } from "@/components/platform/subscription-form";
 import { SubscriptionRowEditor } from "@/components/platform/subscription-row-editor";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { parsePageParam } from "@/lib/pagination";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { TableFilterSelect } from "@/components/shared/table-filter-select";
+import Link from "next/link";
+import {
+  parseDateRangeParams,
+  parseTableFilterEnumParam,
+  parseTextParam,
+  TABLE_FILTER_ALL_VALUE,
+} from "@/lib/table-filters";
 
-export default async function SubscriptionsPage() {
+export default async function SubscriptionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    plan?: string;
+    status?: string;
+    isActive?: string;
+    periodFrom?: string;
+    periodTo?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const { page: pageParam } = params;
+  const page = parsePageParam(pageParam);
+  const q = parseTextParam(params.q);
+  const plan = parseTableFilterEnumParam(params.plan, [
+    Plan.FREE,
+    Plan.BASIC,
+    Plan.PREMIUM,
+  ] as const);
+  const status = parseTableFilterEnumParam(params.status, [
+    SubscriptionStatus.ACTIVE,
+    SubscriptionStatus.PAST_DUE,
+    SubscriptionStatus.CANCELED,
+  ] as const);
+  const isActiveRaw = parseTableFilterEnumParam(params.isActive, [
+    "true",
+    "false",
+  ] as const);
+  const isActive = isActiveRaw == null ? undefined : isActiveRaw === "true";
+  const periodRange = parseDateRangeParams({
+    from: params.periodFrom,
+    to: params.periodTo,
+  });
+
   const [subscriptions, tenants] = await Promise.all([
-    getSubscriptions(),
+    getPaginatedSubscriptions({
+      page,
+      filters: {
+        q,
+        plan,
+        status,
+        isActive,
+        periodFrom: periodRange.from,
+        periodTo: periodRange.to,
+      },
+    }),
     getTenants(),
   ]);
 
@@ -21,7 +88,90 @@ export default async function SubscriptionsPage() {
           <CardTitle>Create Subscription</CardTitle>
         </CardHeader>
         <CardContent>
-          <SubscriptionForm tenants={tenants.map((tenant) => ({ id: tenant.id, name: tenant.name }))} />
+          <SubscriptionForm
+            tenants={tenants.map((tenant) => ({
+              id: tenant.id,
+              name: tenant.name,
+            }))}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Filters</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 md:grid-cols-4" method="get">
+            <div className="grid gap-2 md:col-span-2">
+              <Label htmlFor="q">Search</Label>
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder="Tenant name"
+              />
+            </div>
+            <TableFilterSelect
+              id="plan"
+              name="plan"
+              label="Plan"
+              placeholder="All plans"
+              defaultValue={params.plan ?? TABLE_FILTER_ALL_VALUE}
+              options={[
+                { value: "FREE", label: "Free" },
+                { value: "BASIC", label: "Basic" },
+                { value: "PREMIUM", label: "Premium" },
+              ]}
+            />
+            <TableFilterSelect
+              id="status"
+              name="status"
+              label="Status"
+              placeholder="All statuses"
+              defaultValue={params.status ?? TABLE_FILTER_ALL_VALUE}
+              options={[
+                { value: "ACTIVE", label: "Active" },
+                { value: "PAST_DUE", label: "Past Due" },
+                { value: "CANCELED", label: "Canceled" },
+              ]}
+            />
+            <TableFilterSelect
+              id="isActive"
+              name="isActive"
+              label="Active Flag"
+              placeholder="All"
+              defaultValue={params.isActive}
+              options={[
+                { value: "true", label: "Active" },
+                { value: "false", label: "Inactive" },
+              ]}
+            />
+            <div className="grid gap-2">
+              <Label htmlFor="periodFrom">Period End From</Label>
+              <Input
+                id="periodFrom"
+                name="periodFrom"
+                type="date"
+                defaultValue={parseTextParam(params.periodFrom)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="periodTo">Period End To</Label>
+              <Input
+                id="periodTo"
+                name="periodTo"
+                type="date"
+                defaultValue={parseTextParam(params.periodTo)}
+              />
+            </div>
+            <div className="flex items-end gap-2">
+              <Button type="submit">Apply</Button>
+              <Button asChild type="button" variant="outline">
+                <Link href="/platform/subscriptions">Reset</Link>
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
 
@@ -32,53 +182,74 @@ export default async function SubscriptionsPage() {
         <CardContent>
           <Table>
             <TableHeader>
-                <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Plan</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Active</TableHead>
-                  <TableHead>Period End</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {subscriptions.map((subscription) => (
-                  <TableRow key={subscription.id}>
+              <TableRow>
+                <TableHead>Tenant</TableHead>
+                <TableHead>Plan</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Active</TableHead>
+                <TableHead>Period End</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {subscriptions.items.map((subscription) => (
+                <TableRow key={subscription.id}>
                   <TableCell className="font-medium">
                     {subscription.tenant.name}
                   </TableCell>
                   <TableCell>{subscription.plan}</TableCell>
                   <TableCell>
-                    <Badge variant={subscription.status === "ACTIVE" ? "default" : "outline"}>
+                    <Badge
+                      variant={
+                        subscription.status === "ACTIVE" ? "default" : "outline"
+                      }
+                    >
                       {subscription.status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={subscription.isActive ? "default" : "outline"}>
+                    <Badge
+                      variant={subscription.isActive ? "default" : "outline"}
+                    >
                       {subscription.isActive ? "Yes" : "No"}
                     </Badge>
                   </TableCell>
-                    <TableCell>
-                      {subscription.currentPeriodEnd
-                      ? new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-                          subscription.currentPeriodEnd,
-                        )
+                  <TableCell>
+                    {subscription.currentPeriodEnd
+                      ? new Intl.DateTimeFormat("en-US", {
+                          dateStyle: "medium",
+                        }).format(subscription.currentPeriodEnd)
                       : "-"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <SubscriptionRowEditor subscription={subscription} />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              {subscriptions.length === 0 ? (
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <SubscriptionRowEditor subscription={subscription} />
+                  </TableCell>
+                </TableRow>
+              ))}
+              {subscriptions.totalCount === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-sm text-muted-foreground">
+                  <TableCell
+                    colSpan={6}
+                    className="py-8 text-center text-sm text-muted-foreground"
+                  >
                     No subscriptions yet.
                   </TableCell>
                 </TableRow>
               ) : null}
             </TableBody>
           </Table>
+          <TablePagination
+            pagination={subscriptions}
+            pathname="/platform/subscriptions"
+            searchParams={{
+              q: params.q,
+              plan: params.plan,
+              status: params.status,
+              isActive: params.isActive,
+              periodFrom: params.periodFrom,
+              periodTo: params.periodTo,
+            }}
+          />
         </CardContent>
       </Card>
     </div>

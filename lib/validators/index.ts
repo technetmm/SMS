@@ -17,7 +17,11 @@ import {
 export const studentCreateSchema = z.object({
   name: z.string().min(2, "Name is required"),
   gender: z.nativeEnum(Gender),
-  dob: z.coerce.date(),
+  dob: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? null : value),
+    z.coerce.date().nullable(),
+  ),
+  admissionDate: z.coerce.date(),
   fatherName: z.string().optional(),
   motherName: z.string().optional(),
   phone: z
@@ -178,6 +182,21 @@ export const enrollmentUpdateSchema = z.object({
   status: z.nativeEnum(EnrollmentStatus),
 });
 
+export const enrollmentDetailsUpdateSchema = z.object({
+  id: z.string().min(1, "Enrollment id is required"),
+  sectionId: z.string().min(1, "Section is required"),
+  enrolledAt: z.coerce.date(),
+  status: z.nativeEnum(EnrollmentStatus),
+  discountType: z
+    .enum(["NONE", "FIXED", "PERCENT"])
+    .optional()
+    .default("NONE"),
+  discountValue: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? 0 : value),
+    z.coerce.number().min(0, "Discount must be >= 0"),
+  ),
+});
+
 export const enrollmentAttendanceSchema = z.object({
   enrollmentId: z.string().min(1, "Enrollment is required"),
   date: z.coerce.date(),
@@ -196,7 +215,10 @@ export const invoiceUpdateSchema = z.object({
 });
 
 export const enrollmentActorRoleSchema = z.nativeEnum(UserRole).refine(
-  (role) => role === UserRole.SCHOOL_ADMIN || role === UserRole.SUPER_ADMIN,
+  (role) =>
+    role === UserRole.SCHOOL_SUPER_ADMIN ||
+    role === UserRole.SCHOOL_ADMIN ||
+    role === UserRole.SUPER_ADMIN,
   { message: "Only staff/admin can enroll students." },
 );
 

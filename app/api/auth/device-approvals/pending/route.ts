@@ -1,39 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { prisma } from "@/lib/prisma/client";
-import { expirePendingDeviceApprovalsForUser } from "@/lib/auth/device-approval-lifecycle";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { getPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
 
 export async function GET(request: NextRequest) {
   const token = await getToken({ req: request });
   const userId = typeof token?.id === "string" ? token.id : null;
-  const sessionId = typeof token?.sessionId === "string" ? token.sessionId : null;
+  const role = token?.role;
+  const schoolId =
+    typeof token?.schoolId === "string" ? token.schoolId : null;
 
-  if (!userId || !sessionId) {
+  if (!userId || typeof role !== "string") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const now = new Date();
-
-  await expirePendingDeviceApprovalsForUser(userId, {
-    currentSessionId: sessionId,
-    now,
-  });
-
-  const requests = await prisma.loginApprovalRequest.findMany({
-    where: {
-      userId,
-      currentSessionId: sessionId,
-      status: "PENDING",
-      expiresAt: { gt: now },
-    },
-    orderBy: { createdAt: "asc" },
-    select: {
-      id: true,
-      createdAt: true,
-      expiresAt: true,
-      requestedIp: true,
-      requestedUserAgent: true,
-    },
+  const requests = await getPendingDeviceApprovalRows({
+    role: role as UserRole,
+    schoolId,
   });
 
   return NextResponse.json({ requests });

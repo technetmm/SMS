@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { getStaff, deleteStaff } from "@/app/(school)/school/staff/actions";
+import {
+  getPaginatedStaff,
+  deleteStaff,
+  type StaffTableFilters,
+} from "@/app/(school)/school/staff/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,16 +21,16 @@ import {
   USER_ROLE_LABELS,
 } from "@/lib/enum-labels";
 
-function formatRole(role: string) {
-  return role
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-export async function StaffTable() {
-  const staff = await getStaff();
+export async function StaffTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: StaffTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const staff = await getPaginatedStaff({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -43,7 +48,7 @@ export async function StaffTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {staff.map((staff) => (
+          {staff.items.map((staff) => (
             <TableRow key={staff.id}>
               <TableCell className="font-medium">{staff.name}</TableCell>
               <TableCell>{staff.email}</TableCell>
@@ -77,7 +82,7 @@ export async function StaffTable() {
               </TableCell>
             </TableRow>
           ))}
-          {staff.length === 0 ? (
+          {staff.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -89,6 +94,11 @@ export async function StaffTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={staff}
+        pathname="/school/staff"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

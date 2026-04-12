@@ -7,7 +7,10 @@ import { requireSuperAdminAccess } from "@/lib/rbac";
 import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
-import {Plan, SubscriptionStatus } from "@/app/generated/prisma/enums";
+import { Plan, SubscriptionStatus, UserRole } from "@/app/generated/prisma/enums";
+import { getPaginatedPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
+import { paginateQuery } from "@/lib/pagination";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
@@ -317,11 +320,106 @@ export async function getTenants() {
   });
 }
 
+export type TenantTableFilters = {
+  q?: string;
+  plan?: Plan;
+  isActive?: boolean;
+  createdFrom?: Date;
+  createdTo?: Date;
+};
+
+export async function getPaginatedTenants({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: TenantTableFilters;
+}) {
+  await requireSuperAdminAccess();
+  const where: Record<string, unknown> = {};
+
+  if (filters?.plan) where.plan = filters.plan;
+  if (filters?.isActive != null) where.isActive = filters.isActive;
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      { slug: containsInsensitive(filters.q) },
+    ];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.tenant.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.tenant.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: {
+          _count: { select: { users: true, students: true, staff: true } },
+        },
+      }),
+  });
+}
+
 export async function getSubscriptions() {
   await requireSuperAdminAccess();
   return prisma.subscription.findMany({
     orderBy: { createdAt: "desc" },
     include: { tenant: true },
+  });
+}
+
+export type SubscriptionTableFilters = {
+  q?: string;
+  plan?: Plan;
+  status?: SubscriptionStatus;
+  isActive?: boolean;
+  periodFrom?: Date;
+  periodTo?: Date;
+};
+
+export async function getPaginatedSubscriptions({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: SubscriptionTableFilters;
+}) {
+  await requireSuperAdminAccess();
+  const where: Record<string, unknown> = {};
+
+  if (filters?.plan) where.plan = filters.plan;
+  if (filters?.status) where.status = filters.status;
+  if (filters?.isActive != null) where.isActive = filters.isActive;
+  if (filters?.periodFrom || filters?.periodTo) {
+    where.currentPeriodEnd = {
+      ...(filters.periodFrom ? { gte: filters.periodFrom } : {}),
+      ...(filters.periodTo ? { lte: filters.periodTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [{ tenant: { name: containsInsensitive(filters.q) } }];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.subscription.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.subscription.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        include: { tenant: true },
+      }),
   });
 }
 
@@ -337,31 +435,63 @@ export async function getActivityLogs() {
   });
 }
 
-export async function getPlatformDashboardData() {
+export async function getPlatformDashboardData({
+  schoolsPage,
+  subscriptionsPage,
+  devicePage,
+}: {
+  schoolsPage: number;
+  subscriptionsPage: number;
+  devicePage: number;
+}) {
   await requireSuperAdminAccess();
-
-  const [tenants, subscriptions] = await Promise.all([
-    prisma.tenant.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        _count: { select: { users: true } },
-      },
-      take: 20,
+  const [
+    tenants,
+    subscriptions,
+    deviceApprovalRequests,
+    totalSchools,
+    activeSubscriptions,
+    activePlans,
+  ] = await Promise.all([
+    paginateQuery({
+      page: schoolsPage,
+      count: () => prisma.tenant.count(),
+      query: ({ skip, take }) =>
+        prisma.tenant.findMany({
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          include: {
+            _count: { select: { users: true } },
+          },
+        }),
+    }),
+    paginateQuery({
+      page: subscriptionsPage,
+      count: () => prisma.subscription.count(),
+      query: ({ skip, take }) =>
+        prisma.subscription.findMany({
+          orderBy: { createdAt: "desc" },
+          skip,
+          take,
+          include: { tenant: true },
+        }),
+    }),
+    getPaginatedPendingDeviceApprovalRows(
+      { role: UserRole.SUPER_ADMIN },
+      { page: devicePage },
+    ),
+    prisma.tenant.count(),
+    prisma.subscription.count({
+      where: { isActive: true },
     }),
     prisma.subscription.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { tenant: true },
-      take: 20,
+      where: { isActive: true },
+      select: { plan: true },
     }),
   ]);
 
-  const totalSchools = await prisma.tenant.count();
-  const activeSubscriptions = await prisma.subscription.count({
-    where: { isActive: true },
-  });
-
-  const monthlyRevenue = subscriptions
-    .filter((sub) => sub.isActive)
+  const monthlyRevenue = activePlans
     .reduce((sum, sub) => {
       const price =
         sub.plan === "FREE"
@@ -380,5 +510,6 @@ export async function getPlatformDashboardData() {
     monthlyRevenue,
     tenants,
     subscriptions,
+    deviceApprovalRequests,
   };
 }

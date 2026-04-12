@@ -13,8 +13,19 @@ import {
   DEVICE_APPROVAL_EXPIRED_CODE,
   DEVICE_APPROVAL_TTL_MS,
 } from "@/lib/auth/device-approval";
-import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth/email-verification";
 import {
+  buildEmailVerificationIdentifier,
+  buildVerificationEmailBody,
+  buildVerificationEmailSubject,
+  EMAIL_NOT_VERIFIED_CODE,
+  EMAIL_VERIFICATION_RESEND_COOLDOWN_MS,
+  EMAIL_VERIFICATION_TTL_MS,
+  generateEmailVerificationCode,
+  hashEmailVerificationCode,
+  requiresEmailVerification,
+} from "@/lib/auth/email-verification";
+import {
+  clearPendingDeviceApprovalsForUser,
   expirePendingDeviceApprovalsForUser,
   finalizeDeviceApprovalRequest,
 } from "@/lib/auth/device-approval-lifecycle";
@@ -23,6 +34,7 @@ import {
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
 import { resolveAuthSecret } from "@/lib/auth/env";
+import { processEmailJob } from "@/lib/jobs/email.job";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -80,6 +92,8 @@ export const authOptions: NextAuthOptions = {
             passwordHash: true,
             activeSessionId: true,
             activeSessionExpiresAt: true,
+            activeSessionUserAgent: true,
+            activeSessionIp: true,
           },
         });
 
@@ -92,11 +106,79 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) return null;
 
-        if (user.role === "SCHOOL_ADMIN" && !user.emailVerifiedAt) {
+        if (
+          requiresEmailVerification({
+            role: user.role,
+            emailVerifiedAt: user.emailVerifiedAt,
+            passwordHash: user.passwordHash,
+          })
+        ) {
+          const identifier = buildEmailVerificationIdentifier(user.id);
+          const latestToken = await prisma.verificationToken.findFirst({
+            where: { identifier },
+            orderBy: { createdAt: "desc" },
+            select: { createdAt: true },
+          });
+
+          const ageMs = latestToken
+            ? Date.now() - latestToken.createdAt.getTime()
+            : Number.POSITIVE_INFINITY;
+
+          if (ageMs >= EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
+            const verificationCode = generateEmailVerificationCode();
+            const verificationTokenHash =
+              await hashEmailVerificationCode(verificationCode);
+            const verificationExpiresAt = new Date(
+              Date.now() + EMAIL_VERIFICATION_TTL_MS,
+            );
+
+            await prisma.verificationToken.create({
+              data: {
+                identifier,
+                token: verificationTokenHash,
+                expires: verificationExpiresAt,
+              },
+            });
+
+            try {
+              const school = user.schoolId
+                ? await prisma.tenant.findFirst({
+                    where: { id: user.schoolId },
+                    select: { name: true },
+                  })
+                : null;
+
+              await processEmailJob({
+                to: user.email,
+                subject: buildVerificationEmailSubject(),
+                body: buildVerificationEmailBody({
+                  userName: user.name ?? "User",
+                  schoolName: school?.name ?? null,
+                  code: verificationCode,
+                }),
+              });
+
+              await prisma.verificationToken.deleteMany({
+                where: {
+                  identifier,
+                  token: { not: verificationTokenHash },
+                },
+              });
+            } catch (error) {
+              console.error("authorize processEmailJob failed", {
+                email: user.email,
+                error,
+              });
+            }
+          }
+
           throw new Error(EMAIL_NOT_VERIFIED_CODE);
         }
 
         const now = new Date();
+        const xForwardedFor = getHeaderValue(req, "x-forwarded-for");
+        const requestedIp = xForwardedFor?.split(",")[0]?.trim() ?? null;
+        const requestedUserAgent = getHeaderValue(req, "user-agent");
         const hasActiveSession =
           Boolean(user.activeSessionId) &&
           Boolean(user.activeSessionExpiresAt) &&
@@ -104,6 +186,7 @@ export const authOptions: NextAuthOptions = {
           user.activeSessionExpiresAt.getTime() > now.getTime();
 
         if (
+          user.role !== "SUPER_ADMIN" &&
           parsed.data.approvalToken &&
           parsed.data.approvalToken !== String(undefined) &&
           parsed.data.approvalToken !== String(null)
@@ -198,6 +281,8 @@ export const authOptions: NextAuthOptions = {
           data: {
             activeSessionId: sessionId,
             activeSessionExpiresAt,
+            activeSessionUserAgent: requestedUserAgent,
+            activeSessionIp: requestedIp,
           },
         });
 
@@ -210,6 +295,74 @@ export const authOptions: NextAuthOptions = {
 
         if (!hasActiveSession || !user.activeSessionId) {
           throw new Error(SESSION_LOCK_ERROR_CODE);
+        }
+
+        if (user.role === "SUPER_ADMIN") {
+          await clearPendingDeviceApprovalsForUser(user.id, { now });
+
+          const transferred = await (
+            prisma.user as unknown as {
+              updateMany: (args: unknown) => Promise<{ count: number }>;
+            }
+          ).updateMany({
+            where: {
+              id: user.id,
+              activeSessionId: user.activeSessionId,
+            },
+            data: {
+              activeSessionId: sessionId,
+              activeSessionExpiresAt,
+              activeSessionUserAgent: requestedUserAgent,
+              activeSessionIp: requestedIp,
+            },
+          });
+
+          if (transferred.count === 0) {
+            throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          return {
+            ...user,
+            sessionId,
+          };
+        }
+
+        const isSameBrowserSessionReclaim =
+          Boolean(requestedUserAgent) &&
+          Boolean(user.activeSessionUserAgent) &&
+          requestedUserAgent === user.activeSessionUserAgent;
+
+        if (isSameBrowserSessionReclaim) {
+          await expirePendingDeviceApprovalsForUser(user.id, {
+            currentSessionId: user.activeSessionId,
+            now,
+          });
+
+          const transferred = await (
+            prisma.user as unknown as {
+              updateMany: (args: unknown) => Promise<{ count: number }>;
+            }
+          ).updateMany({
+            where: {
+              id: user.id,
+              activeSessionId: user.activeSessionId,
+            },
+            data: {
+              activeSessionId: sessionId,
+              activeSessionExpiresAt,
+              activeSessionUserAgent: requestedUserAgent,
+              activeSessionIp: requestedIp,
+            },
+          });
+
+          if (transferred.count === 0) {
+            throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          return {
+            ...user,
+            sessionId,
+          };
         }
 
         await expirePendingDeviceApprovalsForUser(user.id, {
@@ -234,9 +387,6 @@ export const authOptions: NextAuthOptions = {
           );
         }
 
-        const xForwardedFor = getHeaderValue(req, "x-forwarded-for");
-        const requestedIp = xForwardedFor?.split(",")[0]?.trim() ?? null;
-        const requestedUserAgent = getHeaderValue(req, "user-agent");
         const approvalExpiresAt = new Date(
           now.getTime() + DEVICE_APPROVAL_TTL_MS,
         );
@@ -312,6 +462,8 @@ export const authOptions: NextAuthOptions = {
             data: {
               activeSessionId: null,
               activeSessionExpiresAt: null,
+              activeSessionUserAgent: null,
+              activeSessionIp: null,
             },
           });
         }
@@ -353,6 +505,8 @@ export const authOptions: NextAuthOptions = {
           data: {
             activeSessionId: null,
             activeSessionExpiresAt: null,
+            activeSessionUserAgent: null,
+            activeSessionIp: null,
           },
         });
         return;
@@ -367,6 +521,8 @@ export const authOptions: NextAuthOptions = {
         data: {
           activeSessionId: null,
           activeSessionExpiresAt: null,
+          activeSessionUserAgent: null,
+          activeSessionIp: null,
         },
       });
     },

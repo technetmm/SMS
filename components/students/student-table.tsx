@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getStudents } from "@/app/(school)/school/students/actions";
+import { getPaginatedStudents } from "@/app/(school)/school/students/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +20,30 @@ import {
 import { StudentStatus } from "@/app/generated/prisma/enums";
 
 export async function StudentTable({
+  page,
   query,
   status,
+  gender,
+  admissionFrom,
+  admissionTo,
+  searchParams,
 }: {
+  page: number;
   query?: string;
   status?: StudentStatus | "ALL";
+  gender?: "ALL" | "MALE" | "FEMALE" | "OTHER";
+  admissionFrom?: Date;
+  admissionTo?: Date;
+  searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const students = await getStudents({ query, status });
+  const students = await getPaginatedStudents({
+    page,
+    query,
+    status,
+    gender: gender && gender !== "ALL" ? gender : undefined,
+    admissionFrom,
+    admissionTo,
+  });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -37,12 +55,12 @@ export async function StudentTable({
             <TableHead>Gender</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created At</TableHead>
+            <TableHead>Admission Date</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {students.map((student) => (
+          {students.items.map((student) => (
             <TableRow key={student.id}>
               <TableCell className="font-medium">{student.name}</TableCell>
               <TableCell>{enumLabel(student.gender, GENDER_LABELS)}</TableCell>
@@ -54,7 +72,7 @@ export async function StudentTable({
                   {enumLabel(student.status, STUDENT_STATUS_LABELS)}
                 </Badge>
               </TableCell>
-              <TableCell>{formatter.format(student.createdAt)}</TableCell>
+              <TableCell>{formatter.format(student.admissionDate)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
@@ -68,7 +86,7 @@ export async function StudentTable({
               </TableCell>
             </TableRow>
           ))}
-          {students.length === 0 ? (
+          {students.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={6}
@@ -80,6 +98,11 @@ export async function StudentTable({
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={students}
+        pathname="/school/students"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

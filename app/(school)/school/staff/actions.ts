@@ -7,15 +7,24 @@ import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
 import { staffCreateSchema, staffUpdateSchema } from "@/lib/validators";
 import { UserRole } from "@/app/generated/prisma/enums";
-import { enqueueEmail } from "@/lib/queue";
+import { processEmailJob } from "@/lib/jobs/email.job";
 import { logAction } from "@/lib/audit-log";
+import { paginateQuery } from "@/lib/pagination";
 import { getServerAuth } from "@/auth";
 import { z } from "zod";
-import { toast } from "sonner";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type StaffActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type StaffTableFilters = {
+  q?: string;
+  role?: "SCHOOL_ADMIN" | "TEACHER";
+  status?: "ACTIVE" | "ONLEAVE" | "RESIGNED" | "TERMINATED";
+  hireFrom?: Date;
+  hireTo?: Date;
 };
 
 export type StaffSystemRoleActionState = {
@@ -104,12 +113,18 @@ export async function createStaff(
       createdStaffId = staff.id;
     });
 
-    await enqueueEmail({
-      to: parsed.data.email,
-      subject: "Welcome to Technet SMS",
-      body: `Hi ${parsed.data.name}, your staff account is ready.`,
-      delayMs: 2000,
-    });
+    try {
+      await processEmailJob({
+        to: parsed.data.email,
+        subject: "Welcome to Technet SMS",
+        body: `Hi ${parsed.data.name}, your staff account is ready.`,
+      });
+    } catch (emailError) {
+      console.error("createStaff processEmailJob failed", {
+        email: parsed.data.email,
+        error: emailError,
+      });
+    }
 
     await logAction({
       action: "CREATE",
@@ -128,11 +143,17 @@ export async function createStaff(
 }
 
 export async function getStaff() {
-  await requireSchoolAdminAccess();
+  const sessionUser = await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.staff.findMany({
-    where: { schoolId },
+    where: {
+      schoolId,
+      userId: { not: sessionUser.id },
+      user: {
+        role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+      },
+    },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -148,6 +169,71 @@ export async function getStaff() {
       status: true,
       hireDate: true,
     },
+  });
+}
+
+export async function getPaginatedStaff({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: StaffTableFilters;
+}) {
+  const sessionUser = await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+  const where: Record<string, unknown> = {
+    schoolId,
+    userId: { not: sessionUser.id },
+    user: {
+      role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+    },
+  };
+
+  if (filters?.status) where.status = filters.status;
+  if (filters?.role) {
+    where.user = {
+      role: filters.role,
+    };
+  }
+  if (filters?.hireFrom || filters?.hireTo) {
+    where.hireDate = {
+      ...(filters.hireFrom ? { gte: filters.hireFrom } : {}),
+      ...(filters.hireTo ? { lte: filters.hireTo } : {}),
+    };
+  }
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      { email: containsInsensitive(filters.q) },
+      { phone: containsInsensitive(filters.q) },
+      { user: { email: containsInsensitive(filters.q) } },
+    ];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.staff.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.staff.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          userId: true,
+          user: {
+            select: {
+              role: true,
+            },
+          },
+          name: true,
+          email: true,
+          phone: true,
+          status: true,
+          hireDate: true,
+        },
+      }),
   });
 }
 
@@ -272,7 +358,8 @@ export async function setStaffSystemRole(
   if (
     !session?.user?.id ||
     !session.user.schoolId ||
-    session.user.role !== UserRole.SCHOOL_ADMIN
+    (session.user.role !== UserRole.SCHOOL_SUPER_ADMIN &&
+      session.user.role !== UserRole.SCHOOL_ADMIN)
   ) {
     return { status: "error", message: "Unauthorized." };
   }
@@ -301,8 +388,26 @@ export async function setStaffSystemRole(
   if (targetUser.role === UserRole.SUPER_ADMIN) {
     return { status: "error", message: "Cannot modify SUPER_ADMIN." };
   }
+  if (
+    targetUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
+    targetUser.role === UserRole.STUDENT
+  ) {
+    return { status: "error", message: "Target user cannot use staff admin roles." };
+  }
   if (!targetUser.staffProfile || targetUser.studentProfile) {
     return { status: "error", message: "Target user is not a staff account." };
+  }
+  const isSchoolAdminDemotion =
+    parsed.data.nextRole === UserRole.TEACHER &&
+    targetUser.role === UserRole.SCHOOL_ADMIN;
+  if (
+    session.user.role === UserRole.SCHOOL_ADMIN &&
+    isSchoolAdminDemotion
+  ) {
+    return {
+      status: "error",
+      message: "SCHOOL_ADMIN cannot demote SCHOOL_ADMIN accounts.",
+    };
   }
   if (targetUser.role === parsed.data.nextRole) {
     return {

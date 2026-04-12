@@ -72,8 +72,8 @@ export function SignupForm() {
       <CardHeader>
         <CardTitle>Create your school workspace</CardTitle>
         <CardDescription>
-          We will create a new tenant and your SCHOOL_ADMIN account in one
-          secure step.
+          We will create a new tenant and your SCHOOL_SUPER_ADMIN account in
+          one secure step.
         </CardDescription>
       </CardHeader>
       <CardContent>

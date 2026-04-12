@@ -150,3 +150,32 @@ export async function expirePendingDeviceApprovalsForUser(
 
   return requests.length;
 }
+
+export async function clearPendingDeviceApprovalsForUser(
+  userId: string,
+  options?: { currentSessionId?: string; now?: Date },
+) {
+  const now = options?.now ?? new Date();
+
+  const requests = await prisma.loginApprovalRequest.findMany({
+    where: {
+      userId,
+      status: "PENDING",
+      ...(options?.currentSessionId
+        ? { currentSessionId: options.currentSessionId }
+        : {}),
+    },
+    select: { id: true },
+  });
+
+  for (const request of requests) {
+    await finalizeDeviceApprovalRequest(prisma, {
+      requestId: request.id,
+      userId,
+      outcome: "EXPIRED",
+      now,
+    });
+  }
+
+  return requests.length;
+}

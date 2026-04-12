@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {
-  getSections,
+  getPaginatedSections,
   deleteSection,
+  type SectionTableFilters,
 } from "@/app/(school)/school/sections/actions";
+import { TablePagination } from "@/components/shared/table-pagination";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,8 +16,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export async function SectionTable() {
-  const sections = await getSections();
+export async function SectionTable({
+  page,
+  filters,
+  searchParams,
+}: {
+  page: number;
+  filters?: SectionTableFilters;
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
+  const sections = await getPaginatedSections({ page, filters });
   const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
@@ -33,7 +43,7 @@ export async function SectionTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sections.map((section) => {
+          {sections.items.map((section) => {
             const activeEnrollments = section.enrollments.filter(
               (item) => item.status === "ACTIVE",
             ).length;
@@ -82,7 +92,7 @@ export async function SectionTable() {
               </TableRow>
             );
           })}
-          {sections.length === 0 ? (
+          {sections.totalCount === 0 ? (
             <TableRow>
               <TableCell
                 colSpan={7}
@@ -94,6 +104,11 @@ export async function SectionTable() {
           ) : null}
         </TableBody>
       </Table>
+      <TablePagination
+        pagination={sections}
+        pathname="/school/sections"
+        searchParams={searchParams}
+      />
     </div>
   );
 }

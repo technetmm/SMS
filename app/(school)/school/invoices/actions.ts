@@ -2,10 +2,17 @@
 
 import { getServerAuth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { PaymentStatus, UserRole } from "@/app/generated/prisma/enums";
+import {
+  InvoiceType,
+  PaymentStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
+import { generateMonthlyInvoices } from "@/lib/monthly-invoices";
+import { containsInsensitive } from "@/lib/table-filters";
 import {
   enrollmentActorRoleSchema,
   paymentCreateSchema,
@@ -15,6 +22,16 @@ import {
 export type BillingActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type InvoiceTableFilters = {
+  q?: string;
+  status?: PaymentStatus;
+  invoiceType?: InvoiceType;
+  dueFrom?: Date;
+  dueTo?: Date;
+  finalMin?: number;
+  finalMax?: number;
 };
 
 function resolveInvoiceStatus(
@@ -52,6 +69,7 @@ async function requireAdminRefund() {
   if (!actor.ok) return actor;
 
   if (
+    actor.role !== UserRole.SCHOOL_SUPER_ADMIN &&
     actor.role !== UserRole.SCHOOL_ADMIN &&
     actor.role !== UserRole.SUPER_ADMIN
   ) {
@@ -80,6 +98,7 @@ export async function getInvoices() {
       paidAmount: true,
       dueDate: true,
       createdAt: true,
+      tenant: { select: { currency: true } },
       student: { select: { id: true, name: true } },
       enrollment: {
         select: {
@@ -108,6 +127,105 @@ export async function getInvoices() {
   });
 }
 
+export async function getPaginatedInvoices({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: InvoiceTableFilters;
+}) {
+  const actor = await requireStaffOrAdmin();
+  if (!actor.ok) {
+    return paginateQuery({
+      page,
+      count: async () => 0,
+      query: async () => [],
+    });
+  }
+  const where: Record<string, unknown> = { schoolId: actor.schoolId };
+
+  if (filters?.status) where.status = filters.status;
+  if (filters?.invoiceType) where.invoiceType = filters.invoiceType;
+
+  if (filters?.dueFrom || filters?.dueTo) {
+    where.dueDate = {
+      ...(filters.dueFrom ? { gte: filters.dueFrom } : {}),
+      ...(filters.dueTo ? { lte: filters.dueTo } : {}),
+    };
+  }
+
+  if (filters?.finalMin != null || filters?.finalMax != null) {
+    where.finalAmount = {
+      ...(filters.finalMin != null ? { gte: filters.finalMin } : {}),
+      ...(filters.finalMax != null ? { lte: filters.finalMax } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { id: containsInsensitive(filters.q) },
+      { student: { name: containsInsensitive(filters.q) } },
+      { enrollment: { section: { name: containsInsensitive(filters.q) } } },
+      { enrollment: { section: { class: { name: containsInsensitive(filters.q) } } } },
+    ];
+  }
+
+  return paginateQuery({
+    page,
+    count: () => prisma.invoice.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.invoice.findMany({
+        where,
+        orderBy: { dueDate: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          invoiceType: true,
+          billingYear: true,
+          billingMonth: true,
+          status: true,
+          originalAmount: true,
+          discount: true,
+          finalAmount: true,
+          paidAmount: true,
+          dueDate: true,
+          createdAt: true,
+          tenant: { select: { currency: true } },
+          student: { select: { id: true, name: true } },
+          enrollment: {
+            select: {
+              section: {
+                select: {
+                  id: true,
+                  name: true,
+                  class: { select: { name: true } },
+                },
+              },
+            },
+          },
+          payments: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              amount: true,
+              method: true,
+              createdAt: true,
+              refunds: {
+                select: {
+                  id: true,
+                  amount: true,
+                  reason: true,
+                  createdAt: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+  });
+}
+
 export async function getInvoiceById(id: string) {
   const actor = await requireStaffOrAdmin();
   if (!actor.ok || !id) return null;
@@ -126,6 +244,7 @@ export async function getInvoiceById(id: string) {
       paidAmount: true,
       dueDate: true,
       createdAt: true,
+      tenant: { select: { currency: true } },
       student: { select: { id: true, name: true } },
       enrollment: {
         select: {
@@ -356,4 +475,36 @@ export async function generateInvoicePDF(invoiceId: string) {
     status: "success" as const,
     url: `/school/invoices/${invoice.id}/pdf`,
   };
+}
+
+export async function generateMissingMonthlyInvoices(
+  _prevState: BillingActionState,
+  _formData: FormData,
+): Promise<BillingActionState> {
+  const actor = await requireStaffOrAdmin();
+  if (!actor.ok) return { status: "error", message: actor.message };
+
+  try {
+    const result = await generateMonthlyInvoices({
+      now: new Date(),
+      schoolId: actor.schoolId,
+      currentPeriodOnly: false,
+      respectCurrentPeriodDueDateGate: false,
+    });
+
+    revalidatePath("/school/invoices");
+    revalidatePath("/school/payments");
+    revalidatePath("/school/enrollments");
+
+    return {
+      status: "success",
+      message: `Created ${result.created} invoice${result.created === 1 ? "" : "s"} and skipped ${result.existing} existing invoice${result.existing === 1 ? "" : "s"}${result.gated > 0 ? ` (${result.gated} gated)` : ""}.`,
+    };
+  } catch (error) {
+    console.error("generateMissingMonthlyInvoices failed", error);
+    return {
+      status: "error",
+      message: "Unable to generate monthly invoices.",
+    };
+  }
 }

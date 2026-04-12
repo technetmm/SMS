@@ -11,6 +11,7 @@ datasource db {
 
 enum UserRole {
   SUPER_ADMIN
+  SCHOOL_SUPER_ADMIN
   SCHOOL_ADMIN
   TEACHER
   STUDENT
@@ -136,6 +137,8 @@ model User {
   twoFactorEnabled       Boolean   @default(false)
   activeSessionId        String?
   activeSessionExpiresAt DateTime?
+  activeSessionUserAgent String?
+  activeSessionIp        String?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
   isDeleted              Boolean   @default(false)
@@ -156,6 +159,7 @@ model Tenant {
   name              String
   slug              String    @unique
   plan              Plan      @default(FREE)
+  currency          Currency  @default(USD)
   isActive          Boolean   @default(true)
   billingDayOfMonth Int       @default(5)
   createdAt         DateTime  @default(now())
@@ -259,22 +263,23 @@ model Staff {
 }
 
 model Student {
-  id         String        @id @default(cuid())
-  userId     String?       @unique
-  schoolId   String
-  branchId   String?
-  name       String
-  gender     Gender
-  dob        DateTime
-  fatherName String?
-  motherName String?
-  phone      String?
-  address    String?
-  status     StudentStatus @default(ACTIVE)
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-  isDeleted  Boolean       @default(false)
-  deletedAt  DateTime?
+  id            String        @id @default(cuid())
+  userId        String?       @unique
+  schoolId      String
+  branchId      String?
+  name          String
+  gender        Gender
+  dob           DateTime?
+  admissionDate DateTime
+  fatherName    String?
+  motherName    String?
+  phone         String?
+  address       String?
+  status        StudentStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?
 
   user        User?        @relation(fields: [userId], references: [id])
   tenant      Tenant       @relation(fields: [schoolId], references: [id])

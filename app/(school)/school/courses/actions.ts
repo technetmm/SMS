@@ -3,12 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
+import { paginateQuery } from "@/lib/pagination";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { courseCreateSchema, courseUpdateSchema } from "@/lib/validators";
+import { containsInsensitive } from "@/lib/table-filters";
 
 export type CourseActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+};
+
+export type CourseTableFilters = {
+  q?: string;
+  createdFrom?: Date;
+  createdTo?: Date;
 };
 
 export async function createCourse(
@@ -95,6 +103,73 @@ export async function getCourses() {
     ...course,
     subjects: course.subjects.map((mapping) => mapping.subject),
   }));
+}
+
+export async function getPaginatedCourses({
+  page,
+  filters,
+}: {
+  page: number;
+  filters?: CourseTableFilters;
+}) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+  const where: Record<string, unknown> = { schoolId };
+
+  if (filters?.createdFrom || filters?.createdTo) {
+    where.createdAt = {
+      ...(filters.createdFrom ? { gte: filters.createdFrom } : {}),
+      ...(filters.createdTo ? { lte: filters.createdTo } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { name: containsInsensitive(filters.q) },
+      {
+        subjects: {
+          some: {
+            subject: {
+              name: containsInsensitive(filters.q),
+            },
+          },
+        },
+      },
+    ];
+  }
+
+  const result = await paginateQuery({
+    page,
+    count: () => prisma.course.count({ where }),
+    query: ({ skip, take }) =>
+      prisma.course.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take,
+        select: {
+          id: true,
+          name: true,
+          createdAt: true,
+          subjects: {
+            select: { subject: { select: { id: true, name: true } } },
+          },
+          _count: {
+            select: {
+              classes: true,
+            },
+          },
+        },
+      }),
+  });
+
+  return {
+    ...result,
+    items: result.items.map((course) => ({
+      ...course,
+      subjects: course.subjects.map((mapping) => mapping.subject),
+    })),
+  };
 }
 
 export async function getCourseById(id: string) {
