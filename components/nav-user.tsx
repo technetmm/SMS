@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
+  BellIcon,
   ChevronsUpDownIcon,
   LogOutIcon,
   Settings2Icon,
@@ -26,30 +27,22 @@ import {
   UserIcon,
 } from "lucide-react";
 
-const menuItems = [
-  {
-    name: "Profile",
-    href: "/profile",
-    icon: <UserIcon />,
-  },
-  {
-    name: "Settings",
-    href: "/school/settings",
-    icon: <Settings2Icon />,
-  },
-  { name: "Security", href: "/school/settings/security", icon: <ShieldCheckIcon /> },
-];
-
 export function NavUser({
   user,
-  settingsHref,
+  isPlatform,
+  isTeacher,
+  isStudent,
+  isSchoolAdmin,
 }: {
   user: {
     name: string;
     email: string;
     avatar: string;
   };
-  settingsHref: string;
+  isPlatform: boolean;
+  isSchoolAdmin: boolean;
+  isTeacher: boolean;
+  isStudent: boolean;
 }) {
   const { isMobile } = useSidebar();
   const initials =
@@ -59,6 +52,61 @@ export function NavUser({
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase())
       .join("") ?? "ME";
+
+  const menuItems = [
+    {
+      name: "Profile",
+      href: isPlatform
+        ? "/platform/profile"
+        : isSchoolAdmin
+          ? "/school/profile"
+          : isTeacher
+            ? "/teacher/profile"
+            : isStudent
+              ? "/student/profile"
+              : "/",
+      icon: <UserIcon />,
+    },
+    {
+      name: "Settings",
+      href: isPlatform
+        ? "/platform/settings"
+        : isSchoolAdmin
+          ? "/school/settings"
+          : isTeacher
+            ? "/teacher/settings"
+            : isStudent
+              ? "/student/settings"
+              : "/",
+      icon: <Settings2Icon />,
+    },
+    {
+      name: "Security",
+      href: isPlatform
+        ? "/platform/settings/security"
+        : isSchoolAdmin
+          ? "/school/settings/security"
+          : isTeacher
+            ? "/teacher/settings/security"
+            : isStudent
+              ? "/student/settings/security"
+              : "/",
+      icon: <ShieldCheckIcon />,
+    },
+    {
+      name: "Notifications",
+      href: isPlatform
+        ? "/platform/notifications"
+        : isSchoolAdmin
+          ? "/school/notifications"
+          : isTeacher
+            ? "/teacher/notifications"
+            : isStudent
+              ? "/student/notifications"
+              : "/",
+      icon: <BellIcon />,
+    },
+  ];
 
   return (
     <SidebarMenu>
@@ -106,7 +154,7 @@ export function NavUser({
             <DropdownMenuGroup>
               {menuItems.map((item) => (
                 <DropdownMenuItem asChild key={item.name}>
-                  <Link href={settingsHref}>
+                  <Link href={item.href}>
                     {item.icon}
                     {item.name}
                   </Link>

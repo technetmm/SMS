@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BellIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,15 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-type NotificationItem = {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-};
+import {
+  fetchNotificationsPage,
+  fetchUnreadNotificationsCount,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type NotificationItem,
+} from "@/lib/notifications/client";
 
 const POLL_INTERVAL_MS = 15000;
 
@@ -32,21 +32,24 @@ function formatTimestamp(value: string) {
 }
 
 export function NotificationBell() {
+  const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [open, setOpen] = useState(false);
   const [loadingList, setLoadingList] = useState(false);
 
+  const notificationsHref = useMemo(() => {
+    const root = pathname.split("/").filter(Boolean)[0];
+    if (root === "platform") return "/platform/notifications";
+    if (root === "teacher") return "/teacher/notifications";
+    if (root === "student") return "/student/notifications";
+    return "/school/notifications";
+  }, [pathname]);
+
   const refreshUnreadCount = useCallback(async () => {
     try {
-      const res = await fetch("/api/notifications/unread-count", {
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (!res.ok) return;
-      const data = (await res.json()) as { unreadCount?: number };
-      setUnreadCount(Number(data.unreadCount ?? 0));
+      const count = await fetchUnreadNotificationsCount();
+      setUnreadCount(count);
     } catch {
       // Ignore transient network errors from polling.
     }
@@ -55,13 +58,7 @@ export function NotificationBell() {
   const refreshNotifications = useCallback(async () => {
     setLoadingList(true);
     try {
-      const res = await fetch("/api/notifications?limit=10&offset=0", {
-        cache: "no-store",
-        credentials: "include",
-      });
-
-      if (!res.ok) return;
-      const data = (await res.json()) as { notifications?: NotificationItem[] };
+      const data = await fetchNotificationsPage({ limit: 10, offset: 0 });
       setNotifications(data.notifications ?? []);
     } catch {
       toast.error("Unable to load notifications.");
@@ -72,15 +69,7 @@ export function NotificationBell() {
 
   const markOneRead = useCallback(async (id: string) => {
     try {
-      const res = await fetch(`/api/notifications/${id}/read`, {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        toast.error("Unable to update notification.");
-        return;
-      }
+      await markNotificationRead(id);
 
       setNotifications((prev) =>
         prev.map((notification) =>
@@ -97,15 +86,7 @@ export function NotificationBell() {
 
   const markAllRead = useCallback(async () => {
     try {
-      const res = await fetch("/api/notifications/read-all", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        toast.error("Unable to update notifications.");
-        return;
-      }
+      await markAllNotificationsRead();
 
       setNotifications((prev) =>
         prev.map((notification) => ({ ...notification, isRead: true })),
@@ -209,6 +190,10 @@ export function NotificationBell() {
             </DropdownMenuItem>
           ))
         )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={notificationsHref}>View all notifications</Link>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

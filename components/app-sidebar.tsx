@@ -174,6 +174,7 @@ export function AppSidebar({
   schoolName?: string | null;
 }) {
   const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
+  const isSchool = role === UserRole.SCHOOL_ADMIN && !!schoolId;
   const isTeacher = role === UserRole.TEACHER;
   const isStudent = role === UserRole.STUDENT;
   const homeHref = isPlatform
@@ -183,11 +184,6 @@ export function AppSidebar({
       : isStudent
         ? "/student/dashboard"
         : "/school/dashboard";
-  const settingsHref = isPlatform
-    ? "/platform/settings"
-    : isTeacher || isStudent
-      ? homeHref
-      : "/school/settings";
   const subtitle = isPlatform ? "Platform" : schoolName?.trim() || "School";
 
   return (
@@ -221,7 +217,13 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} settingsHref={settingsHref} />
+        <NavUser
+          user={user}
+          isPlatform={isPlatform}
+          isTeacher={isTeacher}
+          isStudent={isStudent}
+          isSchoolAdmin={isSchool}
+        />
       </SidebarFooter>
     </Sidebar>
   );
