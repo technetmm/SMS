@@ -26,11 +26,13 @@ const initialState: StaffSystemRoleActionState = { status: "idle" };
 
 type StaffSystemRoleManagerProps = {
   userId: string;
+  actorRole: UserRole;
   currentRole: UserRole;
 };
 
 export function StaffSystemRoleManager({
   userId,
+  actorRole,
   currentRole,
 }: StaffSystemRoleManagerProps) {
   const router = useRouter();
@@ -56,7 +58,9 @@ export function StaffSystemRoleManager({
   }, [router, state]);
 
   const canPromote = currentRole !== UserRole.SCHOOL_ADMIN;
-  const canDemote = currentRole === UserRole.SCHOOL_ADMIN;
+  const canDemote =
+    currentRole === UserRole.SCHOOL_ADMIN &&
+    actorRole === UserRole.SCHOOL_SUPER_ADMIN;
 
   return (
     <div className="rounded-lg border p-3">
@@ -133,8 +137,7 @@ export function StaffSystemRoleManager({
                   <AlertDialogDescription>
                     This will remove{" "}
                     {enumLabel(UserRole.SCHOOL_ADMIN, USER_ROLE_LABELS)} access
-                    for this account. If you are demoting yourself, your current
-                    session will end and you will be redirected to login.
+                    for this account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

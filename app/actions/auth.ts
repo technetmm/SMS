@@ -11,13 +11,15 @@ import {
   type SignupActionState,
 } from "@/app/lib/validations/signup-schema";
 import {
-  buildSignupEmailVerificationIdentifier,
-  buildSignupVerificationEmailBody,
+  buildEmailVerificationIdentifier,
+  buildVerificationEmailBody,
+  buildVerificationEmailSubject,
   generateEmailVerificationCode,
   hashEmailVerificationCode,
   normalizeEmail,
-  SIGNUP_EMAIL_VERIFICATION_RESEND_COOLDOWN_MS,
-  SIGNUP_EMAIL_VERIFICATION_TTL_MS,
+  EMAIL_VERIFICATION_RESEND_COOLDOWN_MS,
+  EMAIL_VERIFICATION_TTL_MS,
+  requiresEmailVerification,
   verifyEmailVerificationCode,
 } from "@/lib/auth/email-verification";
 
@@ -114,7 +116,7 @@ export async function signup(
     const verificationTokenHash =
       await hashEmailVerificationCode(verificationCode);
     const verificationExpiresAt = new Date(
-      Date.now() + SIGNUP_EMAIL_VERIFICATION_TTL_MS,
+      Date.now() + EMAIL_VERIFICATION_TTL_MS,
     );
 
     await prisma.$transaction(async (tx) => {
@@ -139,7 +141,7 @@ export async function signup(
         select: { id: true },
       });
 
-      const identifier = buildSignupEmailVerificationIdentifier(user.id);
+      const identifier = buildEmailVerificationIdentifier(user.id);
       await tx.verificationToken.deleteMany({
         where: { identifier },
       });
@@ -156,9 +158,9 @@ export async function signup(
     try {
       await processEmailJob({
         to: normalizedEmail,
-        subject: "Verify your email for Technet SMS",
-        body: buildSignupVerificationEmailBody({
-          adminName: data.adminName,
+        subject: buildVerificationEmailSubject(),
+        body: buildVerificationEmailBody({
+          userName: data.adminName,
           schoolName: data.schoolName,
           code: verificationCode,
         }),
@@ -240,10 +242,11 @@ export async function verifySignupEmailAction(
       id: true,
       role: true,
       emailVerifiedAt: true,
+      passwordHash: true,
     },
   });
 
-  if (!user || user.role !== UserRole.SCHOOL_SUPER_ADMIN) {
+  if (!user) {
     return { status: "error", message: "Invalid verification request." };
   }
 
@@ -255,7 +258,17 @@ export async function verifySignupEmailAction(
     };
   }
 
-  const identifier = buildSignupEmailVerificationIdentifier(user.id);
+  if (
+    !requiresEmailVerification({
+      role: user.role,
+      emailVerifiedAt: user.emailVerifiedAt,
+      passwordHash: user.passwordHash,
+    })
+  ) {
+    return { status: "error", message: "Invalid verification request." };
+  }
+
+  const identifier = buildEmailVerificationIdentifier(user.id);
   const tokenRecord = await prisma.verificationToken.findFirst({
     where: { identifier },
     orderBy: { createdAt: "desc" },
@@ -331,14 +344,18 @@ export async function resendSignupEmailCodeAction(
       role: true,
       name: true,
       emailVerifiedAt: true,
+      passwordHash: true,
       school: { select: { name: true } },
     },
   });
 
   if (
     !user ||
-    user.role !== UserRole.SCHOOL_SUPER_ADMIN ||
-    user.emailVerifiedAt
+    !requiresEmailVerification({
+      role: user.role,
+      emailVerifiedAt: user.emailVerifiedAt,
+      passwordHash: user.passwordHash,
+    })
   ) {
     return {
       status: "error",
@@ -346,7 +363,7 @@ export async function resendSignupEmailCodeAction(
     };
   }
 
-  const identifier = buildSignupEmailVerificationIdentifier(user.id);
+  const identifier = buildEmailVerificationIdentifier(user.id);
   const latestToken = await prisma.verificationToken.findFirst({
     where: { identifier },
     orderBy: { createdAt: "desc" },
@@ -355,12 +372,12 @@ export async function resendSignupEmailCodeAction(
 
   if (latestToken) {
     const ageMs = Date.now() - latestToken.createdAt.getTime();
-    if (ageMs < SIGNUP_EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
+    if (ageMs < EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
       return {
         status: "error",
         message: "Please wait before requesting another code.",
         cooldownSeconds: Math.ceil(
-          (SIGNUP_EMAIL_VERIFICATION_RESEND_COOLDOWN_MS - ageMs) / 1000,
+          (EMAIL_VERIFICATION_RESEND_COOLDOWN_MS - ageMs) / 1000,
         ),
       };
     }
@@ -370,7 +387,7 @@ export async function resendSignupEmailCodeAction(
   const verificationTokenHash =
     await hashEmailVerificationCode(verificationCode);
   const verificationExpiresAt = new Date(
-    Date.now() + SIGNUP_EMAIL_VERIFICATION_TTL_MS,
+    Date.now() + EMAIL_VERIFICATION_TTL_MS,
   );
 
   await prisma.verificationToken.create({
@@ -385,9 +402,9 @@ export async function resendSignupEmailCodeAction(
   try {
     await processEmailJob({
       to: email,
-      subject: "Your new verification code for Technet SMS",
-      body: buildSignupVerificationEmailBody({
-        adminName: user.name ?? "Admin",
+      subject: buildVerificationEmailSubject(),
+      body: buildVerificationEmailBody({
+        userName: user.name ?? "User",
         schoolName: user.school?.name ?? "your school",
         code: verificationCode,
       }),

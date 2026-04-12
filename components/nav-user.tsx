@@ -56,15 +56,13 @@ export function NavUser({
   const menuItems = [
     {
       name: "Profile",
-      href: isPlatform
-        ? "/platform/profile"
-        : isSchoolAdmin
-          ? "/school/profile"
-          : isTeacher
-            ? "/teacher/profile"
-            : isStudent
-              ? "/student/profile"
-              : "/",
+      href: isSchoolAdmin
+        ? "/school/profile"
+        : isTeacher
+          ? "/teacher/profile"
+          : isStudent
+            ? "/student/profile"
+            : "/",
       icon: <UserIcon />,
     },
     {
@@ -152,14 +150,16 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              {menuItems.map((item) => (
-                <DropdownMenuItem asChild key={item.name}>
-                  <Link href={item.href}>
-                    {item.icon}
-                    {item.name}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+              {menuItems.map((item) =>
+                isPlatform && item.name === "Profile" ? null : (
+                  <DropdownMenuItem asChild key={item.name}>
+                    <Link href={item.href}>
+                      {item.icon}
+                      {item.name}
+                    </Link>
+                  </DropdownMenuItem>
+                ),
+              )}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

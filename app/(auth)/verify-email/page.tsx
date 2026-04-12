@@ -17,7 +17,7 @@ export default async function VerifyEmailPage({
       <CardHeader>
         <CardTitle>Verify your email</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Enter the 6-digit code sent to your email to activate your school account.
+          Enter the 6-digit code sent to your email to activate your account.
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
