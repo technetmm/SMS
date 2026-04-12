@@ -95,7 +95,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) return null;
 
-        if (user.role === "SCHOOL_ADMIN" && !user.emailVerifiedAt) {
+        if (user.role === "SCHOOL_SUPER_ADMIN" && !user.emailVerifiedAt) {
           throw new Error(EMAIL_NOT_VERIFIED_CODE);
         }
 

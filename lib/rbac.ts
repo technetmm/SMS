@@ -33,7 +33,11 @@ export async function requireTenant() {
 
 export async function requireSchoolAdminAccess() {
   const user = await getSessionUser();
-  if (user.role !== UserRole.SCHOOL_ADMIN && user.role !== UserRole.SUPER_ADMIN) {
+  if (
+    user.role !== UserRole.SCHOOL_SUPER_ADMIN &&
+    user.role !== UserRole.SCHOOL_ADMIN &&
+    user.role !== UserRole.SUPER_ADMIN
+  ) {
     forbidden();
   }
   return user;
@@ -49,7 +53,11 @@ export async function requireSuperAdminAccess() {
 
 export async function requireSchoolOwnerAdminAccess() {
   const user = await getSessionUser();
-  if (user.role !== UserRole.SCHOOL_ADMIN || !user.schoolId) {
+  if (
+    (user.role !== UserRole.SCHOOL_SUPER_ADMIN &&
+      user.role !== UserRole.SCHOOL_ADMIN) ||
+    !user.schoolId
+  ) {
     forbidden();
   }
 
@@ -57,7 +65,7 @@ export async function requireSchoolOwnerAdminAccess() {
     where: {
       id: user.id,
       schoolId: user.schoolId,
-      role: UserRole.SCHOOL_ADMIN,
+      role: { in: [UserRole.SCHOOL_SUPER_ADMIN, UserRole.SCHOOL_ADMIN] },
     },
     select: { isSchoolOwner: true },
   });

@@ -37,6 +37,7 @@ export default async function PlatformDeviceApprovalsPage({
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
   const requesterRole = parseTableFilterEnumParam(params.requesterRole, [
+    UserRole.SCHOOL_SUPER_ADMIN,
     UserRole.SCHOOL_ADMIN,
     UserRole.TEACHER,
     UserRole.STUDENT,
@@ -96,6 +97,7 @@ export default async function PlatformDeviceApprovalsPage({
               placeholder="All roles"
               defaultValue={params.requesterRole ?? TABLE_FILTER_ALL_VALUE}
               options={[
+                { value: "SCHOOL_SUPER_ADMIN", label: "School Owner" },
                 { value: "SCHOOL_ADMIN", label: "School Admin" },
                 { value: "TEACHER", label: "Teacher" },
                 { value: "STUDENT", label: "Student" },

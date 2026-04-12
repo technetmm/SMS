@@ -26,10 +26,14 @@ export type DeviceApprovalQueueRow = {
 
 function buildApproverUserFilter(approver: DeviceApprovalApprover) {
   if (approver.role === UserRole.SUPER_ADMIN) {
-    return { role: UserRole.SCHOOL_ADMIN };
+    return { role: { in: [UserRole.SCHOOL_SUPER_ADMIN, UserRole.SCHOOL_ADMIN] } };
   }
 
-  if (approver.role === UserRole.SCHOOL_ADMIN && approver.schoolId) {
+  if (
+    (approver.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      approver.role === UserRole.SCHOOL_ADMIN) &&
+    approver.schoolId
+  ) {
     return {
       role: { in: [UserRole.TEACHER, UserRole.STUDENT] },
       schoolId: approver.schoolId,
@@ -77,10 +81,16 @@ export function canApproveDeviceRequest(
   requestUser: { role: UserRole; schoolId: string | null },
 ) {
   if (approver.role === UserRole.SUPER_ADMIN) {
-    return requestUser.role === UserRole.SCHOOL_ADMIN;
+    return (
+      requestUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      requestUser.role === UserRole.SCHOOL_ADMIN
+    );
   }
 
-  if (approver.role === UserRole.SCHOOL_ADMIN) {
+  if (
+    approver.role === UserRole.SCHOOL_SUPER_ADMIN ||
+    approver.role === UserRole.SCHOOL_ADMIN
+  ) {
     return (
       approver.schoolId != null &&
       approver.schoolId === requestUser.schoolId &&

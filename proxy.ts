@@ -80,7 +80,11 @@ export default async function proxy(req: NextRequest) {
   );
 
   if (isSchoolAdminRoute) {
-    if (role !== UserRole.SCHOOL_ADMIN && role !== UserRole.SUPER_ADMIN) {
+    if (
+      role !== UserRole.SCHOOL_SUPER_ADMIN &&
+      role !== UserRole.SCHOOL_ADMIN &&
+      role !== UserRole.SUPER_ADMIN
+    ) {
       return NextResponse.redirect(new URL("/unauthorized", req.url));
     }
     if (!schoolId) {

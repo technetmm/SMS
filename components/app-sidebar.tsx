@@ -174,7 +174,10 @@ export function AppSidebar({
   schoolName?: string | null;
 }) {
   const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
-  const isSchool = role === UserRole.SCHOOL_ADMIN && !!schoolId;
+  const isSchool =
+    (role === UserRole.SCHOOL_SUPER_ADMIN ||
+      role === UserRole.SCHOOL_ADMIN) &&
+    !!schoolId;
   const isTeacher = role === UserRole.TEACHER;
   const isStudent = role === UserRole.STUDENT;
   const homeHref = isPlatform

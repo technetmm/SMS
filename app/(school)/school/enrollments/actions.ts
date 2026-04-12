@@ -45,6 +45,7 @@ export type EnrollmentTableFilters = {
 };
 
 const ENROLLMENT_ALLOWED_ROLES = new Set<UserRole>([
+  UserRole.SCHOOL_SUPER_ADMIN,
   UserRole.SCHOOL_ADMIN,
   UserRole.SUPER_ADMIN,
 ]);

@@ -131,7 +131,7 @@ export async function signup(
           name: data.adminName,
           email: normalizedEmail,
           passwordHash,
-          role: UserRole.SCHOOL_ADMIN,
+          role: UserRole.SCHOOL_SUPER_ADMIN,
           schoolId: tenant.id,
           isSchoolOwner: true,
           emailVerifiedAt: null,
@@ -243,7 +243,7 @@ export async function verifySignupEmailAction(
     },
   });
 
-  if (!user || user.role !== UserRole.SCHOOL_ADMIN) {
+  if (!user || user.role !== UserRole.SCHOOL_SUPER_ADMIN) {
     return { status: "error", message: "Invalid verification request." };
   }
 
@@ -335,7 +335,11 @@ export async function resendSignupEmailCodeAction(
     },
   });
 
-  if (!user || user.role !== UserRole.SCHOOL_ADMIN || user.emailVerifiedAt) {
+  if (
+    !user ||
+    user.role !== UserRole.SCHOOL_SUPER_ADMIN ||
+    user.emailVerifiedAt
+  ) {
     return {
       status: "error",
       message: "Verification is not required for this account.",

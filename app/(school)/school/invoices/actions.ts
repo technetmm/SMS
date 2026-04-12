@@ -69,6 +69,7 @@ async function requireAdminRefund() {
   if (!actor.ok) return actor;
 
   if (
+    actor.role !== UserRole.SCHOOL_SUPER_ADMIN &&
     actor.role !== UserRole.SCHOOL_ADMIN &&
     actor.role !== UserRole.SUPER_ADMIN
   ) {

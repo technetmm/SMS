@@ -24,6 +24,10 @@ export default async function HomePage() {
     redirect("/platform/dashboard");
   }
 
+  if (session?.user?.role === UserRole.SCHOOL_SUPER_ADMIN) {
+    redirect("/school/dashboard");
+  }
+
   if (session?.user?.role === UserRole.SCHOOL_ADMIN) {
     redirect("/school/dashboard");
   }

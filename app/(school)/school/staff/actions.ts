@@ -344,7 +344,8 @@ export async function setStaffSystemRole(
   if (
     !session?.user?.id ||
     !session.user.schoolId ||
-    session.user.role !== UserRole.SCHOOL_ADMIN
+    (session.user.role !== UserRole.SCHOOL_SUPER_ADMIN &&
+      session.user.role !== UserRole.SCHOOL_ADMIN)
   ) {
     return { status: "error", message: "Unauthorized." };
   }
@@ -372,6 +373,12 @@ export async function setStaffSystemRole(
   }
   if (targetUser.role === UserRole.SUPER_ADMIN) {
     return { status: "error", message: "Cannot modify SUPER_ADMIN." };
+  }
+  if (
+    targetUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
+    targetUser.role === UserRole.STUDENT
+  ) {
+    return { status: "error", message: "Target user cannot use staff admin roles." };
   }
   if (!targetUser.staffProfile || targetUser.studentProfile) {
     return { status: "error", message: "Target user is not a staff account." };

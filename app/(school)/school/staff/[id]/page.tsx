@@ -15,7 +15,6 @@ import {
 import { staffStatusColor } from "@/lib/colors";
 import { timeToMinutes } from "@/lib/time";
 import { dateFormatter } from "@/lib/helper";
-import { cn } from "@/lib/utils";
 import { StaffSystemRoleManager } from "@/components/staff/staff-system-role-manager";
 
 export default async function StaffDetailPage({
