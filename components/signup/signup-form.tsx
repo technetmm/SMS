@@ -23,6 +23,9 @@ import {
   InputGroupButton,
   InputGroupInput,
 } from "../ui/input-group";
+import { useTranslations } from "next-intl";
+import { enumLabel, USER_ROLE_LABELS } from "@/lib/enum-labels";
+import { UserRole } from "@/app/generated/prisma/enums";
 
 const initialState: SignupActionState = {
   success: false,
@@ -30,10 +33,11 @@ const initialState: SignupActionState = {
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const t = useTranslations("SignupForm");
 
   return (
     <Button type="submit" className="w-full" disabled={pending}>
-      {pending ? "Creating school..." : "Create School Account"}
+      {pending ? t("buttons.creating") : t("buttons.submit")}
     </Button>
   );
 }
@@ -49,13 +53,14 @@ function FieldError({ errors }: FieldErrorProps) {
 
 export function SignupForm() {
   const router = useRouter();
+  const t = useTranslations("SignupForm");
   const [state, action] = useActionState(signup, initialState);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmVisible, setIsConfirmVisible] = useState(false);
 
   useEffect(() => {
     if (state.success) {
-      toast.success(state.message ?? "Account created.");
+      toast.success(state.message ?? t('messages.createdFallback'));
       if (state.redirectTo) {
         router.push(state.redirectTo);
       }
@@ -65,48 +70,49 @@ export function SignupForm() {
     if (state.message) {
       toast.error(state.message);
     }
-  }, [router, state]);
+  }, [router, state, t]);
 
   return (
     <Card className="w-full border-border/70">
       <CardHeader>
-        <CardTitle>Create your school workspace</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          We will create a new tenant and your SCHOOL_SUPER_ADMIN account in
-          one secure step.
+          {t("description", {
+            role: enumLabel(UserRole.SCHOOL_SUPER_ADMIN, USER_ROLE_LABELS),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={action} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="schoolName">School Name</Label>
+            <Label htmlFor="schoolName">{t("fields.schoolName.label")}</Label>
             <Input
               id="schoolName"
               name="schoolName"
-              placeholder="Future Academy"
+              placeholder={t("fields.schoolName.placeholder")}
               required
             />
             <FieldError errors={state.fieldErrors?.schoolName} />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="adminName">Admin Name</Label>
+            <Label htmlFor="adminName">{t("fields.adminName.label")}</Label>
             <Input
               id="adminName"
               name="adminName"
-              placeholder="Jane Doe"
+              placeholder={t("fields.adminName.placeholder")}
               required
             />
             <FieldError errors={state.fieldErrors?.adminName} />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email">Admin Email</Label>
+            <Label htmlFor="email">{t("fields.email.label")}</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="admin@school.com"
+              placeholder={t("fields.email.placeholder")}
               required
             />
             <FieldError errors={state.fieldErrors?.email} />
@@ -114,7 +120,7 @@ export function SignupForm() {
 
           <div className="grid gap-2 md:grid-cols-2 md:gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("fields.password.label")}</Label>
               <InputGroup>
                 <InputGroupInput
                   id="password"
@@ -128,7 +134,9 @@ export function SignupForm() {
                   <InputGroupButton
                     type="button"
                     aria-label={
-                      isPasswordVisible ? "Hide password" : "Show password"
+                      isPasswordVisible
+                        ? t("fields.password.hide")
+                        : t("fields.password.show")
                     }
                     size="icon-xs"
                     onClick={() => setIsPasswordVisible((prev) => !prev)}
@@ -145,7 +153,9 @@ export function SignupForm() {
               <FieldError errors={state.fieldErrors?.password} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">
+                {t("fields.confirmPassword.label")}
+              </Label>
               <InputGroup>
                 <InputGroupInput
                   id="confirmPassword"
@@ -159,7 +169,9 @@ export function SignupForm() {
                   <InputGroupButton
                     type="button"
                     aria-label={
-                      isConfirmVisible ? "Hide password" : "Show password"
+                      isConfirmVisible
+                        ? t("fields.confirmPassword.hide")
+                        : t("fields.confirmPassword.show")
                     }
                     size="icon-xs"
                     onClick={() => setIsConfirmVisible((prev) => !prev)}
@@ -177,16 +189,24 @@ export function SignupForm() {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="phone">Phone (optional)</Label>
-            <Input id="phone" name="phone" placeholder="+95 9..." />
+            <Label htmlFor="phone">{t("fields.phone.label")}</Label>
+            <Input
+              id="phone"
+              name="phone"
+              placeholder={t("fields.phone.placeholder")}
+            />
             <FieldError errors={state.fieldErrors?.phone} />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="slug">Subdomain Slug (optional)</Label>
-            <Input id="slug" name="slug" placeholder="future-academy" />
+            <Label htmlFor="slug">{t("fields.slug.label")}</Label>
+            <Input
+              id="slug"
+              name="slug"
+              placeholder={t("fields.slug.placeholder")}
+            />
             <p className="text-xs text-muted-foreground">
-              Lowercase letters, numbers, and hyphens only.
+              {t("fields.slug.hint")}
             </p>
             <FieldError errors={state.fieldErrors?.slug} />
           </div>

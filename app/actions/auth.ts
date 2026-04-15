@@ -22,6 +22,7 @@ import {
   requiresEmailVerification,
   verifyEmailVerificationCode,
 } from "@/lib/auth/email-verification";
+import { getTranslations } from "next-intl/server";
 
 function toSlug(input: string) {
   return input
@@ -40,22 +41,11 @@ export type VerifyEmailActionState = {
   cooldownSeconds?: number;
 };
 
-const verifyEmailSchema = z.object({
-  email: z.string().trim().email("Enter a valid email."),
-  code: z
-    .string()
-    .trim()
-    .regex(/^\d{6}$/, "Verification code must be 6 digits."),
-});
-
-const resendEmailSchema = z.object({
-  email: z.string().trim().email("Enter a valid email."),
-});
-
 export async function signup(
   _previousState: SignupActionState,
   formData: FormData,
 ): Promise<SignupActionState> {
+  const t = await getTranslations("SignupForm");
   const parsed = signupSchema.safeParse({
     schoolName: formData.get("schoolName"),
     adminName: formData.get("adminName"),
@@ -69,7 +59,7 @@ export async function signup(
   if (!parsed.success) {
     return {
       success: false,
-      message: "Please check the form fields and try again.",
+      message: t("messages.invalidForm"),
       fieldErrors: parsed.error.flatten().fieldErrors,
     };
   }
@@ -81,7 +71,7 @@ export async function signup(
   if (!tenantSlug) {
     return {
       success: false,
-      fieldErrors: { slug: ["Please provide a valid school slug."] },
+      fieldErrors: { slug: [t("fieldErrors.slug.invalid")] },
     };
   }
 
@@ -100,14 +90,14 @@ export async function signup(
     if (emailExists) {
       return {
         success: false,
-        fieldErrors: { email: ["Email is already in use."] },
+        fieldErrors: { email: [t("fieldErrors.email.taken")] },
       };
     }
 
     if (slugExists) {
       return {
         success: false,
-        fieldErrors: { slug: ["Slug is already taken."] },
+        fieldErrors: { slug: [t("fieldErrors.slug.taken")] },
       };
     }
 
@@ -182,16 +172,14 @@ export async function signup(
     if (!emailSent) {
       return {
         success: true,
-        message:
-          "School account created, but we could not send the verification code yet. Please use Resend Code.",
+        message: t("messages.createdEmailFailed"),
         redirectTo: `/verify-email?email=${encodeURIComponent(normalizedEmail)}&emailSend=failed`,
       };
     }
 
     return {
       success: true,
-      message:
-        "School account created. Check your email for the verification code.",
+      message: t("messages.createdSuccess"),
       redirectTo: `/verify-email?email=${encodeURIComponent(normalizedEmail)}`,
     };
   } catch (error) {
@@ -206,14 +194,13 @@ export async function signup(
     ) {
       return {
         success: false,
-        message:
-          "Database schema is out of date. Please run migrations and try again.",
+        message: t("messages.schemaOutdated"),
       };
     }
 
     return {
       success: false,
-      message: "We could not create your account right now. Please try again.",
+      message: t("messages.createFailed"),
     };
   }
 }
@@ -222,6 +209,16 @@ export async function verifySignupEmailAction(
   _previousState: VerifyEmailActionState,
   formData: FormData,
 ): Promise<VerifyEmailActionState> {
+  const t = await getTranslations("VerifyEmailForm");
+
+  const verifyEmailSchema = z.object({
+    email: z.string().trim().email(t("messages.invalidEmail")),
+    code: z
+      .string()
+      .trim()
+      .regex(/^\d{6}$/, t("messages.codeLength")),
+  });
+
   const parsed = verifyEmailSchema.safeParse({
     email: formData.get("email"),
     code: formData.get("code"),
@@ -230,8 +227,7 @@ export async function verifySignupEmailAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message:
-        parsed.error.errors[0]?.message ?? "Invalid verification request.",
+      message: parsed.error.errors[0]?.message ?? t("messages.invalidRequest"),
     };
   }
 
@@ -247,13 +243,13 @@ export async function verifySignupEmailAction(
   });
 
   if (!user) {
-    return { status: "error", message: "Invalid verification request." };
+    return { status: "error", message: t("messages.invalidRequest") };
   }
 
   if (user.emailVerifiedAt) {
     return {
       status: "success",
-      message: "Email is already verified. Please sign in.",
+      message: t("messages.alreadyVerified"),
       redirectTo: "/login?verified=1",
     };
   }
@@ -265,7 +261,7 @@ export async function verifySignupEmailAction(
       passwordHash: user.passwordHash,
     })
   ) {
-    return { status: "error", message: "Invalid verification request." };
+    return { status: "error", message: t("messages.invalidRequest") };
   }
 
   const identifier = buildEmailVerificationIdentifier(user.id);
@@ -281,14 +277,14 @@ export async function verifySignupEmailAction(
   if (!tokenRecord) {
     return {
       status: "error",
-      message: "Verification code not found. Please request a new code.",
+      message: t("messages.codeMissing"),
     };
   }
 
   if (tokenRecord.expires.getTime() <= Date.now()) {
     return {
       status: "error",
-      message: "Verification code expired. Please request a new code.",
+      message: t("messages.codeExpired"),
     };
   }
 
@@ -300,7 +296,7 @@ export async function verifySignupEmailAction(
   if (!isValidCode) {
     return {
       status: "error",
-      message: "Invalid verification code.",
+      message: t("messages.codeInvalid"),
     };
   }
 
@@ -316,7 +312,7 @@ export async function verifySignupEmailAction(
 
   return {
     status: "success",
-    message: "Email verified successfully. Please sign in.",
+    message: t("messages.verifySuccess"),
     redirectTo: "/login?verified=1",
   };
 }
@@ -325,6 +321,12 @@ export async function resendSignupEmailCodeAction(
   _previousState: VerifyEmailActionState,
   formData: FormData,
 ): Promise<VerifyEmailActionState> {
+  const t = await getTranslations("VerifyEmailForm");
+
+  const resendEmailSchema = z.object({
+    email: z.string().trim().email(t("messages.invalidEmail")),
+  });
+
   const parsed = resendEmailSchema.safeParse({
     email: formData.get("email"),
   });
@@ -332,7 +334,7 @@ export async function resendSignupEmailCodeAction(
   if (!parsed.success) {
     return {
       status: "error",
-      message: parsed.error.errors[0]?.message ?? "Invalid resend request.",
+      message: parsed.error.errors[0]?.message ?? t("messages.invalidResend"),
     };
   }
 
@@ -359,7 +361,7 @@ export async function resendSignupEmailCodeAction(
   ) {
     return {
       status: "error",
-      message: "Verification is not required for this account.",
+      message: t("messages.notRequired"),
     };
   }
 
@@ -375,7 +377,7 @@ export async function resendSignupEmailCodeAction(
     if (ageMs < EMAIL_VERIFICATION_RESEND_COOLDOWN_MS) {
       return {
         status: "error",
-        message: "Please wait before requesting another code.",
+        message: t("messages.cooldown"),
         cooldownSeconds: Math.ceil(
           (EMAIL_VERIFICATION_RESEND_COOLDOWN_MS - ageMs) / 1000,
         ),
@@ -427,7 +429,7 @@ export async function resendSignupEmailCodeAction(
     });
     return {
       status: "error",
-      message: "Unable to send a new code right now. Please try again.",
+      message: t("messages.sendFailed"),
     };
   }
 
@@ -440,6 +442,6 @@ export async function resendSignupEmailCodeAction(
 
   return {
     status: "success",
-    message: "A new verification code has been sent.",
+    message: t("messages.resent"),
   };
 }

@@ -33,9 +33,11 @@ import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_ERROR_MESSAGE,
 } from "@/lib/auth/session-lock";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations("LoginPage");
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,7 +112,7 @@ export default function LoginPage() {
         result.error.includes(SESSION_LOCK_ERROR_CODE);
       const message = isSessionLocked
         ? SESSION_LOCK_ERROR_MESSAGE
-        : "Invalid email or password.";
+        : t("messages.invalidCredentials");
 
       setUnverifiedEmail(null);
       setError(message);
@@ -119,7 +121,7 @@ export default function LoginPage() {
       return;
     }
 
-    toast.success("Signed in successfully.");
+    toast.success(t("messages.signInSuccess"));
     setUnverifiedEmail(null);
     setApprovalToken(null);
     router.push("/");
@@ -161,14 +163,14 @@ export default function LoginPage() {
             setError(DEVICE_APPROVAL_EXPIRED_MESSAGE);
             toast.error(DEVICE_APPROVAL_EXPIRED_MESSAGE);
           } else {
-            setError("Unable to finish sign in. Please try again.");
-            toast.error("Unable to finish sign in. Please try again.");
+            setError(t("messages.finishFailed"));
+            toast.error(t("messages.finishFailed"));
           }
           setApprovalToken(null);
           return;
         }
 
-        toast.success("Signed in successfully.");
+        toast.success(t("messages.signInSuccess"));
         setApprovalToken(null);
         router.push("/");
         return;
@@ -178,12 +180,8 @@ export default function LoginPage() {
         setError(DEVICE_APPROVAL_DENIED_MESSAGE);
         toast.error(DEVICE_APPROVAL_DENIED_MESSAGE);
       } else if (status === "INVALID") {
-        setError(
-          "Login approval request is no longer valid. Please sign in again.",
-        );
-        toast.error(
-          "Login approval request is no longer valid. Please sign in again.",
-        );
+        setError(t("messages.deviceInvalid"));
+        toast.error(t("messages.deviceInvalid"));
       } else {
         setError(DEVICE_APPROVAL_EXPIRED_MESSAGE);
         toast.error(DEVICE_APPROVAL_EXPIRED_MESSAGE);
@@ -201,17 +199,17 @@ export default function LoginPage() {
       active = false;
       window.clearInterval(intervalId);
     };
-  }, [approvalToken, router]);
+  }, [approvalToken, router, t]);
 
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Sign in</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("fields.email")}</Label>
             <Input
               id="email"
               name="email"
@@ -221,7 +219,7 @@ export default function LoginPage() {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t("fields.password")}</Label>
             <InputGroup>
               <InputGroupInput
                 id="password"
@@ -235,7 +233,11 @@ export default function LoginPage() {
               <InputGroupAddon align={"inline-end"}>
                 <InputGroupButton
                   type="button"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={
+                    showPassword
+                      ? t("fields.hidePassword")
+                      : t("fields.showPassword")
+                  }
                   size="icon-xs"
                   onClick={() => setShowPassword((prev) => !prev)}
                 >
@@ -251,12 +253,12 @@ export default function LoginPage() {
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           {unverifiedEmail ? (
             <p className="text-sm text-muted-foreground">
-              Verify your email here:{" "}
+              {t("verifyPrompt")}{" "}
               <Link
                 href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
-                Enter verification code
+                {t("verifyLink")}
               </Link>
             </p>
           ) : null}
@@ -266,18 +268,18 @@ export default function LoginPage() {
             disabled={isSubmitting || Boolean(approvalToken)}
           >
             {isSubmitting
-              ? "Signing in..."
+              ? t("buttons.signingIn")
               : approvalToken
-                ? "Waiting for approval..."
-                : "Sign in"}
+                ? t("buttons.waitingApproval")
+                : t("buttons.submit")}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            New school?{" "}
+            {t("signupPrompt")}{" "}
             <Link
               href="/signup"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              Create account
+              {t("signupLink")}
             </Link>
           </p>
         </form>

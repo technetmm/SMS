@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { getServerAuth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { SignupForm } from "@/components/signup/signup-form";
+import { enumLabel, USER_ROLE_LABELS } from "@/lib/enum-labels";
 
 export const metadata: Metadata = {
   title: "Create School Account | Technet SMS",
@@ -16,6 +18,7 @@ export default function SignupPage() {
 }
 
 async function SignupPageContent() {
+  const t = await getTranslations("SignupPage");
   const session = await getServerAuth();
 
   if (session?.user?.role === UserRole.SUPER_ADMIN) {
@@ -44,23 +47,23 @@ async function SignupPageContent() {
         <section className="space-y-4 pt-2">
           <p className="inline-flex items-center gap-2 rounded-full border border-border/70 px-3 py-1 text-xs text-muted-foreground">
             <Building2 className="h-3.5 w-3.5" />
-            Multi-tenant onboarding
+            {t("eyebrow")}
           </p>
-          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            Start your SMS school in minutes.
+          <h1 className="text-3xl font-semibold tracking-tight leading-relaxed md:text-4xl">
+            {t("title")}
           </h1>
           <p className="max-w-prose text-sm text-muted-foreground md:text-base">
-            We will create your tenant and your SCHOOL_SUPER_ADMIN user account
-            in one transaction. After verifying your email, you can sign in and
-            manage staff, students, classes, and billing.
+            {t("description", {
+              role: enumLabel(UserRole.SCHOOL_SUPER_ADMIN, USER_ROLE_LABELS),
+            })}
           </p>
           <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
+            {t("alreadyHaveAccount")}{" "}
             <Link
               href="/login"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              Sign in
+              {t("signIn")}
             </Link>
           </p>
         </section>

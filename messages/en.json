@@ -1,0 +1,294 @@
+{
+  "LocaleSwitcher": {
+    "label": "Language switcher",
+    "shortLabel": "Language"
+  },
+  "HomePage": {
+    "cta": {
+      "title": "Ready to launch your school workspace?",
+      "description": "Create your school account in under two minutes and invite your team.",
+      "button": "Get Started"
+    }
+  },
+  "LandingHero": {
+    "eyebrow": "Built for multi-tenant SMS teams",
+    "title": "One platform to run every school in your SMS SaaS.",
+    "description": "Launch tenant onboarding, manage classrooms, track attendance, and automate billing with a clean, secure dashboard your admins and staff can trust.",
+    "primaryAction": "Get Started",
+    "secondaryAction": "Sign In"
+  },
+  "LandingFeatures": {
+    "items": [
+      {
+        "title": "Tenant-Isolated Architecture",
+        "description": "Each school has strict data isolation with role-based controls."
+      },
+      {
+        "title": "Academic Operations",
+        "description": "Manage students, staff, sections, and attendance in one workflow."
+      },
+      {
+        "title": "Billing & Subscription Ready",
+        "description": "Track tuition, plan upgrades, and subscription lifecycle with confidence."
+      }
+    ]
+  },
+  "LandingPricing": {
+    "title": "Simple pricing for every school size",
+    "description": "Start free, then scale when your tenants grow.",
+    "choosePlan": "Choose {plan}",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "For early-stage schools",
+        "points": ["Up to 50 students", "Core dashboard", "Email support"]
+      },
+      "basic": {
+        "name": "Basic",
+        "description": "For growing schools",
+        "points": [
+          "Up to 500 students",
+          "Staff & class workflows",
+          "Attendance & payments"
+        ]
+      },
+      "premium": {
+        "name": "Premium",
+        "description": "For enterprise operations",
+        "points": ["Unlimited students", "Advanced reports", "Priority support"]
+      }
+    }
+  },
+  "Footer": {
+    "copyright": "© {year} Technet SMS SaaS. All rights reserved.",
+    "login": "Login",
+    "startFree": "Start Free"
+  },
+  "SignupPage": {
+    "eyebrow": "Multi-tenant onboarding",
+    "title": "Start your SMS school in minutes.",
+    "description": "We will create your tenant and your {role} account in one transaction. After verifying your email, you can sign in and manage staff, students, classes, and billing.",
+    "alreadyHaveAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "SignupForm": {
+    "title": "Create your school workspace",
+    "description": "We will create a new tenant and your {role} account in one secure step.",
+    "buttons": {
+      "submit": "Create School Account",
+      "creating": "Creating school..."
+    },
+    "fields": {
+      "schoolName": {
+        "label": "School Name",
+        "placeholder": "Future Academy"
+      },
+      "adminName": {
+        "label": "Admin Name",
+        "placeholder": "Jane Doe"
+      },
+      "email": {
+        "label": "Admin Email",
+        "placeholder": "admin@school.com"
+      },
+      "password": {
+        "label": "Password",
+        "show": "Show password",
+        "hide": "Hide password"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "show": "Show password",
+        "hide": "Hide password"
+      },
+      "phone": {
+        "label": "Phone (optional)",
+        "placeholder": "+95 9..."
+      },
+      "slug": {
+        "label": "Subdomain Slug (optional)",
+        "placeholder": "future-academy",
+        "hint": "Lowercase letters, numbers, and hyphens only."
+      }
+    },
+    "messages": {
+      "createdFallback": "Account created.",
+      "invalidForm": "Please check the form fields and try again.",
+      "createdEmailFailed": "School account created, but we could not send the verification code yet. Please use Resend Code.",
+      "createdSuccess": "School account created. Check your email for the verification code.",
+      "schemaOutdated": "Database schema is out of date. Please run migrations and try again.",
+      "createFailed": "We could not create your account right now. Please try again."
+    },
+    "fieldErrors": {
+      "schoolName": {
+        "min": "School name must be at least 2 characters."
+      },
+      "adminName": {
+        "required": "Admin name is required."
+      },
+      "email": {
+        "invalid": "Please enter a valid email address.",
+        "taken": "Email is already in use."
+      },
+      "password": {
+        "min": "Password must be at least 8 characters."
+      },
+      "confirmPassword": {
+        "required": "Confirm password is required.",
+        "mismatch": "Passwords do not match."
+      },
+      "phone": {
+        "max": "Phone is too long."
+      },
+      "slug": {
+        "invalid": "Please provide a valid school slug.",
+        "pattern": "Slug must be lowercase letters, numbers, and hyphens only.",
+        "taken": "Slug is already taken."
+      }
+    }
+  },
+  "LoginPage": {
+    "title": "Sign in",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "buttons": {
+      "submit": "Sign in",
+      "signingIn": "Signing in...",
+      "waitingApproval": "Waiting for approval..."
+    },
+    "verifyPrompt": "Verify your email here:",
+    "verifyLink": "Enter verification code",
+    "signupPrompt": "New school?",
+    "signupLink": "Create account",
+    "messages": {
+      "invalidCredentials": "Invalid email or password.",
+      "signInSuccess": "Signed in successfully.",
+      "deviceDenied": "Login request was denied by an approver.",
+      "deviceExpired": "Login approval request expired. Please try signing in again.",
+      "deviceInvalid": "Login approval request is no longer valid. Please sign in again.",
+      "finishFailed": "Unable to finish sign in. Please try again.",
+      "sessionLocked": "This account is already signed in on another device."
+    }
+  },
+  "VerifyEmailPage": {
+    "title": "Verify your email",
+    "description": "Enter the 6-digit code sent to your email to activate your account.",
+    "alreadyVerified": "Already verified?",
+    "signIn": "Sign in"
+  },
+  "VerifyEmailForm": {
+    "fields": {
+      "email": "Email",
+      "code": "Verification Code"
+    },
+    "buttons": {
+      "verify": "Verify Email",
+      "resend": "Resend",
+      "resendNow": "Resend Now"
+    },
+    "secondsSuffix": "s",
+    "messages": {
+      "verified": "Email verified.",
+      "resendFailed": "Unable to resend code.",
+      "initialEmailFailed": "We created your account, but we could not send the verification code. Please click",
+      "invalidEmail": "Enter a valid email.",
+      "codeLength": "Verification code must be 6 digits.",
+      "invalidRequest": "Invalid verification request.",
+      "alreadyVerified": "Email is already verified. Please sign in.",
+      "codeMissing": "Verification code not found. Please request a new code.",
+      "codeExpired": "Verification code expired. Please request a new code.",
+      "codeInvalid": "Invalid verification code.",
+      "verifySuccess": "Email verified successfully. Please sign in.",
+      "invalidResend": "Invalid resend request.",
+      "notRequired": "Verification is not required for this account.",
+      "cooldown": "Please wait before requesting another code.",
+      "sendFailed": "Unable to send a new code right now. Please try again.",
+      "resent": "A new verification code has been sent."
+    }
+  },
+  "Sidebar": {
+    "platform": "Platform",
+    "school": "School",
+    "groups": {
+      "overview": "Overview",
+      "people": "People",
+      "academics": "Academics",
+      "schedule": "Schedule",
+      "finance": "Finance"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "deviceApprovals": "Device Approvals",
+      "students": "Students",
+      "staff": "Staff",
+      "subjects": "Subjects",
+      "courses": "Courses",
+      "classes": "Classes",
+      "sections": "Sections",
+      "enrollments": "Enrollments",
+      "timetable": "Timetable",
+      "studentAttendance": "Student Attendance",
+      "staffAttendance": "Staff Attendance",
+      "invoices": "Invoices",
+      "payments": "Payments",
+      "payroll": "Payroll",
+      "exports": "Exports",
+      "tenants": "Tenants",
+      "subscriptions": "Subscriptions"
+    }
+  },
+  "NavUser": {
+    "profile": "Profile",
+    "settings": "Settings",
+    "security": "Security",
+    "notifications": "Notifications",
+    "logOut": "Log out"
+  },
+  "SettingsNav": {
+    "schoolInfo": "School Info",
+    "theme": "Theme",
+    "profilePhoto": "Profile Photo",
+    "changeEmail": "Change Email",
+    "changePassword": "Change Password",
+    "twoFactorAuth": "Two-Factor Auth",
+    "security": "Security"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "loading": "Loading...",
+    "empty": "No notifications yet.",
+    "viewAll": "View all notifications",
+    "loadFailed": "Unable to load notifications.",
+    "updateFailedSingle": "Unable to update notification.",
+    "updateFailedAll": "Unable to update notifications."
+  },
+  "Breadcrumb": {
+    "school": "School",
+    "dashboard": "Dashboard",
+    "platform": "Platform",
+    "tenants": "Tenants",
+    "subscriptions": "Subscriptions",
+    "students": "Students",
+    "classes": "Classes",
+    "attendance": "Attendance",
+    "payments": "Payments",
+    "settings": "Settings",
+    "changeEmail": "Change Email",
+    "changePassword": "Change Password",
+    "profilePhoto": "Profile Photo",
+    "twoFactorAuth": "Two-Factor Auth",
+    "security": "Security",
+    "theme": "Theme",
+    "notifications": "Notifications"
+  },
+  "Topbar": {
+    "welcomeBack": "Welcome back",
+    "signOut": "Sign out"
+  }
+}

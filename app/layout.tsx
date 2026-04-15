@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { AuthSessionProvider } from "@/components/shared/session-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,14 +29,17 @@ export const metadata: Metadata = {
   description: "School management system for students, classes, and payments.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={cn(
         "h-full",
@@ -45,17 +51,22 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-sidebar">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <AuthSessionProvider>{children}</AuthSessionProvider>
-            <Toaster position={"top-right"} />
-          </TooltipProvider>
-        </ThemeProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <TooltipProvider>
+              <div className="fixed right-4 top-4 z-50">
+                <LocaleSwitcher />
+              </div>
+              <AuthSessionProvider>{children}</AuthSessionProvider>
+              <Toaster position={"top-right"} />
+            </TooltipProvider>
+          </ThemeProvider>
+        </NextIntlClientProvider>
         <Analytics />
         <SpeedInsights />
       </body>

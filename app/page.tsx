@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getServerAuth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
+  const t = await getTranslations("HomePage");
   const session = await getServerAuth();
 
   if (session?.user?.role === UserRole.SUPER_ADMIN) {
@@ -46,14 +48,12 @@ export default async function HomePage() {
       <LandingFeatures />
       <LandingPricing />
       <section className="mx-auto w-full max-w-6xl px-6 py-10 text-center md:py-14">
-        <h3 className="text-2xl font-semibold">
-          Ready to launch your school workspace?
-        </h3>
+        <h3 className="text-2xl font-semibold">{t("cta.title")}</h3>
         <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-          Create your school account in under two minutes and invite your team.
+          {t("cta.description")}
         </p>
         <Button asChild size="lg" className="mt-5">
-          <Link href="/signup">Get Started</Link>
+          <Link href="/signup">{t("cta.button")}</Link>
         </Button>
       </section>
       <Footer />
