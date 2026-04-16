@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         destination: "/school/dashboard",
         permanent: true,
       },
+      {
+        source: "/:locale(en|my)/school",
+        destination: "/:locale/school/dashboard",
+        permanent: true,
+      },
     ];
   },
 };

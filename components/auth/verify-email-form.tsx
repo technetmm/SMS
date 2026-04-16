@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { RefreshCwIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import {
   resendSignupEmailCodeAction,
@@ -18,6 +18,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "@/i18n/navigation";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 
 const initialState: VerifyEmailActionState = { status: "idle" };
@@ -30,6 +31,7 @@ export function VerifyEmailForm({
   emailSendFailed?: boolean;
 }) {
   const router = useRouter();
+  const t = useTranslations("VerifyEmailForm");
   const [email, setEmail] = useState(initialEmail);
   const [code, setCode] = useState("");
   const [verifyState, verifyAction] = useActionState(
@@ -43,7 +45,7 @@ export function VerifyEmailForm({
 
   useEffect(() => {
     if (verifyState.status === "success") {
-      toast.success(verifyState.message ?? "Email verified.");
+      toast.success(verifyState.message ?? t("messages.verified"));
       if (verifyState.redirectTo) {
         router.push(verifyState.redirectTo);
       }
@@ -53,7 +55,7 @@ export function VerifyEmailForm({
     if (verifyState.status === "error" && verifyState.message) {
       toast.error(verifyState.message);
     }
-  }, [router, verifyState]);
+  }, [router, t, verifyState]);
 
   useEffect(() => {
     if (resendState.status === "success" && resendState.message) {
@@ -63,26 +65,26 @@ export function VerifyEmailForm({
 
     if (resendState.status === "error") {
       const suffix = resendState.cooldownSeconds
-        ? ` (${resendState.cooldownSeconds}s)`
+        ? ` (${resendState.cooldownSeconds}${t("secondsSuffix")})`
         : "";
       toast.error(
-        `${resendState.message ?? "Unable to resend code."}${suffix}`,
+        `${resendState.message ?? t("messages.resendFailed")}${suffix}`,
       );
     }
-  }, [resendState]);
+  }, [resendState, t]);
 
   return (
     <div className="space-y-5">
       {emailSendFailed ? (
         <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
-          We created your account, but we could not send the verification code.
-          Please click <span className="font-medium">Resend Code</span>.
+          {t("messages.initialEmailFailed")}{" "}
+          <span className="font-medium">{t("buttons.resend")}</span>.
         </div>
       ) : null}
 
       <form action={verifyAction} className="space-y-5">
         <div className="grid gap-2">
-          <Label htmlFor="verify-email">Email</Label>
+          <Label htmlFor="verify-email">{t("fields.email")}</Label>
           <Input
             id="verify-email"
             name="email"
@@ -95,7 +97,7 @@ export function VerifyEmailForm({
 
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="verify-code">Verification Code</Label>
+            <Label htmlFor="verify-code">{t("fields.code")}</Label>
             <Button
               type="submit"
               form="resend-code-form"
@@ -103,7 +105,7 @@ export function VerifyEmailForm({
               size="xs"
             >
               <RefreshCwIcon />
-              {emailSendFailed ? "Resend Now" : "Resend"}
+              {emailSendFailed ? t("buttons.resendNow") : t("buttons.resend")}
             </Button>
           </div>
           <InputOTP
@@ -132,7 +134,7 @@ export function VerifyEmailForm({
         </div>
 
         <Button type="submit" className="w-full">
-          Verify Email
+          {t("buttons.verify")}
         </Button>
       </form>
 

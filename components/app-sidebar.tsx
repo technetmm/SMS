@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -34,128 +34,7 @@ import {
   TvMinimalIcon,
 } from "lucide-react";
 import { UserRole } from "@/app/generated/prisma/enums";
-
-const schoolNavGroups = [
-  {
-    label: "Overview",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/school/dashboard",
-        icon: <LayoutDashboardIcon />,
-      },
-      {
-        title: "Analytics",
-        url: "/school/analytics",
-        icon: <BarChart3Icon />,
-      },
-      {
-        title: "Device Approvals",
-        url: "/school/device-approvals",
-        icon: <ShieldCheckIcon />,
-      },
-    ],
-  },
-  {
-    label: "People",
-    items: [
-      { title: "Students", url: "/school/students", icon: <UsersIcon /> },
-      { title: "Staff", url: "/school/staff", icon: <UserRoundIcon /> },
-    ],
-  },
-  {
-    label: "Academics",
-    items: [
-      {
-        title: "Subjects",
-        url: "/school/subjects",
-        icon: <BookOpenTextIcon />,
-      },
-      { title: "Courses", url: "/school/courses", icon: <BookOpenIcon /> },
-      { title: "Classes", url: "/school/classes", icon: <GraduationCapIcon /> },
-      { title: "Sections", url: "/school/sections", icon: <TvMinimalIcon /> },
-      {
-        title: "Enrollments",
-        url: "/school/enrollments",
-        icon: <ListChecksIcon />,
-      },
-    ],
-  },
-  {
-    label: "Schedule",
-    items: [
-      {
-        title: "Timetable",
-        url: "/school/timetable",
-        icon: <CalendarClockIcon />,
-      },
-      {
-        title: "Student Attendance",
-        url: "/school/attendance",
-        icon: <CalendarDaysIcon />,
-      },
-      {
-        title: "Staff Attendance",
-        url: "/school/staff-attendance",
-        icon: <ClipboardCheckIcon />,
-      },
-    ],
-  },
-  {
-    label: "Finance",
-    items: [
-      { title: "Invoices", url: "/school/invoices", icon: <FileTextIcon /> },
-      { title: "Payments", url: "/school/payments", icon: <CreditCardIcon /> },
-      { title: "Payroll", url: "/school/payroll", icon: <ReceiptIcon /> },
-      { title: "Exports", url: "/school/exports", icon: <FileDownIcon /> },
-    ],
-  },
-];
-
-const teacherNavGroups = [
-  {
-    label: "Overview",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/teacher/dashboard",
-        icon: <LayoutDashboardIcon />,
-      },
-    ],
-  },
-];
-
-const studentNavGroups = [
-  {
-    label: "Overview",
-    items: [
-      {
-        title: "Dashboard",
-        url: "/student/dashboard",
-        icon: <LayoutDashboardIcon />,
-      },
-    ],
-  },
-];
-
-const platformNavMain = [
-  {
-    title: "Dashboard",
-    url: "/platform/dashboard",
-    icon: <LayoutDashboardIcon />,
-  },
-  {
-    title: "Device Approvals",
-    url: "/platform/device-approvals",
-    icon: <ShieldCheckIcon />,
-  },
-  { title: "Tenants", url: "/platform/tenants", icon: <UsersIcon /> },
-  {
-    title: "Subscriptions",
-    url: "/platform/subscriptions",
-    icon: <CreditCardIcon />,
-  },
-];
+import { Link } from "@/i18n/navigation";
 
 export function AppSidebar({
   user,
@@ -173,10 +52,10 @@ export function AppSidebar({
   schoolId: string | null;
   schoolName?: string | null;
 }) {
+  const t = useTranslations("Sidebar");
   const isPlatform = role === UserRole.SUPER_ADMIN && !schoolId;
   const isSchool =
-    (role === UserRole.SCHOOL_SUPER_ADMIN ||
-      role === UserRole.SCHOOL_ADMIN) &&
+    (role === UserRole.SCHOOL_SUPER_ADMIN || role === UserRole.SCHOOL_ADMIN) &&
     !!schoolId;
   const isTeacher = role === UserRole.TEACHER;
   const isStudent = role === UserRole.STUDENT;
@@ -187,7 +66,171 @@ export function AppSidebar({
       : isStudent
         ? "/student/dashboard"
         : "/school/dashboard";
-  const subtitle = isPlatform ? "Platform" : schoolName?.trim() || "School";
+  const subtitle = isPlatform
+    ? t("platform")
+    : schoolName?.trim() || t("school");
+
+  const schoolNavGroups = [
+    {
+      label: t("groups.overview"),
+      items: [
+        {
+          title: t("items.dashboard"),
+          url: "/school/dashboard",
+          icon: <LayoutDashboardIcon />,
+        },
+        {
+          title: t("items.analytics"),
+          url: "/school/analytics",
+          icon: <BarChart3Icon />,
+        },
+        {
+          title: t("items.deviceApprovals"),
+          url: "/school/device-approvals",
+          icon: <ShieldCheckIcon />,
+        },
+      ],
+    },
+    {
+      label: t("groups.people"),
+      items: [
+        {
+          title: t("items.students"),
+          url: "/school/students",
+          icon: <UsersIcon />,
+        },
+        {
+          title: t("items.staff"),
+          url: "/school/staff",
+          icon: <UserRoundIcon />,
+        },
+      ],
+    },
+    {
+      label: t("groups.academics"),
+      items: [
+        {
+          title: t("items.subjects"),
+          url: "/school/subjects",
+          icon: <BookOpenTextIcon />,
+        },
+        {
+          title: t("items.courses"),
+          url: "/school/courses",
+          icon: <BookOpenIcon />,
+        },
+        {
+          title: t("items.classes"),
+          url: "/school/classes",
+          icon: <GraduationCapIcon />,
+        },
+        {
+          title: t("items.sections"),
+          url: "/school/sections",
+          icon: <TvMinimalIcon />,
+        },
+        {
+          title: t("items.enrollments"),
+          url: "/school/enrollments",
+          icon: <ListChecksIcon />,
+        },
+      ],
+    },
+    {
+      label: t("groups.schedule"),
+      items: [
+        {
+          title: t("items.timetable"),
+          url: "/school/timetable",
+          icon: <CalendarClockIcon />,
+        },
+        {
+          title: t("items.studentAttendance"),
+          url: "/school/attendance",
+          icon: <CalendarDaysIcon />,
+        },
+        {
+          title: t("items.staffAttendance"),
+          url: "/school/staff-attendance",
+          icon: <ClipboardCheckIcon />,
+        },
+      ],
+    },
+    {
+      label: t("groups.finance"),
+      items: [
+        {
+          title: t("items.invoices"),
+          url: "/school/invoices",
+          icon: <FileTextIcon />,
+        },
+        {
+          title: t("items.payments"),
+          url: "/school/payments",
+          icon: <CreditCardIcon />,
+        },
+        {
+          title: t("items.payroll"),
+          url: "/school/payroll",
+          icon: <ReceiptIcon />,
+        },
+        {
+          title: t("items.exports"),
+          url: "/school/exports",
+          icon: <FileDownIcon />,
+        },
+      ],
+    },
+  ];
+
+  const teacherNavGroups = [
+    {
+      label: t("groups.overview"),
+      items: [
+        {
+          title: t("items.dashboard"),
+          url: "/teacher/dashboard",
+          icon: <LayoutDashboardIcon />,
+        },
+      ],
+    },
+  ];
+
+  const studentNavGroups = [
+    {
+      label: t("groups.overview"),
+      items: [
+        {
+          title: t("items.dashboard"),
+          url: "/student/dashboard",
+          icon: <LayoutDashboardIcon />,
+        },
+      ],
+    },
+  ];
+
+  const platformNavMain = [
+    {
+      title: t("items.dashboard"),
+      url: "/platform/dashboard",
+      icon: <LayoutDashboardIcon />,
+    },
+    {
+      title: t("items.deviceApprovals"),
+      url: "/platform/device-approvals",
+      icon: <ShieldCheckIcon />,
+    },
+    {
+      title: t("items.tenants"),
+      url: "/platform/tenants",
+      icon: <UsersIcon />,
+    },
+    {
+      title: t("items.subscriptions"),
+      url: "/platform/subscriptions",
+      icon: <CreditCardIcon />,
+    },
+  ];
 
   return (
     <Sidebar variant="inset" {...props}>

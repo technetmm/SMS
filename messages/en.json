@@ -1,4 +1,7 @@
 {
+  "Common": {
+    "open": "Open"
+  },
   "LocaleSwitcher": {
     "label": "Language switcher",
     "shortLabel": "Language"
@@ -258,9 +261,46 @@
     "twoFactorAuth": "Two-Factor Auth",
     "security": "Security"
   },
+  "SettingsOverview": {
+    "schoolInfo": {
+      "title": "School Info",
+      "description": "View or update your school profile details."
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Switch between light, dark, or system appearance."
+    },
+    "profilePhoto": {
+      "title": "Profile Photo",
+      "description": "Upload or remove your profile picture."
+    },
+    "email": {
+      "title": "Email",
+      "description": "Update the email used to sign in."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Change your account password securely."
+    },
+    "twoFactorAuth": {
+      "title": "Two-Factor Auth",
+      "description": "Enable or disable two-factor authentication."
+    },
+    "security": {
+      "title": "Security",
+      "description": "Review security status and sessions."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language used across your dashboard."
+    }
+  },
   "Notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",
+    "markRead": "Mark read",
+    "loadMore": "Load more",
+    "unreadCount": "Unread: {count}",
     "loading": "Loading...",
     "empty": "No notifications yet.",
     "viewAll": "View all notifications",
@@ -289,6 +329,25 @@
   },
   "Topbar": {
     "welcomeBack": "Welcome back",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "account": "Account"
+  },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "description": "We hit an unexpected issue. You can retry now or go back safely.",
+    "reference": "Error reference: {digest}",
+    "retry": "Try again",
+    "backHome": "Back to Home"
+  },
+  "NotFoundPage": {
+    "title": "Page Not Found",
+    "description": "The page you are looking for does not exist or may have been moved.",
+    "goHome": "Go to Home",
+    "goDashboard": "Go to Dashboard"
+  },
+  "UnauthorizedPage": {
+    "title": "Unauthorized",
+    "description": "You do not have permission to access this page.",
+    "goDashboard": "Go to Dashboard"
   }
 }

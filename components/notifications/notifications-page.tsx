@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,14 +15,16 @@ import {
 
 const DEFAULT_PAGE_SIZE = 20;
 
-function formatTimestamp(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatTimestamp(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
 }
 
 export function NotificationsPage() {
+  const locale = useLocale();
+  const t = useTranslations("Notifications");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [nextOffset, setNextOffset] = useState<number | null>(0);
   const [loading, setLoading] = useState(false);
@@ -56,13 +59,13 @@ export function NotificationsPage() {
         );
         setNextOffset(data.nextOffset);
       } catch {
-        toast.error("Unable to load notifications.");
+        toast.error(t("loadFailed"));
       } finally {
         setLoading(false);
         setLoadingMore(false);
       }
     },
-    [],
+    [t],
   );
 
   useEffect(() => {
@@ -81,12 +84,12 @@ export function NotificationsPage() {
         );
         setUnreadCount((prev) => Math.max(0, prev - 1));
       } catch {
-        toast.error("Unable to update notification.");
+        toast.error(t("updateFailedSingle"));
       } finally {
         setUpdating(false);
       }
     },
-    [],
+    [t],
   );
 
   const onMarkAllRead = useCallback(async () => {
@@ -98,11 +101,11 @@ export function NotificationsPage() {
       );
       setUnreadCount(0);
     } catch {
-      toast.error("Unable to update notifications.");
+      toast.error(t("updateFailedAll"));
     } finally {
       setUpdating(false);
     }
-  }, []);
+  }, [t]);
 
   const hasUnread = useMemo(
     () => notifications.some((item) => !item.isRead),
@@ -115,7 +118,7 @@ export function NotificationsPage() {
         <CardTitle>All Notifications</CardTitle>
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">
-            Unread: {unreadCount}
+            {t("unreadCount", {count: unreadCount})}
           </span>
           <Button
             type="button"
@@ -124,15 +127,15 @@ export function NotificationsPage() {
             onClick={() => void onMarkAllRead()}
             disabled={!hasUnread || updating}
           >
-            Mark all as read
+            {t("markAllRead")}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
         ) : notifications.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No notifications yet.</p>
+          <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
           notifications.map((notification) => (
             <div
@@ -157,7 +160,7 @@ export function NotificationsPage() {
                     disabled={updating}
                     onClick={() => void onMarkOneRead(notification.id)}
                   >
-                    Mark read
+                    {t("markRead")}
                   </Button>
                 ) : null}
               </div>
@@ -165,7 +168,7 @@ export function NotificationsPage() {
                 {notification.message}
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                {formatTimestamp(notification.createdAt)}
+                {formatTimestamp(notification.createdAt, locale)}
               </p>
             </div>
           ))
@@ -178,7 +181,7 @@ export function NotificationsPage() {
               onClick={() => void loadPage(nextOffset, true)}
               disabled={loadingMore}
             >
-              {loadingMore ? "Loading..." : "Load more"}
+              {loadingMore ? t("loading") : t("loadMore")}
             </Button>
           </div>
         ) : null}

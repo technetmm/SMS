@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LanguagesIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ type LocaleSwitcherProps = {
 
 export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
   const locale = useLocale() as AppLocale;
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const t = useTranslations("LocaleSwitcher");
   const [isPending, startTransition] = useTransition();
@@ -30,7 +32,10 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
 
     startTransition(() => {
       document.cookie = `${localeCookieName}=${nextLocale}; path=/; max-age=${COOKIE_MAX_AGE}; samesite=lax`;
-      router.refresh();
+      const query = searchParams.toString();
+      const newPathname = pathname.replace(`/${locale}`, `/${nextLocale}`);
+      const href = query ? `${newPathname}?${query}` : newPathname;
+      router.replace(href);
     });
   }
 
@@ -57,7 +62,10 @@ export function LocaleSwitcher({ className }: LocaleSwitcherProps) {
             size="sm"
             disabled={isPending}
             onClick={() => updateLocale(nextLocale)}
-            className={cn("rounded-full px-3 text-xs", !isActive && "shadow-none")}
+            className={cn(
+              "rounded-full px-3 text-xs",
+              !isActive && "shadow-none",
+            )}
             aria-pressed={isActive}
           >
             {localeLabels[nextLocale]}

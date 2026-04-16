@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Building2,
   Image as ImageIcon,
@@ -11,6 +10,7 @@ import {
   Palette,
   ShieldCheck,
 } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -25,6 +25,7 @@ const navItems = [
 
 export function SettingsNav() {
   const pathname = usePathname();
+  const t = useTranslations("SettingsNav");
 
   return (
     <nav className="flex flex-col gap-2">
@@ -51,7 +52,21 @@ export function SettingsNav() {
             >
               <Icon className="h-4 w-4" />
             </span>
-            <span>{item.label}</span>
+            <span>
+              {item.href === "/school/settings/school-profile"
+                ? t("schoolInfo")
+                : item.href === "/school/settings/theme"
+                  ? t("theme")
+                  : item.href === "/school/settings/profile-photo"
+                    ? t("profilePhoto")
+                    : item.href === "/school/settings/change-email"
+                      ? t("changeEmail")
+                      : item.href === "/school/settings/change-password"
+                        ? t("changePassword")
+                        : item.href === "/school/settings/2fa"
+                          ? t("twoFactorAuth")
+                          : t("security")}
+            </span>
           </Link>
         );
       })}

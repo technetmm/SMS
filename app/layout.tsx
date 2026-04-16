@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { LocaleSwitcher } from "@/components/shared/locale-switcher";
-import { ThemeProvider } from "@/components/shared/theme-provider";
-import { AuthSessionProvider } from "@/components/shared/session-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getLocale } from "next-intl/server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -35,7 +29,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const messages = await getMessages();
 
   return (
     <html
@@ -51,22 +44,7 @@ export default async function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-sidebar">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <TooltipProvider>
-              <div className="fixed right-4 top-4 z-50">
-                <LocaleSwitcher />
-              </div>
-              <AuthSessionProvider>{children}</AuthSessionProvider>
-              <Toaster position={"top-right"} />
-            </TooltipProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <main>{children}</main>
         <Analytics />
         <SpeedInsights />
       </body>

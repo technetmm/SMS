@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -26,6 +25,7 @@ import {
 import { useTranslations } from "next-intl";
 import { enumLabel, USER_ROLE_LABELS } from "@/lib/enum-labels";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { useRouter } from "@/i18n/navigation";
 
 const initialState: SignupActionState = {
   success: false,

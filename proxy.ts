@@ -1,57 +1,106 @@
+import createMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { UserRole } from "@/app/generated/prisma/enums";
+import type { AppLocale } from "@/i18n/config";
+import { getLocaleFromPathname, withLocale } from "@/i18n/locale";
+import { routing } from "@/i18n/routing";
 
 function matchesPath(pathname: string, base: string) {
   return pathname === base || pathname.startsWith(`${base}/`);
 }
 
+const handleI18nRouting = createMiddleware(routing);
+
+function redirectWithLocale(
+  req: NextRequest,
+  locale: AppLocale,
+  pathname: string,
+) {
+  return NextResponse.redirect(new URL(withLocale(pathname, locale), req.url));
+}
+
 export default async function proxy(req: NextRequest) {
-  const token = await getToken({ req });
-  const tokenUserId = typeof token?.id === "string" ? token.id : null;
-  if (!token || !tokenUserId) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  const { locale, pathnameWithoutLocale } = getLocaleFromPathname(
+    req.nextUrl.pathname,
+  );
+  const resolvedLocale = locale ?? routing.defaultLocale;
+
+  if (!locale) {
+    return handleI18nRouting(req);
   }
 
-  const role = token.role as UserRole | undefined;
-  const schoolId = token.schoolId as string | null | undefined;
-  const pathname = req.nextUrl.pathname;
+  const token = await getToken({ req });
+  const tokenUserId = typeof token?.id === "string" ? token.id : null;
+  const role = token?.role as UserRole | undefined;
+  const schoolId = token?.schoolId as string | null | undefined;
+  const pathname = pathnameWithoutLocale;
+
+  const protectedPaths = [
+    "/platform",
+    "/school/dashboard",
+    "/teacher",
+    "/student",
+    "/school/analytics",
+    "/school/students",
+    "/school/subjects",
+    "/school/courses",
+    "/school/classes",
+    "/school/sections",
+    "/school/enrollments",
+    "/school/attendance",
+    "/school/staff-attendance",
+    "/school/timetable",
+    "/school/invoices",
+    "/school/payments",
+    "/school/payroll",
+    "/school/exports",
+    "/school/staff",
+    "/school/settings",
+  ];
+
+  if (
+    protectedPaths.some((route) => matchesPath(pathname, route)) &&
+    (!token || !tokenUserId)
+  ) {
+    return redirectWithLocale(req, resolvedLocale, "/login");
+  }
 
   if (role === UserRole.SUPER_ADMIN && pathname.startsWith("/school/dashboard")) {
-    return NextResponse.redirect(new URL("/platform/dashboard", req.url));
+    return redirectWithLocale(req, resolvedLocale, "/platform/dashboard");
   }
 
   if (matchesPath(pathname, "/school/dashboard")) {
     if (role === UserRole.TEACHER) {
-      return NextResponse.redirect(new URL("/teacher/dashboard", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/teacher/dashboard");
     }
     if (role === UserRole.STUDENT) {
-      return NextResponse.redirect(new URL("/student/dashboard", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/student/dashboard");
     }
   }
 
   if (matchesPath(pathname, "/platform")) {
     if (role !== UserRole.SUPER_ADMIN) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
   }
 
   if (matchesPath(pathname, "/teacher")) {
     if (role !== UserRole.TEACHER) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
     if (!schoolId) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
   }
 
   if (matchesPath(pathname, "/student")) {
     if (role !== UserRole.STUDENT) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
     if (!schoolId) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
   }
 
@@ -85,13 +134,12 @@ export default async function proxy(req: NextRequest) {
       role !== UserRole.SCHOOL_ADMIN &&
       role !== UserRole.SUPER_ADMIN
     ) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
     if (!schoolId) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
+      return redirectWithLocale(req, resolvedLocale, "/unauthorized");
     }
   }
-
 
   const requestHeaders = new Headers(req.headers);
   if (schoolId) {
@@ -106,26 +154,5 @@ export default async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/platform/:path*",
-    "/school/dashboard/:path*",
-    "/teacher/:path*",
-    "/student/:path*",
-    "/school/analytics/:path*",
-    "/school/students/:path*",
-    "/school/subjects/:path*",
-    "/school/courses/:path*",
-    "/school/classes/:path*",
-    "/school/sections/:path*",
-    "/school/enrollments/:path*",
-    "/school/attendance/:path*",
-    "/school/staff-attendance/:path*",
-    "/school/timetable/:path*",
-    "/school/invoices/:path*",
-    "/school/payments/:path*",
-    "/school/payroll/:path*",
-    "/school/exports/:path*",
-    "/school/staff/:path*",
-    "/school/settings/:path*",
-  ],
+  matcher: ["/((?!api|_next|.*\\..*).*)"],
 };
