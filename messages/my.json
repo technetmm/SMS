@@ -270,6 +270,18 @@
     "security": "လုံခြုံရေး"
   },
   "SettingsOverview": {
+    "schoolEyebrow": "ဆက်တင်များ",
+    "platformEyebrow": "Platform ဆက်တင်များ",
+    "title": "အကောင့် Preferences",
+    "description": "သင့် profile၊ Theme နှင့် Security controls များကို စီမံပါ။",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "Settings overview",
+      "description": "သင် update လုပ်လိုသော အပိုင်းသို့ တိုက်ရိုက်သွားပါ။"
+    },
     "schoolInfo": {
       "title": "ကျောင်းအချက်အလက်",
       "description": "သင့်ကျောင်းပရိုဖိုင်အသေးစိတ်အချက်အလက်များကို ကြည့်ရှုပါ သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ။"
@@ -301,6 +313,268 @@
     "language": {
       "title": "ဘာသာစကား",
       "description": "သင့် dashboard တစ်လျှောက် အသုံးပြုမည့် ဘာသာစကားကို ရွေးချယ်ပါ။"
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "သင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်သုံးသပ်ပါ။",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "အတည်ပြုခြင်း အဆင့်တစ်ဆင့် ထပ်ထည့်ပါ။"
+      },
+      "password": {
+        "title": "Password",
+        "description": "လုံခြုံရေးအတွက် ပုံမှန် update လုပ်ထားသည်။"
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "အများဆုံးအသုံးပြုသော account ပြောင်းလဲမှုများ။",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
+    }
+  },
+  "SettingsPages": {
+    "theme": {
+      "eyebrow": "Appearance",
+      "title": "Theme",
+      "description": "System, Light, သို့မဟုတ် Dark mode အကြား ရွေးချယ်ပါ။"
+    },
+    "profilePhoto": {
+      "eyebrow": "Profile",
+      "title": "Profile Photo",
+      "description": "သင့် profile image ကို upload လုပ်ပါ သို့မဟုတ် ဖယ်ရှားပါ။"
+    },
+    "changeEmail": {
+      "eyebrow": "Account",
+      "title": "Change Email",
+      "description": "သင့် account နှင့်ချိတ်ဆက်ထားသော email address ကို update လုပ်ပါ။"
+    },
+    "changePassword": {
+      "eyebrow": "Security",
+      "title": "Change Password",
+      "description": "သင့် password ကို update လုပ်ပြီး account ကို လုံခြုံအောင်ထားပါ။"
+    },
+    "twoFactor": {
+      "eyebrow": "Security",
+      "title": "Two-Factor Authentication",
+      "description": "Authenticator app ဖြင့် သင့် account ကို လုံခြုံစေပါ။"
+    },
+    "security": {
+      "eyebrow": "Security",
+      "title": "Account Security",
+      "description": "Sign-in protections နှင့် session visibility ကို ထိန်းချုပ်ပါ။"
+    },
+    "schoolProfile": {
+      "eyebrow": "School",
+      "title": "School Info",
+      "description": "သင့်ကျောင်းအတွက် tenant profile fields များကို စီမံပါ။"
+    }
+  },
+  "SettingsThemeToggle": {
+    "title": "Appearance",
+    "description": "Dashboard အမြင်ကို သင်နှစ်သက်သလို ရွေးချယ်ပါ။",
+    "options": {
+      "system": {
+        "label": "System",
+        "description": "သင့်စက်၏ settings များအတိုင်း လိုက်လျောပါ"
+      },
+      "light": {
+        "label": "Light",
+        "description": "တောက်ပပြီး ရှင်းလင်းသည်"
+      },
+      "dark": {
+        "label": "Dark",
+        "description": "အလင်းနည်းသောနေရာများအတွက် သင့်တော်သည်"
+      }
+    }
+  },
+  "SettingsChangeEmailForm": {
+    "title": "Account Email",
+    "description": "သင့် email ကို ပြောင်းလဲပါက နောက်တစ်ကြိမ် sign in ဝင်ချိန်တွင် အသစ်ကို အသုံးပြုရပါမည်။",
+    "fields": {
+      "currentEmail": "Current email",
+      "newEmail": "New email",
+      "confirmPassword": "Confirm password"
+    },
+    "buttons": {
+      "submit": "Update Email",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Email updated",
+      "updateFailed": "Email ကို update မလုပ်နိုင်ပါ"
+    }
+  },
+  "SettingsChangePasswordForm": {
+    "title": "Password",
+    "description": "အခြားနေရာတွင် မသုံးသော အားကောင်းသော password ကို ရွေးချယ်ပါ။",
+    "fields": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password"
+    },
+    "buttons": {
+      "submit": "Update Password",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Password updated",
+      "updateFailed": "Password ကို update မလုပ်နိုင်ပါ"
+    }
+  },
+  "SettingsProfilePhoto": {
+    "title": "Profile Photo",
+    "description": "Dashboard တစ်လျှောက် သင့် avatar ကို update လုပ်ပါ။",
+    "altProfile": "Profile",
+    "yourProfile": "Your profile",
+    "fileHelp": "JPG, PNG သို့မဟုတ် WEBP ကို 2MB အထိ အသုံးပြုနိုင်သည်။",
+    "buttons": {
+      "upload": "Upload Photo",
+      "remove": "Remove Photo"
+    },
+    "messages": {
+      "updated": "Updated",
+      "removed": "Removed",
+      "failed": "Failed"
+    }
+  },
+  "SettingsSchoolProfileForm": {
+    "title": "School Profile",
+    "descriptionEditable": "သင့်ကျောင်းအမည်၊ slug နှင့် default currency ကို update လုပ်ပါ။",
+    "descriptionReadOnly": "School owner admin သာ school info ကို update လုပ်နိုင်ပါသည်။",
+    "fields": {
+      "schoolName": "School name",
+      "schoolSlug": "School slug",
+      "status": "Status",
+      "currency": "Currency",
+      "selectCurrency": "Select currency",
+      "billingDay": "Monthly billing day (1-28)"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "buttons": {
+      "save": "Save School Info",
+      "saving": "Saving..."
+    },
+    "viewOnly": "ဤအကောင့်သည် school info ကို ကြည့်ရှုနိုင်သော်လည်း ပြင်ဆင်၍ မရပါ။",
+    "messages": {
+      "updated": "School profile updated.",
+      "updateFailed": "School profile ကို update မလုပ်နိုင်ပါ။"
+    }
+  },
+  "SettingsSecurity": {
+    "title": "Security Overview",
+    "description": "Authentication options နှင့် active session controls များကို စီမံပါ။",
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Sign in ဝင်တိုင်း one-time code လိုအပ်စေပါ။",
+      "enable": "Enable",
+      "disable": "Disable",
+      "disableDialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "disableSubmit": "Disable 2FA"
+    },
+    "lastLogin": {
+      "title": "Last login",
+      "viewSessions": "View sessions"
+    },
+    "logoutAll": {
+      "title": "Logout from all devices",
+      "description": "သင့်စက်များအားလုံးရှိ active sessions များကို အဆုံးသတ်ပါ။",
+      "button": "Logout all",
+      "working": "Working..."
+    },
+    "messages": {
+      "twoFactorDisabled": "2FA disabled",
+      "disableFailed": "2FA ကို disable မလုပ်နိုင်ပါ",
+      "loggedOutAll": "စက်အားလုံးမှ logout လုပ်ပြီးပါပြီ (mock)."
+    }
+  },
+  "SettingsTwoFactor": {
+    "title": "Two-Factor Authentication",
+    "description": "Time-based one-time password (TOTP) ဖြင့် သင့် account ကို လုံခြုံစေပါ။",
+    "enabledBanner": "သင့် account အတွက် 2FA ကို လက်ရှိဖွင့်ထားပါသည်။",
+    "disable": {
+      "button": "Disable 2FA",
+      "dialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "submit": "Disable"
+    },
+    "enable": {
+      "button": "Enable 2FA",
+      "qrAlt": "2FA QR code",
+      "tokenLabel": "ဂဏန်း 6 လုံး code ကို ထည့်ပါ",
+      "verifying": "Verifying...",
+      "verify": "Verify & Enable"
+    },
+    "messages": {
+      "scanQr": "QR code ကို scan လုပ်ပါ",
+      "unableToStart": "2FA ကို စတင်မလုပ်နိုင်ပါ",
+      "enabled": "2FA enabled",
+      "disabled": "2FA disabled",
+      "failed": "Failed"
+    }
+  },
+  "SettingsActions": {
+    "validation": {
+      "otp": {
+        "required": "OTP code လိုအပ်ပါသည်",
+        "length": "OTP code သည် ဂဏန်း 6 လုံး ဖြစ်ရမည်"
+      },
+      "shared": {
+        "passwordRequired": "Password လိုအပ်ပါသည်"
+      },
+      "changeEmail": {
+        "invalidEmail": "မှန်ကန်သော email ကို ထည့်ပါ"
+      },
+      "changePassword": {
+        "currentPasswordRequired": "Current password လိုအပ်ပါသည်",
+        "newPasswordMin": "New password သည် အနည်းဆုံး 8 လုံး ရှိရမည်",
+        "confirmPasswordRequired": "New password ကို အတည်ပြုပါ",
+        "passwordsDoNotMatch": "Passwords မတူညီပါ"
+      },
+      "schoolProfile": {
+        "nameMin": "School name သည် အနည်းဆုံး 2 လုံး ရှိရမည်။",
+        "slugRequired": "Slug လိုအပ်ပါသည်။",
+        "currencyInvalid": "မှန်ကန်သော currency ကို ရွေးပါ။",
+        "billingDayInteger": "Billing day သည် whole number ဖြစ်ရမည်",
+        "billingDayRange": "Billing day သည် 1 နှင့် 28 အကြား ဖြစ်ရမည်"
+      }
+    },
+    "errors": {
+      "unknown": "တစ်ခုခု မှားယွင်းသွားပါသည်။",
+      "unauthorized": "Unauthorized",
+      "selectImage": "Image တစ်ခု ရွေးချယ်ပါ",
+      "userNotFound": "User မတွေ့ပါ",
+      "twoFactorNotStarted": "2FA setup မစတင်ရသေးပါ။",
+      "invalidCode": "Code မမှန်ပါ။ ထပ်ကြိုးစားပါ။",
+      "passwordLoginNotConfigured": "Password login ကို configure မလုပ်ထားပါ။",
+      "invalidPassword": "Password မမှန်ပါ။",
+      "emailUnchanged": "Email မပြောင်းလဲသေးပါ။",
+      "emailInUse": "Email ကို အသုံးပြုပြီးသား ဖြစ်သည်။",
+      "currentPasswordIncorrect": "Current password မမှန်ပါ။",
+      "schoolOwnerOnly": "School owner admin သာ school info ကို update လုပ်နိုင်ပါသည်။",
+      "schoolContextNotFound": "School context မတွေ့ပါ။",
+      "invalidSchoolSlug": "မှန်ကန်သော school slug ကို ထည့်ပါ။",
+      "slugTaken": "Slug ကို အသုံးပြုပြီးသား ဖြစ်သည်။"
+    },
+    "success": {
+      "profilePhotoUpdated": "Profile photo updated",
+      "profilePhotoRemoved": "Profile photo removed",
+      "scanQr": "Authenticator app ဖြင့် QR code ကို scan လုပ်ပါ။",
+      "twoFactorEnabled": "2FA ကို အောင်မြင်စွာ ဖွင့်ပြီးပါပြီ။",
+      "twoFactorDisabled": "2FA disabled.",
+      "emailUpdated": "Email ကို အောင်မြင်စွာ update လုပ်ပြီးပါပြီ။",
+      "passwordUpdated": "Password ကို အောင်မြင်စွာ update လုပ်ပြီးပါပြီ။",
+      "schoolProfileUpdated": "School profile updated."
     }
   },
   "Notifications": {

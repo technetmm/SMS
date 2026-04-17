@@ -1,40 +1,41 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { Laptop, Moon, Sun } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-const options = [
-  {
-    value: "system",
-    label: "System",
-    description: "Match your device settings",
-    icon: Laptop,
-  },
-  {
-    value: "light",
-    label: "Light",
-    description: "Bright and clear",
-    icon: Sun,
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    description: "Low-light friendly",
-    icon: Moon,
-  },
-];
-
 export function ThemeToggle() {
+  const t = useTranslations("SettingsThemeToggle");
   const { theme, setTheme } = useTheme();
   const currentTheme = theme ?? "system";
+  const options = [
+    {
+      value: "system",
+      label: t("options.system.label"),
+      description: t("options.system.description"),
+      icon: Laptop,
+    },
+    {
+      value: "light",
+      label: t("options.light.label"),
+      description: t("options.light.description"),
+      icon: Sun,
+    },
+    {
+      value: "dark",
+      label: t("options.dark.label"),
+      description: t("options.dark.description"),
+      icon: Moon,
+    },
+  ];
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Appearance</CardTitle>
-        <CardDescription>Choose how the dashboard looks for you.</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3 md:grid-cols-3">
         {options.map((option) => {

@@ -1,35 +1,39 @@
-import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { getServerAuth } from "@/auth";
 import { TwoFactor } from "@/components/settings/two-factor";
+import { redirect } from "@/i18n/navigation";
 
 export default async function PlatformTwoFactorPage() {
+  const locale = await getLocale();
+  const t = await getTranslations("SettingsPages.twoFactor");
   const session = await getServerAuth();
-  if (!session?.user?.id) {
-    redirect("/login");
+  const sessionUser = session?.user;
+  if (!sessionUser?.id) {
+    redirect({ href: "/login", locale });
   }
+  const verifiedSessionUser = sessionUser!;
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: verifiedSessionUser.id },
     select: { twoFactorEnabled: true },
   });
 
   if (!user) {
-    redirect("/login");
+    redirect({ href: "/login", locale });
   }
+  const currentUser = user!;
 
   return (
     <div className="space-y-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          Security
+          {t("eyebrow")}
         </p>
-        <h2 className="text-2xl font-semibold">Two-Factor Authentication</h2>
-        <p className="text-sm text-muted-foreground">
-          Secure your account with an authenticator app.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("title")}</h2>
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
       </div>
-      <TwoFactor enabled={user.twoFactorEnabled} />
+      <TwoFactor enabled={currentUser.twoFactorEnabled} />
     </div>
   );
 }

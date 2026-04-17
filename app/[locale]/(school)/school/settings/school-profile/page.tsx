@@ -1,22 +1,28 @@
-import { redirect } from "next/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 import { getServerAuth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SchoolProfileForm } from "@/components/settings/school-profile-form";
 import { UserRole } from "@/app/generated/prisma/enums";
+import { redirect } from "@/i18n/navigation";
 
 export default async function SchoolProfilePage() {
+  const locale = await getLocale();
+  const t = await getTranslations("SettingsPages.schoolProfile");
   const session = await getServerAuth();
-  if (!session?.user?.id || !session.user.schoolId) {
-    redirect("/login");
+  const sessionUser = session?.user;
+  if (!sessionUser?.id || !sessionUser.schoolId) {
+    redirect({ href: "/login", locale });
   }
+  const verifiedSessionUser = sessionUser!;
+  const schoolId = verifiedSessionUser.schoolId!;
 
   const [user, tenant] = await Promise.all([
     prisma.user.findUnique({
-      where: { id: session.user.id },
+      where: { id: verifiedSessionUser.id },
       select: { isSchoolOwner: true, role: true, schoolId: true },
     }),
     prisma.tenant.findFirst({
-      where: { id: session.user.schoolId },
+      where: { id: schoolId },
       select: {
         name: true,
         slug: true,
@@ -28,27 +34,27 @@ export default async function SchoolProfilePage() {
   ]);
 
   if (!user || !tenant || !user.schoolId) {
-    redirect("/login");
+    redirect({ href: "/login", locale });
   }
+  const currentUser = user!;
+  const currentTenant = tenant!;
 
   const canEdit =
-    (user.role === UserRole.SCHOOL_SUPER_ADMIN ||
-      user.role === UserRole.SCHOOL_ADMIN) &&
-    user.isSchoolOwner;
+    (currentUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
+      currentUser.role === UserRole.SCHOOL_ADMIN) &&
+    currentUser.isSchoolOwner;
 
   return (
     <div className="space-y-6">
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          School
+          {t("eyebrow")}
         </p>
-        <h2 className="text-2xl font-semibold">School Info</h2>
-        <p className="text-sm text-muted-foreground">
-          Manage tenant profile fields for your school.
-        </p>
+        <h2 className="text-2xl font-semibold">{t("title")}</h2>
+        <p className="text-sm text-muted-foreground">{t("description")}</p>
       </div>
 
-      <SchoolProfileForm tenant={tenant} canEdit={canEdit} />
+      <SchoolProfileForm tenant={currentTenant} canEdit={canEdit} />
     </div>
   );
 }

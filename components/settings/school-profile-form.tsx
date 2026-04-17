@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Currency } from "@/app/generated/prisma/enums";
 import { updateSchoolProfileAction, type ActionState } from "@/app/(school)/school/settings/actions";
@@ -30,30 +31,31 @@ type SchoolProfileFormProps = {
 };
 
 export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
+  const t = useTranslations("SettingsSchoolProfileForm");
   const [state, formAction] = useActionState(updateSchoolProfileAction, initialState);
 
   useEffect(() => {
     if (state.status === "success") {
-      toast.success(state.message ?? "School profile updated.");
+      toast.success(state.message ?? t("messages.updated"));
     } else if (state.status === "error") {
-      toast.error(state.message ?? "Unable to update school profile.");
+      toast.error(state.message ?? t("messages.updateFailed"));
     }
-  }, [state]);
+  }, [state, t]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>School Profile</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
           {canEdit
-            ? "Update your school name, slug, and default currency."
-            : "Only the school owner admin can update school info."}
+            ? t("descriptionEditable")
+            : t("descriptionReadOnly")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={canEdit ? formAction : undefined} className="space-y-4">
           <div className="grid gap-2">
-            <Label htmlFor="school-name">School name</Label>
+            <Label htmlFor="school-name">{t("fields.schoolName")}</Label>
             <Input
               id="school-name"
               name="name"
@@ -63,7 +65,7 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="school-slug">School slug</Label>
+            <Label htmlFor="school-slug">{t("fields.schoolSlug")}</Label>
             <Input
               id="school-slug"
               name="slug"
@@ -73,23 +75,23 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="school-status">Status</Label>
+            <Label htmlFor="school-status">{t("fields.status")}</Label>
             <Input
               id="school-status"
-              value={tenant.isActive ? "Active" : "Disabled"}
+              value={tenant.isActive ? t("status.active") : t("status.disabled")}
               readOnly
               className="bg-muted/40"
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="school-currency">Currency</Label>
+            <Label htmlFor="school-currency">{t("fields.currency")}</Label>
             <Select
               name="currency"
               defaultValue={tenant.currency}
               disabled={!canEdit}
             >
               <SelectTrigger id="school-currency" className="w-full">
-                <SelectValue placeholder="Select currency" />
+                <SelectValue placeholder={t("fields.selectCurrency")} />
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectItem value={Currency.USD}>USD</SelectItem>
@@ -99,7 +101,7 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="billing-day">Monthly billing day (1-28)</Label>
+            <Label htmlFor="billing-day">{t("fields.billingDay")}</Label>
             <Input
               id="billing-day"
               name="billingDayOfMonth"
@@ -113,10 +115,10 @@ export function SchoolProfileForm({ tenant, canEdit }: SchoolProfileFormProps) {
           </div>
 
           {canEdit ? (
-            <SubmitButton label="Save School Info" loadingLabel="Saving..." />
+            <SubmitButton label={t("buttons.save")} loadingLabel={t("buttons.saving")} />
           ) : (
             <p className="text-sm text-muted-foreground">
-              This account can view school info but cannot edit it.
+              {t("viewOnly")}
             </p>
           )}
         </form>

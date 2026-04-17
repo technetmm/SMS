@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { getTranslations } from "next-intl/server";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import { prisma } from "@/lib/prisma";
 import { getServerAuth } from "@/auth";
@@ -27,6 +28,25 @@ export type ActionState = {
   qrCode?: string;
 };
 
+async function getSettingsActionTranslations() {
+  return getTranslations("SettingsActions");
+}
+
+function translateValidationMessage(
+  t: Awaited<ReturnType<typeof getSettingsActionTranslations>>,
+  message: string | undefined,
+) {
+  if (!message) {
+    return t("errors.unknown");
+  }
+
+  if (message.startsWith("validation.")) {
+    return t(message as Parameters<typeof t>[0]);
+  }
+
+  return message;
+}
+
 function revalidateSettingsPages() {
   revalidateLocalizedPath("/school/settings");
   revalidateLocalizedPath("/platform/settings");
@@ -35,8 +55,8 @@ function revalidateSettingsPages() {
 const tokenSchema = z
   .string()
   .trim()
-  .min(6, "OTP code is required")
-  .max(6, "OTP code must be 6 digits");
+  .min(6, "validation.otp.required")
+  .max(6, "validation.otp.length");
 
 function getFormValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -57,14 +77,15 @@ export async function uploadProfilePhoto(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const file = formData.get("photo");
   if (!(file instanceof File)) {
-    return { status: "error", message: "Please select an image" };
+    return { status: "error", message: t("errors.selectImage") };
   }
 
   const user = await prisma.user.findUnique({
@@ -73,7 +94,7 @@ export async function uploadProfilePhoto(
   });
 
   if (!user) {
-    return { status: "error", message: "User not found" };
+    return { status: "error", message: t("errors.userNotFound") };
   }
 
   const result = await saveProfileImage({ file, existingUrl: user.image });
@@ -90,13 +111,14 @@ export async function uploadProfilePhoto(
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "Profile photo updated" };
+  return { status: "success", message: t("success.profilePhotoUpdated") };
 }
 
 export async function removeProfilePhotoAction(): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const user = await prisma.user.findUnique({
@@ -105,7 +127,7 @@ export async function removeProfilePhotoAction(): Promise<ActionState> {
   });
 
   if (!user) {
-    return { status: "error", message: "User not found" };
+    return { status: "error", message: t("errors.userNotFound") };
   }
 
   await removeProfileImage(user.image);
@@ -121,13 +143,14 @@ export async function removeProfilePhotoAction(): Promise<ActionState> {
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "Profile photo removed" };
+  return { status: "success", message: t("success.profilePhotoRemoved") };
 }
 
 export async function startTwoFactorSetup(): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id || !session.user.email) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const secret = generateTwoFactorSecret();
@@ -145,7 +168,7 @@ export async function startTwoFactorSetup(): Promise<ActionState> {
 
   return {
     status: "success",
-    message: "Scan the QR code with your authenticator app.",
+    message: t("success.scanQr"),
     qrCode,
   };
 }
@@ -154,15 +177,19 @@ export async function verifyTwoFactorSetup(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const tokenValue = formData.get("token");
   const parsed = tokenSchema.safeParse(tokenValue);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: translateValidationMessage(t, parsed.error.errors[0]?.message),
+    };
   }
 
   const user = await prisma.user.findUnique({
@@ -171,7 +198,7 @@ export async function verifyTwoFactorSetup(
   });
 
   if (!user?.twoFactorSecret) {
-    return { status: "error", message: "2FA setup not started." };
+    return { status: "error", message: t("errors.twoFactorNotStarted") };
   }
 
   const isValid = verifyTwoFactorToken({
@@ -180,7 +207,7 @@ export async function verifyTwoFactorSetup(
   });
 
   if (!isValid) {
-    return { status: "error", message: "Invalid code, try again." };
+    return { status: "error", message: t("errors.invalidCode") };
   }
 
   await prisma.user.update({
@@ -195,21 +222,22 @@ export async function verifyTwoFactorSetup(
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "2FA enabled successfully." };
+  return { status: "success", message: t("success.twoFactorEnabled") };
 }
 
 export async function disableTwoFactor(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const password = formData.get("password");
   if (typeof password !== "string" || password.length < 8) {
-    return { status: "error", message: "Password is required." };
+    return { status: "error", message: t("validation.shared.passwordRequired") };
   }
 
   const user = await prisma.user.findUnique({
@@ -218,12 +246,12 @@ export async function disableTwoFactor(
   });
 
   if (!user?.passwordHash) {
-    return { status: "error", message: "Password login not configured." };
+    return { status: "error", message: t("errors.passwordLoginNotConfigured") };
   }
 
   const valid = await bcrypt.compare(password, user.passwordHash);
   if (!valid) {
-    return { status: "error", message: "Invalid password." };
+    return { status: "error", message: t("errors.invalidPassword") };
   }
 
   await prisma.user.update({
@@ -238,16 +266,17 @@ export async function disableTwoFactor(
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "2FA disabled." };
+  return { status: "success", message: t("success.twoFactorDisabled") };
 }
 
 export async function changeEmailAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const parsed = changeEmailSchema.safeParse({
@@ -256,7 +285,10 @@ export async function changeEmailAction(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: translateValidationMessage(t, parsed.error.errors[0]?.message),
+    };
   }
 
   const user = await prisma.user.findUnique({
@@ -265,7 +297,7 @@ export async function changeEmailAction(
   });
 
   if (!user?.passwordHash) {
-    return { status: "error", message: "Password login not configured." };
+    return { status: "error", message: t("errors.passwordLoginNotConfigured") };
   }
 
   const passwordValid = await bcrypt.compare(
@@ -274,11 +306,11 @@ export async function changeEmailAction(
   );
 
   if (!passwordValid) {
-    return { status: "error", message: "Invalid password." };
+    return { status: "error", message: t("errors.invalidPassword") };
   }
 
   if (parsed.data.newEmail === user.email) {
-    return { status: "error", message: "Email is unchanged." };
+    return { status: "error", message: t("errors.emailUnchanged") };
   }
 
   const existing = await prisma.user.findUnique({
@@ -287,7 +319,7 @@ export async function changeEmailAction(
   });
 
   if (existing && existing.id !== session.user.id) {
-    return { status: "error", message: "Email already in use." };
+    return { status: "error", message: t("errors.emailInUse") };
   }
 
   await prisma.user.update({
@@ -302,16 +334,17 @@ export async function changeEmailAction(
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "Email updated successfully." };
+  return { status: "success", message: t("success.emailUpdated") };
 }
 
 export async function changePasswordAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized" };
+    return { status: "error", message: t("errors.unauthorized") };
   }
 
   const parsed = changePasswordSchema.safeParse({
@@ -321,7 +354,10 @@ export async function changePasswordAction(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: translateValidationMessage(t, parsed.error.errors[0]?.message),
+    };
   }
 
   const user = await prisma.user.findUnique({
@@ -330,7 +366,7 @@ export async function changePasswordAction(
   });
 
   if (!user?.passwordHash) {
-    return { status: "error", message: "Password login not configured." };
+    return { status: "error", message: t("errors.passwordLoginNotConfigured") };
   }
 
   const passwordValid = await bcrypt.compare(
@@ -339,7 +375,7 @@ export async function changePasswordAction(
   );
 
   if (!passwordValid) {
-    return { status: "error", message: "Current password is incorrect." };
+    return { status: "error", message: t("errors.currentPasswordIncorrect") };
   }
 
   const newHash = await bcrypt.hash(parsed.data.newPassword, 10);
@@ -356,25 +392,26 @@ export async function changePasswordAction(
   });
 
   revalidateSettingsPages();
-  return { status: "success", message: "Password updated successfully." };
+  return { status: "success", message: t("success.passwordUpdated") };
 }
 
 export async function updateSchoolProfileAction(
   _prevState: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const t = await getSettingsActionTranslations();
   let ownerUser: Awaited<ReturnType<typeof requireSchoolOwnerAdminAccess>>;
   try {
     ownerUser = await requireSchoolOwnerAdminAccess();
   } catch {
     return {
       status: "error",
-      message: "Only the school owner admin can update school info.",
+      message: t("errors.schoolOwnerOnly"),
     };
   }
 
   if (!ownerUser.schoolId) {
-    return { status: "error", message: "School context not found." };
+    return { status: "error", message: t("errors.schoolContextNotFound") };
   }
 
   const parsed = schoolProfileSchema.safeParse({
@@ -384,12 +421,15 @@ export async function updateSchoolProfileAction(
     billingDayOfMonth: getFormValue(formData, "billingDayOfMonth"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: translateValidationMessage(t, parsed.error.errors[0]?.message),
+    };
   }
 
   const slug = toSlug(parsed.data.slug);
   if (!slug) {
-    return { status: "error", message: "Please provide a valid school slug." };
+    return { status: "error", message: t("errors.invalidSchoolSlug") };
   }
 
   const existing = await prisma.tenant.findFirst({
@@ -397,7 +437,7 @@ export async function updateSchoolProfileAction(
     select: { id: true },
   });
   if (existing) {
-    return { status: "error", message: "Slug is already taken." };
+    return { status: "error", message: t("errors.slugTaken") };
   }
 
   await prisma.tenant.update({
@@ -428,5 +468,5 @@ export async function updateSchoolProfileAction(
   revalidateLocalizedPath("/school/settings/school-profile");
   revalidateLocalizedPath("/school/settings");
   revalidateLocalizedPath("/school/dashboard");
-  return { status: "success", message: "School profile updated." };
+  return { status: "success", message: t("success.schoolProfileUpdated") };
 }

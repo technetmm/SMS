@@ -262,6 +262,18 @@
     "security": "Security"
   },
   "SettingsOverview": {
+    "schoolEyebrow": "Settings",
+    "platformEyebrow": "Platform Settings",
+    "title": "Account preferences",
+    "description": "Manage your profile, appearance, and security controls.",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "Settings overview",
+      "description": "Jump straight to the section you want to update."
+    },
     "schoolInfo": {
       "title": "School Info",
       "description": "View or update your school profile details."
@@ -293,6 +305,268 @@
     "language": {
       "title": "Language",
       "description": "Choose the language used across your dashboard."
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "Review your protection status.",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "Add a second verification step."
+      },
+      "password": {
+        "title": "Password",
+        "description": "Updated regularly for safety."
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "Common account changes.",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
+    }
+  },
+  "SettingsPages": {
+    "theme": {
+      "eyebrow": "Appearance",
+      "title": "Theme",
+      "description": "Choose between system, light, or dark mode."
+    },
+    "profilePhoto": {
+      "eyebrow": "Profile",
+      "title": "Profile Photo",
+      "description": "Upload or remove your profile image."
+    },
+    "changeEmail": {
+      "eyebrow": "Account",
+      "title": "Change Email",
+      "description": "Update the email address associated with your account."
+    },
+    "changePassword": {
+      "eyebrow": "Security",
+      "title": "Change Password",
+      "description": "Update your password and keep your account secure."
+    },
+    "twoFactor": {
+      "eyebrow": "Security",
+      "title": "Two-Factor Authentication",
+      "description": "Secure your account with an authenticator app."
+    },
+    "security": {
+      "eyebrow": "Security",
+      "title": "Account Security",
+      "description": "Control sign-in protections and session visibility."
+    },
+    "schoolProfile": {
+      "eyebrow": "School",
+      "title": "School Info",
+      "description": "Manage tenant profile fields for your school."
+    }
+  },
+  "SettingsThemeToggle": {
+    "title": "Appearance",
+    "description": "Choose how the dashboard looks for you.",
+    "options": {
+      "system": {
+        "label": "System",
+        "description": "Match your device settings"
+      },
+      "light": {
+        "label": "Light",
+        "description": "Bright and clear"
+      },
+      "dark": {
+        "label": "Dark",
+        "description": "Low-light friendly"
+      }
+    }
+  },
+  "SettingsChangeEmailForm": {
+    "title": "Account Email",
+    "description": "Changing your email will be required the next time you sign in.",
+    "fields": {
+      "currentEmail": "Current email",
+      "newEmail": "New email",
+      "confirmPassword": "Confirm password"
+    },
+    "buttons": {
+      "submit": "Update Email",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Email updated",
+      "updateFailed": "Unable to update email"
+    }
+  },
+  "SettingsChangePasswordForm": {
+    "title": "Password",
+    "description": "Choose a strong password you do not use anywhere else.",
+    "fields": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password"
+    },
+    "buttons": {
+      "submit": "Update Password",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Password updated",
+      "updateFailed": "Unable to update password"
+    }
+  },
+  "SettingsProfilePhoto": {
+    "title": "Profile Photo",
+    "description": "Update your avatar across the dashboard.",
+    "altProfile": "Profile",
+    "yourProfile": "Your profile",
+    "fileHelp": "JPG, PNG, or WEBP up to 2MB.",
+    "buttons": {
+      "upload": "Upload Photo",
+      "remove": "Remove Photo"
+    },
+    "messages": {
+      "updated": "Updated",
+      "removed": "Removed",
+      "failed": "Failed"
+    }
+  },
+  "SettingsSchoolProfileForm": {
+    "title": "School Profile",
+    "descriptionEditable": "Update your school name, slug, and default currency.",
+    "descriptionReadOnly": "Only the school owner admin can update school info.",
+    "fields": {
+      "schoolName": "School name",
+      "schoolSlug": "School slug",
+      "status": "Status",
+      "currency": "Currency",
+      "selectCurrency": "Select currency",
+      "billingDay": "Monthly billing day (1-28)"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "buttons": {
+      "save": "Save School Info",
+      "saving": "Saving..."
+    },
+    "viewOnly": "This account can view school info but cannot edit it.",
+    "messages": {
+      "updated": "School profile updated.",
+      "updateFailed": "Unable to update school profile."
+    }
+  },
+  "SettingsSecurity": {
+    "title": "Security Overview",
+    "description": "Manage your authentication options and active session controls.",
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Require a one-time code on every sign in.",
+      "enable": "Enable",
+      "disable": "Disable",
+      "disableDialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "disableSubmit": "Disable 2FA"
+    },
+    "lastLogin": {
+      "title": "Last login",
+      "viewSessions": "View sessions"
+    },
+    "logoutAll": {
+      "title": "Logout from all devices",
+      "description": "End every active session across your devices.",
+      "button": "Logout all",
+      "working": "Working..."
+    },
+    "messages": {
+      "twoFactorDisabled": "2FA disabled",
+      "disableFailed": "Unable to disable 2FA",
+      "loggedOutAll": "Logged out from all devices (mock)."
+    }
+  },
+  "SettingsTwoFactor": {
+    "title": "Two-Factor Authentication",
+    "description": "Secure your account with a time-based one-time password (TOTP).",
+    "enabledBanner": "2FA is currently enabled for your account.",
+    "disable": {
+      "button": "Disable 2FA",
+      "dialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "submit": "Disable"
+    },
+    "enable": {
+      "button": "Enable 2FA",
+      "qrAlt": "2FA QR code",
+      "tokenLabel": "Enter the 6-digit code",
+      "verifying": "Verifying...",
+      "verify": "Verify & Enable"
+    },
+    "messages": {
+      "scanQr": "Scan the QR code",
+      "unableToStart": "Unable to start 2FA",
+      "enabled": "2FA enabled",
+      "disabled": "2FA disabled",
+      "failed": "Failed"
+    }
+  },
+  "SettingsActions": {
+    "validation": {
+      "otp": {
+        "required": "OTP code is required",
+        "length": "OTP code must be 6 digits"
+      },
+      "shared": {
+        "passwordRequired": "Password is required"
+      },
+      "changeEmail": {
+        "invalidEmail": "Enter a valid email"
+      },
+      "changePassword": {
+        "currentPasswordRequired": "Current password is required",
+        "newPasswordMin": "New password must be at least 8 characters",
+        "confirmPasswordRequired": "Confirm your new password",
+        "passwordsDoNotMatch": "Passwords do not match"
+      },
+      "schoolProfile": {
+        "nameMin": "School name must be at least 2 characters.",
+        "slugRequired": "Slug is required.",
+        "currencyInvalid": "Select a valid currency.",
+        "billingDayInteger": "Billing day must be a whole number",
+        "billingDayRange": "Billing day must be between 1 and 28"
+      }
+    },
+    "errors": {
+      "unknown": "Something went wrong.",
+      "unauthorized": "Unauthorized",
+      "selectImage": "Please select an image",
+      "userNotFound": "User not found",
+      "twoFactorNotStarted": "2FA setup not started.",
+      "invalidCode": "Invalid code, try again.",
+      "passwordLoginNotConfigured": "Password login not configured.",
+      "invalidPassword": "Invalid password.",
+      "emailUnchanged": "Email is unchanged.",
+      "emailInUse": "Email already in use.",
+      "currentPasswordIncorrect": "Current password is incorrect.",
+      "schoolOwnerOnly": "Only the school owner admin can update school info.",
+      "schoolContextNotFound": "School context not found.",
+      "invalidSchoolSlug": "Please provide a valid school slug.",
+      "slugTaken": "Slug is already taken."
+    },
+    "success": {
+      "profilePhotoUpdated": "Profile photo updated",
+      "profilePhotoRemoved": "Profile photo removed",
+      "scanQr": "Scan the QR code with your authenticator app.",
+      "twoFactorEnabled": "2FA enabled successfully.",
+      "twoFactorDisabled": "2FA disabled.",
+      "emailUpdated": "Email updated successfully.",
+      "passwordUpdated": "Password updated successfully.",
+      "schoolProfileUpdated": "School profile updated."
     }
   },
   "Notifications": {
