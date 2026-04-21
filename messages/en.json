@@ -338,6 +338,101 @@
       "changePassword": "Change password"
     }
   },
+  "TeacherSettingsOverview": {
+    "title": "Teacher Settings",
+    "description": "Manage your account preferences and security settings.",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "Settings overview",
+      "description": "Open and update your account settings quickly."
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Switch between light, dark, or system appearance."
+    },
+    "profilePhoto": {
+      "title": "Profile Photo",
+      "description": "Upload or remove your profile picture."
+    },
+    "email": {
+      "title": "Email",
+      "description": "Update the email used to sign in."
+    },
+    "password": {
+      "title": "Password",
+      "description": "Change your account password securely."
+    },
+    "twoFactorAuth": {
+      "title": "Two-Factor Auth",
+      "description": "Enable or disable two-factor authentication."
+    },
+    "security": {
+      "title": "Security",
+      "description": "Review your account protection status."
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language used across your dashboard."
+    }
+  },
+  "TeacherSite": {
+    "sections": {
+      "title": "My Sections",
+      "description": "Review sections assigned to you.",
+      "empty": "No sections are assigned to you yet.",
+      "labels": {
+        "students": "{count}/{capacity} students",
+        "room": "Room: {room}",
+        "roomNotSet": "Room: Not set"
+      }
+    },
+    "timetable": {
+      "title": "My Timetable",
+      "description": "View your teaching schedule.",
+      "filters": "Filters"
+    },
+    "attendance": {
+      "title": "Student Attendance",
+      "description": "Mark and review attendance for your assigned sections.",
+      "filters": "Filters"
+    },
+    "students": {
+      "title": "My Students",
+      "description": "Track progress for students in your assigned sections.",
+      "filters": "Filters",
+      "search": "Search",
+      "searchPlaceholder": "Search student, class, or section",
+      "section": "Section",
+      "allSections": "All sections",
+      "status": "Enrollment Status",
+      "allStatuses": "All statuses",
+      "columns": {
+        "student": "Student",
+        "section": "Section",
+        "status": "Status",
+        "progress": "Progress"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "completed": "Completed",
+        "dropped": "Dropped"
+      },
+      "notAvailable": "-",
+      "empty": "No students found for your filters."
+    },
+    "dashboard": {
+      "timetable": {
+        "title": "Weekly Timetable",
+        "description": "Your assigned schedule for this week.",
+        "viewFullTimetable": "View full timetable",
+        "empty": "No timetable slots assigned yet.",
+        "noSlots": "No slots"
+      }
+    }
+  },
   "SchoolDashboard": {
     "stats": {
       "totalStudents": "Total Students",

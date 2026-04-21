@@ -346,6 +346,101 @@
       "changePassword": "Change password"
     }
   },
+  "TeacherSettingsOverview": {
+    "title": "ဆရာ ဆက်တင်များ",
+    "description": "သင့်အကောင့် preference နှင့် security settings များကို စီမံပါ။",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "ဆက်တင် အကျဉ်းချုပ်",
+      "description": "အကောင့်ဆက်တင်များကို လျင်မြန်စွာ ဖွင့်ပြီး ပြင်ဆင်ပါ။"
+    },
+    "theme": {
+      "title": "အပြင်အဆင်",
+      "description": "အလင်း၊ မှောင် သို့မဟုတ် စနစ်အသွင်အပြင်အကြား ပြောင်းပါ။"
+    },
+    "profilePhoto": {
+      "title": "ပရိုဖိုင်ဓာတ်ပုံ",
+      "description": "သင့်ပရိုဖိုင်ပုံကို တင်ရန် သို့မဟုတ် ဖယ်ရှားရန်။"
+    },
+    "email": {
+      "title": "အီးမေးလ်",
+      "description": "အကောင့်ဝင်ရန် အသုံးပြုသော အီးမေးလ်ကို ပြင်ဆင်ပါ။"
+    },
+    "password": {
+      "title": "စကားဝှက်",
+      "description": "သင့်အကောင့် စကားဝှက်ကို လုံခြုံစွာ ပြောင်းပါ။"
+    },
+    "twoFactorAuth": {
+      "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+      "description": "နှစ်ဆင့်အတည်ပြုခြင်းကို ဖွင့်/ပိတ် ပြုလုပ်ပါ။"
+    },
+    "security": {
+      "title": "လုံခြုံရေး",
+      "description": "သင့်အကောင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်စစ်ဆေးပါ။"
+    },
+    "language": {
+      "title": "ဘာသာစကား",
+      "description": "Dashboard တစ်လျှောက် အသုံးပြုမည့် ဘာသာစကားကို ရွေးပါ။"
+    }
+  },
+  "TeacherSite": {
+    "sections": {
+      "title": "ကျွန်ုပ်၏ Sections",
+      "description": "သင့်အား တာဝန်ပေးထားသော sections များကို ကြည့်ရှုပါ။",
+      "empty": "သင့်အတွက် section မသတ်မှတ်ထားသေးပါ။",
+      "labels": {
+        "students": "ကျောင်းသား {count}/{capacity}",
+        "room": "အခန်း: {room}",
+        "roomNotSet": "အခန်း: မသတ်မှတ်ရသေး"
+      }
+    },
+    "timetable": {
+      "title": "ကျွန်ုပ်၏ အချိန်ဇယား",
+      "description": "သင်ကြားရေးအချိန်ဇယားကို ကြည့်ရှုပါ။",
+      "filters": "Filters"
+    },
+    "attendance": {
+      "title": "ကျောင်းသား တက်ရောက်မှု",
+      "description": "သင့် section များအတွက် attendance ကို မှတ်သားပြီး ပြန်လည်ကြည့်ရှုပါ။",
+      "filters": "Filters"
+    },
+    "students": {
+      "title": "ကျွန်ုပ်၏ ကျောင်းသားများ",
+      "description": "သင့် section များရှိ ကျောင်းသားများ၏ တိုးတက်မှုကို စောင့်ကြည့်ပါ။",
+      "filters": "Filters",
+      "search": "ရှာဖွေရန်",
+      "searchPlaceholder": "ကျောင်းသား၊ အတန်း၊ section ကို ရှာဖွေပါ",
+      "section": "Section",
+      "allSections": "Section အားလုံး",
+      "status": "Enrollment Status",
+      "allStatuses": "Status အားလုံး",
+      "columns": {
+        "student": "ကျောင်းသား",
+        "section": "Section",
+        "status": "အခြေအနေ",
+        "progress": "တိုးတက်မှု"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "completed": "Completed",
+        "dropped": "Dropped"
+      },
+      "notAvailable": "-",
+      "empty": "စစ်ထုတ်မှုအလိုက် ကျောင်းသားမတွေ့ပါ။"
+    },
+    "dashboard": {
+      "timetable": {
+        "title": "အပတ်စဉ် အချိန်ဇယား",
+        "description": "ဤအပတ်အတွက် သင့်အား သတ်မှတ်ထားသော သင်ကြားရေးအချိန်ဇယား။",
+        "viewFullTimetable": "အချိန်ဇယား အပြည့်အစုံကြည့်ရန်",
+        "empty": "အချိန်ဇယား slot မသတ်မှတ်ရသေးပါ။",
+        "noSlots": "Slot မရှိပါ"
+      }
+    }
+  },
   "SchoolDashboard": {
     "stats": {
       "totalStudents": "ကျောင်းသားစုစုပေါင်း",

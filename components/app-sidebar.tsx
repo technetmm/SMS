@@ -194,6 +194,36 @@ export function AppSidebar({
         },
       ],
     },
+    {
+      label: t("groups.academics"),
+      items: [
+        {
+          title: t("items.sections"),
+          url: "/teacher/sections",
+          icon: <TvMinimalIcon />,
+        },
+        {
+          title: t("items.students"),
+          url: "/teacher/students",
+          icon: <UsersIcon />,
+        },
+      ],
+    },
+    {
+      label: t("groups.schedule"),
+      items: [
+        {
+          title: t("items.timetable"),
+          url: "/teacher/timetable",
+          icon: <CalendarClockIcon />,
+        },
+        {
+          title: t("items.studentAttendance"),
+          url: "/teacher/attendance",
+          icon: <CalendarDaysIcon />,
+        },
+      ],
+    },
   ];
 
   const studentNavGroups = [

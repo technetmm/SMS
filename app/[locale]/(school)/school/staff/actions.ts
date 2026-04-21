@@ -392,7 +392,10 @@ export async function setStaffSystemRole(
     targetUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
     targetUser.role === UserRole.STUDENT
   ) {
-    return { status: "error", message: "Target user cannot use staff admin roles." };
+    return {
+      status: "error",
+      message: "Target user cannot use staff admin roles.",
+    };
   }
   if (!targetUser.staffProfile || targetUser.studentProfile) {
     return { status: "error", message: "Target user is not a staff account." };
@@ -400,13 +403,10 @@ export async function setStaffSystemRole(
   const isSchoolAdminDemotion =
     parsed.data.nextRole === UserRole.TEACHER &&
     targetUser.role === UserRole.SCHOOL_ADMIN;
-  if (
-    session.user.role === UserRole.SCHOOL_ADMIN &&
-    isSchoolAdminDemotion
-  ) {
+  if (session.user.role === UserRole.SCHOOL_ADMIN && isSchoolAdminDemotion) {
     return {
       status: "error",
-      message: "SCHOOL_ADMIN cannot demote SCHOOL_ADMIN accounts.",
+      message: "Admin cannot demote admin accounts.",
     };
   }
   if (targetUser.role === parsed.data.nextRole) {
@@ -446,7 +446,7 @@ export async function setStaffSystemRole(
   if (isSelfDemotionToTeacher) {
     return {
       status: "success",
-      message: "Demoted to TEACHER.",
+      message: "Demoted to teacher.",
       shouldLogout: true,
       redirectTo: "/login?demoted=1",
     };
@@ -455,12 +455,12 @@ export async function setStaffSystemRole(
   if (parsed.data.nextRole === UserRole.SCHOOL_ADMIN) {
     return {
       status: "success",
-      message: "Promoted to SCHOOL_ADMIN.",
+      message: "Promoted to Admin.",
     };
   }
 
   return {
     status: "success",
-    message: "Demoted to TEACHER.",
+    message: "Demoted to Teacher.",
   };
 }

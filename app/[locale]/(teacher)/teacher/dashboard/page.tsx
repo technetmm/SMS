@@ -2,6 +2,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TeacherDashboardTimetableGrid } from "@/components/teacher/teacher-dashboard-timetable-grid";
 
 export default async function TeacherDashboardPage() {
   const session = await requireRole([UserRole.TEACHER]);
@@ -30,7 +31,7 @@ export default async function TeacherDashboardPage() {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [sectionCount, timetableCount, attendanceCount] = await Promise.all([
+  const [sectionCount, timetableCount, attendanceCount, timetableSlots] = await Promise.all([
     prisma.sectionStaff.count({
       where: {
         staffId: staffProfile.id,
@@ -42,6 +43,24 @@ export default async function TeacherDashboardPage() {
     }),
     prisma.staffAttendance.count({
       where: { schoolId, staffId: staffProfile.id, date: { gte: startOfMonth } },
+    }),
+    prisma.timetable.findMany({
+      where: { schoolId, staffId: staffProfile.id },
+      orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }],
+      select: {
+        id: true,
+        dayOfWeek: true,
+        startTime: true,
+        endTime: true,
+        room: true,
+        section: {
+          select: {
+            id: true,
+            name: true,
+            class: { select: { name: true } },
+          },
+        },
+      },
     }),
   ]);
 
@@ -68,6 +87,9 @@ export default async function TeacherDashboardPage() {
           <CardContent className="text-3xl font-semibold">{attendanceCount}</CardContent>
         </Card>
       </div>
+
+      <TeacherDashboardTimetableGrid slots={timetableSlots} />
+
       <Card>
         <CardHeader>
           <CardTitle>Welcome, {staffProfile.name}</CardTitle>

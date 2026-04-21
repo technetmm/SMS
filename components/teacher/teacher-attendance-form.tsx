@@ -3,10 +3,11 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
-  markAttendance,
-  type EnrollmentActionState,
-} from "@/app/(school)/school/enrollments/actions";
+  markTeacherAttendance,
+  type TeacherActionState,
+} from "@/app/(teacher)/teacher/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
@@ -18,16 +19,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useTranslations } from "next-intl";
 
-const initialState: EnrollmentActionState = { status: "idle" };
+const initialState: TeacherActionState = { status: "idle" };
 
 type EnrollmentOption = {
   id: string;
   label: string;
 };
 
-export function EnrollmentAttendanceForm({
+export function TeacherAttendanceForm({
   enrollments,
   defaultDate,
 }: {
@@ -36,7 +36,7 @@ export function EnrollmentAttendanceForm({
 }) {
   const t = useTranslations("SchoolEntities.attendance.form");
   const router = useRouter();
-  const [state, formAction] = useActionState(markAttendance, initialState);
+  const [state, formAction] = useActionState(markTeacherAttendance, initialState);
   const [handled, setHandled] = useState(false);
 
   useEffect(() => {
