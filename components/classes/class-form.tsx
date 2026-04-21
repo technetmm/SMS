@@ -59,7 +59,9 @@ export function ClassForm({
 }: ClassFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
-  const [selectedCourse, setSelectedCourse] = useState<Option | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Option | null>(
+    courses.find((c) => c.id === initialData?.courseId) || null,
+  );
 
   useEffect(() => {
     if (state.status === "success") {
@@ -77,6 +79,8 @@ export function ClassForm({
       {mode === "edit" && initialData ? (
         <input type="hidden" name="id" value={initialData.id} />
       ) : null}
+
+      <input type="hidden" name="courseId" value={selectedCourse?.id ?? ""} />
 
       <Card>
         <CardHeader>
@@ -97,7 +101,6 @@ export function ClassForm({
 
           <div className="grid gap-2 md:col-span-2">
             <Label htmlFor="courseId">Course</Label>
-
             <Combobox
               items={courses}
               value={selectedCourse}
