@@ -8,8 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { dateFormatter } from "@/lib/formatter";
 
 type AttendanceRow = {
@@ -38,16 +37,17 @@ export function EnrollmentAttendanceTable({
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   const locale = useLocale();
+  const t = useTranslations("SchoolEntities.attendance.table");
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Student</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t("columns.date")}</TableHead>
+            <TableHead>{t("columns.student")}</TableHead>
+            <TableHead>{t("columns.section")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,7 +67,7 @@ export function EnrollmentAttendanceTable({
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
-                  {enumLabel(row.status, ATTENDANCE_STATUS_LABELS)}
+                  {t(`statusOptions.${row.status.toLowerCase()}`)}
                 </Badge>
               </TableCell>
             </TableRow>
@@ -78,7 +78,7 @@ export function EnrollmentAttendanceTable({
                 colSpan={4}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No attendance records yet.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

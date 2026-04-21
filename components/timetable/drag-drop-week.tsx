@@ -28,7 +28,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { cn } from "@/lib/utils";
-import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
+import { useTranslations } from "next-intl";
 
 type Slot = {
   id: string;
@@ -42,6 +42,7 @@ type Slot = {
 const days: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
+  const t = useTranslations("SchoolEntities.timetable.board");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [copiedSlotId, setCopiedSlotId] = useState<string | null>(null);
@@ -59,31 +60,43 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
     return map;
   }, [slots]);
 
+  const dayLabel = (day: DayOfWeek) => {
+    const key = day.toLowerCase() as
+      | "mon"
+      | "tue"
+      | "wed"
+      | "thu"
+      | "fri"
+      | "sat"
+      | "sun";
+    return t(`days.${key}`);
+  };
+
   const onDropDay = (day: DayOfWeek, slotId: string) => {
     startTransition(async () => {
       const result = await moveTimetableSlot(slotId, day);
       if (result.status === "error") {
-        toast.error(result.message ?? "Unable to move slot");
+        toast.error(result.message ?? t("messages.unableToMove"));
         return;
       }
-      toast.success("Slot updated");
+      toast.success(t("messages.updated"));
       router.refresh();
     });
   };
 
   const onPasteDay = (day: DayOfWeek) => {
     if (!copiedSlotId) {
-      toast.error("Copy a slot first");
+      toast.error(t("messages.copyFirst"));
       return;
     }
 
     startTransition(async () => {
       const result = await duplicateTimetableSlot(copiedSlotId, day);
       if (result.status === "error") {
-        toast.error(result.message ?? "Unable to paste slot");
+        toast.error(result.message ?? t("messages.unableToPaste"));
         return;
       }
-      toast.success(`Slot pasted to ${enumLabel(day, DAY_OF_WEEK_LABELS)}`);
+      toast.success(t("messages.pastedTo", { day: dayLabel(day) }));
       router.refresh();
     });
   };
@@ -95,14 +108,14 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
     startTransition(async () => {
       const result = await deleteTimetableSlotById(target.id);
       if (result.status === "error") {
-        toast.error(result.message ?? "Unable to delete slot");
+        toast.error(result.message ?? t("messages.unableToDelete"));
         return;
       }
       if (copiedSlotId === target.id) {
         setCopiedSlotId(null);
       }
       setSlotToDelete(null);
-      toast.success("Slot deleted");
+      toast.success(t("messages.deleted"));
       router.refresh();
     });
   };
@@ -111,13 +124,13 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
     <div className="rounded-lg border bg-background p-4">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-medium">Weekly Board</h3>
+          <h3 className="text-sm font-medium">{t("title")}</h3>
           <p className="text-xs text-muted-foreground">
-            Drag to move, or right-click to copy and paste slots across days.
+            {t("description")}
           </p>
         </div>
         <p className={cn("text-xs text-muted-foreground", pending && "text-primary")}>
-          {pending ? "Updating..." : null}
+          {pending ? t("updating") : null}
         </p>
       </div>
 
@@ -136,7 +149,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                 }}
               >
                 <div className="mb-2 text-xs font-medium text-muted-foreground">
-                  {enumLabel(day, DAY_OF_WEEK_LABELS)}
+                  {dayLabel(day)}
                 </div>
                 <div className="space-y-2">
                   {(byDay.get(day) ?? []).map((slot) => (
@@ -168,16 +181,16 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                         <ContextMenuItem
                           onClick={() => {
                             setCopiedSlotId(slot.id);
-                            toast.success("Slot copied");
+                            toast.success(t("messages.copied"));
                           }}
                         >
-                          Copy slot
+                          {t("actions.copySlot")}
                         </ContextMenuItem>
                         <ContextMenuItem
                           disabled={!copiedSlotId}
                           onClick={() => onPasteDay(day)}
                         >
-                          Paste into {enumLabel(day, DAY_OF_WEEK_LABELS)}
+                          {t("actions.pasteInto", { day: dayLabel(day) })}
                         </ContextMenuItem>
                         <ContextMenuSeparator />
                         <ContextMenuItem
@@ -185,27 +198,27 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                           disabled={pending}
                           onClick={() => setSlotToDelete(slot)}
                         >
-                          Delete slot
+                          {t("actions.deleteSlot")}
                         </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
                   ))}
                   {(byDay.get(day) ?? []).length === 0 ? (
                     <div className="rounded-md border border-dashed bg-background/60 p-2 text-center text-[11px] text-muted-foreground">
-                      Drop here
+                      {t("dropHere")}
                     </div>
                   ) : null}
                 </div>
               </div>
             </ContextMenuTrigger>
             <ContextMenuContent>
-              <ContextMenuLabel>{enumLabel(day, DAY_OF_WEEK_LABELS)}</ContextMenuLabel>
+              <ContextMenuLabel>{dayLabel(day)}</ContextMenuLabel>
               <ContextMenuSeparator />
               <ContextMenuItem
                 disabled={!copiedSlotId}
                 onClick={() => onPasteDay(day)}
               >
-                Paste copied slot here
+                {t("actions.pasteCopiedHere")}
               </ContextMenuItem>
             </ContextMenuContent>
           </ContextMenu>
@@ -221,15 +234,21 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
       >
         <AlertDialogContent size="sm">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete timetable slot?</AlertDialogTitle>
+            <AlertDialogTitle>{t("dialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
               {slotToDelete
-                ? `${enumLabel(slotToDelete.dayOfWeek, DAY_OF_WEEK_LABELS)} • ${slotToDelete.startTime}-${slotToDelete.endTime} • ${slotToDelete.section.name}`
-                : "This action cannot be undone."}
+                ? t("dialog.descriptionWithSlot", {
+                    day: dayLabel(slotToDelete.dayOfWeek),
+                    time: `${slotToDelete.startTime}-${slotToDelete.endTime}`,
+                    section: slotToDelete.section.name,
+                  })
+                : t("dialog.descriptionFallback")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={pending}>
+              {t("dialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               type="button"
               variant="destructive"
@@ -239,7 +258,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                 onDeleteSlot();
               }}
             >
-              {pending ? "Deleting..." : "Delete"}
+              {pending ? t("dialog.deleting") : t("dialog.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

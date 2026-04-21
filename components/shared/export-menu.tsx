@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTranslations } from "next-intl";
 
 type ExportAction = () => Promise<{
   status: "success" | "error" | "idle";
@@ -23,6 +24,7 @@ export function ExportMenu({
   items: Array<{ label: string; action: ExportAction }>;
 }) {
   const [pending, startTransition] = useTransition();
+  const t = useTranslations("Common");
 
   const runExport = (action: ExportAction) => {
     startTransition(async () => {
@@ -46,7 +48,7 @@ export function ExportMenu({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={pending}>
           <FileDown className="h-4 w-4" />
-          {pending ? "Exporting..." : "Export"}
+          {pending ? "Exporting..." : t("export")}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -4,9 +4,12 @@
     "apply": "Apply",
     "cancel": "Cancel",
     "reset": "Reset",
-    "previous": "Previous",
     "next": "Next",
-    "showing": "Showing {start}-{end} of {total}"
+    "previous": "Previous",
+    "showing": "Showing {start}-{end} of {total}",
+    "actions": "Actions",
+    "back": "Back",
+    "export": "Export"
   },
   "LocaleSwitcher": {
     "label": "Language switcher",
@@ -1042,6 +1045,365 @@
           "updated": "Enrollment updated.",
           "updateFailed": "Unable to update enrollment."
         }
+      }
+    },
+    "timetable": {
+      "list": {
+        "title": "Timetable",
+        "description": "Manage weekly schedules and prevent staff conflicts.",
+        "new": "Create Slot",
+        "filters": "Filters"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Staff, section, class, room",
+        "day": "Day",
+        "allDays": "All days",
+        "days": {
+          "mon": "Monday",
+          "tue": "Tuesday",
+          "wed": "Wednesday",
+          "thu": "Thursday",
+          "fri": "Friday",
+          "sat": "Saturday",
+          "sun": "Sunday"
+        },
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "board": {
+        "title": "Weekly Board",
+        "description": "Drag to move, or right-click to copy and paste slots across days.",
+        "updating": "Updating...",
+        "days": {
+          "mon": "Monday",
+          "tue": "Tuesday",
+          "wed": "Wednesday",
+          "thu": "Thursday",
+          "fri": "Friday",
+          "sat": "Saturday",
+          "sun": "Sunday"
+        },
+        "dropHere": "Drop here",
+        "actions": {
+          "copySlot": "Copy slot",
+          "pasteInto": "Paste into {day}",
+          "deleteSlot": "Delete slot",
+          "pasteCopiedHere": "Paste copied slot here"
+        },
+        "messages": {
+          "unableToMove": "Unable to move slot",
+          "updated": "Slot updated",
+          "copyFirst": "Copy a slot first",
+          "unableToPaste": "Unable to paste slot",
+          "pastedTo": "Slot pasted to {day}",
+          "unableToDelete": "Unable to delete slot",
+          "deleted": "Slot deleted",
+          "copied": "Slot copied"
+        },
+        "dialog": {
+          "title": "Delete timetable slot?",
+          "descriptionWithSlot": "{day} • {time} • {section}",
+          "descriptionFallback": "This action cannot be undone.",
+          "cancel": "Cancel",
+          "delete": "Delete",
+          "deleting": "Deleting..."
+        }
+      },
+      "table": {
+        "columns": {
+          "day": "Day",
+          "time": "Time",
+          "staff": "Staff",
+          "section": "Section",
+          "room": "Room",
+          "actions": "Actions"
+        },
+        "days": {
+          "mon": "Monday",
+          "tue": "Tuesday",
+          "wed": "Wednesday",
+          "thu": "Thursday",
+          "fri": "Friday",
+          "sat": "Saturday",
+          "sun": "Sunday"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "empty": "No timetable slots yet. Create your first slot."
+      }
+    },
+    "attendance": {
+      "list": {
+        "title": "Attendance",
+        "description": "Mark and review attendance per enrollment (student + section).",
+        "filters": "Filters"
+      },
+      "form": {
+        "title": "Mark Attendance",
+        "enrollment": "Enrollment",
+        "selectEnrollment": "Select enrollment",
+        "date": "Date",
+        "status": "Status",
+        "selectStatus": "Select status",
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "save": "Save Attendance",
+        "saving": "Saving...",
+        "messages": {
+          "saved": "Attendance saved.",
+          "saveFailed": "Unable to save attendance."
+        }
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Student, section, class",
+        "student": "Student",
+        "allStudents": "All students",
+        "section": "Section",
+        "allSections": "All sections",
+        "date": "Date",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "date": "Date",
+          "student": "Student",
+          "section": "Section",
+          "status": "Status"
+        },
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "empty": "No attendance records yet."
+      }
+    },
+    "staffAttendance": {
+      "list": {
+        "title": "Staff Attendance",
+        "description": "Track staff attendance per section, per day.",
+        "filters": "Table Filters"
+      },
+      "form": {
+        "title": "Mark Staff Attendance",
+        "staff": "Staff",
+        "searchStaff": "Search staff...",
+        "noStaffFound": "No staff found.",
+        "section": "Section",
+        "searchSection": "Search section...",
+        "noSectionsFound": "No sections found.",
+        "date": "Date",
+        "status": "Status",
+        "selectStatus": "Select status",
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "save": "Save Attendance",
+        "saving": "Saving...",
+        "messages": {
+          "saved": "Saved",
+          "saveFailed": "Unable to save attendance",
+          "selectStaff": "Please select a staff.",
+          "selectSection": "Please select a section."
+        }
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Staff, section, class",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "date": "Date",
+          "staff": "Staff",
+          "section": "Section",
+          "status": "Status"
+        },
+        "statusOptions": {
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "leave": "Leave"
+        },
+        "empty": "No staff attendance records yet."
+      }
+    },
+    "invoices": {
+      "list": {
+        "title": "Invoices",
+        "description": "Manage discounts, partial payments, refunds, and invoice documents.",
+        "filters": "Filters",
+        "table": {
+          "columns": {
+            "invoice": "Invoice",
+            "student": "Student",
+            "section": "Section",
+            "type": "Type",
+            "period": "Period",
+            "finalAmount": "Final Amount",
+            "paid": "Paid",
+            "remaining": "Remaining",
+            "status": "Status",
+            "actions": "Actions"
+          },
+          "invoiceTypeOptions": {
+            "oneTime": "One Time",
+            "monthly": "Monthly"
+          },
+          "statusOptions": {
+            "unpaid": "Unpaid",
+            "partial": "Partial",
+            "paid": "Paid"
+          },
+          "actions": {
+            "view": "View",
+            "downloadPdf": "Download PDF"
+          },
+          "empty": "No invoices yet."
+        }
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Invoice, student, class, section",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "unpaid": "Unpaid",
+          "partial": "Partial",
+          "paid": "Paid"
+        },
+        "invoiceType": "Invoice Type",
+        "allInvoiceTypes": "All invoice types",
+        "invoiceTypeOptions": {
+          "oneTime": "One Time",
+          "monthly": "Monthly"
+        },
+        "dueFrom": "Due From",
+        "dueTo": "Due To",
+        "finalMin": "Final Min",
+        "finalMax": "Final Max",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "generate": {
+        "button": "Generate Invoices",
+        "loading": "Generating...",
+        "messages": {
+          "generated": "Invoices generated.",
+          "generateFailed": "Unable to generate invoices."
+        }
+      }
+    },
+    "payments": {
+      "list": {
+        "title": "Payments",
+        "description": "Track monthly fees, deposits, and invoice status.",
+        "exportPdf": "Export PDF",
+        "filters": "Table Filters",
+        "table": {
+          "title": "Invoices",
+          "columns": {
+            "invoice": "Invoice",
+            "student": "Student",
+            "finalAmount": "Final Amount",
+            "paid": "Paid",
+            "dueDate": "Due Date",
+            "status": "Status"
+          },
+          "statusOptions": {
+            "unpaid": "Unpaid",
+            "partial": "Partial",
+            "paid": "Paid"
+          },
+          "empty": "No invoices yet."
+        }
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Invoice id or student",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "unpaid": "Unpaid",
+          "partial": "Partial",
+          "paid": "Paid"
+        },
+        "dueFrom": "Due From",
+        "dueTo": "Due To",
+        "totalMin": "Total Min",
+        "totalMax": "Total Max",
+        "apply": "Apply",
+        "reset": "Reset"
+      }
+    },
+    "payroll": {
+      "list": {
+        "title": "Payroll",
+        "description": "Generate and review monthly staff payroll.",
+        "filters": "Filters",
+        "form": {
+          "searchStaff": "Search Staff",
+          "monthFrom": "Month From",
+          "monthTo": "Month To",
+          "totalMin": "Total Min",
+          "totalMax": "Total Max",
+          "apply": "Apply",
+          "reset": "Reset"
+        }
+      },
+      "generate": {
+        "title": "Generate Payroll",
+        "month": "Month",
+        "description": "Generates (or updates) payroll for all staff.",
+        "generate": "Generate",
+        "generating": "Generating...",
+        "messages": {
+          "generated": "Generated",
+          "generateFailed": "Unable to generate payroll"
+        }
+      },
+      "table": {
+        "columns": {
+          "month": "Month",
+          "staff": "Staff",
+          "sections": "Sections",
+          "total": "Total"
+        },
+        "empty": "No payroll generated yet."
       }
     }
   },

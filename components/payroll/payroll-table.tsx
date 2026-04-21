@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatMoney } from "@/lib/helper";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function PayrollTable({
   page,
@@ -23,8 +24,12 @@ export async function PayrollTable({
   filters?: PayrollTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("SchoolEntities.payroll.table"),
+  ]);
   const rows = await getPaginatedPayrolls({ page, filters });
-  const monthFormatter = new Intl.DateTimeFormat("en-US", {
+  const monthFormatter = new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "short",
   });
@@ -34,10 +39,10 @@ export async function PayrollTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Month</TableHead>
-            <TableHead>Staff</TableHead>
-            <TableHead className="text-right">Sections</TableHead>
-            <TableHead className="text-right">Total</TableHead>
+            <TableHead>{t("columns.month")}</TableHead>
+            <TableHead>{t("columns.staff")}</TableHead>
+            <TableHead className="text-right">{t("columns.sections")}</TableHead>
+            <TableHead className="text-right">{t("columns.total")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -58,7 +63,7 @@ export async function PayrollTable({
           {rows.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                No payroll generated yet.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}
@@ -72,4 +77,3 @@ export async function PayrollTable({
     </div>
   );
 }
-

@@ -13,11 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  enumLabel,
-  INVOICE_TYPE_LABELS,
-  PAYMENT_STATUS_LABELS,
-} from "@/lib/enum-labels";
 import { formatMoney } from "@/lib/helper";
 import { parsePageParam } from "@/lib/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +24,7 @@ import {
 } from "@/lib/table-filters";
 import { InvoiceType, PaymentStatus } from "@/app/generated/prisma/enums";
 import { InvoicesFilters } from "@/components/invoices/invoice-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function InvoicesPage({
   searchParams,
@@ -63,6 +59,7 @@ export default async function InvoicesPage({
   });
   const finalMin = parseNumberParam(params.finalMin);
   const finalMax = parseNumberParam(params.finalMax);
+  const t = await getTranslations("SchoolEntities.invoices.list");
 
   const invoices = await getPaginatedInvoices({
     page,
@@ -72,14 +69,14 @@ export default async function InvoicesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Invoices"
-        description="Manage discounts, partial payments, refunds, and invoice documents."
+        title={t("title")}
+        description={t("description")}
         actions={<InvoiceGenerateForm />}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <InvoicesFilters
@@ -98,16 +95,18 @@ export default async function InvoicesPage({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Invoice</TableHead>
-              <TableHead>Student</TableHead>
-              <TableHead>Section</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Period</TableHead>
-              <TableHead>Final Amount</TableHead>
-              <TableHead>Paid</TableHead>
-              <TableHead>Remaining</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t("table.columns.invoice")}</TableHead>
+              <TableHead>{t("table.columns.student")}</TableHead>
+              <TableHead>{t("table.columns.section")}</TableHead>
+              <TableHead>{t("table.columns.type")}</TableHead>
+              <TableHead>{t("table.columns.period")}</TableHead>
+              <TableHead>{t("table.columns.finalAmount")}</TableHead>
+              <TableHead>{t("table.columns.paid")}</TableHead>
+              <TableHead>{t("table.columns.remaining")}</TableHead>
+              <TableHead>{t("table.columns.status")}</TableHead>
+              <TableHead className="text-right">
+                {t("table.columns.actions")}
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -128,7 +127,9 @@ export default async function InvoicesPage({
                     {invoice.enrollment.section.name}
                   </TableCell>
                   <TableCell>
-                    {enumLabel(invoice.invoiceType, INVOICE_TYPE_LABELS)}
+                    {t(
+                      `table.invoiceTypeOptions.${invoice.invoiceType === "ONE_TIME" ? "oneTime" : "monthly"}`,
+                    )}
                   </TableCell>
                   <TableCell>
                     {invoice.billingYear && invoice.billingMonth
@@ -160,19 +161,21 @@ export default async function InvoicesPage({
                             : "outline"
                       }
                     >
-                      {enumLabel(invoice.status, PAYMENT_STATUS_LABELS)}
+                      {t(
+                        `table.statusOptions.${invoice.status === "UNPAID" ? "unpaid" : invoice.status === "PARTIAL" ? "partial" : "paid"}`,
+                      )}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button asChild size="sm" variant="outline">
                         <Link href={`/school/invoices/${invoice.id}`}>
-                          View
+                          {t("table.actions.view")}
                         </Link>
                       </Button>
                       <Button asChild size="sm">
                         <Link href={`/school/invoices/${invoice.id}/pdf`}>
-                          Download PDF
+                          {t("table.actions.downloadPdf")}
                         </Link>
                       </Button>
                     </div>
@@ -186,7 +189,7 @@ export default async function InvoicesPage({
                   colSpan={10}
                   className="py-10 text-center text-sm text-muted-foreground"
                 >
-                  No invoices yet.
+                  {t("table.empty")}
                 </TableCell>
               </TableRow>
             ) : null}

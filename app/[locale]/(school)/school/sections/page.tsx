@@ -13,10 +13,18 @@ import { getTranslations } from "next-intl/server";
 export default async function SectionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; q?: string; createdFrom?: string; createdTo?: string }>;
+  searchParams: Promise<{
+    page?: string;
+    q?: string;
+    createdFrom?: string;
+    createdTo?: string;
+  }>;
 }) {
   await requireSchoolAdmin();
-  const t = await getTranslations("SchoolEntities.sections");
+  const [t, commonT] = await Promise.all([
+    getTranslations("SchoolEntities.sections"),
+    getTranslations("Common"),
+  ]);
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -45,20 +53,35 @@ export default async function SectionsPage({
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
               <Label htmlFor="q">{t("list.search")}</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder={t("list.searchPlaceholder")} />
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder={t("list.searchPlaceholder")}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="createdFrom">{t("list.createdFrom")}</Label>
-              <Input id="createdFrom" name="createdFrom" type="date" defaultValue={parseTextParam(params.createdFrom)} />
+              <Input
+                id="createdFrom"
+                name="createdFrom"
+                type="date"
+                defaultValue={parseTextParam(params.createdFrom)}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="createdTo">{t("list.createdTo")}</Label>
-              <Input id="createdTo" name="createdTo" type="date" defaultValue={parseTextParam(params.createdTo)} />
+              <Input
+                id="createdTo"
+                name="createdTo"
+                type="date"
+                defaultValue={parseTextParam(params.createdTo)}
+              />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">{t("list.apply")}</Button>
+              <Button type="submit">{commonT("apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/school/sections">{t("list.reset")}</Link>
+                <Link href="/school/sections">{commonT("reset")}</Link>
               </Button>
             </div>
           </form>

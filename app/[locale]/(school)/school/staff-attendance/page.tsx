@@ -13,6 +13,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { StaffAttendanceFilter } from "@/components/staff-attendance/staff-attendance-filter";
+import { getTranslations } from "next-intl/server";
 
 export default async function StaffAttendancePage({
   searchParams,
@@ -40,6 +41,7 @@ export default async function StaffAttendancePage({
     from: params.dateFrom,
     to: params.dateTo,
   });
+  const t = await getTranslations("SchoolEntities.staffAttendance.list");
 
   const [staff, sections] = await Promise.all([
     prisma.staff.findMany({
@@ -57,8 +59,8 @@ export default async function StaffAttendancePage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Staff Attendance"
-        description="Track staff attendance per section, per day."
+        title={t("title")}
+        description={t("description")}
       />
       <StaffAttendanceForm
         action={markStaffAttendance}
@@ -71,7 +73,7 @@ export default async function StaffAttendancePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Table Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <StaffAttendanceFilter

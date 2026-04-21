@@ -9,7 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { parseDateRangeParams, parseNumberParam, parseTextParam } from "@/lib/table-filters";
+import {
+  parseDateRangeParams,
+  parseNumberParam,
+  parseTextParam,
+} from "@/lib/table-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function PayrollPage({
   searchParams,
@@ -34,44 +39,67 @@ export default async function PayrollPage({
   });
   const totalMin = parseNumberParam(params.totalMin);
   const totalMax = parseNumberParam(params.totalMax);
+  const [t, commonT] = await Promise.all([
+    getTranslations("SchoolEntities.payroll.list"),
+    getTranslations("Common"),
+  ]);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Payroll"
-        description="Generate and review monthly staff payroll."
-      />
+      <PageHeader title={t("title")} description={t("description")} />
       <PayrollGenerateForm action={generatePayroll} />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search Staff</Label>
+              <Label htmlFor="q">{t("form.searchStaff")}</Label>
               <Input id="q" name="q" defaultValue={q} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="monthFrom">Month From</Label>
-              <Input id="monthFrom" name="monthFrom" type="date" defaultValue={parseTextParam(params.monthFrom)} />
+              <Label htmlFor="monthFrom">{t("form.monthFrom")}</Label>
+              <Input
+                id="monthFrom"
+                name="monthFrom"
+                type="date"
+                defaultValue={parseTextParam(params.monthFrom)}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="monthTo">Month To</Label>
-              <Input id="monthTo" name="monthTo" type="date" defaultValue={parseTextParam(params.monthTo)} />
+              <Label htmlFor="monthTo">{t("form.monthTo")}</Label>
+              <Input
+                id="monthTo"
+                name="monthTo"
+                type="date"
+                defaultValue={parseTextParam(params.monthTo)}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="totalMin">Total Min</Label>
-              <Input id="totalMin" name="totalMin" type="number" step="0.01" defaultValue={params.totalMin} />
+              <Label htmlFor="totalMin">{t("form.totalMin")}</Label>
+              <Input
+                id="totalMin"
+                name="totalMin"
+                type="number"
+                step="0.01"
+                defaultValue={params.totalMin}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="totalMax">Total Max</Label>
-              <Input id="totalMax" name="totalMax" type="number" step="0.01" defaultValue={params.totalMax} />
+              <Label htmlFor="totalMax">{t("form.totalMax")}</Label>
+              <Input
+                id="totalMax"
+                name="totalMax"
+                type="number"
+                step="0.01"
+                defaultValue={params.totalMax}
+              />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
+              <Button type="submit">{commonT("apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/school/payroll">Reset</Link>
+                <Link href="/school/payroll">{commonT("reset")}</Link>
               </Button>
             </div>
           </form>
@@ -92,4 +120,3 @@ export default async function PayrollPage({
     </div>
   );
 }
-

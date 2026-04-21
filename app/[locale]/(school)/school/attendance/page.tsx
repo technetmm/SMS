@@ -17,6 +17,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { AttendanceFilters } from "@/components/attendance/attendance-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function AttendancePage({
   searchParams,
@@ -48,6 +49,7 @@ export default async function AttendancePage({
   });
 
   const page = parsePageParam(params.page);
+  const t = await getTranslations("SchoolEntities.attendance.list");
   const [enrollments, students, sections, rows] = await Promise.all([
     getEnrollments(),
     prisma.student.findMany({
@@ -78,8 +80,8 @@ export default async function AttendancePage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Attendance"
-        description="Mark and review attendance per enrollment (student + section)."
+        title={t("title")}
+        description={t("description")}
       />
       <EnrollmentAttendanceForm
         defaultDate={today}
@@ -91,7 +93,7 @@ export default async function AttendancePage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <AttendanceFilters

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/table";
 import { prisma } from "@/lib/prisma/client";
 import { requireTenantId } from "@/lib/tenant";
-import { enumLabel, PAYMENT_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/helper";
 import { paginateQuery, parsePageParam } from "@/lib/pagination";
@@ -27,7 +26,7 @@ import {
 import { PaymentStatus } from "@/app/generated/prisma/enums";
 import { PaymentsFilters } from "@/components/payments/payments-filters";
 import { dateFormatter } from "@/lib/formatter";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function PaymentsPage({
   searchParams,
@@ -46,6 +45,7 @@ export default async function PaymentsPage({
   const schoolId = await requireTenantId();
   const params = await searchParams;
   const locale = await getLocale();
+  const t = await getTranslations("SchoolEntities.payments.list");
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
@@ -106,18 +106,18 @@ export default async function PaymentsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Payments"
-        description="Track monthly fees, deposits, and invoice status."
+        title={t("title")}
+        description={t("description")}
         actions={
           <ExportMenu
-            items={[{ label: "Export PDF", action: exportPaymentsToPDF }]}
+            items={[{ label: t("exportPdf"), action: exportPaymentsToPDF }]}
           />
         }
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Table Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <PaymentsFilters
@@ -133,18 +133,18 @@ export default async function PaymentsPage({
 
       <Card>
         <CardHeader>
-          <CardTitle>Invoices</CardTitle>
+          <CardTitle>{t("table.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Invoice</TableHead>
-                <TableHead>Student</TableHead>
-                <TableHead>Final Amount</TableHead>
-                <TableHead>Paid</TableHead>
-                <TableHead>Due Date</TableHead>
-                <TableHead>Status</TableHead>
+                <TableHead>{t("table.columns.invoice")}</TableHead>
+                <TableHead>{t("table.columns.student")}</TableHead>
+                <TableHead>{t("table.columns.finalAmount")}</TableHead>
+                <TableHead>{t("table.columns.paid")}</TableHead>
+                <TableHead>{t("table.columns.dueDate")}</TableHead>
+                <TableHead>{t("table.columns.status")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -173,7 +173,9 @@ export default async function PaymentsPage({
                         invoice.status === "PAID" ? "default" : "outline"
                       }
                     >
-                      {enumLabel(invoice.status, PAYMENT_STATUS_LABELS)}
+                      {t(
+                        `table.statusOptions.${invoice.status === "UNPAID" ? "unpaid" : invoice.status === "PARTIAL" ? "partial" : "paid"}`,
+                      )}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -184,7 +186,7 @@ export default async function PaymentsPage({
                     colSpan={6}
                     className="py-10 text-center text-sm text-muted-foreground"
                   >
-                    No invoices yet.
+                    {t("table.empty")}
                   </TableCell>
                 </TableRow>
               ) : null}

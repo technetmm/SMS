@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/combobox";
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
 import { Input } from "../ui/input";
+import { useTranslations } from "next-intl";
 
 const initialState: StaffAttendanceActionState = { status: "idle" };
 
@@ -44,6 +45,7 @@ type Props = {
 };
 
 export function StaffAttendanceForm({ action, staff, sections }: Props) {
+  const t = useTranslations("SchoolEntities.staffAttendance.form");
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
   const staffAnchor = useComboboxAnchor();
@@ -56,23 +58,23 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
 
   useEffect(() => {
     if (state.status === "success") {
-      toast.success(state.message ?? "Saved");
+      toast.success(state.message ?? t("messages.saved"));
       router.refresh();
     }
     if (state.status === "error") {
-      toast.error(state.message ?? "Unable to save attendance");
+      toast.error(state.message ?? t("messages.saveFailed"));
     }
-  }, [router, state]);
+  }, [router, state, t]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!selectedStaff) {
       event.preventDefault();
-      toast.error("Please select a staff.");
+      toast.error(t("messages.selectStaff"));
       return;
     }
     if (!selectedSection) {
       event.preventDefault();
-      toast.error("Please select a section.");
+      toast.error(t("messages.selectSection"));
     }
   }
 
@@ -83,20 +85,20 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Mark Staff Attendance</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label>Staff</Label>
+            <Label>{t("staff")}</Label>
             <Combobox
               items={staff}
               value={selectedStaff}
               onValueChange={(value: Option | null) => setSelectedStaff(value)}
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxInput placeholder="Search staff..." />
+              <ComboboxInput placeholder={t("searchStaff")} />
               <ComboboxContent>
-                <ComboboxEmpty>No staff found.</ComboboxEmpty>
+                <ComboboxEmpty>{t("noStaffFound")}</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
@@ -109,7 +111,7 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label>Section</Label>
+            <Label>{t("section")}</Label>
             <Combobox
               items={sections}
               value={selectedSection}
@@ -118,9 +120,9 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
               }
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxInput placeholder="Search section..." />
+              <ComboboxInput placeholder={t("searchSection")} />
               <ComboboxContent>
-                <ComboboxEmpty>No sections found.</ComboboxEmpty>
+                <ComboboxEmpty>{t("noSectionsFound")}</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
@@ -133,7 +135,7 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="date">Date</Label>
+            <Label htmlFor="date">{t("date")}</Label>
             <Input
               id="date"
               name="date"
@@ -144,18 +146,24 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="status">Status</Label>
+            <Label htmlFor="status">{t("status")}</Label>
             <Select name="status" defaultValue="PRESENT">
               <SelectTrigger id="status" className="w-full">
-                <SelectValue placeholder="Select status" />
+                <SelectValue placeholder={t("selectStatus")} />
               </SelectTrigger>
               <SelectContent position="popper">
                 <SelectItem value={AttendanceStatus.PRESENT}>
-                  Present
+                  {t("statusOptions.present")}
                 </SelectItem>
-                <SelectItem value={AttendanceStatus.ABSENT}>Absent</SelectItem>
-                <SelectItem value={AttendanceStatus.LATE}>Late</SelectItem>
-                <SelectItem value={AttendanceStatus.LEAVE}>Leave</SelectItem>
+                <SelectItem value={AttendanceStatus.ABSENT}>
+                  {t("statusOptions.absent")}
+                </SelectItem>
+                <SelectItem value={AttendanceStatus.LATE}>
+                  {t("statusOptions.late")}
+                </SelectItem>
+                <SelectItem value={AttendanceStatus.LEAVE}>
+                  {t("statusOptions.leave")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -163,7 +171,7 @@ export function StaffAttendanceForm({ action, staff, sections }: Props) {
       </Card>
 
       <div className="flex justify-end">
-        <SubmitButton label="Save Attendance" loadingLabel="Saving..." />
+        <SubmitButton label={t("save")} loadingLabel={t("saving")} />
       </div>
     </form>
   );

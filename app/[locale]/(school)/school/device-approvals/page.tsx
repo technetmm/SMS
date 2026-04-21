@@ -25,8 +25,9 @@ export default async function SchoolDeviceApprovalsPage({
   }>;
 }) {
   const user = await requireSchoolAdminAccess();
-  const [t, locale] = await Promise.all([
+  const [t, commonT, locale] = await Promise.all([
     getTranslations("DeviceApprovalsPage"),
+    getTranslations("Common"),
     getLocale(),
   ]);
   const params = await searchParams;
@@ -155,11 +156,9 @@ export default async function SchoolDeviceApprovalsPage({
               />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">{t("filters.apply")}</Button>
+              <Button type="submit">{commonT("apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/school/device-approvals">
-                  {t("filters.reset")}
-                </Link>
+                <Link href="/school/device-approvals">{commonT("reset")}</Link>
               </Button>
             </div>
           </form>

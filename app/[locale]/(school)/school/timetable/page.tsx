@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parseTableFilterEnumParam, parseTextParam } from "@/lib/table-filters";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { TimetableFilters } from "@/components/timetable/timetable-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function TimetablePage({
   searchParams,
@@ -31,22 +32,23 @@ export default async function TimetablePage({
     DayOfWeek.SUN,
   ] as const);
   const slots = await getTimetable();
+  const t = await getTranslations("SchoolEntities.timetable.list");
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Timetable"
-        description="Manage weekly schedules and prevent staff conflicts."
+        title={t("title")}
+        description={t("description")}
         actions={
           <Button asChild>
-            <Link href="/school/timetable/create">Create Slot</Link>
+            <Link href="/school/timetable/create">{t("new")}</Link>
           </Button>
         }
       />
       <DragDropWeekTimetable slots={slots} />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <TimetableFilters q={q} dayOfWeek={dayOfWeek} />

@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { parseTextParam } from "@/lib/table-filters";
+import { useTranslations } from "next-intl";
 
 export function AttendanceFilters({
   q,
@@ -28,25 +29,28 @@ export function AttendanceFilters({
   students: { id: string; name: string }[];
   sections: { id: string; name: string; class: { name: string } }[];
 }) {
+  const t = useTranslations("SchoolEntities.attendance.filters");
+  const commonT = useTranslations("Common");
+
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
       <div className="grid gap-2">
-        <Label htmlFor="q">Search</Label>
+        <Label htmlFor="q">{t("search")}</Label>
         <Input
           id="q"
           name="q"
           defaultValue={q}
-          placeholder="Student, section, class"
+          placeholder={t("searchPlaceholder")}
         />
       </div>
 
       <TableFilterSelect
         id="studentId"
         name="studentId"
-        label="Student"
-        placeholder="All students"
+        label={t("student")}
+        placeholder={t("allStudents")}
         defaultValue={studentId}
-        allLabel="All students"
+        allLabel={t("allStudents")}
         options={students.map((student) => ({
           value: student.id,
           label: student.name,
@@ -56,10 +60,10 @@ export function AttendanceFilters({
       <TableFilterSelect
         id="sectionId"
         name="sectionId"
-        label="Section"
-        placeholder="All sections"
+        label={t("section")}
+        placeholder={t("allSections")}
         defaultValue={sectionId}
-        allLabel="All sections"
+        allLabel={t("allSections")}
         options={sections.map((section) => ({
           value: section.id,
           label: `${section.class.name} • ${section.name}`,
@@ -67,27 +71,27 @@ export function AttendanceFilters({
       />
 
       <div className="grid gap-2">
-        <Label htmlFor="date">Date</Label>
+        <Label htmlFor="date">{t("date")}</Label>
         <Input id="date" name="date" type="date" defaultValue={date ?? ""} />
       </div>
 
       <TableFilterSelect
         id="status"
         name="status"
-        label="Status"
-        placeholder="All statuses"
+        label={t("status")}
+        placeholder={t("allStatuses")}
         defaultValue={status}
-        allLabel="All statuses"
+        allLabel={t("allStatuses")}
         options={[
-          { value: "PRESENT", label: "Present" },
-          { value: "ABSENT", label: "Absent" },
-          { value: "LATE", label: "Late" },
-          { value: "LEAVE", label: "Leave" },
+          { value: "PRESENT", label: t("statusOptions.present") },
+          { value: "ABSENT", label: t("statusOptions.absent") },
+          { value: "LATE", label: t("statusOptions.late") },
+          { value: "LEAVE", label: t("statusOptions.leave") },
         ]}
       />
 
       <div className="grid gap-2">
-        <Label htmlFor="dateFrom">Date From</Label>
+        <Label htmlFor="dateFrom">{t("dateFrom")}</Label>
         <Input
           id="dateFrom"
           name="dateFrom"
@@ -97,7 +101,7 @@ export function AttendanceFilters({
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="dateTo">Date To</Label>
+        <Label htmlFor="dateTo">{t("dateTo")}</Label>
         <Input
           id="dateTo"
           name="dateTo"
@@ -108,7 +112,7 @@ export function AttendanceFilters({
 
       <div className="flex items-end gap-2">
         <Button type="submit" variant="default">
-          Apply
+          {commonT("apply")}
         </Button>
 
         <Button
@@ -116,7 +120,7 @@ export function AttendanceFilters({
           variant="outline"
           onClick={() => (window.location.href = "/school/attendance")}
         >
-          Reset
+          {commonT("reset")}
         </Button>
       </div>
     </form>

@@ -56,7 +56,9 @@ export default async function StaffPage({
         actions={
           <div className="flex items-center gap-2">
             <ExportMenu
-              items={[{ label: t("list.exportExcel"), action: exportStaffToExcel }]}
+              items={[
+                { label: t("list.exportExcel"), action: exportStaffToExcel },
+              ]}
             />
             <Button asChild>
               <Link href="/school/staff/create">{t("list.new")}</Link>

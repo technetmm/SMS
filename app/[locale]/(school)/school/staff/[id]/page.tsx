@@ -14,8 +14,9 @@ import {
 } from "@/lib/enum-labels";
 import { staffStatusColor } from "@/lib/colors";
 import { timeToMinutes } from "@/lib/time";
-import { dateFormatter } from "@/lib/helper";
+import { dateFormatter } from "@/lib/formatter";
 import { StaffSystemRoleManager } from "@/components/staff/staff-system-role-manager";
+import { getLocale } from "next-intl/server";
 
 export default async function StaffDetailPage({
   params,
@@ -24,6 +25,7 @@ export default async function StaffDetailPage({
 }) {
   const session = await requireSchoolAdmin();
   const { id } = await params;
+  const locale = await getLocale();
 
   if (!id) {
     redirect("/school/staff");
@@ -105,7 +107,7 @@ export default async function StaffDetailPage({
               <div>
                 <p className="text-xs text-muted-foreground">Date of birth</p>
                 <p className="font-medium">
-                  {staff?.dob ? dateFormatter.format(staff.dob) : "-"}
+                  {staff?.dob ? dateFormatter(locale).format(staff.dob) : "-"}
                 </p>
               </div>
               <div>
@@ -172,13 +174,17 @@ export default async function StaffDetailPage({
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Hire date</p>
                 <p className="font-medium">
-                  {staff?.hireDate ? dateFormatter.format(staff.hireDate) : "-"}
+                  {staff?.hireDate
+                    ? dateFormatter(locale).format(staff.hireDate)
+                    : "-"}
                 </p>
               </div>
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Exit date</p>
                 <p className="font-medium">
-                  {staff.exitDate ? dateFormatter.format(staff.exitDate) : "-"}
+                  {staff.exitDate
+                    ? dateFormatter(locale).format(staff.exitDate)
+                    : "-"}
                 </p>
               </div>
               <div className="rounded-xl border p-3">

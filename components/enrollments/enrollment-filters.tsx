@@ -19,6 +19,7 @@ export function EnrollmentFilters({
   enrolledTo?: string;
 }) {
   const t = useTranslations("SchoolEntities.enrollments.filters");
+  const commonT = useTranslations("Common");
   return (
     <form method="get" className="grid gap-4 md:grid-cols-4">
       <div className="grid gap-2 md:col-span-2">
@@ -61,13 +62,13 @@ export function EnrollmentFilters({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">{t("apply")}</Button>
+        <Button type="submit">{commonT("apply")}</Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/enrollments")}
         >
-          {t("reset")}
+          {commonT("reset")}
         </Button>
       </div>
     </form>
