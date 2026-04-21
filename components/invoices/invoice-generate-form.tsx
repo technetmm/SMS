@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { generateMissingMonthlyInvoices, type BillingActionState } from "@/app/(school)/school/invoices/actions";
@@ -12,12 +12,25 @@ const initialState: BillingActionState = { status: "idle" };
 export function InvoiceGenerateForm() {
   const t = useTranslations("SchoolEntities.invoices.generate");
   const router = useRouter();
-  const [state, formAction] = useActionState(
+  const [state, formAction, pending] = useActionState(
     generateMissingMonthlyInvoices,
     initialState,
   );
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.generated"));
       router.refresh();

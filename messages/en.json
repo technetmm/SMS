@@ -1326,6 +1326,20 @@
           "generated": "Invoices generated.",
           "generateFailed": "Unable to generate invoices."
         }
+      },
+      "bulkPaidAll": {
+        "button": "Paid All",
+        "loading": "Processing...",
+        "confirm": {
+          "title": "Settle all filtered invoices?",
+          "description": "This will create payments with method \"Bulk Paid All\" for the full remaining balance of every filtered unpaid/partial invoice across all pages.",
+          "cancel": "Cancel",
+          "confirm": "Paid All"
+        },
+        "messages": {
+          "success": "Paid all processed successfully.",
+          "error": "Unable to process paid all."
+        }
       }
     },
     "payments": {

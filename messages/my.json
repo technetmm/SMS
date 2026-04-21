@@ -1289,6 +1289,20 @@
           "generated": "Invoice များကို ထုတ်ပြီးပါပြီ။",
           "generateFailed": "Invoice များကို မထုတ်နိုင်ပါ။"
         }
+      },
+      "bulkPaidAll": {
+        "button": "အားလုံး ပေးချေပြီး",
+        "loading": "လုပ်ဆောင်နေသည်...",
+        "confirm": {
+          "title": "Filter လုပ်ထားသော invoice အားလုံးကို ပေးချေပြီးအဖြစ် သတ်မှတ်မလား?",
+          "description": "စာမျက်နှာအားလုံးအတွင်း filter ကိုက်ညီသော unpaid/partial invoice များအတွက် ကျန်ငွေအပြည့်ကို method \"Bulk Paid All\" ဖြင့် payment အဖြစ် ဖန်တီးပါမည်။",
+          "cancel": "မလုပ်ဆောင်ပါ",
+          "confirm": "အားလုံး ပေးချေပြီး"
+        },
+        "messages": {
+          "success": "Paid All ကို အောင်မြင်စွာ လုပ်ဆောင်ပြီးပါပြီ။",
+          "error": "Paid All ကို မလုပ်ဆောင်နိုင်ပါ။"
+        }
       }
     },
     "payments": {

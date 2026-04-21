@@ -24,6 +24,7 @@ import {
 } from "@/lib/table-filters";
 import { InvoiceType, PaymentStatus } from "@/app/generated/prisma/enums";
 import { InvoicesFilters } from "@/components/invoices/invoice-filters";
+import { InvoicePaidAllForm } from "@/components/invoices/invoice-paid-all-form";
 import { getTranslations } from "next-intl/server";
 
 export default async function InvoicesPage({
@@ -71,7 +72,21 @@ export default async function InvoicesPage({
       <PageHeader
         title={t("title")}
         description={t("description")}
-        actions={<InvoiceGenerateForm />}
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            <InvoicePaidAllForm
+              q={params.q}
+              status={params.status}
+              invoiceType={params.invoiceType}
+              dueFrom={params.dueFrom}
+              dueTo={params.dueTo}
+              finalMin={params.finalMin}
+              finalMax={params.finalMax}
+              disabled={invoices.totalCount === 0}
+            />
+            <InvoiceGenerateForm />
+          </div>
+        }
       />
 
       <Card>

@@ -12,7 +12,13 @@ import { prisma } from "@/lib/prisma/client";
 import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
 import { generateMonthlyInvoices } from "@/lib/monthly-invoices";
-import { containsInsensitive } from "@/lib/table-filters";
+import {
+  containsInsensitive,
+  parseDateRangeParams,
+  parseNumberParam,
+  parseTableFilterEnumParam,
+  parseTextParam,
+} from "@/lib/table-filters";
 import {
   enrollmentActorRoleSchema,
   paymentCreateSchema,
@@ -33,6 +39,47 @@ export type InvoiceTableFilters = {
   finalMin?: number;
   finalMax?: number;
 };
+
+const BULK_PAID_ALL_METHOD = "Bulk Paid All";
+
+function buildInvoiceWhere(
+  schoolId: string,
+  filters?: InvoiceTableFilters,
+): Prisma.InvoiceWhereInput {
+  const where: Prisma.InvoiceWhereInput = { schoolId };
+
+  if (filters?.status) where.status = filters.status;
+  if (filters?.invoiceType) where.invoiceType = filters.invoiceType;
+
+  if (filters?.dueFrom || filters?.dueTo) {
+    where.dueDate = {
+      ...(filters.dueFrom ? { gte: filters.dueFrom } : {}),
+      ...(filters.dueTo ? { lte: filters.dueTo } : {}),
+    };
+  }
+
+  if (filters?.finalMin != null || filters?.finalMax != null) {
+    where.finalAmount = {
+      ...(filters.finalMin != null ? { gte: filters.finalMin } : {}),
+      ...(filters.finalMax != null ? { lte: filters.finalMax } : {}),
+    };
+  }
+
+  if (filters?.q) {
+    where.OR = [
+      { id: containsInsensitive(filters.q) },
+      { student: { name: containsInsensitive(filters.q) } },
+      { enrollment: { section: { name: containsInsensitive(filters.q) } } },
+      {
+        enrollment: {
+          section: { class: { name: containsInsensitive(filters.q) } },
+        },
+      },
+    ];
+  }
+
+  return where;
+}
 
 function resolveInvoiceStatus(
   finalAmount: Prisma.Decimal,
@@ -142,33 +189,7 @@ export async function getPaginatedInvoices({
       query: async () => [],
     });
   }
-  const where: Record<string, unknown> = { schoolId: actor.schoolId };
-
-  if (filters?.status) where.status = filters.status;
-  if (filters?.invoiceType) where.invoiceType = filters.invoiceType;
-
-  if (filters?.dueFrom || filters?.dueTo) {
-    where.dueDate = {
-      ...(filters.dueFrom ? { gte: filters.dueFrom } : {}),
-      ...(filters.dueTo ? { lte: filters.dueTo } : {}),
-    };
-  }
-
-  if (filters?.finalMin != null || filters?.finalMax != null) {
-    where.finalAmount = {
-      ...(filters.finalMin != null ? { gte: filters.finalMin } : {}),
-      ...(filters.finalMax != null ? { lte: filters.finalMax } : {}),
-    };
-  }
-
-  if (filters?.q) {
-    where.OR = [
-      { id: containsInsensitive(filters.q) },
-      { student: { name: containsInsensitive(filters.q) } },
-      { enrollment: { section: { name: containsInsensitive(filters.q) } } },
-      { enrollment: { section: { class: { name: containsInsensitive(filters.q) } } } },
-    ];
-  }
+  const where = buildInvoiceWhere(actor.schoolId, filters);
 
   return paginateQuery({
     page,
@@ -361,6 +382,125 @@ export async function addPayment(
   revalidateLocalizedPath("/school/payments");
   revalidateLocalizedPath("/school/invoices");
   return { status: "success", message: "Payment added." };
+}
+
+export async function bulkPayAllInvoices(
+  _prevState: BillingActionState,
+  formData: FormData,
+): Promise<BillingActionState> {
+  const actor = await requireStaffOrAdmin();
+  if (!actor.ok) return { status: "error", message: actor.message };
+
+  const raw = formDataToObject(formData);
+  const q = parseTextParam(raw.q as string | undefined);
+  const status = parseTableFilterEnumParam(
+    raw.status as string | undefined,
+    [PaymentStatus.UNPAID, PaymentStatus.PARTIAL, PaymentStatus.PAID] as const,
+  );
+  const invoiceType = parseTableFilterEnumParam(
+    raw.invoiceType as string | undefined,
+    [InvoiceType.ONE_TIME, InvoiceType.MONTHLY] as const,
+  );
+  const { from: dueFrom, to: dueTo } = parseDateRangeParams({
+    from: raw.dueFrom as string | undefined,
+    to: raw.dueTo as string | undefined,
+  });
+  const finalMin = parseNumberParam(raw.finalMin as string | undefined);
+  const finalMax = parseNumberParam(raw.finalMax as string | undefined);
+
+  const filterWhere = buildInvoiceWhere(actor.schoolId, {
+    q,
+    status,
+    invoiceType,
+    dueFrom,
+    dueTo,
+    finalMin,
+    finalMax,
+  });
+
+  let paid = 0;
+  let skipped = 0;
+
+  const invoices = await prisma.invoice.findMany({
+    where: {
+      AND: [filterWhere, { status: { not: PaymentStatus.PAID } }],
+    },
+    select: { id: true },
+  });
+
+  for (const row of invoices) {
+    try {
+      const result = await prisma.$transaction(async (tx) => {
+        const latest = await tx.invoice.findFirst({
+          where: { id: row.id, schoolId: actor.schoolId },
+          select: {
+            id: true,
+            finalAmount: true,
+            paidAmount: true,
+            status: true,
+          },
+        });
+
+        if (!latest || latest.status === PaymentStatus.PAID) {
+          return "skipped" as const;
+        }
+
+        const remaining = new Prisma.Decimal(latest.finalAmount).sub(
+          new Prisma.Decimal(latest.paidAmount),
+        );
+
+        if (remaining.lessThanOrEqualTo(0)) {
+          return "skipped" as const;
+        }
+
+        const updateResult = await tx.invoice.updateMany({
+          where: {
+            id: latest.id,
+            schoolId: actor.schoolId,
+            status: { not: PaymentStatus.PAID },
+          },
+          data: {
+            paidAmount: latest.finalAmount,
+            status: PaymentStatus.PAID,
+          },
+        });
+
+        if (updateResult.count === 0) {
+          return "skipped" as const;
+        }
+
+        await tx.payment.create({
+          data: {
+            schoolId: actor.schoolId,
+            invoiceId: latest.id,
+            amount: remaining,
+            method: BULK_PAID_ALL_METHOD,
+          },
+        });
+
+        return "paid" as const;
+      });
+
+      if (result === "paid") {
+        paid += 1;
+      } else {
+        skipped += 1;
+      }
+    } catch (error) {
+      console.error("bulkPayAllInvoices item failed", {
+        invoiceId: row.id,
+        error,
+      });
+      skipped += 1;
+    }
+  }
+
+  revalidateLocalizedPath("/school/payments");
+  revalidateLocalizedPath("/school/invoices");
+  return {
+    status: "success",
+    message: `Paid ${paid} invoices. Skipped ${skipped}.`,
+  };
 }
 
 export async function addRefund(
