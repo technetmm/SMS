@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { ClassForm } from "@/components/classes/class-form";
 import { getClassById, updateClass } from "@/app/(school)/school/classes/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditClassPage({
   params,
@@ -14,6 +15,7 @@ export default async function EditClassPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.classes");
   const schoolId = await requireTenantId();
   const { id } = await params;
 
@@ -33,11 +35,11 @@ export default async function EditClassPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Class"
-        description="Update class details."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/classes">Cancel</Link>
+            <Link href="/school/classes">{t("edit.back")}</Link>
           </Button>
         }
       />

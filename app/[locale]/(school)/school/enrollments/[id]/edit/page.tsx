@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { EnrollmentEditForm } from "@/components/enrollments/enrollment-edit-form";
 import { getEnrollmentEditFormOptions } from "@/app/(school)/school/enrollments/actions";
 import { requireSchoolAdmin } from "@/lib/permissions";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditEnrollmentPage({
   params,
@@ -12,6 +13,7 @@ export default async function EditEnrollmentPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.enrollments");
   const { id } = await params;
 
   const data = await getEnrollmentEditFormOptions(id);
@@ -20,11 +22,11 @@ export default async function EditEnrollmentPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Enrollment"
-        description="Update enrollment details, section assignment, and billing inputs."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/enrollments">Back to Enrollments</Link>
+            <Link href="/school/enrollments">{t("edit.back")}</Link>
           </Button>
         }
       />

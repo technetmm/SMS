@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { parseDateRangeParams, parseTextParam } from "@/lib/table-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function CoursesPage({
   searchParams,
@@ -15,6 +16,7 @@ export default async function CoursesPage({
   searchParams: Promise<{ page?: string; q?: string; createdFrom?: string; createdTo?: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.courses");
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -27,36 +29,36 @@ export default async function CoursesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Courses"
-        description="Manage courses and map them to subjects."
+        title={t("list.title")}
+        description={t("list.description")}
         actions={
           <Button asChild>
-            <Link href="/school/courses/create">Create Course</Link>
+            <Link href="/school/courses/create">{t("list.new")}</Link>
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("list.filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder="Course or subject" />
+              <Label htmlFor="q">{t("list.search")}</Label>
+              <Input id="q" name="q" defaultValue={q} placeholder={t("list.searchPlaceholder")} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="createdFrom">Created From</Label>
+              <Label htmlFor="createdFrom">{t("list.createdFrom")}</Label>
               <Input id="createdFrom" name="createdFrom" type="date" defaultValue={parseTextParam(params.createdFrom)} />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="createdTo">Created To</Label>
+              <Label htmlFor="createdTo">{t("list.createdTo")}</Label>
               <Input id="createdTo" name="createdTo" type="date" defaultValue={parseTextParam(params.createdTo)} />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
+              <Button type="submit">{t("list.apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/school/courses">Reset</Link>
+                <Link href="/school/courses">{t("list.reset")}</Link>
               </Button>
             </div>
           </form>
@@ -75,4 +77,3 @@ export default async function CoursesPage({
     </div>
   );
 }
-

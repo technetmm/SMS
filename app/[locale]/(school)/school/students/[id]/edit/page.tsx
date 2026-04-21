@@ -5,6 +5,7 @@ import { getStudentById } from "@/app/(school)/school/students/actions";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { StudentForm } from "@/components/students/student-form";
+import { getTranslations } from "next-intl/server";
 
 function toDateInput(value: Date | null) {
   if (!value) return "";
@@ -17,6 +18,7 @@ export default async function EditStudentPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.students");
 
   const { id } = await params;
 
@@ -32,11 +34,11 @@ export default async function EditStudentPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Student"
-        description="Update student profile information."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/students">Back to Students</Link>
+            <Link href="/school/students">{t("edit.back")}</Link>
           </Button>
         }
       />

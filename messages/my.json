@@ -1,6 +1,12 @@
 {
   "Common": {
-    "open": "ဖွင့်ပါ"
+    "open": "ဖွင့်ပါ",
+    "apply": "အသုံးပြုပါ",
+    "cancel": "မလုပ်ဆောင်ပါ",
+    "reset": "ပြန်စမည်",
+    "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+    "previous": "ယခင်",
+    "next": "နောက်"
   },
   "LocaleSwitcher": {
     "label": "ဘာသာစကား ရွေးချယ်မှု",
@@ -272,14 +278,14 @@
   "SettingsOverview": {
     "schoolEyebrow": "ဆက်တင်များ",
     "platformEyebrow": "Platform ဆက်တင်များ",
-    "title": "အကောင့် Preferences",
+    "title": "ဆက်တင်များ",
     "description": "သင့် profile၊ Theme နှင့် Security controls များကို စီမံပါ။",
     "actions": {
       "securityStatus": "Security status",
       "enable2fa": "Enable 2FA"
     },
     "overview": {
-      "title": "Settings overview",
+      "title": "ဆက်တင် အကျဉ်းချုပ်",
       "description": "သင် update လုပ်လိုသော အပိုင်းသို့ တိုက်ရိုက်သွားပါ။"
     },
     "schoolInfo": {
@@ -303,8 +309,8 @@
       "description": "သင့်အကောင့်ရဲ့ စကားဝှက်ကို လုံခြုံစွာ ပြောင်းလဲပါ။"
     },
     "twoFactorAuth": {
-      "title": "နှစ်ဆင့်အထောက်အထားစိစစ်ခြင်း",
-      "description": "နှစ်ဆင့်အထောက်အထားစိစစ်ခြင်းကို ဖွင့် သို့မဟုတ် ပိတ်ပါ။"
+      "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+      "description": "နှစ်ဆင့်အတည်ပြုခြင်းကို ဖွင့်ရန် သို့မဟုတ် ပိတ်ရန်။"
     },
     "security": {
       "title": "လုံခြုံရေး",
@@ -335,6 +341,716 @@
       "updateProfilePhoto": "Update profile photo",
       "changeEmail": "Change email",
       "changePassword": "Change password"
+    }
+  },
+  "SchoolDashboard": {
+    "stats": {
+      "totalStudents": "ကျောင်းသားစုစုပေါင်း",
+      "activeClasses": "လက်ရှိဖွင့်ထားသော အတန်းများ",
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "charts": {
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "highlights": {
+      "title": "အနှစ်ချုပ်",
+      "topProgram": "အကောင်းဆုံးအစီအစဉ်: Regular (2 days)",
+      "avgAttendance": "ပျမ်းမျှတက်ရောက်မှုနှုန်း: 92%",
+      "pendingInvoices": "ဒီလ မပေးသေးသော Invoice: 14"
+    },
+    "deviceApprovals": {
+      "title": "ဝန်ထမ်းနှင့် ကျောင်းသား Device အတည်ပြုရန် တောင်းဆိုမှုများ"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "PlatformDashboard": {
+    "eyebrow": "Platform Dashboard",
+    "title": "Super Admin အကျဉ်းချုပ်",
+    "stats": {
+      "totalSchools": "ကျောင်းစုစုပေါင်း",
+      "activeSubscriptions": "အသုံးပြုနေသော Subscription များ",
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "charts": {
+      "revenueTrend": "Platform ဝင်ငွေ လမ်းကြောင်း"
+    },
+    "highlights": {
+      "title": "အနှစ်ချုပ်",
+      "totalSchools": "Onboard ပြုလုပ်ထားသော ကျောင်းစုစုပေါင်း: {count}",
+      "activeSubscriptions": "လက်ရှိ အသက်ဝင် Paid Subscription များ: {count}",
+      "latestGrowth": "နောက်ဆုံး ကြီးထွားမှုအညွှန်း: {count}"
+    },
+    "deviceApprovals": {
+      "title": "Admin Device Approval Requests"
+    },
+    "schools": {
+      "title": "ကျောင်းများ",
+      "columns": {
+        "name": "အမည်",
+        "plan": "အစီအစဉ်",
+        "status": "အခြေအနေ",
+        "created": "ဖန်တီးသည့်နေ့",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "status": {
+        "active": "ACTIVE",
+        "disabled": "DISABLED"
+      },
+      "actions": {
+        "view": "ကြည့်မည်",
+        "disable": "ပိတ်မည်"
+      },
+      "empty": "ကျောင်း မရှိသေးပါ။"
+    },
+    "subscriptions": {
+      "title": "Subscription များ",
+      "columns": {
+        "school": "ကျောင်း",
+        "plan": "အစီအစဉ်",
+        "status": "အခြေအနေ",
+        "nextBilling": "နောက်တစ်ကြိမ် Billing"
+      },
+      "status": {
+        "active": "ACTIVE"
+      },
+      "empty": "Subscription မရှိသေးပါ။"
+    },
+    "activity": {
+      "title": "လုပ်ဆောင်ချက် Timeline",
+      "empty": "မကြာသေးမီ လုပ်ဆောင်ချက် မရှိပါ။",
+      "system": "System"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "AnalyticsPage": {
+    "charts": {
+      "attendanceTrend": "တက်ရောက်မှု လမ်းကြောင်း (30 ရက်)"
+    },
+    "stats": {
+      "attendanceRate": "တက်ရောက်မှုနှုန်း",
+      "present": "တက်ရောက်",
+      "absent": "ပျက်ကွက်",
+      "lateLeave": "နောက်ကျ / ခွင့်"
+    },
+    "notes": {
+      "title": "မှတ်ချက်များ",
+      "item1": "Count တွင် ရွေးချယ်ထားသော tenant ၏ section အားလုံး ပါဝင်သည်။",
+      "item2": "Trend သည် မှတ်တမ်းရှိသော နောက်ဆုံးရက် 30 ကို ပြသသည်။"
+    }
+  },
+  "DeviceApprovalsPage": {
+    "school": {
+      "title": "Device အတည်ပြုချက်များ",
+      "description": "ဝန်ထမ်းနှင့် ကျောင်းသား device login request များကို စစ်ဆေးပြီး ဆောင်ရွက်ပါ။"
+    },
+    "platform": {
+      "title": "Device အတည်ပြုချက်များ",
+      "description": "ကျောင်း admin device login request များကို စစ်ဆေးပြီး ဆောင်ရွက်ပါ။"
+    },
+    "filters": {
+      "title": "Filter များ",
+      "search": {
+        "label": "ရှာဖွေရန်",
+        "placeholder": {
+          "school": "အမည်, email, IP, user agent",
+          "platform": "အမည်, email, ကျောင်း, IP, user agent"
+        }
+      },
+      "requesterRole": {
+        "label": "တောင်းဆိုသူ Role",
+        "placeholder": "Role အားလုံး",
+        "options": {
+          "schoolSuperAdmin": "School Owner",
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher",
+          "student": "Student"
+        }
+      },
+      "requestedFrom": "တောင်းဆိုချိန် (မှ)",
+      "requestedTo": "တောင်းဆိုချိန် (အထိ)",
+      "expiresFrom": "သက်တမ်းကုန်ချိန် (မှ)",
+      "expiresTo": "သက်တမ်းကုန်ချိန် (အထိ)",
+      "apply": "အသုံးပြုမည်",
+      "reset": "ပြန်စမည်"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "table": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "SchoolEntities": {
+    "students": {
+      "list": {
+        "title": "Students",
+        "description": "ကျောင်းသားများကို စီမံပြီး အတန်းများသို့ အပ်နှံပါ။",
+        "exportExcel": "Export Excel",
+        "new": "New Student",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "Create Student",
+        "description": "ကျောင်းသားအသစ်ကို ထည့်ပါ။",
+        "back": "Back to Students"
+      },
+      "edit": {
+        "title": "Edit Student",
+        "description": "ကျောင်းသား အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Back to Students"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "အမည် သို့မဟုတ် ဖုန်းဖြင့် ရှာပါ",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "graduated": "Graduated"
+        },
+        "gender": "လိင်",
+        "allGenders": "လိင်အားလုံး",
+        "genderOptions": {
+          "male": "Male",
+          "female": "Female",
+          "other": "Other"
+        },
+        "admissionFrom": "Admission From",
+        "admissionTo": "Admission To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "gender": "Gender",
+          "phone": "Phone",
+          "status": "Status",
+          "admissionDate": "Admission Date",
+          "actions": "Actions"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit"
+        },
+        "empty": "No students found.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      },
+      "rowActions": {
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Student deleted",
+          "deleteFailed": "Unable to delete student"
+        },
+        "dialog": {
+          "title": "Delete student",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "staff": {
+      "list": {
+        "title": "Staff",
+        "description": "Staff account များကို စီမံပါ။",
+        "exportExcel": "Export Excel",
+        "new": "New Staff",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "Create Staff",
+        "description": "ဝန်ထမ်း account အသစ်တစ်ခု ဖန်တီးပါ။",
+        "back": "Back to Staff"
+      },
+      "edit": {
+        "title": "Edit Staff",
+        "description": "ဝန်ထမ်းအချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Back to Details"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "အမည်၊ email၊ phone",
+        "role": "Role",
+        "allRoles": "Role အားလုံး",
+        "roleOptions": {
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher"
+        },
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "active": "Active",
+          "onLeave": "On Leave",
+          "resigned": "Resigned",
+          "terminated": "Terminated"
+        },
+        "hireFrom": "Hire From",
+        "hireTo": "Hire To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "role": "Role",
+          "status": "Status",
+          "hireDate": "Hire Date",
+          "actions": "Actions"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "empty": "No staff yet."
+      }
+    },
+    "subjects": {
+      "list": {
+        "title": "Subjects",
+        "description": "Subject များကို စီမံပါ။",
+        "new": "Create Subject",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Subject name",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Subject",
+        "description": "Subject အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "Back to Subjects"
+      },
+      "edit": {
+        "title": "Edit Subject",
+        "description": "Subject အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Back"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "courses": "Courses",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "empty": "No subjects yet. Create your first subject to organize courses.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Subject deleted",
+          "deleteFailed": "Unable to delete subject"
+        },
+        "dialog": {
+          "title": "Delete subject",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "courses": {
+      "list": {
+        "title": "Courses",
+        "description": "Course များကို subject များနှင့် တွဲဖက်စီမံပါ။",
+        "new": "Create Course",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Course or subject",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Course",
+        "description": "Course အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "Back to Courses"
+      },
+      "edit": {
+        "title": "Edit Course",
+        "description": "Course အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Back"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "subject": "Subject",
+          "classes": "Classes",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "notAvailable": "-",
+        "empty": "No courses yet. Create your first course to start building classes.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Course deleted",
+          "deleteFailed": "Unable to delete course"
+        },
+        "dialog": {
+          "title": "Delete course",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "classes": {
+      "list": {
+        "title": "Classes",
+        "description": "Class များကို စီမံပါ။",
+        "new": "Create Class",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "Create Class",
+        "description": "Class အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "Back to Classes"
+      },
+      "edit": {
+        "title": "Edit Class",
+        "description": "Class အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Cancel"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Class or course",
+        "classType": "Class Type",
+        "allClassTypes": "All class types",
+        "classTypeOptions": {
+          "oneOnOne": "One On One",
+          "private": "Private",
+          "group": "Group"
+        },
+        "programType": "Program Type",
+        "allProgramTypes": "All program types",
+        "programTypeOptions": {
+          "regular": "Regular",
+          "intensive": "Intensive"
+        },
+        "billingType": "Billing Type",
+        "allBillingTypes": "All billing types",
+        "billingTypeOptions": {
+          "oneTime": "One Time",
+          "monthly": "Monthly"
+        },
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "feeMin": "Fee Min",
+        "feeMax": "Fee Max",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "course": "Course",
+          "type": "Type",
+          "programType": "Program Type",
+          "billingType": "Billing Type",
+          "fee": "Fee",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "empty": "No classes yet. Create your first class.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      }
+    },
+    "sections": {
+      "list": {
+        "title": "Sections",
+        "description": "Section များနှင့် staff assignment များကို စီမံပါ။",
+        "new": "Create Section",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Section, class, or teacher",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Section",
+        "description": "Section အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "Back to Sections"
+      },
+      "edit": {
+        "title": "Edit Section",
+        "description": "Section အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Cancel"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "class": "Class",
+          "capacity": "Capacity",
+          "teacher": "Teacher",
+          "status": "Status",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "status": {
+          "full": "Full",
+          "available": "Available"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "notAvailable": "-",
+        "empty": "No sections yet. Create your first section.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      }
+    },
+    "enrollments": {
+      "list": {
+        "title": "Enrollments",
+        "description": "Enrollment, billing နှင့် progress များကို စီမံပါ။",
+        "new": "New Enrollment",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "Create Enrollment",
+        "description": "Student ကို section ထဲသို့ အပ်နှံပြီး invoice ဖန်တီးပါ။",
+        "back": "Back to Enrollments"
+      },
+      "edit": {
+        "title": "Edit Enrollment",
+        "description": "Enrollment အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "Back to Enrollments"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Student, section, or class",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "enrolledFrom": "Enrolled From",
+        "enrolledTo": "Enrolled To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "student": "Student",
+          "section": "Section",
+          "status": "Status",
+          "enrolledDate": "Enrolled Date",
+          "autoInvoice": "Auto Invoice",
+          "progress": "Progress",
+          "actions": "Actions"
+        },
+        "invoice": {
+          "final": "Final",
+          "original": "Original",
+          "discount": "Discount",
+          "paid": "Paid",
+          "remaining": "Remaining",
+          "due": "Due"
+        },
+        "notAvailable": "-",
+        "empty": "No enrollments yet.",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Enrollment deleted.",
+          "deleteFailed": "Unable to delete enrollment."
+        },
+        "dialog": {
+          "title": "Delete enrollment",
+          "description": "{studentName} အတွက် enrollment ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      },
+      "progress": {
+        "update": "Update",
+        "updating": "Updating...",
+        "remarkPlaceholder": "Remark (optional)",
+        "messages": {
+          "updated": "Progress updated.",
+          "updateFailed": "Unable to update progress."
+        }
+      },
+      "status": {
+        "status": "Status",
+        "save": "Save",
+        "saving": "Saving...",
+        "options": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "messages": {
+          "updated": "Enrollment updated.",
+          "updateFailed": "Unable to update enrollment."
+        }
+      }
     }
   },
   "SettingsPages": {

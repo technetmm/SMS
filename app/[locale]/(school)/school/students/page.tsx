@@ -14,6 +14,7 @@ import {
   parseTableFilterEnumParam,
   parseTextParam,
 } from "@/lib/table-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function StudentsPage({
   searchParams,
@@ -28,6 +29,7 @@ export default async function StudentsPage({
   }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.students");
 
   const { q, status: paramsStatus, gender: paramsGender, admissionFrom: admissionFromParam, admissionTo: admissionToParam, page: pageParam } = await searchParams;
 
@@ -53,22 +55,22 @@ export default async function StudentsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Students"
-        description="Create, manage, and enroll students into classes."
+        title={t("list.title")}
+        description={t("list.description")}
         actions={
           <div className="flex items-center gap-2">
             <ExportMenu
-              items={[{ label: "Export Excel", action: exportStudentsToExcel }]}
+              items={[{ label: t("list.exportExcel"), action: exportStudentsToExcel }]}
             />
             <Button asChild>
-              <Link href="/school/students/create">New Student</Link>
+              <Link href="/school/students/create">{t("list.new")}</Link>
             </Button>
           </div>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("list.filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <StudentFilters

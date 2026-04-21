@@ -56,7 +56,9 @@ export async function TimetableTable({
         <TableBody>
           {slots.items.map((slot) => (
             <TableRow key={slot.id}>
-              <TableCell>{enumLabel(slot.dayOfWeek, DAY_OF_WEEK_LABELS)}</TableCell>
+              <TableCell>
+                {enumLabel(slot.dayOfWeek, DAY_OF_WEEK_LABELS)}
+              </TableCell>
               <TableCell className="font-medium">
                 {slot.startTime} - {slot.endTime}
               </TableCell>
@@ -89,7 +91,10 @@ export async function TimetableTable({
           ))}
           {slots.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell
+                colSpan={6}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
                 No timetable slots yet. Create your first slot.
               </TableCell>
             </TableRow>

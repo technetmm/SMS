@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { SectionForm } from "@/components/sections/section-form";
 import { createSection } from "@/app/(school)/school/sections/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function CreateSectionPage() {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.sections");
   const schoolId = await requireTenantId();
 
   const [classes, staff] = await Promise.all([
@@ -27,11 +29,11 @@ export default async function CreateSectionPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Section"
-        description="Add a section and optionally assign a staff."
+        title={t("create.title")}
+        description={t("create.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/sections">Back to Sections</Link>
+            <Link href="/school/sections">{t("create.back")}</Link>
           </Button>
         }
       />

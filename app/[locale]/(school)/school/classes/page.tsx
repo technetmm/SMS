@@ -12,6 +12,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { ClassFilters } from "@/components/classes/class-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function ClassesPage({
   searchParams,
@@ -29,6 +30,7 @@ export default async function ClassesPage({
   }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.classes");
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -56,17 +58,17 @@ export default async function ClassesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Classes"
-        description="Manage classes for your school."
+        title={t("list.title")}
+        description={t("list.description")}
         actions={
           <Button asChild>
-            <Link href="/school/classes/create">Create Class</Link>
+            <Link href="/school/classes/create">{t("list.new")}</Link>
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("list.filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ClassFilters

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { TableFilterSelect } from "@/components/shared/table-filter-select";
 import { parseTextParam } from "@/lib/table-filters";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export function EnrollmentFilters({
   q,
@@ -17,31 +18,32 @@ export function EnrollmentFilters({
   enrolledFrom?: string;
   enrolledTo?: string;
 }) {
+  const t = useTranslations("SchoolEntities.enrollments.filters");
   return (
     <form method="get" className="grid gap-4 md:grid-cols-4">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="q">Search</Label>
+        <Label htmlFor="q">{t("search")}</Label>
         <Input
           id="q"
           name="q"
           defaultValue={q}
-          placeholder="Student, section, or class"
+          placeholder={t("searchPlaceholder")}
         />
       </div>
       <TableFilterSelect
         id="status"
         name="status"
-        label="Status"
-        placeholder="All statuses"
+        label={t("status")}
+        placeholder={t("allStatuses")}
         defaultValue={status}
         options={[
-          { value: "ACTIVE", label: "Active" },
-          { value: "COMPLETED", label: "Completed" },
-          { value: "DROPPED", label: "Dropped" },
+          { value: "ACTIVE", label: t("statusOptions.active") },
+          { value: "COMPLETED", label: t("statusOptions.completed") },
+          { value: "DROPPED", label: t("statusOptions.dropped") },
         ]}
       />
       <div className="grid gap-2">
-        <Label htmlFor="enrolledFrom">Enrolled From</Label>
+        <Label htmlFor="enrolledFrom">{t("enrolledFrom")}</Label>
         <Input
           id="enrolledFrom"
           name="enrolledFrom"
@@ -50,7 +52,7 @@ export function EnrollmentFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="enrolledTo">Enrolled To</Label>
+        <Label htmlFor="enrolledTo">{t("enrolledTo")}</Label>
         <Input
           id="enrolledTo"
           name="enrolledTo"
@@ -59,13 +61,13 @@ export function EnrollmentFilters({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">Apply</Button>
+        <Button type="submit">{t("apply")}</Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/enrollments")}
         >
-          Reset
+          {t("reset")}
         </Button>
       </div>
     </form>

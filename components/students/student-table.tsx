@@ -18,6 +18,8 @@ import {
   STUDENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
 import { StudentStatus } from "@/app/generated/prisma/enums";
+import { getLocale, getTranslations } from "next-intl/server";
+import { dateFormatter } from "@/lib/formatter";
 
 export async function StudentTable({
   page,
@@ -36,6 +38,10 @@ export async function StudentTable({
   admissionTo?: Date;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.students.table"),
+    getLocale(),
+  ]);
   const students = await getPaginatedStudents({
     page,
     query,
@@ -44,19 +50,18 @@ export async function StudentTable({
     admissionFrom,
     admissionTo,
   });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Gender</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Admission Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.gender")}</TableHead>
+            <TableHead>{t("columns.phone")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
+            <TableHead>{t("columns.admissionDate")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -72,14 +77,20 @@ export async function StudentTable({
                   {enumLabel(student.status, STUDENT_STATUS_LABELS)}
                 </Badge>
               </TableCell>
-              <TableCell>{formatter.format(student.admissionDate)}</TableCell>
+              <TableCell>
+                {dateFormatter(locale).format(student.admissionDate)}
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/students/${student.id}`}>View</Link>
+                    <Link href={`/school/students/${student.id}`}>
+                      {t("actions.view")}
+                    </Link>
                   </Button>
                   <Button asChild size="sm" variant="default">
-                    <Link href={`/school/students/${student.id}/edit`}>Edit</Link>
+                    <Link href={`/school/students/${student.id}/edit`}>
+                      {t("actions.edit")}
+                    </Link>
                   </Button>
                   <StudentRowActions id={student.id} name={student.name} />
                 </div>
@@ -92,7 +103,7 @@ export async function StudentTable({
                 colSpan={6}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No students found.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

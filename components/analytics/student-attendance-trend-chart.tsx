@@ -20,13 +20,15 @@ export type AttendanceTrendPoint = {
 
 export function StudentAttendanceTrendChart({
   data,
+  title = "Attendance Trend (30 days)",
 }: {
   data: AttendanceTrendPoint[];
+  title?: string;
 }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Attendance Trend (30 days)</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">

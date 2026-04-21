@@ -78,17 +78,17 @@ export default async function SettingsOverviewPage() {
   return (
     <div className="space-y-8">
       <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("schoolEyebrow")}
-        </p>
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">
+            <h1
+              className={cn(
+                "text-3xl font-semibold tracking-tight",
+                locale === "my" && "leading-loose",
+              )}
+            >
               {t("title")}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("description")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="secondary">
@@ -166,7 +166,9 @@ export default async function SettingsOverviewPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("securitySnapshot.title")}</CardTitle>
-              <CardDescription>{t("securitySnapshot.description")}</CardDescription>
+              <CardDescription>
+                {t("securitySnapshot.description")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
@@ -178,7 +180,9 @@ export default async function SettingsOverviewPage() {
                     {t("securitySnapshot.twoFactor.description")}
                   </p>
                 </div>
-                <Badge variant="outline">{t("securitySnapshot.recommended")}</Badge>
+                <Badge variant="outline">
+                  {t("securitySnapshot.recommended")}
+                </Badge>
               </div>
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
                 <div>
@@ -205,19 +209,31 @@ export default async function SettingsOverviewPage() {
               <CardDescription>{t("quickUpdates.description")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/school/settings/profile-photo">
                   {t("quickUpdates.updateProfilePhoto")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/school/settings/change-email">
                   {t("quickUpdates.changeEmail")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/school/settings/change-password">
                   {t("quickUpdates.changePassword")}
                   <ArrowRight className="h-4 w-4" />

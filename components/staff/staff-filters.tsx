@@ -6,6 +6,7 @@ import { Label } from "../ui/label";
 import { TableFilterSelect } from "../shared/table-filter-select";
 import { Button } from "../ui/button";
 import { parseTextParam, TABLE_FILTER_ALL_VALUE } from "@/lib/table-filters";
+import { useTranslations } from "next-intl";
 
 export function StaffFilters({
   q,
@@ -20,43 +21,44 @@ export function StaffFilters({
   hireFrom?: string;
   hireTo?: string;
 }) {
+  const t = useTranslations("SchoolEntities.staff.filters");
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="q">Search</Label>
+        <Label htmlFor="q">{t("search")}</Label>
         <Input
           id="q"
           name="q"
           defaultValue={q}
-          placeholder="Name, email, phone"
+          placeholder={t("searchPlaceholder")}
         />
       </div>
       <TableFilterSelect
         id="role"
         name="role"
-        label="Role"
-        placeholder="All roles"
+        label={t("role")}
+        placeholder={t("allRoles")}
         defaultValue={role ?? TABLE_FILTER_ALL_VALUE}
         options={[
-          { value: "SCHOOL_ADMIN", label: "School Admin" },
-          { value: "TEACHER", label: "Teacher" },
+          { value: "SCHOOL_ADMIN", label: t("roleOptions.schoolAdmin") },
+          { value: "TEACHER", label: t("roleOptions.teacher") },
         ]}
       />
       <TableFilterSelect
         id="status"
         name="status"
-        label="Status"
-        placeholder="All statuses"
+        label={t("status")}
+        placeholder={t("allStatuses")}
         defaultValue={status ?? TABLE_FILTER_ALL_VALUE}
         options={[
-          { value: "ACTIVE", label: "Active" },
-          { value: "ONLEAVE", label: "On Leave" },
-          { value: "RESIGNED", label: "Resigned" },
-          { value: "TERMINATED", label: "Terminated" },
+          { value: "ACTIVE", label: t("statusOptions.active") },
+          { value: "ONLEAVE", label: t("statusOptions.onLeave") },
+          { value: "RESIGNED", label: t("statusOptions.resigned") },
+          { value: "TERMINATED", label: t("statusOptions.terminated") },
         ]}
       />
       <div className="grid gap-2">
-        <Label htmlFor="hireFrom">Hire From</Label>
+        <Label htmlFor="hireFrom">{t("hireFrom")}</Label>
         <Input
           id="hireFrom"
           name="hireFrom"
@@ -65,7 +67,7 @@ export function StaffFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="hireTo">Hire To</Label>
+        <Label htmlFor="hireTo">{t("hireTo")}</Label>
         <Input
           id="hireTo"
           name="hireTo"
@@ -74,14 +76,14 @@ export function StaffFilters({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">Apply</Button>
+        <Button type="submit">{t("apply")}</Button>
 
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/staff")}
         >
-          Reset
+          {t("reset")}
         </Button>
       </div>
     </form>

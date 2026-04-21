@@ -20,6 +20,7 @@ import {
   STAFF_STATUS_LABELS,
   USER_ROLE_LABELS,
 } from "@/lib/enum-labels";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function StaffTable({
   page,
@@ -30,21 +31,27 @@ export async function StaffTable({
   filters?: StaffTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.staff.table"),
+    getLocale(),
+  ]);
   const staff = await getPaginatedStaff({ page, filters });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
+  const formatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: locale === "en" ? "medium" : "long",
+  });
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Hire Date</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.email")}</TableHead>
+            <TableHead>{t("columns.phone")}</TableHead>
+            <TableHead>{t("columns.role")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
+            <TableHead>{t("columns.hireDate")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -67,15 +74,19 @@ export async function StaffTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/staff/${staff.id}`}>View</Link>
+                    <Link href={`/school/staff/${staff.id}`}>
+                      {t("actions.view")}
+                    </Link>
                   </Button>
                   <Button asChild size="sm" variant="default">
-                    <Link href={`/school/staff/${staff.id}/edit`}>Edit</Link>
+                    <Link href={`/school/staff/${staff.id}/edit`}>
+                      {t("actions.edit")}
+                    </Link>
                   </Button>
                   <form action={deleteStaff}>
                     <input type="hidden" name="id" value={staff.id} />
                     <Button size="sm" variant="destructive" type="submit">
-                      Delete
+                      {t("actions.delete")}
                     </Button>
                   </form>
                 </div>
@@ -88,7 +99,7 @@ export async function StaffTable({
                 colSpan={7}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No staff yet.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

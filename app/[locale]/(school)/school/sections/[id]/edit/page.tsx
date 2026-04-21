@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { SectionForm } from "@/components/sections/section-form";
 import { getSectionById, updateSection } from "@/app/(school)/school/sections/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditSectionPage({
   params,
@@ -14,6 +15,7 @@ export default async function EditSectionPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.sections");
   const schoolId = await requireTenantId();
   const { id } = await params;
 
@@ -38,11 +40,11 @@ export default async function EditSectionPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Section"
-        description="Update section details."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/sections">Cancel</Link>
+            <Link href="/school/sections">{t("edit.back")}</Link>
           </Button>
         }
       />

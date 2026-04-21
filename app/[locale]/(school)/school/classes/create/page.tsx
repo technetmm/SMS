@@ -6,9 +6,11 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { ClassForm } from "@/components/classes/class-form";
 import { createClass } from "@/app/(school)/school/classes/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function CreateClassPage() {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.classes");
   const schoolId = await requireTenantId();
 
   const courses = await prisma.course.findMany({
@@ -20,11 +22,11 @@ export default async function CreateClassPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Class"
-        description="Add a new class."
+        title={t("create.title")}
+        description={t("create.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/classes">Back to Classes</Link>
+            <Link href="/school/classes">{t("create.back")}</Link>
           </Button>
         }
       />

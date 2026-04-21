@@ -12,6 +12,7 @@ import {
 } from "@/lib/table-filters";
 import { EnrollmentStatus } from "@/app/generated/prisma/enums";
 import { EnrollmentFilters } from "@/components/enrollments/enrollment-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function EnrollmentsPage({
   searchParams,
@@ -25,6 +26,7 @@ export default async function EnrollmentsPage({
   }>;
 }) {
   await requireSchoolAdminAccess();
+  const t = await getTranslations("SchoolEntities.enrollments");
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -42,17 +44,17 @@ export default async function EnrollmentsPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Enrollments"
-        description="Manage student enrollment, billing, attendance, and progress by section."
+        title={t("list.title")}
+        description={t("list.description")}
         actions={
           <Button asChild>
-            <Link href="/school/enrollments/create">New Enrollment</Link>
+            <Link href="/school/enrollments/create">{t("list.new")}</Link>
           </Button>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("list.filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <EnrollmentFilters

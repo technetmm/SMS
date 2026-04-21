@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CourseForm } from "@/components/courses/course-form";
 import { getCourseById, updateCourse } from "@/app/(school)/school/courses/actions";
 import { getSubjects } from "@/app/(school)/school/subjects/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function EditCoursePage({
   params,
@@ -13,6 +14,7 @@ export default async function EditCoursePage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.courses");
   const { id } = await params;
 
   const [course, subjects] = await Promise.all([
@@ -27,11 +29,11 @@ export default async function EditCoursePage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Course"
-        description="Update course details and subject assignment."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/courses">Back</Link>
+            <Link href="/school/courses">{t("edit.back")}</Link>
           </Button>
         }
       />

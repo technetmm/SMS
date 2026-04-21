@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 import { parseDateRangeParams, parseTextParam } from "@/lib/table-filters";
+import { Link } from "@/i18n/navigation";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function SchoolDeviceApprovalsPage({
   searchParams,
@@ -24,6 +25,10 @@ export default async function SchoolDeviceApprovalsPage({
   }>;
 }) {
   const user = await requireSchoolAdminAccess();
+  const [t, locale] = await Promise.all([
+    getTranslations("DeviceApprovalsPage"),
+    getLocale(),
+  ]);
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -53,44 +58,108 @@ export default async function SchoolDeviceApprovalsPage({
       },
     },
   );
+  const tableMessages = {
+    errors: {
+      unableToProcess: t("table.errors.unableToProcess"),
+    },
+    success: {
+      approved: t("table.success.approved"),
+      denied: t("table.success.denied"),
+    },
+    columns: {
+      requester: t("table.columns.requester"),
+      role: t("table.columns.role"),
+      school: t("table.columns.school"),
+      requested: t("table.columns.requested"),
+      expires: t("table.columns.expires"),
+      deviceIp: t("table.columns.deviceIp"),
+      status: t("table.columns.status"),
+      actions: t("table.columns.actions"),
+    },
+    roleLabels: {
+      superAdmin: t("table.roleLabels.superAdmin"),
+      schoolSuperAdmin: t("table.roleLabels.schoolSuperAdmin"),
+      schoolAdmin: t("table.roleLabels.schoolAdmin"),
+      teacher: t("table.roleLabels.teacher"),
+      student: t("table.roleLabels.student"),
+    },
+    fallbacks: {
+      unnamedUser: t("table.fallbacks.unnamedUser"),
+      notAvailable: t("table.fallbacks.notAvailable"),
+    },
+    actions: {
+      deny: t("table.actions.deny"),
+      denying: t("table.actions.denying"),
+      approve: t("table.actions.approve"),
+      approving: t("table.actions.approving"),
+    },
+    empty: t("table.empty"),
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Device Approvals"
-        description="Review and handle staff and student device login requests."
+        title={t("school.title")}
+        description={t("school.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search</Label>
-              <Input id="q" name="q" defaultValue={q} placeholder="Name, email, IP, user agent" />
+              <Label htmlFor="q">{t("filters.search.label")}</Label>
+              <Input
+                id="q"
+                name="q"
+                defaultValue={q}
+                placeholder={t("filters.search.placeholder.school")}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="createdFrom">Requested From</Label>
-              <Input id="createdFrom" name="createdFrom" type="date" defaultValue={parseTextParam(params.createdFrom)} />
+              <Label htmlFor="createdFrom">{t("filters.requestedFrom")}</Label>
+              <Input
+                id="createdFrom"
+                name="createdFrom"
+                type="date"
+                defaultValue={parseTextParam(params.createdFrom)}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="createdTo">Requested To</Label>
-              <Input id="createdTo" name="createdTo" type="date" defaultValue={parseTextParam(params.createdTo)} />
+              <Label htmlFor="createdTo">{t("filters.requestedTo")}</Label>
+              <Input
+                id="createdTo"
+                name="createdTo"
+                type="date"
+                defaultValue={parseTextParam(params.createdTo)}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="expiresFrom">Expires From</Label>
-              <Input id="expiresFrom" name="expiresFrom" type="date" defaultValue={parseTextParam(params.expiresFrom)} />
+              <Label htmlFor="expiresFrom">{t("filters.expiresFrom")}</Label>
+              <Input
+                id="expiresFrom"
+                name="expiresFrom"
+                type="date"
+                defaultValue={parseTextParam(params.expiresFrom)}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="expiresTo">Expires To</Label>
-              <Input id="expiresTo" name="expiresTo" type="date" defaultValue={parseTextParam(params.expiresTo)} />
+              <Label htmlFor="expiresTo">{t("filters.expiresTo")}</Label>
+              <Input
+                id="expiresTo"
+                name="expiresTo"
+                type="date"
+                defaultValue={parseTextParam(params.expiresTo)}
+              />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
+              <Button type="submit">{t("filters.apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/school/device-approvals">Reset</Link>
+                <Link href="/school/device-approvals">
+                  {t("filters.reset")}
+                </Link>
               </Button>
             </div>
           </form>
@@ -98,7 +167,11 @@ export default async function SchoolDeviceApprovalsPage({
       </Card>
 
       <div className="rounded-lg border bg-background">
-        <DeviceApprovalTable initialRequests={requests.items} />
+        <DeviceApprovalTable
+          initialRequests={requests.items}
+          locale={locale}
+          messages={tableMessages}
+        />
         <TablePagination
           pagination={requests}
           pathname="/school/device-approvals"

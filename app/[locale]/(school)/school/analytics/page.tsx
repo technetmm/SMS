@@ -5,6 +5,7 @@ import {
   StudentAttendanceTrendChart,
   type AttendanceTrendPoint,
 } from "@/components/analytics/student-attendance-trend-chart";
+import { getTranslations } from "next-intl/server";
 
 function toYmd(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -12,6 +13,7 @@ function toYmd(date: Date) {
 
 export default async function AnalyticsPage() {
   await requireSchoolAdminAccess();
+  const t = await getTranslations("AnalyticsPage");
   const schoolId = await requireTenant();
 
   const from = new Date();
@@ -60,23 +62,25 @@ export default async function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard title="Attendance Rate" value={`${rate.toFixed(1)}%`} />
-        <StatCard title="Present" value={present.toString()} />
-        <StatCard title="Absent" value={absent.toString()} />
-        <StatCard title="Late / Leave" value={`${late + leave}`} />
+        <StatCard title={t("stats.attendanceRate")} value={`${rate.toFixed(1)}%`} />
+        <StatCard title={t("stats.present")} value={present.toString()} />
+        <StatCard title={t("stats.absent")} value={absent.toString()} />
+        <StatCard title={t("stats.lateLeave")} value={`${late + leave}`} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <StudentAttendanceTrendChart data={data} />
+        <StudentAttendanceTrendChart
+          data={data}
+          title={t("charts.attendanceTrend")}
+        />
         <div className="rounded-lg border bg-background p-6">
-          <h3 className="text-sm font-medium text-muted-foreground">Notes</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">{t("notes.title")}</h3>
           <ul className="mt-4 space-y-2 text-sm">
-            <li>Counts include all sections for the selected tenant.</li>
-            <li>Trend shows the last 30 days with recorded attendance.</li>
+            <li>{t("notes.item1")}</li>
+            <li>{t("notes.item2")}</li>
           </ul>
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,6 +1,12 @@
 {
   "Common": {
-    "open": "Open"
+    "open": "Open",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "previous": "Previous",
+    "next": "Next",
+    "showing": "Showing {start}-{end} of {total}"
   },
   "LocaleSwitcher": {
     "label": "Language switcher",
@@ -264,7 +270,7 @@
   "SettingsOverview": {
     "schoolEyebrow": "Settings",
     "platformEyebrow": "Platform Settings",
-    "title": "Account preferences",
+    "title": "Settings",
     "description": "Manage your profile, appearance, and security controls.",
     "actions": {
       "securityStatus": "Security status",
@@ -327,6 +333,716 @@
       "updateProfilePhoto": "Update profile photo",
       "changeEmail": "Change email",
       "changePassword": "Change password"
+    }
+  },
+  "SchoolDashboard": {
+    "stats": {
+      "totalStudents": "Total Students",
+      "activeClasses": "Active Classes",
+      "monthlyRevenue": "Monthly Revenue"
+    },
+    "charts": {
+      "monthlyRevenue": "Monthly Revenue"
+    },
+    "highlights": {
+      "title": "Highlights",
+      "topProgram": "Top performing program: Regular (2 days)",
+      "avgAttendance": "Average attendance rate: 92%",
+      "pendingInvoices": "Pending invoices this month: 14"
+    },
+    "deviceApprovals": {
+      "title": "Staff & Student Device Approval Requests"
+    },
+    "pagination": {
+      "showing": "Showing {start}-{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Unable to process login request."
+      },
+      "success": {
+        "approved": "Login request approved.",
+        "denied": "Login request denied."
+      },
+      "columns": {
+        "requester": "Requester",
+        "role": "Role",
+        "school": "School",
+        "requested": "Requested",
+        "expires": "Expires",
+        "deviceIp": "Device / IP",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "Unnamed user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "Deny",
+        "denying": "Denying...",
+        "approve": "Approve",
+        "approving": "Approving..."
+      },
+      "empty": "No pending device approval requests."
+    }
+  },
+  "PlatformDashboard": {
+    "eyebrow": "Platform Dashboard",
+    "title": "Super Admin Overview",
+    "stats": {
+      "totalSchools": "Total Schools",
+      "activeSubscriptions": "Active Subscriptions",
+      "monthlyRevenue": "Monthly Revenue"
+    },
+    "charts": {
+      "revenueTrend": "Platform Revenue Trend"
+    },
+    "highlights": {
+      "title": "Highlights",
+      "totalSchools": "Total schools onboarded: {count}",
+      "activeSubscriptions": "Active paid subscriptions: {count}",
+      "latestGrowth": "Latest growth index: {count}"
+    },
+    "deviceApprovals": {
+      "title": "Admin Device Approval Requests"
+    },
+    "schools": {
+      "title": "Schools",
+      "columns": {
+        "name": "Name",
+        "plan": "Plan",
+        "status": "Status",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "ACTIVE",
+        "disabled": "DISABLED"
+      },
+      "actions": {
+        "view": "View",
+        "disable": "Disable"
+      },
+      "empty": "No schools yet."
+    },
+    "subscriptions": {
+      "title": "Subscriptions",
+      "columns": {
+        "school": "School",
+        "plan": "Plan",
+        "status": "Status",
+        "nextBilling": "Next Billing"
+      },
+      "status": {
+        "active": "ACTIVE"
+      },
+      "empty": "No subscriptions yet."
+    },
+    "activity": {
+      "title": "Activity Timeline",
+      "empty": "No recent activity.",
+      "system": "System"
+    },
+    "pagination": {
+      "showing": "Showing {start}-{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Unable to process login request."
+      },
+      "success": {
+        "approved": "Login request approved.",
+        "denied": "Login request denied."
+      },
+      "columns": {
+        "requester": "Requester",
+        "role": "Role",
+        "school": "School",
+        "requested": "Requested",
+        "expires": "Expires",
+        "deviceIp": "Device / IP",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "Unnamed user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "Deny",
+        "denying": "Denying...",
+        "approve": "Approve",
+        "approving": "Approving..."
+      },
+      "empty": "No pending device approval requests."
+    }
+  },
+  "AnalyticsPage": {
+    "charts": {
+      "attendanceTrend": "Attendance Trend (30 days)"
+    },
+    "stats": {
+      "attendanceRate": "Attendance Rate",
+      "present": "Present",
+      "absent": "Absent",
+      "lateLeave": "Late / Leave"
+    },
+    "notes": {
+      "title": "Notes",
+      "item1": "Counts include all sections for the selected tenant.",
+      "item2": "Trend shows the last 30 days with recorded attendance."
+    }
+  },
+  "DeviceApprovalsPage": {
+    "school": {
+      "title": "Device Approvals",
+      "description": "Review and handle staff and student device login requests."
+    },
+    "platform": {
+      "title": "Device Approvals",
+      "description": "Review and handle school admin device login requests."
+    },
+    "filters": {
+      "title": "Filters",
+      "search": {
+        "label": "Search",
+        "placeholder": {
+          "school": "Name, email, IP, user agent",
+          "platform": "Name, email, school, IP, user agent"
+        }
+      },
+      "requesterRole": {
+        "label": "Requester Role",
+        "placeholder": "All roles",
+        "options": {
+          "schoolSuperAdmin": "School Owner",
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher",
+          "student": "Student"
+        }
+      },
+      "requestedFrom": "Requested From",
+      "requestedTo": "Requested To",
+      "expiresFrom": "Expires From",
+      "expiresTo": "Expires To",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "pagination": {
+      "showing": "Showing {start}-{end} of {total}",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "table": {
+      "errors": {
+        "unableToProcess": "Unable to process login request."
+      },
+      "success": {
+        "approved": "Login request approved.",
+        "denied": "Login request denied."
+      },
+      "columns": {
+        "requester": "Requester",
+        "role": "Role",
+        "school": "School",
+        "requested": "Requested",
+        "expires": "Expires",
+        "deviceIp": "Device / IP",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "Unnamed user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "Deny",
+        "denying": "Denying...",
+        "approve": "Approve",
+        "approving": "Approving..."
+      },
+      "empty": "No pending device approval requests."
+    }
+  },
+  "SchoolEntities": {
+    "students": {
+      "list": {
+        "title": "Students",
+        "description": "Create, manage, and enroll students into classes.",
+        "exportExcel": "Export Excel",
+        "new": "New Student",
+        "filters": "Filters"
+      },
+      "create": {
+        "title": "Create Student",
+        "description": "Add a new student record to the SMS.",
+        "back": "Back to Students"
+      },
+      "edit": {
+        "title": "Edit Student",
+        "description": "Update student profile information.",
+        "back": "Back to Students"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by name or phone",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "graduated": "Graduated"
+        },
+        "gender": "Gender",
+        "allGenders": "All genders",
+        "genderOptions": {
+          "male": "Male",
+          "female": "Female",
+          "other": "Other"
+        },
+        "admissionFrom": "Admission From",
+        "admissionTo": "Admission To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "gender": "Gender",
+          "phone": "Phone",
+          "status": "Status",
+          "admissionDate": "Admission Date",
+          "actions": "Actions"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit"
+        },
+        "empty": "No students found."
+      },
+      "rowActions": {
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Student deleted",
+          "deleteFailed": "Unable to delete student"
+        },
+        "dialog": {
+          "title": "Delete student",
+          "description": "This will permanently remove {name}. This action cannot be undone."
+        }
+      }
+    },
+    "staff": {
+      "list": {
+        "title": "Staff",
+        "description": "Create and manage staff accounts.",
+        "exportExcel": "Export Excel",
+        "new": "New Staff",
+        "filters": "Filters"
+      },
+      "create": {
+        "title": "Create Staff",
+        "description": "Create a new staff account and link it to a user.",
+        "back": "Back to Staff"
+      },
+      "edit": {
+        "title": "Edit Staff",
+        "description": "Update staff details and employment info.",
+        "back": "Back to Details"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Name, email, phone",
+        "role": "Role",
+        "allRoles": "All roles",
+        "roleOptions": {
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher"
+        },
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "active": "Active",
+          "onLeave": "On Leave",
+          "resigned": "Resigned",
+          "terminated": "Terminated"
+        },
+        "hireFrom": "Hire From",
+        "hireTo": "Hire To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "email": "Email",
+          "phone": "Phone",
+          "role": "Role",
+          "status": "Status",
+          "hireDate": "Hire Date",
+          "actions": "Actions"
+        },
+        "actions": {
+          "view": "View",
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "empty": "No staff yet.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      }
+    },
+    "subjects": {
+      "list": {
+        "title": "Subjects",
+        "description": "Manage curriculum subjects for your school.",
+        "new": "Create Subject",
+        "filters": "Filters",
+        "search": "Search",
+        "searchPlaceholder": "Subject name",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Subject",
+        "description": "Add a new subject to your school catalog.",
+        "back": "Back to Subjects"
+      },
+      "edit": {
+        "title": "Edit Subject",
+        "description": "Update subject details.",
+        "back": "Back"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "courses": "Courses",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "empty": "No subjects yet. Create your first subject to organize courses.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Subject deleted",
+          "deleteFailed": "Unable to delete subject"
+        },
+        "dialog": {
+          "title": "Delete subject",
+          "description": "This will delete {name}. This action cannot be undone."
+        }
+      }
+    },
+    "courses": {
+      "list": {
+        "title": "Courses",
+        "description": "Manage courses and map them to subjects.",
+        "new": "Create Course",
+        "filters": "Filters",
+        "search": "Search",
+        "searchPlaceholder": "Course or subject",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Course",
+        "description": "Add a course and assign a subject.",
+        "back": "Back to Courses"
+      },
+      "edit": {
+        "title": "Edit Course",
+        "description": "Update course details and subject assignment.",
+        "back": "Back"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "subject": "Subject",
+          "classes": "Classes",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "notAvailable": "-",
+        "empty": "No courses yet. Create your first course to start building classes.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Course deleted",
+          "deleteFailed": "Unable to delete course"
+        },
+        "dialog": {
+          "title": "Delete course",
+          "description": "This will delete {name}. This action cannot be undone."
+        }
+      }
+    },
+    "classes": {
+      "list": {
+        "title": "Classes",
+        "description": "Manage classes for your school.",
+        "new": "Create Class",
+        "filters": "Filters"
+      },
+      "create": {
+        "title": "Create Class",
+        "description": "Add a new class.",
+        "back": "Back to Classes"
+      },
+      "edit": {
+        "title": "Edit Class",
+        "description": "Update class details.",
+        "back": "Cancel"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Class or course",
+        "classType": "Class Type",
+        "allClassTypes": "All class types",
+        "classTypeOptions": {
+          "oneOnOne": "One On One",
+          "private": "Private",
+          "group": "Group"
+        },
+        "programType": "Program Type",
+        "allProgramTypes": "All program types",
+        "programTypeOptions": {
+          "regular": "Regular",
+          "intensive": "Intensive"
+        },
+        "billingType": "Billing Type",
+        "allBillingTypes": "All billing types",
+        "billingTypeOptions": {
+          "oneTime": "One Time",
+          "monthly": "Monthly"
+        },
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "feeMin": "Fee Min",
+        "feeMax": "Fee Max",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "course": "Course",
+          "type": "Type",
+          "programType": "Program Type",
+          "billingType": "Billing Type",
+          "fee": "Fee",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "empty": "No classes yet. Create your first class.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      }
+    },
+    "sections": {
+      "list": {
+        "title": "Sections",
+        "description": "Manage class sections and staff assignments.",
+        "new": "Create Section",
+        "filters": "Filters",
+        "search": "Search",
+        "searchPlaceholder": "Section, class, or teacher",
+        "createdFrom": "Created From",
+        "createdTo": "Created To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "create": {
+        "title": "Create Section",
+        "description": "Add a section and optionally assign a staff.",
+        "back": "Back to Sections"
+      },
+      "edit": {
+        "title": "Edit Section",
+        "description": "Update section details.",
+        "back": "Cancel"
+      },
+      "table": {
+        "columns": {
+          "name": "Name",
+          "class": "Class",
+          "capacity": "Capacity",
+          "teacher": "Teacher",
+          "status": "Status",
+          "createdAt": "Created At",
+          "actions": "Actions"
+        },
+        "status": {
+          "full": "Full",
+          "available": "Available"
+        },
+        "actions": {
+          "edit": "Edit",
+          "delete": "Delete"
+        },
+        "notAvailable": "-",
+        "empty": "No sections yet. Create your first section.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      }
+    },
+    "enrollments": {
+      "list": {
+        "title": "Enrollments",
+        "description": "Manage student enrollment, billing, attendance, and progress by section.",
+        "new": "New Enrollment",
+        "filters": "Filters"
+      },
+      "create": {
+        "title": "Create Enrollment",
+        "description": "Enroll a student into a section and auto-create the first invoice.",
+        "back": "Back to Enrollments"
+      },
+      "edit": {
+        "title": "Edit Enrollment",
+        "description": "Update enrollment details, section assignment, and billing inputs.",
+        "back": "Back to Enrollments"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Student, section, or class",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusOptions": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "enrolledFrom": "Enrolled From",
+        "enrolledTo": "Enrolled To",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "student": "Student",
+          "section": "Section",
+          "status": "Status",
+          "enrolledDate": "Enrolled Date",
+          "autoInvoice": "Auto Invoice",
+          "progress": "Progress",
+          "actions": "Actions"
+        },
+        "invoice": {
+          "final": "Final",
+          "original": "Original",
+          "discount": "Discount",
+          "paid": "Paid",
+          "remaining": "Remaining",
+          "due": "Due"
+        },
+        "notAvailable": "-",
+        "empty": "No enrollments yet.",
+        "pagination": {
+          "showing": "Showing {start}-{end} of {total}",
+          "previous": "Previous",
+          "next": "Next"
+        }
+      },
+      "rowActions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleting": "Deleting...",
+        "cancel": "Cancel",
+        "messages": {
+          "deleted": "Enrollment deleted.",
+          "deleteFailed": "Unable to delete enrollment."
+        },
+        "dialog": {
+          "title": "Delete enrollment",
+          "description": "This will delete the enrollment for {studentName}. This action cannot be undone."
+        }
+      },
+      "progress": {
+        "update": "Update",
+        "updating": "Updating...",
+        "remarkPlaceholder": "Remark (optional)",
+        "messages": {
+          "updated": "Progress updated.",
+          "updateFailed": "Unable to update progress."
+        }
+      },
+      "status": {
+        "status": "Status",
+        "save": "Save",
+        "saving": "Saving...",
+        "options": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "messages": {
+          "updated": "Enrollment updated.",
+          "updateFailed": "Unable to update enrollment."
+        }
+      }
     }
   },
   "SettingsPages": {

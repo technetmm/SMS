@@ -13,6 +13,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { StaffFilters } from "@/components/staff/staff-filters";
+import { getTranslations } from "next-intl/server";
 
 export default async function StaffPage({
   searchParams,
@@ -27,6 +28,7 @@ export default async function StaffPage({
   }>;
 }) {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.staff");
   const params = await searchParams;
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
@@ -49,22 +51,22 @@ export default async function StaffPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Staff"
-        description="Create and manage staff accounts."
+        title={t("list.title")}
+        description={t("list.description")}
         actions={
           <div className="flex items-center gap-2">
             <ExportMenu
-              items={[{ label: "Export Excel", action: exportStaffToExcel }]}
+              items={[{ label: t("list.exportExcel"), action: exportStaffToExcel }]}
             />
             <Button asChild>
-              <Link href="/school/staff/create">New Staff</Link>
+              <Link href="/school/staff/create">{t("list.new")}</Link>
             </Button>
           </div>
         }
       />
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("list.filters")}</CardTitle>
         </CardHeader>
         <CardContent>
           <StaffFilters

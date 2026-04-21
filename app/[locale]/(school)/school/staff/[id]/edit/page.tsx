@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma/client";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { StaffEditForm } from "@/components/staff/staff-edit-form";
+import { getTranslations } from "next-intl/server";
 
 function toDateInput(value: Date | null) {
   if (!value) return "";
@@ -17,6 +18,7 @@ export default async function EditStaffPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations("SchoolEntities.staff");
   const { id } = await params;
   if (!id) {
     redirect("/school/staff");
@@ -36,11 +38,11 @@ export default async function EditStaffPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Edit Staff"
-        description="Update staff details and employment info."
+        title={t("edit.title")}
+        description={t("edit.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href={`/school/staff/${staff.id}`}>Back to Details</Link>
+            <Link href={`/school/staff/${staff.id}`}>{t("edit.back")}</Link>
           </Button>
         }
       />

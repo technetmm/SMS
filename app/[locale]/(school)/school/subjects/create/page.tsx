@@ -4,18 +4,20 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { SubjectForm } from "@/components/subjects/subject-form";
 import { createSubject } from "@/app/(school)/school/subjects/actions";
+import { getTranslations } from "next-intl/server";
 
 export default async function CreateSubjectPage() {
   await requireSchoolAdmin();
+  const t = await getTranslations("SchoolEntities.subjects");
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Create Subject"
-        description="Add a new subject to your school catalog."
+        title={t("create.title")}
+        description={t("create.description")}
         actions={
           <Button asChild variant="outline">
-            <Link href="/school/subjects">Back to Subjects</Link>
+            <Link href="/school/subjects">{t("create.back")}</Link>
           </Button>
         }
       />

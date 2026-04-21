@@ -10,13 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { TableFilterSelect } from "@/components/shared/table-filter-select";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import {
   parseDateRangeParams,
   parseTableFilterEnumParam,
   parseTextParam,
   TABLE_FILTER_ALL_VALUE,
 } from "@/lib/table-filters";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function PlatformDeviceApprovalsPage({
   searchParams,
@@ -31,6 +32,10 @@ export default async function PlatformDeviceApprovalsPage({
     expiresTo?: string;
   }>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("DeviceApprovalsPage"),
+    getLocale(),
+  ]);
   await requireSuperAdminAccess();
   const params = await searchParams;
   const { page: pageParam } = params;
@@ -67,44 +72,93 @@ export default async function PlatformDeviceApprovalsPage({
       },
     },
   );
+  const tableMessages = {
+    errors: {
+      unableToProcess: t("table.errors.unableToProcess"),
+    },
+    success: {
+      approved: t("table.success.approved"),
+      denied: t("table.success.denied"),
+    },
+    columns: {
+      requester: t("table.columns.requester"),
+      role: t("table.columns.role"),
+      school: t("table.columns.school"),
+      requested: t("table.columns.requested"),
+      expires: t("table.columns.expires"),
+      deviceIp: t("table.columns.deviceIp"),
+      status: t("table.columns.status"),
+      actions: t("table.columns.actions"),
+    },
+    roleLabels: {
+      superAdmin: t("table.roleLabels.superAdmin"),
+      schoolSuperAdmin: t("table.roleLabels.schoolSuperAdmin"),
+      schoolAdmin: t("table.roleLabels.schoolAdmin"),
+      teacher: t("table.roleLabels.teacher"),
+      student: t("table.roleLabels.student"),
+    },
+    fallbacks: {
+      unnamedUser: t("table.fallbacks.unnamedUser"),
+      notAvailable: t("table.fallbacks.notAvailable"),
+    },
+    actions: {
+      deny: t("table.actions.deny"),
+      denying: t("table.actions.denying"),
+      approve: t("table.actions.approve"),
+      approving: t("table.actions.approving"),
+    },
+    empty: t("table.empty"),
+  };
 
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Device Approvals"
-        description="Review and handle school admin device login requests."
+        title={t("platform.title")}
+        description={t("platform.description")}
       />
 
       <Card>
         <CardHeader>
-          <CardTitle>Filters</CardTitle>
+          <CardTitle>{t("filters.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-4" method="get">
             <div className="grid gap-2 md:col-span-2">
-              <Label htmlFor="q">Search</Label>
+              <Label htmlFor="q">{t("filters.search.label")}</Label>
               <Input
                 id="q"
                 name="q"
                 defaultValue={q}
-                placeholder="Name, email, school, IP, user agent"
+                placeholder={t("filters.search.placeholder.platform")}
               />
             </div>
             <TableFilterSelect
               id="requesterRole"
               name="requesterRole"
-              label="Requester Role"
-              placeholder="All roles"
+              label={t("filters.requesterRole.label")}
+              placeholder={t("filters.requesterRole.placeholder")}
               defaultValue={params.requesterRole ?? TABLE_FILTER_ALL_VALUE}
               options={[
-                { value: "SCHOOL_SUPER_ADMIN", label: "School Owner" },
-                { value: "SCHOOL_ADMIN", label: "School Admin" },
-                { value: "TEACHER", label: "Teacher" },
-                { value: "STUDENT", label: "Student" },
+                {
+                  value: "SCHOOL_SUPER_ADMIN",
+                  label: t("filters.requesterRole.options.schoolSuperAdmin"),
+                },
+                {
+                  value: "SCHOOL_ADMIN",
+                  label: t("filters.requesterRole.options.schoolAdmin"),
+                },
+                {
+                  value: "TEACHER",
+                  label: t("filters.requesterRole.options.teacher"),
+                },
+                {
+                  value: "STUDENT",
+                  label: t("filters.requesterRole.options.student"),
+                },
               ]}
             />
             <div className="grid gap-2">
-              <Label htmlFor="createdFrom">Requested From</Label>
+              <Label htmlFor="createdFrom">{t("filters.requestedFrom")}</Label>
               <Input
                 id="createdFrom"
                 name="createdFrom"
@@ -113,7 +167,7 @@ export default async function PlatformDeviceApprovalsPage({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="createdTo">Requested To</Label>
+              <Label htmlFor="createdTo">{t("filters.requestedTo")}</Label>
               <Input
                 id="createdTo"
                 name="createdTo"
@@ -122,7 +176,7 @@ export default async function PlatformDeviceApprovalsPage({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="expiresFrom">Expires From</Label>
+              <Label htmlFor="expiresFrom">{t("filters.expiresFrom")}</Label>
               <Input
                 id="expiresFrom"
                 name="expiresFrom"
@@ -131,7 +185,7 @@ export default async function PlatformDeviceApprovalsPage({
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="expiresTo">Expires To</Label>
+              <Label htmlFor="expiresTo">{t("filters.expiresTo")}</Label>
               <Input
                 id="expiresTo"
                 name="expiresTo"
@@ -140,9 +194,11 @@ export default async function PlatformDeviceApprovalsPage({
               />
             </div>
             <div className="flex items-end gap-2">
-              <Button type="submit">Apply</Button>
+              <Button type="submit">{t("filters.apply")}</Button>
               <Button asChild type="button" variant="outline">
-                <Link href="/platform/device-approvals">Reset</Link>
+                <Link href="/platform/device-approvals">
+                  {t("filters.reset")}
+                </Link>
               </Button>
             </div>
           </form>
@@ -150,7 +206,12 @@ export default async function PlatformDeviceApprovalsPage({
       </Card>
 
       <div className="rounded-lg border bg-background">
-        <DeviceApprovalTable initialRequests={requests.items} showSchool />
+        <DeviceApprovalTable
+          initialRequests={requests.items}
+          showSchool
+          locale={locale}
+          messages={tableMessages}
+        />
         <TablePagination
           pagination={requests}
           pathname="/platform/device-approvals"

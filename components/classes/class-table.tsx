@@ -14,13 +14,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { dateFormatter, formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/helper";
 import {
   BILLING_TYPE_LABELS,
   CLASS_TYPE_LABELS,
   enumLabel,
   PROGRAM_TYPE_LABELS,
 } from "@/lib/enum-labels";
+import { getLocale, getTranslations } from "next-intl/server";
+import { dateFormatter } from "@/lib/formatter";
 
 export async function ClassTable({
   page,
@@ -31,6 +33,10 @@ export async function ClassTable({
   filters?: ClassTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.classes.table"),
+    getLocale(),
+  ]);
   const classes = await getPaginatedClasses({ page, filters });
 
   return (
@@ -38,14 +44,14 @@ export async function ClassTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Course</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Program Type</TableHead>
-            <TableHead>Billing Type</TableHead>
-            <TableHead className="text-right">Fee</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.course")}</TableHead>
+            <TableHead>{t("columns.type")}</TableHead>
+            <TableHead>{t("columns.programType")}</TableHead>
+            <TableHead>{t("columns.billingType")}</TableHead>
+            <TableHead className="text-right">{t("columns.fee")}</TableHead>
+            <TableHead>{t("columns.createdAt")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -65,16 +71,20 @@ export async function ClassTable({
               <TableCell className="text-right">
                 {formatMoney(Number(klass.fee), klass.tenant.currency)}
               </TableCell>
-              <TableCell>{dateFormatter.format(klass.createdAt)}</TableCell>
+              <TableCell>
+                {dateFormatter(locale).format(klass.createdAt)}
+              </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/classes/${klass.id}/edit`}>Edit</Link>
+                    <Link href={`/school/classes/${klass.id}/edit`}>
+                      {t("actions.edit")}
+                    </Link>
                   </Button>
                   <form action={deleteClass}>
                     <input type="hidden" name="id" value={klass.id} />
                     <Button size="sm" type="submit" variant="destructive">
-                      Delete
+                      {t("actions.delete")}
                     </Button>
                   </form>
                 </div>
@@ -87,7 +97,7 @@ export async function ClassTable({
                 colSpan={7}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No classes yet. Create your first class.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

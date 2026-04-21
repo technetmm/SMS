@@ -26,6 +26,8 @@ import {
 } from "@/lib/table-filters";
 import { PaymentStatus } from "@/app/generated/prisma/enums";
 import { PaymentsFilters } from "@/components/payments/payments-filters";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale } from "next-intl/server";
 
 export default async function PaymentsPage({
   searchParams,
@@ -43,6 +45,7 @@ export default async function PaymentsPage({
   await requireSchoolAdmin();
   const schoolId = await requireTenantId();
   const params = await searchParams;
+  const locale = await getLocale();
   const { page: pageParam } = params;
   const page = parsePageParam(pageParam);
   const q = parseTextParam(params.q);
@@ -99,7 +102,6 @@ export default async function PaymentsPage({
         },
       }),
   });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
     <div className="space-y-6">
@@ -162,7 +164,9 @@ export default async function PaymentsPage({
                       invoice.tenant.currency,
                     )}
                   </TableCell>
-                  <TableCell>{formatter.format(invoice.dueDate)}</TableCell>
+                  <TableCell>
+                    {dateFormatter(locale).format(invoice.dueDate)}
+                  </TableCell>
                   <TableCell>
                     <Badge
                       variant={
