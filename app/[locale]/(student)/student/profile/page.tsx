@@ -51,7 +51,7 @@ export default async function StudentProfilePage() {
       const [enrollments, attendanceRecords, pendingInvoices, progressRecords] =
         await Promise.all([
           prisma.enrollment.count({
-            where: { schoolId, studentId: student.id, isDeleted: false },
+            where: { schoolId, studentId: student.id },
           }),
           prisma.attendance.count({
             where: {
@@ -64,7 +64,6 @@ export default async function StudentProfilePage() {
               schoolId,
               studentId: student.id,
               status: { in: ["UNPAID", "PARTIAL"] },
-              isDeleted: false,
             },
           }),
           prisma.progress.count({

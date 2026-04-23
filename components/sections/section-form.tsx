@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import type { SectionActionState } from "@/app/(school)/school/sections/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,6 +42,7 @@ type SectionFormProps = {
     classId: string;
     staffIds: string[];
     room: string | null;
+    meetingLink: string | null;
     capacity: number;
   };
 };
@@ -56,6 +58,7 @@ export function SectionForm({
   staff,
   initialData,
 }: SectionFormProps) {
+  const t = useTranslations("SchoolEntities.sections");
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
   const staffAnchor = useComboboxAnchor();
@@ -111,12 +114,12 @@ export function SectionForm({
       <Card>
         <CardHeader>
           <CardTitle>
-            {mode === "create" ? "Create Section" : "Edit Section"}
+            {mode === "create" ? t("create.title") : t("edit.title")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2 md:col-span-2">
-            <Label htmlFor="name">Section Name</Label>
+            <Label htmlFor="name">{t("form.name")}</Label>
             <Input
               id="name"
               name="name"
@@ -126,16 +129,16 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label>Class</Label>
+            <Label>{t("form.class")}</Label>
             <Combobox
               items={classes}
               value={selectedClass}
               onValueChange={(value: Option | null) => setSelectedClass(value)}
               itemToStringLabel={(item) => item?.name ?? ""}
             >
-              <ComboboxInput placeholder="Select class..." />
+              <ComboboxInput placeholder={t("form.classPlaceholder")} />
               <ComboboxContent>
-                <ComboboxEmpty>No items found.</ComboboxEmpty>
+                <ComboboxEmpty>{t("form.noItemsFound")}</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
@@ -148,7 +151,7 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label>Teacher (Optional)</Label>
+            <Label>{t("form.teacherOptional")}</Label>
             <Combobox
               multiple
               autoHighlight
@@ -166,7 +169,7 @@ export function SectionForm({
                       {values.map((value: Option) => (
                         <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                       ))}
-                      <ComboboxChipsInput placeholder="Search staff..." />
+                      <ComboboxChipsInput placeholder={t("form.searchStaff")} />
                     </>
                   )}
                 </ComboboxValue>
@@ -180,8 +183,8 @@ export function SectionForm({
                 </button>
               </ComboboxChips>
               <ComboboxContent anchor={staffAnchor}>
-                <ComboboxInput placeholder="Search staff..." />
-                <ComboboxEmpty>No staff found.</ComboboxEmpty>
+                <ComboboxInput placeholder={t("form.searchStaff")} />
+                <ComboboxEmpty>{t("form.noStaffFound")}</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
@@ -194,7 +197,7 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="room">Room</Label>
+            <Label htmlFor="room">{t("form.room")}</Label>
             <Input
               id="room"
               name="room"
@@ -203,7 +206,18 @@ export function SectionForm({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="capacity">Max Students</Label>
+            <Label htmlFor="meetingLink">{t("form.meetingLink")}</Label>
+            <Input
+              id="meetingLink"
+              name="meetingLink"
+              type="url"
+              defaultValue={initialData?.meetingLink ?? ""}
+              placeholder={t("form.meetingLinkPlaceholder")}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="capacity">{t("form.capacity")}</Label>
             <Input
               id="capacity"
               name="capacity"
@@ -217,8 +231,12 @@ export function SectionForm({
 
       <div className="flex justify-end">
         <SubmitButton
-          label={mode === "create" ? "Create Section" : "Save Changes"}
-          loadingLabel={mode === "create" ? "Creating..." : "Saving..."}
+          label={
+            mode === "create" ? t("form.actions.create") : t("form.actions.save")
+          }
+          loadingLabel={
+            mode === "create" ? t("form.actions.creating") : t("form.actions.saving")
+          }
         />
       </div>
     </form>

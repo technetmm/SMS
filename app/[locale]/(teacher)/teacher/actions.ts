@@ -88,7 +88,7 @@ export async function getTeacherSections() {
   const sections = await prisma.sectionStaff.findMany({
     where: {
       staffId: scope.staffId,
-      section: { schoolId: scope.schoolId, isDeleted: false },
+      section: { schoolId: scope.schoolId },
     },
     orderBy: [{ section: { class: { name: "asc" } } }, { section: { name: "asc" } }],
     select: {
@@ -98,9 +98,10 @@ export async function getTeacherSections() {
           name: true,
           room: true,
           capacity: true,
+          meetingLink: true,
           class: { select: { name: true } },
           enrollments: {
-            where: { isDeleted: false, status: "ACTIVE" },
+            where: { status: "ACTIVE" },
             select: { id: true },
           },
         },
@@ -113,9 +114,83 @@ export async function getTeacherSections() {
     name: item.section.name,
     room: item.section.room,
     capacity: item.section.capacity,
+    meetingLink: item.section.meetingLink,
     className: item.section.class.name,
     activeStudents: item.section.enrollments.length,
   }));
+}
+
+export async function getTeacherSectionDetail(sectionId: string) {
+  const scope = await getTeacherScope();
+  if (!scope.schoolId || !scope.staffId || !sectionId) return null;
+
+  const mapping = await prisma.sectionStaff.findFirst({
+    where: {
+      staffId: scope.staffId,
+      sectionId,
+      section: { schoolId: scope.schoolId },
+    },
+    select: {
+      section: {
+        select: {
+          id: true,
+          name: true,
+          room: true,
+          capacity: true,
+          meetingLink: true,
+          class: { select: { name: true } },
+          timetables: {
+            orderBy: [
+              { dayOfWeek: "asc" },
+              { startTime: "asc" },
+              { createdAt: "desc" },
+            ],
+            select: {
+              id: true,
+              dayOfWeek: true,
+              startTime: true,
+              endTime: true,
+              room: true,
+              staff: { select: { id: true, name: true } },
+            },
+          },
+          enrollments: {
+            orderBy: [{ status: "asc" }, { student: { name: "asc" } }],
+            select: {
+              id: true,
+              status: true,
+              student: {
+                select: {
+                  id: true,
+                  name: true,
+                  phone: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!mapping) return null;
+
+  const section = mapping.section;
+  const activeStudents = section.enrollments.filter(
+    (row) => row.status === "ACTIVE",
+  ).length;
+
+  return {
+    id: section.id,
+    name: section.name,
+    room: section.room,
+    capacity: section.capacity,
+    meetingLink: section.meetingLink,
+    className: section.class.name,
+    activeStudents,
+    timetable: section.timetables,
+    students: section.enrollments,
+  };
 }
 
 export async function getTeacherTimetable({
@@ -173,6 +248,7 @@ export async function getTeacherTimetable({
             select: {
               id: true,
               name: true,
+              meetingLink: true,
               class: { select: { name: true } },
             },
           },
@@ -191,7 +267,6 @@ export async function getTeacherAttendanceFormOptions() {
     prisma.enrollment.findMany({
       where: {
         schoolId: scope.schoolId,
-        isDeleted: false,
         section: {
           staffMappings: {
             some: { staffId: scope.staffId },
@@ -216,7 +291,6 @@ export async function getTeacherAttendanceFormOptions() {
         schoolId: scope.schoolId,
         enrollments: {
           some: {
-            isDeleted: false,
             section: {
               staffMappings: {
                 some: { staffId: scope.staffId },
@@ -231,7 +305,6 @@ export async function getTeacherAttendanceFormOptions() {
     prisma.section.findMany({
       where: {
         schoolId: scope.schoolId,
-        isDeleted: false,
         staffMappings: {
           some: { staffId: scope.staffId },
         },
@@ -422,7 +495,6 @@ export async function getTeacherPaginatedStudents({
 
   const where: Record<string, unknown> = {
     schoolId: scope.schoolId,
-    isDeleted: false,
     ...(filters?.status ? { status: filters.status } : {}),
     ...(filters?.sectionId ? { sectionId: filters.sectionId } : {}),
     section: {

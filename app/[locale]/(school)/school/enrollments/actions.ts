@@ -124,7 +124,6 @@ export async function enrollStudent(
         INNER JOIN "Class" c ON c."id" = s."classId"
         WHERE s."id" = ${parsed.data.sectionId}
           AND s."schoolId" = ${schoolId}
-          AND s."isDeleted" = false
         FOR UPDATE
       `;
 
@@ -259,7 +258,6 @@ export async function getEnrollments(filters?: {
   return prisma.enrollment.findMany({
     where: {
       schoolId,
-      isDeleted: false,
       ...(filters?.sectionId ? { sectionId: filters.sectionId } : {}),
       ...(filters?.studentId ? { studentId: filters.studentId } : {}),
       ...(filters?.date
@@ -339,7 +337,7 @@ export async function getPaginatedEnrollments({
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
-  const where: Record<string, unknown> = { schoolId, isDeleted: false };
+  const where: Record<string, unknown> = { schoolId };
 
   if (filters?.status) {
     where.status = filters.status;
@@ -494,7 +492,7 @@ export async function getEnrollmentEditFormOptions(id: string) {
   const [enrollment, students, sections, activeEnrollmentCounts, tenant] =
     await Promise.all([
       prisma.enrollment.findFirst({
-        where: { id, schoolId, isDeleted: false },
+        where: { id, schoolId },
         select: {
           id: true,
           sectionId: true,
@@ -518,7 +516,7 @@ export async function getEnrollmentEditFormOptions(id: string) {
         select: { id: true, name: true },
       }),
       prisma.section.findMany({
-        where: { schoolId, isDeleted: false, class: { isDeleted: false } },
+        where: { schoolId },
         orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
         select: {
           id: true,
@@ -529,7 +527,7 @@ export async function getEnrollmentEditFormOptions(id: string) {
       }),
       prisma.enrollment.groupBy({
         by: ["sectionId"],
-        where: { schoolId, status: EnrollmentStatus.ACTIVE, isDeleted: false },
+        where: { schoolId, status: EnrollmentStatus.ACTIVE },
         _count: { _all: true },
       }),
       prisma.tenant.findFirst({
@@ -633,14 +631,13 @@ export async function deleteEnrollment(
   }
 
   const enrollment = await prisma.enrollment.findFirst({
-    where: { id, schoolId, isDeleted: false },
+    where: { id, schoolId },
     select: {
       id: true,
       _count: {
         select: {
           invoices: {
             where: {
-              isDeleted: false,
               payments: { some: {} },
             },
           },
@@ -700,7 +697,7 @@ export async function updateEnrollmentDetails(
   try {
     await prisma.$transaction(async (tx) => {
       const existing = await tx.enrollment.findFirst({
-        where: { id: parsed.data.id, schoolId, isDeleted: false },
+        where: { id: parsed.data.id, schoolId },
         select: {
           id: true,
           studentId: true,
@@ -734,8 +731,6 @@ export async function updateEnrollmentDetails(
         INNER JOIN "Class" c ON c."id" = s."classId"
         WHERE s."id" = ${parsed.data.sectionId}
           AND s."schoolId" = ${schoolId}
-          AND s."isDeleted" = false
-          AND c."isDeleted" = false
         FOR UPDATE
       `;
 
@@ -753,7 +748,6 @@ export async function updateEnrollmentDetails(
             schoolId,
             studentId: parsed.data.studentId,
             sectionId: parsed.data.sectionId,
-            isDeleted: false,
             id: { not: existing.id },
           },
           select: { id: true },
@@ -772,7 +766,6 @@ export async function updateEnrollmentDetails(
             schoolId,
             sectionId: parsed.data.sectionId,
             status: EnrollmentStatus.ACTIVE,
-            isDeleted: false,
             id: { not: existing.id },
           },
         });
@@ -823,7 +816,6 @@ export async function updateEnrollmentDetails(
         where: {
           schoolId,
           enrollmentId: existing.id,
-          isDeleted: false,
           status: { in: [PaymentStatus.UNPAID, PaymentStatus.PARTIAL] },
         },
         orderBy: { createdAt: "desc" },

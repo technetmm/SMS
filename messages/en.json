@@ -9,7 +9,9 @@
     "showing": "Showing {start}-{end} of {total}",
     "actions": "Actions",
     "back": "Back",
-    "export": "Export"
+    "export": "Export",
+    "joinMeeting": "Join Meeting",
+    "edit": "Edit"
   },
   "LocaleSwitcher": {
     "label": "Language switcher",
@@ -387,6 +389,48 @@
         "students": "{count}/{capacity} students",
         "room": "Room: {room}",
         "roomNotSet": "Room: Not set"
+      },
+      "actions": {
+        "openMeeting": "Open link",
+        "viewDetails": "View details"
+      }
+    },
+    "sectionDetails": {
+      "description": "Section details, timetable, and student information.",
+      "back": "Back to sections",
+      "notAvailable": "-",
+      "joinMeeting": "Join meeting",
+      "summary": {
+        "class": "Class",
+        "students": "Students",
+        "studentsValue": "{count}/{capacity} students",
+        "room": "Room",
+        "meeting": "Meeting",
+        "assignedTeacher": "Assigned teacher"
+      },
+      "timetable": {
+        "title": "Timetable",
+        "columns": {
+          "day": "Day",
+          "time": "Time",
+          "teacher": "Teacher",
+          "room": "Room"
+        },
+        "empty": "No timetable slots for this section."
+      },
+      "students": {
+        "title": "Students",
+        "columns": {
+          "name": "Student",
+          "phone": "Phone",
+          "status": "Status"
+        },
+        "status": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "empty": "No students enrolled in this section."
       }
     },
     "timetable": {
@@ -1019,12 +1063,32 @@
         "description": "Update section details.",
         "back": "Cancel"
       },
+      "form": {
+        "name": "Section Name",
+        "class": "Class",
+        "classPlaceholder": "Select class...",
+        "teacherOptional": "Teacher (Optional)",
+        "searchStaff": "Search staff...",
+        "noItemsFound": "No items found.",
+        "noStaffFound": "No staff found.",
+        "room": "Room",
+        "meetingLink": "Meeting Link",
+        "meetingLinkPlaceholder": "https://meet.google.com/...",
+        "capacity": "Max Students",
+        "actions": {
+          "create": "Create Section",
+          "save": "Save Changes",
+          "creating": "Creating...",
+          "saving": "Saving..."
+        }
+      },
       "table": {
         "columns": {
           "name": "Name",
           "class": "Class",
           "capacity": "Capacity",
           "teacher": "Teacher",
+          "meetingLink": "Meeting Link",
           "status": "Status",
           "createdAt": "Created At",
           "actions": "Actions"
@@ -1034,8 +1098,10 @@
           "available": "Available"
         },
         "actions": {
+          "view": "View",
           "edit": "Edit",
-          "delete": "Delete"
+          "delete": "Delete",
+          "openMeeting": "Open link"
         },
         "notAvailable": "-",
         "empty": "No sections yet. Create your first section.",
@@ -1211,6 +1277,7 @@
           "time": "Time",
           "staff": "Staff",
           "section": "Section",
+          "meetingLink": "Meeting Link",
           "room": "Room",
           "actions": "Actions"
         },
@@ -1225,7 +1292,8 @@
         },
         "actions": {
           "edit": "Edit",
-          "delete": "Delete"
+          "delete": "Delete",
+          "openMeeting": "Open link"
         },
         "empty": "No timetable slots yet. Create your first slot."
       }

@@ -47,8 +47,6 @@ export async function main() {
       twoFactorEnabled: false,
       activeSessionId: null,
       activeSessionExpiresAt: null,
-      isDeleted: false,
-      deletedAt: null,
     },
     create: {
       name: superAdminName,

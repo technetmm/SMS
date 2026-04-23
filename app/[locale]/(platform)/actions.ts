@@ -169,28 +169,6 @@ export async function deleteTenant(formData: FormData) {
   revalidateLocalizedPath("/platform/tenants");
 }
 
-export async function restoreTenant(formData: FormData) {
-  await requireSuperAdminAccess();
-
-  const id = formData.get("id");
-  if (typeof id !== "string" || !id) {
-    throw new Error("Tenant id is required");
-  }
-
-  await prisma.tenant.update({
-    where: { id },
-    data: { isDeleted: false, deletedAt: null },
-  });
-
-  await logAction({
-    action: "RESTORE",
-    entity: "Tenant",
-    entityId: id,
-  });
-
-  revalidateLocalizedPath("/platform/tenants");
-}
-
 export async function createSubscription(
   _prevState: PlatformActionState,
   formData: FormData,

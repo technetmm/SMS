@@ -112,7 +112,7 @@ export async function generatePayroll(
   const month = monthStartUTC(parsed.data.month);
 
   const staffMembers = await prisma.staff.findMany({
-    where: { schoolId, isDeleted: false },
+    where: { schoolId },
     select: { id: true, ratePerSection: true },
   });
 

@@ -10,12 +10,12 @@ export default async function CreateTimetablePage() {
 
   const [staff, sections] = await Promise.all([
     prisma.staff.findMany({
-      where: { schoolId, isDeleted: false },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.section.findMany({
-      where: { schoolId, isDeleted: false },
+      where: { schoolId },
       orderBy: { name: "asc" },
       select: { id: true, name: true, class: { select: { name: true } } },
     }),

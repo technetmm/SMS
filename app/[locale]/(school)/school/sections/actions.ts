@@ -33,6 +33,7 @@ function parseSectionInput(formData: FormData) {
     name: raw.name,
     staffIds: Array.from(new Set(staffIds)),
     room: emptyToUndefined(raw.room as string | undefined),
+    meetingLink: emptyToUndefined(raw.meetingLink as string | undefined),
     capacity: raw.capacity,
   });
 }
@@ -94,6 +95,7 @@ export async function createSection(
           classId: parsed.data.classId,
           name: parsed.data.name,
           room: parsed.data.room,
+          meetingLink: parsed.data.meetingLink,
           capacity: parsed.data.capacity,
         },
       });
@@ -128,6 +130,7 @@ export async function getSections() {
       id: true,
       name: true,
       room: true,
+      meetingLink: true,
       capacity: true,
       createdAt: true,
       enrollments: {
@@ -197,6 +200,7 @@ export async function getPaginatedSections({
           id: true,
           name: true,
           room: true,
+          meetingLink: true,
           capacity: true,
           createdAt: true,
           enrollments: {
@@ -232,6 +236,7 @@ export async function getSectionById(id: string) {
       name: true,
       classId: true,
       room: true,
+      meetingLink: true,
       capacity: true,
       staffMappings: {
         select: {
@@ -245,6 +250,74 @@ export async function getSectionById(id: string) {
       },
     },
   });
+}
+
+export async function getSectionDetailById(id: string) {
+  await requireSchoolAdmin();
+  const schoolId = await requireTenantId();
+  if (!id) return null;
+
+  const section = await prisma.section.findFirst({
+    where: { id, schoolId },
+    select: {
+      id: true,
+      name: true,
+      room: true,
+      meetingLink: true,
+      capacity: true,
+      class: { select: { id: true, name: true } },
+      staffMappings: {
+        select: {
+          staff: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      timetables: {
+        orderBy: [
+          { dayOfWeek: "asc" },
+          { startTime: "asc" },
+          { createdAt: "desc" },
+        ],
+        select: {
+          id: true,
+          dayOfWeek: true,
+          startTime: true,
+          endTime: true,
+          room: true,
+          staff: { select: { id: true, name: true } },
+        },
+      },
+      enrollments: {
+        orderBy: [{ status: "asc" }, { student: { name: "asc" } }],
+        select: {
+          id: true,
+          status: true,
+          student: {
+            select: {
+              id: true,
+              name: true,
+              phone: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!section) return null;
+
+  const activeStudents = section.enrollments.filter(
+    (row) => row.status === "ACTIVE",
+  ).length;
+
+  return {
+    ...section,
+    activeStudents,
+  };
 }
 
 export async function updateSection(
@@ -286,6 +359,7 @@ export async function updateSection(
           classId: parsed.data.classId,
           name: parsed.data.name,
           room: parsed.data.room,
+          meetingLink: parsed.data.meetingLink,
           capacity: parsed.data.capacity,
         },
       });

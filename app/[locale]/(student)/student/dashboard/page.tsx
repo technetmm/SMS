@@ -29,7 +29,7 @@ export default async function StudentDashboardPage() {
 
   const [enrollmentCount, attendanceSummary, unpaidInvoices] = await Promise.all([
     prisma.enrollment.count({
-      where: { schoolId, studentId: studentProfile.id, isDeleted: false },
+      where: { schoolId, studentId: studentProfile.id },
     }),
     prisma.attendance.aggregate({
       _count: { id: true },
@@ -43,7 +43,6 @@ export default async function StudentDashboardPage() {
         schoolId,
         studentId: studentProfile.id,
         status: { in: [PaymentStatus.UNPAID, PaymentStatus.PARTIAL] },
-        isDeleted: false,
       },
     }),
   ]);

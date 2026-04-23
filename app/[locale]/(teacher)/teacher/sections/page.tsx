@@ -1,8 +1,13 @@
+import { Link } from "@/i18n/navigation";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ExternalLink } from "lucide-react";
 import { TeacherAccessFallback } from "@/components/teacher/teacher-access-fallback";
-import { getTeacherSections, requireTeacherAccess } from "@/app/(teacher)/teacher/actions";
+import {
+  getTeacherSections,
+  requireTeacherAccess,
+} from "@/app/(teacher)/teacher/actions";
 import { getTranslations } from "next-intl/server";
 
 export default async function TeacherSectionsPage() {
@@ -22,9 +27,16 @@ export default async function TeacherSectionsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sections.map((section) => (
-          <Card key={section.id}>
+          <Card key={section.id} className="transition-colors hover:bg-muted/20">
             <CardHeader>
-              <CardTitle className="text-base">{section.name}</CardTitle>
+              <CardTitle className="text-base">
+                <Link
+                  href={`/teacher/sections/${section.id}`}
+                  className="hover:underline"
+                >
+                  {section.name}
+                </Link>
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
               <p className="text-muted-foreground">{section.className}</p>
@@ -41,6 +53,26 @@ export default async function TeacherSectionsPage() {
                     : t("labels.roomNotSet")}
                 </Badge>
               </div>
+              {section.meetingLink ? (
+                <div className="flex items-center justify-between pt-1">
+                  <Link
+                    href={`/teacher/sections/${section.id}`}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    {t("actions.viewDetails")}
+                  </Link>
+                  <a
+                    href={section.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("actions.openMeeting")}
+                    title={t("actions.openMeeting")}
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <ExternalLink className="size-4" />
+                  </a>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
         ))}

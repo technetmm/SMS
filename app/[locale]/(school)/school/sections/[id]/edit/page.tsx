@@ -59,6 +59,7 @@ export default async function EditSectionPage({
           classId: section.classId,
           staffIds: section.staffMappings.map((item) => item.staff.id),
           room: section.room,
+          meetingLink: section.meetingLink,
           capacity: section.capacity,
         }}
       />

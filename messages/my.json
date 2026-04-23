@@ -9,7 +9,9 @@
     "next": "နောက်",
     "actions": "လုပ်ဆောင်ရန်",
     "back": "နောက်သို့ ပြန်သွားမည်",
-    "export": "ထုတ်ယူမည်"
+    "export": "ထုတ်ယူမည်",
+    "joinMeeting": "အစည်းအဝေးတွင် ပါဝင်မည်",
+    "edit": "ပြင်ဆင်မည်"
   },
   "LocaleSwitcher": {
     "label": "ဘာသာစကား ရွေးချယ်မှု",
@@ -395,6 +397,48 @@
         "students": "ကျောင်းသား {count}/{capacity}",
         "room": "အခန်း: {room}",
         "roomNotSet": "အခန်း: မသတ်မှတ်ရသေး"
+      },
+      "actions": {
+        "openMeeting": "Link ဖွင့်မည်",
+        "viewDetails": "အသေးစိတ်ကြည့်ရန်"
+      }
+    },
+    "sectionDetails": {
+      "description": "Section အသေးစိတ်၊ အချိန်ဇယားနှင့် ကျောင်းသားအချက်အလက်များ။",
+      "back": "Sections သို့ ပြန်သွားမည်",
+      "notAvailable": "-",
+      "joinMeeting": "Meeting ဝင်မည်",
+      "summary": {
+        "class": "အတန်း",
+        "students": "ကျောင်းသား",
+        "studentsValue": "ကျောင်းသား {count}/{capacity}",
+        "room": "အခန်း",
+        "meeting": "Meeting",
+        "assignedTeacher": "တာဝန်ပေးထားသော ဆရာ/မ"
+      },
+      "timetable": {
+        "title": "အချိန်ဇယား",
+        "columns": {
+          "day": "နေ့",
+          "time": "အချိန်",
+          "teacher": "ဆရာ/မ",
+          "room": "အခန်း"
+        },
+        "empty": "ဤ section အတွက် အချိန်ဇယား slot မရှိသေးပါ။"
+      },
+      "students": {
+        "title": "ကျောင်းသားများ",
+        "columns": {
+          "name": "ကျောင်းသား",
+          "phone": "ဖုန်း",
+          "status": "အခြေအနေ"
+        },
+        "status": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "empty": "ဤ section ထဲတွင် enrollment မရှိသေးပါ။"
       }
     },
     "timetable": {
@@ -1000,12 +1044,32 @@
         "description": "Section အချက်အလက်များကို ပြင်ဆင်ပါ။",
         "back": "နောက်သို့ ပြန်သွားမည်"
       },
+      "form": {
+        "name": "Section အမည်",
+        "class": "အတန်း",
+        "classPlaceholder": "အတန်း ရွေးပါ...",
+        "teacherOptional": "ဆရာ/မ (လိုသလို)",
+        "searchStaff": "ဝန်ထမ်း ရှာပါ...",
+        "noItemsFound": "မတွေ့ပါ။",
+        "noStaffFound": "ဝန်ထမ်း မတွေ့ပါ။",
+        "room": "အခန်း",
+        "meetingLink": "Meeting Link",
+        "meetingLinkPlaceholder": "https://meet.google.com/...",
+        "capacity": "ကျောင်းသားအများဆုံး",
+        "actions": {
+          "create": "Section အသစ် ဖန်တီးမည်",
+          "save": "ပြောင်းလဲမှုများ သိမ်းမည်",
+          "creating": "ဖန်တီးနေသည်...",
+          "saving": "သိမ်းနေသည်..."
+        }
+      },
       "table": {
         "columns": {
           "name": "နာမည်",
           "class": "အတန်း",
           "capacity": "ကျောင်းသားဦးရေ",
           "teacher": "ဆရာ/မ",
+          "meetingLink": "Meeting Link",
           "status": "အခြေအနေ",
           "createdAt": "ဖန်တီးသည့်နေ့",
           "actions": "လုပ်ဆောင်ရန်"
@@ -1015,8 +1079,10 @@
           "available": "ရရှိနိုင်သည်"
         },
         "actions": {
+          "view": "ကြည့်မည်",
           "edit": "ပြင်ဆင်မည်",
-          "delete": "ဖျက်မည်"
+          "delete": "ဖျက်မည်",
+          "openMeeting": "Link ဖွင့်မည်"
         },
         "notAvailable": "-",
         "empty": "Section မရှိသေးပါ။"
@@ -1178,6 +1244,7 @@
           "time": "အချိန်",
           "staff": "ဝန်ထမ်း",
           "section": "Section",
+          "meetingLink": "Meeting Link",
           "room": "အခန်း",
           "actions": "လုပ်ဆောင်ရန်"
         },
@@ -1192,7 +1259,8 @@
         },
         "actions": {
           "edit": "ပြင်မည်",
-          "delete": "ဖျက်မည်"
+          "delete": "ဖျက်မည်",
+          "openMeeting": "Link ဖွင့်မည်"
         },
         "empty": "Timetable slot မရှိသေးပါ။ ပထမဆုံး slot ကို ဖန်တီးပါ။"
       }

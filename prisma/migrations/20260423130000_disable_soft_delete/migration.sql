@@ -1,0 +1,55 @@
+ALTER TABLE "User"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Tenant"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Branch"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Subscription"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Staff"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Student"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Subject"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Course"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Class"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Section"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Enrollment"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Attendance"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Progress"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";
+
+ALTER TABLE "Invoice"
+  DROP COLUMN IF EXISTS "isDeleted",
+  DROP COLUMN IF EXISTS "deletedAt";

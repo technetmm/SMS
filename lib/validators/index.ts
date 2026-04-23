@@ -80,6 +80,16 @@ export const sectionMultiStaffSchema = z.object({
   name: z.string().min(1, "Section name is required"),
   staffIds: z.array(z.string().min(1)).optional().default([]),
   room: z.string().optional(),
+  meetingLink: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z
+      .string()
+      .url("Meeting link must be a valid URL.")
+      .refine((value) => value.startsWith("http://") || value.startsWith("https://"), {
+        message: "Meeting link must start with http:// or https://.",
+      })
+      .optional(),
+  ),
   capacity: z.preprocess(
     (value) => (value === "" || value === null || value === undefined ? 30 : value),
     z.coerce.number().int().positive("Capacity must be at least 1"),

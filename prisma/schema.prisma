@@ -141,8 +141,6 @@ model User {
   activeSessionIp        String?
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
-  isDeleted              Boolean   @default(false)
-  deletedAt              DateTime?
 
   school                Tenant?                @relation(fields: [schoolId], references: [id])
   staffProfile          Staff?
@@ -164,8 +162,6 @@ model Tenant {
   billingDayOfMonth Int       @default(5)
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  isDeleted         Boolean   @default(false)
-  deletedAt         DateTime?
 
   users           User[]
   staff           Staff[]
@@ -196,8 +192,6 @@ model Branch {
   address   String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
 
   tenant   Tenant    @relation(fields: [schoolId], references: [id])
   students Student[]
@@ -219,8 +213,6 @@ model Subscription {
   currentPeriodEnd     DateTime
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
-  isDeleted            Boolean            @default(false)
-  deletedAt            DateTime?
 
   tenant Tenant @relation(fields: [schoolId], references: [id])
 }
@@ -248,8 +240,6 @@ model Staff {
   ratePerSection Decimal       @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
-  isDeleted      Boolean       @default(false)
-  deletedAt      DateTime?
 
   user           User              @relation(fields: [userId], references: [id])
   tenant         Tenant            @relation(fields: [schoolId], references: [id])
@@ -278,8 +268,6 @@ model Student {
   status        StudentStatus @default(ACTIVE)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  isDeleted     Boolean       @default(false)
-  deletedAt     DateTime?
 
   user        User?        @relation(fields: [userId], references: [id])
   tenant      Tenant       @relation(fields: [schoolId], references: [id])
@@ -294,8 +282,6 @@ model Subject {
   id        String    @id @default(cuid())
   name      String
   schoolId  String
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -311,8 +297,6 @@ model Course {
   schoolId  String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
 
   classes  Class[]
   subjects CourseSubject[]
@@ -351,8 +335,6 @@ model Class {
   fee         Decimal     @default(0)
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  isDeleted   Boolean     @default(false)
-  deletedAt   DateTime?
 
   course   Course    @relation(fields: [courseId], references: [id])
   tenant   Tenant    @relation(fields: [schoolId], references: [id])
@@ -428,11 +410,10 @@ model Section {
   branchId  String?
   name      String
   room      String?
+  meetingLink String?
   capacity  Int       @default(30)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  isDeleted Boolean   @default(false)
-  deletedAt DateTime?
 
   class           Class             @relation(fields: [classId], references: [id])
   branch          Branch?           @relation(fields: [branchId], references: [id])
@@ -490,8 +471,6 @@ model Enrollment {
   discountValue        Decimal          @default(0)
   enrolledAt           DateTime         @default(now())
   status               EnrollmentStatus @default(ACTIVE)
-  isDeleted            Boolean          @default(false)
-  deletedAt            DateTime?
   createdAt            DateTime         @default(now())
   updatedAt            DateTime         @updatedAt
 
@@ -512,8 +491,6 @@ model Attendance {
   enrollmentId String
   date         DateTime
   status       AttendanceStatus
-  isDeleted    Boolean          @default(false)
-  deletedAt    DateTime?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
@@ -531,8 +508,6 @@ model Progress {
   enrollmentId String
   progress     Float
   remark       String?
-  isDeleted    Boolean   @default(false)
-  deletedAt    DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -558,8 +533,6 @@ model Invoice {
   paidAmount     Decimal       @default(0)
   status         PaymentStatus @default(UNPAID)
   dueDate        DateTime
-  isDeleted      Boolean       @default(false)
-  deletedAt      DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

@@ -50,19 +50,19 @@ export default async function SchoolProfilePage() {
     session.user.role === UserRole.SCHOOL_SUPER_ADMIN
       ? Promise.all([
           prisma.user.count({
-            where: { schoolId: session.user.schoolId, isDeleted: false },
+            where: { schoolId: session.user.schoolId },
           }),
           prisma.staff.count({
-            where: { schoolId: session.user.schoolId, isDeleted: false },
+            where: { schoolId: session.user.schoolId },
           }),
           prisma.student.count({
-            where: { schoolId: session.user.schoolId, isDeleted: false },
+            where: { schoolId: session.user.schoolId },
           }),
           prisma.class.count({
-            where: { schoolId: session.user.schoolId, isDeleted: false },
+            where: { schoolId: session.user.schoolId },
           }),
           prisma.section.count({
-            where: { schoolId: session.user.schoolId, isDeleted: false },
+            where: { schoolId: session.user.schoolId },
           }),
           prisma.subscription.count({
             where: { schoolId: session.user.schoolId, isActive: true },

@@ -38,7 +38,14 @@ export async function getTimetable() {
       endTime: true,
       room: true,
       staff: { select: { id: true, name: true } },
-      section: { select: { id: true, name: true, class: { select: { id: true, name: true } } } },
+      section: {
+        select: {
+          id: true,
+          name: true,
+          meetingLink: true,
+          class: { select: { id: true, name: true } },
+        },
+      },
       createdAt: true,
     },
   });
@@ -92,6 +99,7 @@ export async function getPaginatedTimetable({
             select: {
               id: true,
               name: true,
+              meetingLink: true,
               class: { select: { id: true, name: true } },
             },
           },

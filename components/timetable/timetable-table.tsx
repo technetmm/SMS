@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import {
   getPaginatedTimetable,
   getTimetable,
@@ -62,6 +63,7 @@ export async function TimetableTable({
             <TableHead>{t("columns.time")}</TableHead>
             <TableHead>{t("columns.staff")}</TableHead>
             <TableHead>{t("columns.section")}</TableHead>
+            <TableHead>{t("columns.meetingLink")}</TableHead>
             <TableHead>{t("columns.room")}</TableHead>
             <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
@@ -69,20 +71,39 @@ export async function TimetableTable({
         <TableBody>
           {slots.items.map((slot) => (
             <TableRow key={slot.id}>
-              <TableCell>
-                {dayLabel(slot.dayOfWeek)}
-              </TableCell>
+              <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
               <TableCell className="font-medium">
                 {slot.startTime} - {slot.endTime}
               </TableCell>
               <TableCell>{slot.staff.name}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
-                  <span>{slot.section.name}</span>
+                  <Link
+                    href={`/school/sections/${slot.section.id}`}
+                    className="hover:underline"
+                  >
+                    {slot.section.name}
+                  </Link>
                   <span className="text-xs text-muted-foreground">
                     {slot.section.class.name}
                   </span>
                 </div>
+              </TableCell>
+              <TableCell>
+                {slot.section.meetingLink ? (
+                  <a
+                    href={slot.section.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("actions.openMeeting")}
+                    title={t("actions.openMeeting")}
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <ExternalLink className="size-4" />
+                  </a>
+                ) : (
+                  "-"
+                )}
               </TableCell>
               <TableCell>
                 {slot.room ? <Badge variant="outline">{slot.room}</Badge> : "-"}
@@ -107,7 +128,7 @@ export async function TimetableTable({
           {slots.totalCount === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
                 {t("empty")}

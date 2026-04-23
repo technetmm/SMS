@@ -42,6 +42,7 @@ export async function SectionTable({
             <TableHead>{t("columns.class")}</TableHead>
             <TableHead>{t("columns.capacity")}</TableHead>
             <TableHead>{t("columns.teacher")}</TableHead>
+            <TableHead>{t("columns.meetingLink")}</TableHead>
             <TableHead>{t("columns.status")}</TableHead>
             <TableHead>{t("columns.createdAt")}</TableHead>
             <TableHead className="text-right">{t("columns.actions")}</TableHead>
@@ -69,6 +70,20 @@ export async function SectionTable({
                     : t("notAvailable")}
                 </TableCell>
                 <TableCell>
+                  {section.meetingLink ? (
+                    <a
+                      href={section.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-4"
+                    >
+                      {t("actions.openMeeting")}
+                    </a>
+                  ) : (
+                    t("notAvailable")
+                  )}
+                </TableCell>
+                <TableCell>
                   <Badge
                     variant={isFull ? "outline" : "default"}
                     className={
@@ -83,6 +98,11 @@ export async function SectionTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/school/sections/${section.id}`}>
+                        {t("actions.view")}
+                      </Link>
+                    </Button>
                     <Button asChild size="sm" variant="outline">
                       <Link href={`/school/sections/${section.id}/edit`}>
                         {t("actions.edit")}
@@ -102,7 +122,7 @@ export async function SectionTable({
           {sections.totalCount === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={8}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
                 {t("empty")}
