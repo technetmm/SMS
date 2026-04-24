@@ -11,9 +11,11 @@ import { useTranslations } from "next-intl";
 export function TimetableFilters({
   q,
   dayOfWeek,
+  resetPath = "/school/timetable",
 }: {
   q?: string;
   dayOfWeek?: DayOfWeek;
+  resetPath?: string;
 }) {
   const t = useTranslations("SchoolEntities.timetable.filters");
   const commonT = useTranslations("Common");
@@ -50,7 +52,7 @@ export function TimetableFilters({
         <Button
           type="button"
           variant="outline"
-          onClick={() => (window.location.href = "/school/timetable")}
+          onClick={() => (window.location.href = resetPath)}
         >
           {commonT("reset")}
         </Button>
