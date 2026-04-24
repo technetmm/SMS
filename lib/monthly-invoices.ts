@@ -65,7 +65,6 @@ export async function generateMonthlyInvoices(options: GenerateMonthlyInvoicesOp
       billingType: BillingType.MONTHLY,
       monthlyBillingActive: true,
       status: EnrollmentStatus.ACTIVE,
-      section: { isDeleted: false, class: { isDeleted: false } },
     },
     select: {
       id: true,

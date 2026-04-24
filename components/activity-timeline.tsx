@@ -10,9 +10,27 @@ type TimelineItem = {
   tenant?: { name: string } | null;
 };
 
-export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
+type ActivityTimelineMessages = {
+  empty: string;
+  system: string;
+};
+
+const defaultMessages: ActivityTimelineMessages = {
+  empty: "No recent activity.",
+  system: "System",
+};
+
+export function ActivityTimeline({
+  items,
+  locale = "en-US",
+  messages = defaultMessages,
+}: {
+  items: TimelineItem[];
+  locale?: string;
+  messages?: ActivityTimelineMessages;
+}) {
   if (items.length === 0) {
-    return <p className="text-sm text-muted-foreground">No recent activity.</p>;
+    return <p className="text-sm text-muted-foreground">{messages.empty}</p>;
   }
 
   return (
@@ -23,7 +41,7 @@ export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
           <div className="absolute left-1 top-4 h-[calc(100%+8px)] w-px bg-border last:hidden" />
           <div className="flex flex-wrap items-center gap-2">
             <p className="text-sm font-medium">
-              {item.user?.name ?? item.user?.email ?? "System"}{" "}
+              {item.user?.name ?? item.user?.email ?? messages.system}{" "}
               {item.action.toLowerCase()} {item.entity}
             </p>
             <Badge variant="outline">{item.action}</Badge>
@@ -32,7 +50,7 @@ export function ActivityTimeline({ items }: { items: TimelineItem[] }) {
             ) : null}
           </div>
           <p className="text-xs text-muted-foreground">
-            {new Intl.DateTimeFormat("en-US", {
+            {new Intl.DateTimeFormat(locale, {
               dateStyle: "medium",
               timeStyle: "short",
             }).format(item.createdAt)}

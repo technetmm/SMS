@@ -3,6 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   updateEnrollment,
   type EnrollmentActionState,
@@ -25,16 +26,17 @@ export function UpdateEnrollmentStatusForm({
   id: string;
   currentStatus: "ACTIVE" | "COMPLETED" | "DROPPED";
 }) {
+  const t = useTranslations("SchoolEntities.enrollments.status");
   const router = useRouter();
   const [state, formAction] = useActionState(updateEnrollment, initialState);
 
   useEffect(() => {
     if (state.status === "success") {
-      toast.success(state.message ?? "Enrollment updated.");
+      toast.success(state.message ?? t("messages.updated"));
       router.refresh();
     }
     if (state.status === "error") {
-      toast.error(state.message ?? "Unable to update enrollment.");
+      toast.error(state.message ?? t("messages.updateFailed"));
     }
   }, [router, state]);
 
@@ -43,15 +45,15 @@ export function UpdateEnrollmentStatusForm({
       <input type="hidden" name="id" value={id} />
       <Select name="status" defaultValue={currentStatus}>
         <SelectTrigger className="h-8 w-[130px]">
-          <SelectValue placeholder="Status" />
+          <SelectValue placeholder={t("status")} />
         </SelectTrigger>
         <SelectContent position="popper">
-          <SelectItem value="ACTIVE">Active</SelectItem>
-          <SelectItem value="COMPLETED">Completed</SelectItem>
-          <SelectItem value="DROPPED">Dropped</SelectItem>
+          <SelectItem value="ACTIVE">{t("options.active")}</SelectItem>
+          <SelectItem value="COMPLETED">{t("options.completed")}</SelectItem>
+          <SelectItem value="DROPPED">{t("options.dropped")}</SelectItem>
         </SelectContent>
       </Select>
-      <SubmitButton label="Save" loadingLabel="Saving..." />
+      <SubmitButton label={t("save")} loadingLabel={t("saving")} />
     </form>
   );
 }

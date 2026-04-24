@@ -80,6 +80,16 @@ export const sectionMultiStaffSchema = z.object({
   name: z.string().min(1, "Section name is required"),
   staffIds: z.array(z.string().min(1)).optional().default([]),
   room: z.string().optional(),
+  meetingLink: z.preprocess(
+    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    z
+      .string()
+      .url("Meeting link must be a valid URL.")
+      .refine((value) => value.startsWith("http://") || value.startsWith("https://"), {
+        message: "Meeting link must start with http:// or https://.",
+      })
+      .optional(),
+  ),
   capacity: z.preprocess(
     (value) => (value === "" || value === null || value === undefined ? 30 : value),
     z.coerce.number().int().positive("Capacity must be at least 1"),
@@ -131,6 +141,10 @@ export const staffUpdateSchema = staffCreateSchema
   .omit({ password: true })
   .extend({
     id: z.string().min(1, "Staff id is required"),
+    exitDate: z.preprocess(
+      (value) => (value === "" ? null : value),
+      z.coerce.date().nullable().optional(),
+    ),
   });
 
 const timeString = z
@@ -184,6 +198,7 @@ export const enrollmentUpdateSchema = z.object({
 
 export const enrollmentDetailsUpdateSchema = z.object({
   id: z.string().min(1, "Enrollment id is required"),
+  studentId: z.string().min(1, "Student is required"),
   sectionId: z.string().min(1, "Section is required"),
   enrolledAt: z.coerce.date(),
   status: z.nativeEnum(EnrollmentStatus),
@@ -206,7 +221,7 @@ export const enrollmentAttendanceSchema = z.object({
 export const enrollmentProgressSchema = z.object({
   enrollmentId: z.string().min(1, "Enrollment is required"),
   progress: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
-  remark: z.string().optional(),
+  remark: z.string().nullable().optional(),
 });
 
 export const invoiceUpdateSchema = z.object({

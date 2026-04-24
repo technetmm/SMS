@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { signOut } from "next-auth/react";
+import { useTranslations, useLocale } from "next-intl";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -26,6 +26,7 @@ import {
   ShieldCheckIcon,
   UserIcon,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 export function NavUser({
   user,
@@ -45,6 +46,8 @@ export function NavUser({
   isStudent: boolean;
 }) {
   const { isMobile } = useSidebar();
+  const t = useTranslations("NavUser");
+  const locale = useLocale();
   const initials =
     user.name
       ?.split(" ")
@@ -56,6 +59,7 @@ export function NavUser({
   const menuItems = [
     {
       name: "Profile",
+      label: t("profile"),
       href: isSchoolAdmin
         ? "/school/profile"
         : isTeacher
@@ -67,6 +71,7 @@ export function NavUser({
     },
     {
       name: "Settings",
+      label: t("settings"),
       href: isPlatform
         ? "/platform/settings"
         : isSchoolAdmin
@@ -80,6 +85,7 @@ export function NavUser({
     },
     {
       name: "Security",
+      label: t("security"),
       href: isPlatform
         ? "/platform/settings/security"
         : isSchoolAdmin
@@ -93,6 +99,7 @@ export function NavUser({
     },
     {
       name: "Notifications",
+      label: t("notifications"),
       href: isPlatform
         ? "/platform/notifications"
         : isSchoolAdmin
@@ -155,7 +162,7 @@ export function NavUser({
                   <DropdownMenuItem asChild key={item.name}>
                     <Link href={item.href}>
                       {item.icon}
-                      {item.name}
+                      {item.label}
                     </Link>
                   </DropdownMenuItem>
                 ),
@@ -165,11 +172,11 @@ export function NavUser({
             <DropdownMenuItem
               onSelect={(event) => {
                 event.preventDefault();
-                signOut({ callbackUrl: "/login" });
+                signOut({ callbackUrl: `/${locale}/login` });
               }}
             >
               <LogOutIcon />
-              Log out
+              {t("logOut")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

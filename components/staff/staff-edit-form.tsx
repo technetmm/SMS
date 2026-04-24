@@ -186,7 +186,6 @@ export function StaffEditForm({ staff }: { staff: StaffFormData }) {
               name="exitDate"
               type="date"
               defaultValue={staff.exitDate ?? ""}
-              required
             />
           </div>
           <div className="grid gap-2">

@@ -13,22 +13,102 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { enumLabel, USER_ROLE_LABELS } from "@/lib/enum-labels";
+import { enumLabel } from "@/lib/enum-labels";
 import type { DeviceApprovalQueueRow } from "@/lib/auth/device-approval-queue";
 
-function formatWhen(iso: string) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatWhen(iso: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(iso));
 }
 
+type DeviceApprovalTableMessages = {
+  errors: {
+    unableToProcess: string;
+  };
+  success: {
+    approved: string;
+    denied: string;
+  };
+  columns: {
+    requester: string;
+    role: string;
+    school: string;
+    requested: string;
+    expires: string;
+    deviceIp: string;
+    status: string;
+    actions: string;
+  };
+  roleLabels: {
+    superAdmin: string;
+    schoolSuperAdmin: string;
+    schoolAdmin: string;
+    teacher: string;
+    student: string;
+  };
+  fallbacks: {
+    unnamedUser: string;
+    notAvailable: string;
+  };
+  actions: {
+    deny: string;
+    denying: string;
+    approve: string;
+    approving: string;
+  };
+  empty: string;
+};
+
+const defaultMessages: DeviceApprovalTableMessages = {
+  errors: {
+    unableToProcess: "Unable to process login request.",
+  },
+  success: {
+    approved: "Login request approved.",
+    denied: "Login request denied.",
+  },
+  columns: {
+    requester: "Requester",
+    role: "Role",
+    school: "School",
+    requested: "Requested",
+    expires: "Expires",
+    deviceIp: "Device / IP",
+    status: "Status",
+    actions: "Actions",
+  },
+  roleLabels: {
+    superAdmin: "Super Admin",
+    schoolSuperAdmin: "School Owner",
+    schoolAdmin: "Admin",
+    teacher: "Teacher",
+    student: "Student",
+  },
+  fallbacks: {
+    unnamedUser: "Unnamed user",
+    notAvailable: "-",
+  },
+  actions: {
+    deny: "Deny",
+    denying: "Denying...",
+    approve: "Approve",
+    approving: "Approving...",
+  },
+  empty: "No pending device approval requests.",
+};
+
 export function DeviceApprovalTable({
   initialRequests,
   showSchool = false,
+  locale = "en-US",
+  messages = defaultMessages,
 }: {
   initialRequests: DeviceApprovalQueueRow[];
   showSchool?: boolean;
+  locale?: string;
+  messages?: DeviceApprovalTableMessages;
 }) {
   const router = useRouter();
   const [requests, setRequests] = useState(initialRequests);
@@ -36,6 +116,14 @@ export function DeviceApprovalTable({
     requestId: string;
     action: "approve" | "deny";
   } | null>(null);
+
+  const roleLabels: Record<string, string> = {
+    SUPER_ADMIN: messages.roleLabels.superAdmin,
+    SCHOOL_SUPER_ADMIN: messages.roleLabels.schoolSuperAdmin,
+    SCHOOL_ADMIN: messages.roleLabels.schoolAdmin,
+    TEACHER: messages.roleLabels.teacher,
+    STUDENT: messages.roleLabels.student,
+  };
 
   async function handleAction(requestId: string, action: "approve" | "deny") {
     if (loading) return;
@@ -55,7 +143,7 @@ export function DeviceApprovalTable({
       };
 
       if (!response.ok) {
-        toast.error(payload.error ?? "Unable to process login request.");
+        toast.error(payload.error ?? messages.errors.unableToProcess);
         setLoading(null);
         router.refresh();
         return;
@@ -64,13 +152,13 @@ export function DeviceApprovalTable({
       setRequests((current) => current.filter((request) => request.id !== requestId));
       toast.success(
         action === "approve"
-          ? "Login request approved."
-          : "Login request denied.",
+          ? messages.success.approved
+          : messages.success.denied,
       );
       setLoading(null);
       router.refresh();
     } catch {
-      toast.error("Unable to process login request.");
+      toast.error(messages.errors.unableToProcess);
       setLoading(null);
     }
   }
@@ -79,14 +167,14 @@ export function DeviceApprovalTable({
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Requester</TableHead>
-          <TableHead>Role</TableHead>
-          {showSchool ? <TableHead>School</TableHead> : null}
-          <TableHead>Requested</TableHead>
-          <TableHead>Expires</TableHead>
-          <TableHead>Device / IP</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead>{messages.columns.requester}</TableHead>
+          <TableHead>{messages.columns.role}</TableHead>
+          {showSchool ? <TableHead>{messages.columns.school}</TableHead> : null}
+          <TableHead>{messages.columns.requested}</TableHead>
+          <TableHead>{messages.columns.expires}</TableHead>
+          <TableHead>{messages.columns.deviceIp}</TableHead>
+          <TableHead>{messages.columns.status}</TableHead>
+          <TableHead className="text-right">{messages.columns.actions}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -98,7 +186,7 @@ export function DeviceApprovalTable({
               <TableCell>
                 <div className="space-y-1">
                   <div className="font-medium">
-                    {request.requester.name ?? "Unnamed user"}
+                    {request.requester.name ?? messages.fallbacks.unnamedUser}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {request.requester.email}
@@ -106,20 +194,22 @@ export function DeviceApprovalTable({
                 </div>
               </TableCell>
               <TableCell>
-                {enumLabel(request.requester.role, USER_ROLE_LABELS)}
+                {enumLabel(request.requester.role, roleLabels)}
               </TableCell>
               {showSchool ? (
-                <TableCell>{request.requester.schoolName ?? "-"}</TableCell>
+                <TableCell>
+                  {request.requester.schoolName ?? messages.fallbacks.notAvailable}
+                </TableCell>
               ) : null}
-              <TableCell>{formatWhen(request.createdAt)}</TableCell>
-              <TableCell>{formatWhen(request.expiresAt)}</TableCell>
+              <TableCell>{formatWhen(request.createdAt, locale)}</TableCell>
+              <TableCell>{formatWhen(request.expiresAt, locale)}</TableCell>
               <TableCell>
                 <div className="space-y-1">
                   <div className="max-w-xs truncate text-sm">
-                    {request.requestedUserAgent ?? "-"}
+                    {request.requestedUserAgent ?? messages.fallbacks.notAvailable}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {request.requestedIp ?? "-"}
+                    {request.requestedIp ?? messages.fallbacks.notAvailable}
                   </div>
                 </div>
               </TableCell>
@@ -134,7 +224,9 @@ export function DeviceApprovalTable({
                     disabled={Boolean(isBusy)}
                     onClick={() => void handleAction(request.id, "deny")}
                   >
-                    {isBusy && loading?.action === "deny" ? "Denying..." : "Deny"}
+                    {isBusy && loading?.action === "deny"
+                      ? messages.actions.denying
+                      : messages.actions.deny}
                   </Button>
                   <Button
                     size="sm"
@@ -142,8 +234,8 @@ export function DeviceApprovalTable({
                     onClick={() => void handleAction(request.id, "approve")}
                   >
                     {isBusy && loading?.action === "approve"
-                      ? "Approving..."
-                      : "Approve"}
+                      ? messages.actions.approving
+                      : messages.actions.approve}
                   </Button>
                 </div>
               </TableCell>
@@ -156,7 +248,7 @@ export function DeviceApprovalTable({
               colSpan={showSchool ? 8 : 7}
               className="py-10 text-center text-sm text-muted-foreground"
             >
-              No pending device approval requests.
+              {messages.empty}
             </TableCell>
           </TableRow>
         ) : null}

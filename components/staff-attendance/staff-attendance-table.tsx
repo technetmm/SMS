@@ -3,7 +3,6 @@ import {
   type StaffAttendanceTableFilters,
 } from "@/app/(school)/school/staff-attendance/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
-import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -13,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function StaffAttendanceTable({
   page,
@@ -23,18 +23,22 @@ export async function StaffAttendanceTable({
   filters?: StaffAttendanceTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [locale, t] = await Promise.all([
+    getLocale(),
+    getTranslations("SchoolEntities.staffAttendance.table"),
+  ]);
   const logs = await getPaginatedStaffAttendance({ page, filters });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
+  const formatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Staff</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t("columns.date")}</TableHead>
+            <TableHead>{t("columns.staff")}</TableHead>
+            <TableHead>{t("columns.section")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -52,7 +56,7 @@ export async function StaffAttendanceTable({
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
-                  {enumLabel(log.status, ATTENDANCE_STATUS_LABELS)}
+                  {t(`statusOptions.${log.status.toLowerCase()}`)}
                 </Badge>
               </TableCell>
             </TableRow>
@@ -60,7 +64,7 @@ export async function StaffAttendanceTable({
           {logs.totalCount === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                No staff attendance records yet.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}
@@ -74,4 +78,3 @@ export async function StaffAttendanceTable({
     </div>
   );
 }
-

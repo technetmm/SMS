@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,26 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-
-const LABELS: Record<string, string> = {
-  school: "School",
-  dashboard: "Dashboard",
-  platform: "Platform",
-  tenants: "Tenants",
-  subscriptions: "Subscriptions",
-  students: "Students",
-  classes: "Classes",
-  attendance: "Attendance",
-  payments: "Payments",
-  settings: "Settings",
-  "change-email": "Change Email",
-  "change-password": "Change Password",
-  "profile-photo": "Profile Photo",
-  "2fa": "Two-Factor Auth",
-  security: "Security",
-  theme: "Theme",
-  notifications: "Notifications",
-};
+import { Link, usePathname } from "@/i18n/navigation";
 
 function toTitleCase(segment: string) {
   return segment
@@ -39,11 +19,12 @@ function toTitleCase(segment: string) {
 
 export function AppBreadcrumb() {
   const pathname = usePathname();
+  const t = useTranslations("Breadcrumb");
   const segments = pathname.split("/").filter(Boolean);
 
   const crumbs = segments.map((segment, index) => {
     const href = `/${segments.slice(0, index + 1).join("/")}`;
-    const label = LABELS[segment] ?? toTitleCase(segment);
+    const label = t.has(segment) ? t(segment) : toTitleCase(segment);
     return { href, label };
   });
 
@@ -52,7 +33,7 @@ export function AppBreadcrumb() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbPage>Dashboard</BreadcrumbPage>
+            <BreadcrumbPage>{t("dashboard")}</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>

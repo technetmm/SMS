@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/shared/submit-button";
+import { useTranslations } from "next-intl";
 
 const initialState: PayrollActionState = { status: "idle" };
 
@@ -16,40 +17,40 @@ export function PayrollGenerateForm({
 }: {
   action: (prevState: PayrollActionState, formData: FormData) => Promise<PayrollActionState>;
 }) {
+  const t = useTranslations("SchoolEntities.payroll.generate");
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
 
   useEffect(() => {
     if (state.status === "success") {
-      toast.success(state.message ?? "Generated");
+      toast.success(state.message ?? t("messages.generated"));
       router.refresh();
     }
     if (state.status === "error") {
-      toast.error(state.message ?? "Unable to generate payroll");
+      toast.error(state.message ?? t("messages.generateFailed"));
     }
-  }, [router, state]);
+  }, [router, state, t]);
 
   return (
     <form action={formAction} className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Generate Payroll</CardTitle>
+          <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="grid gap-2">
-            <Label htmlFor="month">Month</Label>
+            <Label htmlFor="month">{t("month")}</Label>
             <Input id="month" name="month" type="month" required />
             <p className="text-xs text-muted-foreground">
-              Generates (or updates) payroll for all staff.
+              {t("description")}
             </p>
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-end">
-        <SubmitButton label="Generate" loadingLabel="Generating..." />
+        <SubmitButton label={t("generate")} loadingLabel={t("generating")} />
       </div>
     </form>
   );
 }
-

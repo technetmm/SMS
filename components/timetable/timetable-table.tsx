@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import {
   getPaginatedTimetable,
   getTimetable,
@@ -6,9 +7,9 @@ import {
   type TimetableTableFilters,
 } from "@/app/(school)/school/timetable/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
-import { enumLabel, DAY_OF_WEEK_LABELS } from "@/lib/enum-labels";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { DayOfWeek } from "@/app/generated/prisma/enums";
 import {
   Table,
   TableBody,
@@ -17,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getTranslations } from "next-intl/server";
 
 export async function TimetableTable({
   page,
@@ -29,6 +31,18 @@ export async function TimetableTable({
   searchParams?: Record<string, string | string[] | undefined>;
   slots?: Awaited<ReturnType<typeof getTimetable>>;
 } = {}) {
+  const t = await getTranslations("SchoolEntities.timetable.table");
+  const dayLabel = (day: DayOfWeek) => {
+    const key = day.toLowerCase() as
+      | "mon"
+      | "tue"
+      | "wed"
+      | "thu"
+      | "fri"
+      | "sat"
+      | "sun";
+    return t(`days.${key}`);
+  };
   const slots =
     slotsProp != null
       ? {
@@ -45,29 +59,51 @@ export async function TimetableTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Day</TableHead>
-            <TableHead>Time</TableHead>
-            <TableHead>Staff</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead>Room</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.day")}</TableHead>
+            <TableHead>{t("columns.time")}</TableHead>
+            <TableHead>{t("columns.staff")}</TableHead>
+            <TableHead>{t("columns.section")}</TableHead>
+            <TableHead>{t("columns.meetingLink")}</TableHead>
+            <TableHead>{t("columns.room")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {slots.items.map((slot) => (
             <TableRow key={slot.id}>
-              <TableCell>{enumLabel(slot.dayOfWeek, DAY_OF_WEEK_LABELS)}</TableCell>
+              <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
               <TableCell className="font-medium">
                 {slot.startTime} - {slot.endTime}
               </TableCell>
               <TableCell>{slot.staff.name}</TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
-                  <span>{slot.section.name}</span>
+                  <Link
+                    href={`/school/sections/${slot.section.id}`}
+                    className="hover:underline"
+                  >
+                    {slot.section.name}
+                  </Link>
                   <span className="text-xs text-muted-foreground">
                     {slot.section.class.name}
                   </span>
                 </div>
+              </TableCell>
+              <TableCell>
+                {slot.section.meetingLink ? (
+                  <a
+                    href={slot.section.meetingLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={t("actions.openMeeting")}
+                    title={t("actions.openMeeting")}
+                    className="inline-flex size-8 items-center justify-center rounded-md border border-input hover:bg-accent hover:text-accent-foreground"
+                  >
+                    <ExternalLink className="size-4" />
+                  </a>
+                ) : (
+                  "-"
+                )}
               </TableCell>
               <TableCell>
                 {slot.room ? <Badge variant="outline">{slot.room}</Badge> : "-"}
@@ -75,12 +111,14 @@ export async function TimetableTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/timetable/${slot.id}/edit`}>Edit</Link>
+                    <Link href={`/school/timetable/${slot.id}/edit`}>
+                      {t("actions.edit")}
+                    </Link>
                   </Button>
                   <form action={deleteTimetableSlot}>
                     <input type="hidden" name="id" value={slot.id} />
                     <Button size="sm" type="submit" variant="destructive">
-                      Delete
+                      {t("actions.delete")}
                     </Button>
                   </form>
                 </div>
@@ -89,8 +127,11 @@ export async function TimetableTable({
           ))}
           {slots.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={6} className="py-10 text-center text-sm text-muted-foreground">
-                No timetable slots yet. Create your first slot.
+              <TableCell
+                colSpan={7}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

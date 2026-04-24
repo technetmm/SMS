@@ -15,6 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { getLocale, getTranslations } from "next-intl/server";
+import { dateFormatter } from "@/lib/formatter";
 
 export async function SectionTable({
   page,
@@ -25,21 +27,25 @@ export async function SectionTable({
   filters?: SectionTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.sections.table"),
+    getLocale(),
+  ]);
   const sections = await getPaginatedSections({ page, filters });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Class</TableHead>
-            <TableHead>Capacity</TableHead>
-            <TableHead>Teacher</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.class")}</TableHead>
+            <TableHead>{t("columns.capacity")}</TableHead>
+            <TableHead>{t("columns.teacher")}</TableHead>
+            <TableHead>{t("columns.meetingLink")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
+            <TableHead>{t("columns.createdAt")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,7 +67,21 @@ export async function SectionTable({
                     ? section.staffMappings
                         .map((item) => item.staff.name)
                         .join(", ")
-                    : "-"}
+                    : t("notAvailable")}
+                </TableCell>
+                <TableCell>
+                  {section.meetingLink ? (
+                    <a
+                      href={section.meetingLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-4"
+                    >
+                      {t("actions.openMeeting")}
+                    </a>
+                  ) : (
+                    t("notAvailable")
+                  )}
                 </TableCell>
                 <TableCell>
                   <Badge
@@ -70,21 +90,28 @@ export async function SectionTable({
                       isFull ? "text-destructive border-destructive/40" : ""
                     }
                   >
-                    {isFull ? "Full" : "Available"}
+                    {isFull ? t("status.full") : t("status.available")}
                   </Badge>
                 </TableCell>
-                <TableCell>{formatter.format(section.createdAt)}</TableCell>
+                <TableCell>
+                  {dateFormatter(locale).format(section.createdAt)}
+                </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
                     <Button asChild size="sm" variant="outline">
+                      <Link href={`/school/sections/${section.id}`}>
+                        {t("actions.view")}
+                      </Link>
+                    </Button>
+                    <Button asChild size="sm" variant="outline">
                       <Link href={`/school/sections/${section.id}/edit`}>
-                        Edit
+                        {t("actions.edit")}
                       </Link>
                     </Button>
                     <form action={deleteSection}>
                       <input type="hidden" name="id" value={section.id} />
                       <Button size="sm" type="submit" variant="destructive">
-                        Delete
+                        {t("actions.delete")}
                       </Button>
                     </form>
                   </div>
@@ -95,10 +122,10 @@ export async function SectionTable({
           {sections.totalCount === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={7}
+                colSpan={8}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No sections yet. Create your first section.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

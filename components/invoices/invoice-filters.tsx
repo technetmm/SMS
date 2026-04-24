@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { TableFilterSelect } from "../shared/table-filter-select";
 import { parseTextParam } from "@/lib/table-filters";
 import { Button } from "../ui/button";
+import { useTranslations } from "next-intl";
 
 export function InvoicesFilters({
   q,
@@ -23,42 +24,45 @@ export function InvoicesFilters({
   finalMin?: number;
   finalMax?: number;
 }) {
+  const t = useTranslations("SchoolEntities.invoices.filters");
+  const commonT = useTranslations("Common");
+
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="q">Search</Label>
+        <Label htmlFor="q">{t("search")}</Label>
         <Input
           id="q"
           name="q"
           defaultValue={q}
-          placeholder="Invoice, student, class, section"
+          placeholder={t("searchPlaceholder")}
         />
       </div>
       <TableFilterSelect
         id="status"
         name="status"
-        label="Status"
-        placeholder="All statuses"
+        label={t("status")}
+        placeholder={t("allStatuses")}
         defaultValue={status}
         options={[
-          { value: "UNPAID", label: "Unpaid" },
-          { value: "PARTIAL", label: "Partial" },
-          { value: "PAID", label: "Paid" },
+          { value: "UNPAID", label: t("statusOptions.unpaid") },
+          { value: "PARTIAL", label: t("statusOptions.partial") },
+          { value: "PAID", label: t("statusOptions.paid") },
         ]}
       />
       <TableFilterSelect
         id="invoiceType"
         name="invoiceType"
-        label="Invoice Type"
-        placeholder="All invoice types"
+        label={t("invoiceType")}
+        placeholder={t("allInvoiceTypes")}
         defaultValue={invoiceType}
         options={[
-          { value: "ONE_TIME", label: "One Time" },
-          { value: "MONTHLY", label: "Monthly" },
+          { value: "ONE_TIME", label: t("invoiceTypeOptions.oneTime") },
+          { value: "MONTHLY", label: t("invoiceTypeOptions.monthly") },
         ]}
       />
       <div className="grid gap-2">
-        <Label htmlFor="dueFrom">Due From</Label>
+        <Label htmlFor="dueFrom">{t("dueFrom")}</Label>
         <Input
           id="dueFrom"
           name="dueFrom"
@@ -67,7 +71,7 @@ export function InvoicesFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="dueTo">Due To</Label>
+        <Label htmlFor="dueTo">{t("dueTo")}</Label>
         <Input
           id="dueTo"
           name="dueTo"
@@ -76,7 +80,7 @@ export function InvoicesFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="finalMin">Final Min</Label>
+        <Label htmlFor="finalMin">{t("finalMin")}</Label>
         <Input
           id="finalMin"
           name="finalMin"
@@ -86,7 +90,7 @@ export function InvoicesFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="finalMax">Final Max</Label>
+        <Label htmlFor="finalMax">{t("finalMax")}</Label>
         <Input
           id="finalMax"
           name="finalMax"
@@ -96,13 +100,13 @@ export function InvoicesFilters({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">Apply</Button>
+        <Button type="submit">{commonT("apply")}</Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/invoices")}
         >
-          Reset
+          {commonT("reset")}
         </Button>
       </div>
     </form>

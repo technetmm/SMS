@@ -13,7 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SubjectRowActions } from "@/components/subjects/subject-row-actions";
-import { dateFormatter } from "@/lib/helper";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function SubjectTable({
   page,
@@ -24,6 +25,10 @@ export async function SubjectTable({
   filters?: SubjectTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.subjects.table"),
+    getLocale(),
+  ]);
   const subjects = await getPaginatedSubjects({ page, filters });
 
   return (
@@ -31,10 +36,10 @@ export async function SubjectTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Courses</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.courses")}</TableHead>
+            <TableHead>{t("columns.createdAt")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -45,7 +50,7 @@ export async function SubjectTable({
                 <Badge variant="outline">{subject._count.courses}</Badge>
               </TableCell>
               <TableCell className="text-muted-foreground">
-                {dateFormatter.format(subject.createdAt)}
+                {dateFormatter(locale).format(subject.createdAt)}
               </TableCell>
               <TableCell className="text-right">
                 <SubjectRowActions id={subject.id} name={subject.name} />
@@ -58,7 +63,7 @@ export async function SubjectTable({
                 colSpan={4}
                 className="py-10 text-center text-sm text-muted-foreground"
               >
-                No subjects yet. Create your first subject to organize courses.
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

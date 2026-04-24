@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   deleteEnrollment,
   type EnrollmentActionState,
@@ -26,6 +27,7 @@ export function EnrollmentRowActions({
   id: string;
   studentName: string;
 }) {
+  const t = useTranslations("SchoolEntities.enrollments.rowActions");
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -37,14 +39,14 @@ export function EnrollmentRowActions({
 
       const state = await deleteEnrollment(initialState, formData);
       if (state.status === "success") {
-        toast.success(state.message ?? "Enrollment deleted.");
+        toast.success(state.message ?? t("messages.deleted"));
         setOpen(false);
         router.refresh();
         return;
       }
 
       if (state.status === "error") {
-        toast.error(state.message ?? "Unable to delete enrollment.");
+        toast.error(state.message ?? t("messages.deleteFailed"));
       }
     });
   };
@@ -52,29 +54,28 @@ export function EnrollmentRowActions({
   return (
     <div className="flex justify-end gap-2">
       <Button asChild size="sm" variant="outline">
-        <Link href={`/school/enrollments/${id}/edit`}>Edit</Link>
+        <Link href={`/school/enrollments/${id}/edit`}>{t("edit")}</Link>
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button size="sm" variant="destructive" disabled={pending}>
-            Delete
+            {t("delete")}
           </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete enrollment</DialogTitle>
+            <DialogTitle>{t("dialog.title")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            This will delete the enrollment for <strong>{studentName}</strong>.
-            This action cannot be undone.
+            {t("dialog.description", { studentName })}
           </p>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
             <Button type="button" variant="destructive" disabled={pending} onClick={runDelete}>
-              {pending ? "Deleting..." : "Delete"}
+              {pending ? t("deleting") : t("delete")}
             </Button>
           </div>
         </DialogContent>

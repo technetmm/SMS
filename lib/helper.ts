@@ -14,10 +14,6 @@ export function uniqueBy(items: any[], key: string = "id") {
   });
 }
 
-export const dateFormatter = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-});
-
 const moneyCache = new Map<string, Intl.NumberFormat>();
 export const money = (currency: Currency | string) => {
   const cached = moneyCache.get(currency);

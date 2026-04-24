@@ -2,12 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { ThemeProvider } from "@/components/shared/theme-provider";
-import { AuthSessionProvider } from "@/components/shared/session-provider";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getLocale } from "next-intl/server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -26,14 +23,16 @@ export const metadata: Metadata = {
   description: "School management system for students, classes, and payments.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       suppressHydrationWarning
       className={cn(
         "h-full",
@@ -45,17 +44,7 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col bg-sidebar">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <TooltipProvider>
-            <AuthSessionProvider>{children}</AuthSessionProvider>
-            <Toaster position={"top-right"} />
-          </TooltipProvider>
-        </ThemeProvider>
+        <main>{children}</main>
         <Analytics />
         <SpeedInsights />
       </body>

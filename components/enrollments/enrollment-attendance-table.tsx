@@ -8,7 +8,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { enumLabel, ATTENDANCE_STATUS_LABELS } from "@/lib/enum-labels";
+import { useLocale, useTranslations } from "next-intl";
+import { dateFormatter } from "@/lib/formatter";
 
 type AttendanceRow = {
   id: string;
@@ -35,39 +36,49 @@ export function EnrollmentAttendanceTable({
   pathname: string;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
+  const locale = useLocale();
+  const t = useTranslations("SchoolEntities.attendance.table");
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Student</TableHead>
-            <TableHead>Section</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>{t("columns.date")}</TableHead>
+            <TableHead>{t("columns.student")}</TableHead>
+            <TableHead>{t("columns.section")}</TableHead>
+            <TableHead>{t("columns.status")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {rows.items.map((row) => (
             <TableRow key={row.id}>
-              <TableCell>{formatter.format(row.date)}</TableCell>
-              <TableCell className="font-medium">{row.enrollment.student.name}</TableCell>
+              <TableCell>{dateFormatter(locale).format(row.date)}</TableCell>
+              <TableCell className="font-medium">
+                {row.enrollment.student.name}
+              </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
                   <span>{row.enrollment.section.name}</span>
-                  <span className="text-xs text-muted-foreground">{row.enrollment.section.class.name}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {row.enrollment.section.class.name}
+                  </span>
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="outline">{enumLabel(row.status, ATTENDANCE_STATUS_LABELS)}</Badge>
+                <Badge variant="outline">
+                  {t(`statusOptions.${row.status.toLowerCase()}`)}
+                </Badge>
               </TableCell>
             </TableRow>
           ))}
           {rows.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
-                No attendance records yet.
+              <TableCell
+                colSpan={4}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

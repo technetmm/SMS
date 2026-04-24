@@ -12,13 +12,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function PlatformRevenueChart({
   data,
+  title = "Platform Revenue Trend",
 }: {
   data: Array<{ month: string; revenue: number }>;
+  title?: string;
 }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Platform Revenue Trend</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="h-70">
         <ResponsiveContainer width="100%" height="100%">

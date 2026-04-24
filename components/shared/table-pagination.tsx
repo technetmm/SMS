@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import type { PaginatedResult } from "@/lib/pagination";
+import { useLocale, useTranslations } from "next-intl";
+import { numberFormatter } from "@/lib/formatter";
 
 type SearchParamsInput = Record<string, string | string[] | undefined>;
 
@@ -73,6 +75,9 @@ export function TablePagination({
   searchParams?: SearchParamsInput;
   pageParamName?: string;
 }) {
+  const t = useTranslations("Common");
+  const locale = useLocale();
+
   if (pagination.totalCount === 0) {
     return null;
   }
@@ -87,7 +92,11 @@ export function TablePagination({
   return (
     <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground">
-        Showing {start}-{end} of {pagination.totalCount}
+        {t("showing", {
+          start: numberFormatter(locale).format(start),
+          end: numberFormatter(locale).format(end),
+          total: numberFormatter(locale).format(pagination.totalCount),
+        })}
       </p>
 
       <div className="flex flex-wrap items-center justify-end gap-2">
@@ -101,12 +110,12 @@ export function TablePagination({
                 page: pagination.page - 1,
               })}
             >
-              Previous
+              {t("previous")}
             </Link>
           </Button>
         ) : (
           <Button size="sm" variant="outline" disabled>
-            Previous
+            {t("previous")}
           </Button>
         )}
 
@@ -151,12 +160,12 @@ export function TablePagination({
                 page: pagination.page + 1,
               })}
             >
-              Next
+              {t("next")}
             </Link>
           </Button>
         ) : (
           <Button size="sm" variant="outline" disabled>
-            Next
+            {t("next")}
           </Button>
         )}
       </div>

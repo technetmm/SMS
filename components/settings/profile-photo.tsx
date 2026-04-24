@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { uploadProfilePhoto, removeProfilePhotoAction } from "@/app/(school)/school/settings/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,6 +16,7 @@ export function ProfilePhoto({
   name: string | null;
   imageUrl: string | null;
 }) {
+  const t = useTranslations("SettingsProfilePhoto");
   const [file, setFile] = useState<File | null>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -33,19 +35,22 @@ export function ProfilePhoto({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile Photo</CardTitle>
-        <CardDescription>Update your avatar across the dashboard.</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={previewUrl ?? imageUrl ?? undefined} alt={name ?? "Profile"} />
+            <AvatarImage
+              src={previewUrl ?? imageUrl ?? undefined}
+              alt={name ?? t("altProfile")}
+            />
             <AvatarFallback>{name?.slice(0, 2).toUpperCase() ?? "ME"}</AvatarFallback>
           </Avatar>
           <div>
-            <p className="text-sm font-medium">{name ?? "Your profile"}</p>
+            <p className="text-sm font-medium">{name ?? t("yourProfile")}</p>
             <p className="text-xs text-muted-foreground">
-              JPG, PNG, or WEBP up to 2MB.
+              {t("fileHelp")}
             </p>
           </div>
         </div>
@@ -60,13 +65,13 @@ export function ProfilePhoto({
             startTransition(async () => {
               const result = await uploadProfilePhoto({ status: "idle" }, formData);
               if (result.status === "success") {
-                toast.success(result.message ?? "Updated");
+                toast.success(result.message ?? t("messages.updated"));
                 setError(null);
                 setFile(null);
                 return;
               }
-              setError(result.message ?? "Failed");
-              toast.error(result.message ?? "Failed");
+              setError(result.message ?? t("messages.failed"));
+              toast.error(result.message ?? t("messages.failed"));
             });
           }}
         >
@@ -81,7 +86,7 @@ export function ProfilePhoto({
           />
           <div className="flex flex-wrap gap-2">
             <Button type="submit" disabled={!file || pending}>
-              Upload Photo
+              {t("buttons.upload")}
             </Button>
             <Button
               type="button"
@@ -89,11 +94,15 @@ export function ProfilePhoto({
               disabled={!imageUrl || pending}
               onClick={async () => {
                 const result = await removeProfilePhotoAction();
-                if (result.status === "success") toast.success(result.message ?? "Removed");
-                if (result.status === "error") toast.error(result.message ?? "Failed");
+                if (result.status === "success") {
+                  toast.success(result.message ?? t("messages.removed"));
+                }
+                if (result.status === "error") {
+                  toast.error(result.message ?? t("messages.failed"));
+                }
               }}
             >
-              Remove Photo
+              {t("buttons.remove")}
             </Button>
           </div>
           {error ? (

@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { TableFilterSelect } from "@/components/shared/table-filter-select";
 import { Button } from "@/components/ui/button";
 import { parseTextParam } from "@/lib/table-filters";
+import { useTranslations } from "next-intl";
 
 export function StaffAttendanceFilter({
   q,
@@ -17,32 +18,35 @@ export function StaffAttendanceFilter({
   dateFrom?: string;
   dateTo?: string;
 }) {
+  const t = useTranslations("SchoolEntities.staffAttendance.filters");
+  const commonT = useTranslations("Common");
+
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
       <div className="grid gap-2 md:col-span-2">
-        <Label htmlFor="q">Search</Label>
+        <Label htmlFor="q">{t("search")}</Label>
         <Input
           id="q"
           name="q"
           defaultValue={q}
-          placeholder="Staff, section, class"
+          placeholder={t("searchPlaceholder")}
         />
       </div>
       <TableFilterSelect
         id="status"
         name="status"
-        label="Status"
-        placeholder="All statuses"
+        label={t("status")}
+        placeholder={t("allStatuses")}
         defaultValue={status}
         options={[
-          { value: "PRESENT", label: "Present" },
-          { value: "ABSENT", label: "Absent" },
-          { value: "LATE", label: "Late" },
-          { value: "LEAVE", label: "Leave" },
+          { value: "PRESENT", label: t("statusOptions.present") },
+          { value: "ABSENT", label: t("statusOptions.absent") },
+          { value: "LATE", label: t("statusOptions.late") },
+          { value: "LEAVE", label: t("statusOptions.leave") },
         ]}
       />
       <div className="grid gap-2">
-        <Label htmlFor="dateFrom">Date From</Label>
+        <Label htmlFor="dateFrom">{t("dateFrom")}</Label>
         <Input
           id="dateFrom"
           name="dateFrom"
@@ -51,7 +55,7 @@ export function StaffAttendanceFilter({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="dateTo">Date To</Label>
+        <Label htmlFor="dateTo">{t("dateTo")}</Label>
         <Input
           id="dateTo"
           name="dateTo"
@@ -60,13 +64,13 @@ export function StaffAttendanceFilter({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">Apply</Button>
+        <Button type="submit">{commonT("apply")}</Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/staff-attendance")}
         >
-          Reset
+          {commonT("reset")}
         </Button>
       </div>
     </form>

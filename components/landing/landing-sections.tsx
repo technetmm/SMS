@@ -1,28 +1,30 @@
-import Link from "next/link";
 import { BookOpen, Building2, CheckCircle2, GraduationCap, Shield } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/i18n/navigation";
 
 export function LandingHero() {
+  const t = useTranslations("LandingHero");
+
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col items-start gap-6 px-6 py-16 md:py-24">
       <p className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground">
         <Shield className="h-3.5 w-3.5" />
-        Built for multi-tenant SMS teams
+        {t("eyebrow")}
       </p>
       <h1 className="max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-        One platform to run every school in your SMS SaaS.
+        {t("title")}
       </h1>
       <p className="max-w-2xl text-base text-muted-foreground md:text-lg">
-        Launch tenant onboarding, manage classrooms, track attendance, and automate billing with a
-        clean, secure dashboard your admins and staff can trust.
+        {t("description")}
       </p>
       <div className="flex flex-wrap items-center gap-3">
         <Button asChild size="lg">
-          <Link href="/signup">Get Started</Link>
+          <Link href="/signup">{t("primaryAction")}</Link>
         </Button>
         <Button asChild variant="outline" size="lg">
-          <Link href="/login">Sign In</Link>
+          <Link href="/login">{t("secondaryAction")}</Link>
         </Button>
       </div>
     </section>
@@ -30,20 +32,21 @@ export function LandingHero() {
 }
 
 export function LandingFeatures() {
+  const t = useTranslations("LandingFeatures");
   const items = [
     {
-      title: "Tenant-Isolated Architecture",
-      description: "Each school has strict data isolation with role-based controls.",
+      title: t("items.0.title"),
+      description: t("items.0.description"),
       icon: Building2,
     },
     {
-      title: "Academic Operations",
-      description: "Manage students, staff, sections, and attendance in one workflow.",
+      title: t("items.1.title"),
+      description: t("items.1.description"),
       icon: GraduationCap,
     },
     {
-      title: "Billing & Subscription Ready",
-      description: "Track tuition, plan upgrades, and subscription lifecycle with confidence.",
+      title: t("items.2.title"),
+      description: t("items.2.description"),
       icon: BookOpen,
     },
   ];
@@ -70,29 +73,45 @@ export function LandingFeatures() {
 }
 
 export function LandingPricing() {
+  const t = useTranslations("LandingPricing");
   const plans = [
-    { name: "Free", price: "$0", description: "For early-stage schools", points: ["Up to 50 students", "Core dashboard", "Email support"] },
     {
-      name: "Basic",
-      price: "$49",
-      description: "For growing schools",
-      points: ["Up to 500 students", "Staff & class workflows", "Attendance & payments"],
+      name: t("plans.free.name"),
+      price: "$0",
+      description: t("plans.free.description"),
+      points: [
+        t("plans.free.points.0"),
+        t("plans.free.points.1"),
+        t("plans.free.points.2"),
+      ],
     },
     {
-      name: "Premium",
+      name: t("plans.basic.name"),
+      price: "$49",
+      description: t("plans.basic.description"),
+      points: [
+        t("plans.basic.points.0"),
+        t("plans.basic.points.1"),
+        t("plans.basic.points.2"),
+      ],
+    },
+    {
+      name: t("plans.premium.name"),
       price: "$129",
-      description: "For enterprise operations",
-      points: ["Unlimited students", "Advanced reports", "Priority support"],
+      description: t("plans.premium.description"),
+      points: [
+        t("plans.premium.points.0"),
+        t("plans.premium.points.1"),
+        t("plans.premium.points.2"),
+      ],
     },
   ];
 
   return (
     <section className="mx-auto w-full max-w-6xl px-6 py-10 md:py-14">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold md:text-3xl">Simple pricing for every school size</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Start free, then scale when your tenants grow.
-        </p>
+        <h2 className="text-2xl font-semibold md:text-3xl">{t("title")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("description")}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {plans.map((plan) => (
@@ -112,7 +131,7 @@ export function LandingPricing() {
                 </div>
               ))}
               <Button asChild className="mt-4 w-full">
-                <Link href="/signup">Choose {plan.name}</Link>
+                <Link href="/signup">{t("choosePlan", { plan: plan.name })}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -123,16 +142,18 @@ export function LandingPricing() {
 }
 
 export function Footer() {
+  const t = useTranslations("Footer");
+
   return (
     <footer className="border-t border-border/60 py-6">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-start justify-between gap-2 px-6 text-sm text-muted-foreground md:flex-row md:items-center">
-        <p>© {new Date().getFullYear()} Technet SMS SaaS. All rights reserved.</p>
+        <p>{t("copyright", { year: new Date().getFullYear() })}</p>
         <div className="flex items-center gap-4">
           <Link href="/login" className="hover:text-foreground">
-            Login
+            {t("login")}
           </Link>
           <Link href="/signup" className="hover:text-foreground">
-            Start Free
+            {t("startFree")}
           </Link>
         </div>
       </div>

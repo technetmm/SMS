@@ -1,0 +1,1911 @@
+{
+  "Common": {
+    "open": "ဖွင့်ပါ",
+    "apply": "အသုံးပြုမည်",
+    "cancel": "မလုပ်ဆောင်ပါ",
+    "reset": "ပြန်စမည်",
+    "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+    "previous": "ယခင်",
+    "next": "နောက်",
+    "actions": "လုပ်ဆောင်ရန်",
+    "back": "နောက်သို့ ပြန်သွားမည်",
+    "export": "ထုတ်ယူမည်",
+    "joinMeeting": "အစည်းအဝေးတွင် ပါဝင်မည်",
+    "edit": "ပြင်ဆင်မည်"
+  },
+  "LocaleSwitcher": {
+    "label": "ဘာသာစကား ရွေးချယ်မှု",
+    "shortLabel": "ဘာသာစကား"
+  },
+  "HomePage": {
+    "cta": {
+      "title": "သင့်ကျောင်း workspace ကို စတင်ရန် အသင့်ဖြစ်ပြီလား?",
+      "description": "နှစ်မိနစ်အောက်အတွင်း ကျောင်းအကောင့်ဖန်တီးပြီး သင့်အဖွဲ့ကို ဖိတ်ခေါ်လိုက်ပါ။",
+      "button": "စတင်မည်"
+    }
+  },
+  "LandingHero": {
+    "eyebrow": "Multi-tenant SMS အဖွဲ့များအတွက် တည်ဆောက်ထားသည်",
+    "title": "သင့် SMS SaaS ထဲရှိ ကျောင်းတိုင်းကို စီမံရန် platform တစ်ခုတည်း။",
+    "description": "Tenant onboarding စတင်ပါ၊ classroom များကို စီမံပါ၊ attendance ကို ခြေရာခံပါ၊ billing ကို အလိုအလျောက်လုပ်ဆောင်ပါ။ Admin များနှင့် ဝန်ထမ်းများ ယုံကြည်စိတ်ချစွာ သုံးနိုင်မည့် သန့်ရှင်းလုံခြုံသော dashboard ပါဝင်သည်။",
+    "primaryAction": "စတင်မည်",
+    "secondaryAction": "အကောင့်ဝင်မည်"
+  },
+  "LandingFeatures": {
+    "items": [
+      {
+        "title": "Tenant ခွဲထားသော Architecture",
+        "description": "ကျောင်းတိုင်း၏ အချက်အလက်ကို role-based control များဖြင့် တင်းကျပ်စွာ ခွဲခြားထားသည်။"
+      },
+      {
+        "title": "ပညာရေး လုပ်ငန်းစဉ်များ",
+        "description": "ကျောင်းသား၊ ဝန်ထမ်း၊ section နှင့် attendance များကို workflow တစ်ခုတည်းအတွင်း စီမံနိုင်သည်။"
+      },
+      {
+        "title": "Billing နှင့် Subscription အဆင်သင့်",
+        "description": "ကျောင်းကြေး၊ plan upgrade နှင့် subscription lifecycle ကို ယုံကြည်စိတ်ချစွာ ခြေရာခံနိုင်သည်။"
+      }
+    ]
+  },
+  "LandingPricing": {
+    "title": "ကျောင်းအရွယ်အစားတိုင်းအတွက် ရိုးရှင်းသော စျေးနှုန်း",
+    "description": "အခမဲ့ဖြင့် စတင်ပြီး tenant များ ကြီးထွားလာသလို အတိုင်း တိုးချဲ့လိုက်ပါ။",
+    "choosePlan": "{plan} ကို ရွေးမည်",
+    "plans": {
+      "free": {
+        "name": "အခမဲ့",
+        "description": "စတင်သည့် ကျောင်းများအတွက်",
+        "points": [
+          "ကျောင်းသား 50 ဦးအထိ",
+          "အခြေခံ dashboard",
+          "Email ပံ့ပိုးမှု"
+        ]
+      },
+      "basic": {
+        "name": "အခြေခံ",
+        "description": "ကြီးထွားလာသော ကျောင်းများအတွက်",
+        "points": [
+          "ကျောင်းသား 500 ဦးအထိ",
+          "ဝန်ထမ်းနှင့် အတန်း workflow များ",
+          "Attendance နှင့် payment များ"
+        ]
+      },
+      "premium": {
+        "name": "အဆင့်မြင့်",
+        "description": "Enterprise လုပ်ငန်းများအတွက်",
+        "points": [
+          "ကျောင်းသား အကန့်အသတ်မရှိ",
+          "အစီရင်ခံစာ အဆင့်မြင့်",
+          "အရေးပေါ် ပံ့ပိုးမှု"
+        ]
+      }
+    }
+  },
+  "Footer": {
+    "copyright": "© {year} Technet SMS SaaS. မူပိုင်ခွင့်အားလုံး ထိန်းသိမ်းထားသည်။",
+    "login": "အကောင့်ဝင်ရန်",
+    "startFree": "အခမဲ့ စတင်ရန်"
+  },
+  "SignupPage": {
+    "eyebrow": "Multi-tenant onboarding",
+    "title": "မိနစ်အနည်းငယ်အတွင်း သင့် SMS ကျောင်းကို စတင်လိုက်ပါ။",
+    "description": "သင့် tenant နှင့် {role} အသုံးပြုသူအကောင့်ကို transaction တစ်ခုတည်းအတွင်း ဖန်တီးပေးမည်။ Email အတည်ပြုပြီးနောက် ဝန်ထမ်း၊ ကျောင်းသား၊ အတန်းများနှင့် billing ကို စီမံနိုင်ပါသည်။",
+    "alreadyHaveAccount": "အကောင့်ရှိပြီးသားလား?",
+    "signIn": "အကောင့်ဝင်မည်"
+  },
+  "SignupForm": {
+    "title": "သင့်ကျောင်း workspace ကို ဖန်တီးပါ",
+    "description": "Tenant အသစ်နှင့် {role} အကောင့်ကို လုံခြုံစိတ်ချရသော အဆင့်တစ်ဆင့်တည်းဖြင့် ဖန်တီးပေးမည်။",
+    "buttons": {
+      "submit": "ကျောင်းအကောင့် ဖန်တီးမည်",
+      "creating": "ကျောင်း ဖန်တီးနေသည်..."
+    },
+    "fields": {
+      "schoolName": {
+        "label": "ကျောင်းအမည်",
+        "placeholder": "Future Academy"
+      },
+      "adminName": {
+        "label": "Admin အမည်",
+        "placeholder": "Jane Doe"
+      },
+      "email": {
+        "label": "Admin အီးမေးလ်",
+        "placeholder": "admin@school.com"
+      },
+      "password": {
+        "label": "စကားဝှက်",
+        "show": "စကားဝှက် ပြရန်",
+        "hide": "စကားဝှက် ဖျောက်ရန်"
+      },
+      "confirmPassword": {
+        "label": "စကားဝှက် အတည်ပြုရန်",
+        "show": "စကားဝှက် ပြရန်",
+        "hide": "စကားဝှက် ဖျောက်ရန်"
+      },
+      "phone": {
+        "label": "ဖုန်းနံပါတ် (မဖြည့်လည်းရ)",
+        "placeholder": "+95 9..."
+      },
+      "slug": {
+        "label": "Subdomain Slug (မဖြည့်လည်းရ)",
+        "placeholder": "future-academy",
+        "hint": "စာလုံးအသေး၊ နံပါတ်နှင့် hyphen များသာ အသုံးပြုပါ။"
+      }
+    },
+    "messages": {
+      "createdFallback": "အကောင့် ဖန်တီးပြီးပါပြီ။",
+      "invalidForm": "Form အချက်အလက်များကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။",
+      "createdEmailFailed": "ကျောင်းအကောင့်ကို ဖန်တီးပြီးပါပြီ၊ သို့သော် verification code ကို မပို့နိုင်သေးပါ။ Resend Code ကို အသုံးပြုပါ။",
+      "createdSuccess": "ကျောင်းအကောင့် ဖန်တီးပြီးပါပြီ။ Verification code အတွက် email ကို စစ်ဆေးပါ။",
+      "schemaOutdated": "Database schema သည် ခေတ်မမီတော့ပါ။ Migration များကို chạy ပြီး ထပ်မံကြိုးစားပါ။",
+      "createFailed": "ယခုအချိန်တွင် သင့်အကောင့်ကို မဖန်တီးနိုင်သေးပါ။ ထပ်မံကြိုးစားပါ။"
+    },
+    "fieldErrors": {
+      "schoolName": {
+        "min": "ကျောင်းအမည်သည် အနည်းဆုံး အက္ခရာ 2 လုံးရှိရမည်။"
+      },
+      "adminName": {
+        "required": "Admin အမည် လိုအပ်ပါသည်။"
+      },
+      "email": {
+        "invalid": "မှန်ကန်သော email လိပ်စာ ထည့်ပါ။",
+        "taken": "ဤ email ကို အသုံးပြုပြီးသား ဖြစ်သည်။"
+      },
+      "password": {
+        "min": "စကားဝှက်သည် အနည်းဆုံး 8 လုံးရှိရမည်။"
+      },
+      "confirmPassword": {
+        "required": "စကားဝှက် အတည်ပြုချက် လိုအပ်ပါသည်။",
+        "mismatch": "စကားဝှက်များ မကိုက်ညီပါ။"
+      },
+      "phone": {
+        "max": "ဖုန်းနံပါတ် ရှည်လွန်းနေပါသည်။"
+      },
+      "slug": {
+        "invalid": "မှန်ကန်သော school slug ကို ထည့်ပါ။",
+        "pattern": "Slug သည် စာလုံးအသေး၊ နံပါတ်နှင့် hyphen များသာ ဖြစ်ရမည်။",
+        "taken": "ဤ slug ကို အသုံးပြုပြီးသား ဖြစ်သည်။"
+      }
+    }
+  },
+  "LoginPage": {
+    "title": "အကောင့်ဝင်မည်",
+    "fields": {
+      "email": "အီးမေးလ်",
+      "password": "စကားဝှက်",
+      "twoFactorCode": "Authenticator code",
+      "showPassword": "စကားဝှက် ပြရန်",
+      "hidePassword": "စကားဝှက် ဖျောက်ရန်"
+    },
+    "buttons": {
+      "submit": "အကောင့်ဝင်မည်",
+      "signingIn": "အကောင့်ဝင်နေသည်...",
+      "waitingApproval": "အတည်ပြုချက်ကို စောင့်နေသည်..."
+    },
+    "verifyPrompt": "အီးမေးလ် အတည်ပြုရန်:",
+    "verifyLink": "Verification code ထည့်မည်",
+    "signupPrompt": "ကျောင်းအသစ်လား?",
+    "signupLink": "အကောင့် ဖန်တီးမည်",
+    "messages": {
+      "invalidCredentials": "အီးမေးလ် သို့မဟုတ် စကားဝှက် မှားယွင်းနေသည်။",
+      "signInSuccess": "အကောင့်ဝင်ပြီးပါပြီ။",
+      "deviceDenied": "Login request ကို approver က ပယ်ချခဲ့သည်။",
+      "deviceExpired": "Login approval request သက်တမ်းကုန်သွားပါပြီ။ ထပ်မံ အကောင့်ဝင်ပါ။",
+      "deviceInvalid": "Login approval request သည် မမှန်ကန်တော့ပါ။ ထပ်မံ အကောင့်ဝင်ပါ။",
+      "finishFailed": "အကောင့်ဝင်ခြင်းကို အဆုံးသတ်မလုပ်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။",
+      "sessionLocked": "ဤအကောင့်သည် အခြားစက်တစ်ခုတွင် ဝင်ထားပြီးဖြစ်သည်။",
+      "twoFactorRequired": "ဆက်လုပ်ရန် authenticator code ကို ထည့်ပါ။",
+      "invalidTwoFactorCode": "Authenticator code မမှန်ကန်ပါ။ ထပ်မံကြိုးစားပါ။"
+    }
+  },
+  "TwoFactorPage": {
+    "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+    "description": "အကောင့်ဝင်ခြင်းကို အပြီးသတ်ရန် authenticator app ထဲက ဂဏန်း 6 လုံး code ကို ထည့်ပါ။",
+    "backToLoginPrompt": "အခြားအကောင့်ဖြင့် ဝင်မလား?",
+    "backToLogin": "အကောင့်ဝင်ရန် ပြန်သွားမည်"
+  },
+  "TwoFactorForm": {
+    "fields": {
+      "code": "Authenticator code"
+    },
+    "buttons": {
+      "submit": "အတည်ပြုပြီး အကောင့်ဝင်မည်",
+      "verifying": "အတည်ပြုနေသည်..."
+    },
+    "messages": {
+      "codeLength": "Authenticator code သည် ဂဏန်း 6 လုံး ဖြစ်ရမည်။",
+      "codeRequired": "ဆက်လုပ်ရန် authenticator code ကို ထည့်ပါ။",
+      "invalidCode": "Authenticator code မမှန်ကန်ပါ။ ထပ်မံကြိုးစားပါ။",
+      "sessionExpired": "အကောင့်ဝင် session သက်တမ်းကုန်သွားပါပြီ။ ထပ်မံ အကောင့်ဝင်ပါ။",
+      "signInFailed": "အကောင့်ဝင်ခြင်းကို အဆုံးသတ်မလုပ်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။",
+      "signInSuccess": "အကောင့်ဝင်ပြီးပါပြီ။"
+    }
+  },
+  "VerifyEmailPage": {
+    "title": "သင့် အီးမေးလ် ကို အတည်ပြုပါ",
+    "description": "သင့်အကောင့်ကို ဖွင့်ရန် အီးမေလ် သို့ ပို့ထားသော ဂဏန်း 6 လုံး code ကို ထည့်ပါ။",
+    "alreadyVerified": "အတည်ပြုပြီးပြီလား?",
+    "signIn": "အကောင့်ဝင်မည်"
+  },
+  "VerifyEmailForm": {
+    "fields": {
+      "email": "အီးမေးလ်",
+      "code": "အတည်ပြုကုဒ်"
+    },
+    "buttons": {
+      "verify": "အီးမေးလ် အတည်ပြုမည်",
+      "resend": "ပြန်ပို့မည်",
+      "resendNow": "ယခု ပြန်ပို့မည်"
+    },
+    "secondsSuffix": "စ",
+    "messages": {
+      "verified": "အီးမေးလ် အတည်ပြုပြီးပါပြီ။",
+      "resendFailed": "Code ကို ပြန်မပို့နိုင်ပါ။",
+      "initialEmailFailed": "သင့်အကောင့်ကို ဖန်တီးပြီးပါပြီ၊ သို့သော် verification code ကို မပို့နိုင်သေးပါ။",
+      "invalidEmail": "မှန်ကန်သော အီးမေးလ် ကို ထည့်ပါ။",
+      "codeLength": "Verification code သည် ဂဏန်း 6 လုံး ဖြစ်ရမည်။",
+      "invalidRequest": "Verification request မမှန်ကန်ပါ။",
+      "alreadyVerified": "အီးမေးလ် ကို အတည်ပြုပြီးဖြစ်သည်။ အကောင့်ဝင်ပါ။",
+      "codeMissing": "Verification code မတွေ့ပါ။ Code အသစ် တောင်းဆိုပါ။",
+      "codeExpired": "Verification code သက်တမ်းကုန်သွားပါပြီ။ Code အသစ် တောင်းဆိုပါ။",
+      "codeInvalid": "Verification code မမှန်ကန်ပါ။",
+      "verifySuccess": "အီးမေးလ် အတည်ပြုမှု အောင်မြင်ပါသည်။ အကောင့်ဝင်ပါ။",
+      "invalidResend": "Resend request မမှန်ကန်ပါ။",
+      "notRequired": "ဤအကောင့်အတွက် verification မလိုအပ်ပါ။",
+      "cooldown": "Code အသစ် ထပ်မတောင်းဆိုမီ ခဏစောင့်ပါ။",
+      "sendFailed": "ယခုအချိန်တွင် code အသစ် မပို့နိုင်သေးပါ။ ထပ်မံကြိုးစားပါ။",
+      "resent": "Verification code အသစ်တစ်ခု ပို့ပြီးပါပြီ။"
+    }
+  },
+  "Sidebar": {
+    "platform": "Platform",
+    "school": "ကျောင်း",
+    "groups": {
+      "overview": "အနှစ်ချုပ်",
+      "people": "လူပုဂ္ဂိုလ်များ",
+      "academics": "ပညာရေး",
+      "schedule": "အချိန်ဇယား",
+      "finance": "ငွေကြေး"
+    },
+    "items": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "deviceApprovals": "Device အတည်ပြုချက်များ",
+      "students": "ကျောင်းသားများ",
+      "staff": "ဝန်ထမ်းများ",
+      "subjects": "ဘာသာရပ်များ",
+      "courses": "သင်တန်းများ",
+      "classes": "အတန်းများ",
+      "sections": "Section များ",
+      "enrollments": "အပ်နှံမှုများ",
+      "timetable": "အချိန်ဇယား",
+      "studentAttendance": "ကျောင်းသား တက်ရောက်မှု",
+      "staffAttendance": "ဝန်ထမ်း တက်ရောက်မှု",
+      "invoices": "ဘောက်ချာများ",
+      "payments": "ပေးချေမှုများ",
+      "payroll": "လစာစာရင်း",
+      "exports": "Export များ",
+      "tenants": "Tenant များ",
+      "subscriptions": "Subscription များ"
+    }
+  },
+  "NavUser": {
+    "profile": "ကိုယ်ရေးအချက်အလက်",
+    "settings": "ဆက်တင်များ",
+    "security": "လုံခြုံရေး",
+    "notifications": "အသိပေးချက်များ",
+    "logOut": "ထွက်မည်"
+  },
+  "SettingsNav": {
+    "schoolInfo": "ကျောင်းအချက်အလက်",
+    "theme": "Theme",
+    "profilePhoto": "Profile Photo",
+    "changeEmail": "Email ပြောင်းရန်",
+    "changePassword": "စကားဝှက် ပြောင်းရန်",
+    "twoFactorAuth": "နှစ်ဆင့်အတည်ပြုခြင်း",
+    "security": "လုံခြုံရေး"
+  },
+  "SettingsOverview": {
+    "schoolEyebrow": "ဆက်တင်များ",
+    "platformEyebrow": "Platform ဆက်တင်များ",
+    "title": "ဆက်တင်များ",
+    "description": "သင့် profile၊ Theme နှင့် Security controls များကို စီမံပါ။",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "ဆက်တင် အကျဉ်းချုပ်",
+      "description": "သင် update လုပ်လိုသော အပိုင်းသို့ တိုက်ရိုက်သွားပါ။"
+    },
+    "schoolInfo": {
+      "title": "ကျောင်းအချက်အလက်",
+      "description": "သင့်ကျောင်းပရိုဖိုင်အသေးစိတ်အချက်အလက်များကို ကြည့်ရှုပါ သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ။"
+    },
+    "theme": {
+      "title": "အပြင်အဆင်",
+      "description": "အလင်း၊ မှောင် သို့မဟုတ် စနစ်အသွင်အပြင်အကြား ပြောင်းလဲပါ။"
+    },
+    "profilePhoto": {
+      "title": "ပရိုဖိုင်ဓာတ်ပုံ",
+      "description": "သင့်ပရိုဖိုင်ပုံကို အပ်လုဒ်လုပ်ပါ သို့မဟုတ် ဖယ်ရှားပါ။"
+    },
+    "email": {
+      "title": "အီးမေးလ်",
+      "description": "လက်မှတ်ထိုးဝင်ရန်အသုံးပြုသော အီးမေးလ်ကို အပ်ဒိတ်လုပ်ပါ။"
+    },
+    "password": {
+      "title": "စကားဝှက်",
+      "description": "သင့်အကောင့်ရဲ့ စကားဝှက်ကို လုံခြုံစွာ ပြောင်းလဲပါ။"
+    },
+    "twoFactorAuth": {
+      "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+      "description": "နှစ်ဆင့်အတည်ပြုခြင်းကို ဖွင့်ရန် သို့မဟုတ် ပိတ်ရန်။"
+    },
+    "security": {
+      "title": "လုံခြုံရေး",
+      "description": "လုံခြုံရေးအခြေအနေနှင့် အစည်းအဝေးများကို ပြန်လည်သုံးသပ်ပါ။"
+    },
+    "language": {
+      "title": "ဘာသာစကား",
+      "description": "သင့် dashboard တစ်လျှောက် အသုံးပြုမည့် ဘာသာစကားကို ရွေးချယ်ပါ။"
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "သင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်သုံးသပ်ပါ။",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "အတည်ပြုခြင်း အဆင့်တစ်ဆင့် ထပ်ထည့်ပါ။"
+      },
+      "password": {
+        "title": "Password",
+        "description": "လုံခြုံရေးအတွက် ပုံမှန် update လုပ်ထားသည်။"
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "အများဆုံးအသုံးပြုသော account ပြောင်းလဲမှုများ။",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
+    }
+  },
+  "TeacherSettingsOverview": {
+    "title": "ဆရာ ဆက်တင်များ",
+    "description": "သင့်အကောင့် preference နှင့် security settings များကို စီမံပါ။",
+    "actions": {
+      "securityStatus": "Security status",
+      "enable2fa": "Enable 2FA"
+    },
+    "overview": {
+      "title": "ဆက်တင် အကျဉ်းချုပ်",
+      "description": "အကောင့်ဆက်တင်များကို လျင်မြန်စွာ ဖွင့်ပြီး ပြင်ဆင်ပါ။"
+    },
+    "theme": {
+      "title": "အပြင်အဆင်",
+      "description": "အလင်း၊ မှောင် သို့မဟုတ် စနစ်အသွင်အပြင်အကြား ပြောင်းပါ။"
+    },
+    "profilePhoto": {
+      "title": "ပရိုဖိုင်ဓာတ်ပုံ",
+      "description": "သင့်ပရိုဖိုင်ပုံကို တင်ရန် သို့မဟုတ် ဖယ်ရှားရန်။"
+    },
+    "email": {
+      "title": "အီးမေးလ်",
+      "description": "အကောင့်ဝင်ရန် အသုံးပြုသော အီးမေးလ်ကို ပြင်ဆင်ပါ။"
+    },
+    "password": {
+      "title": "စကားဝှက်",
+      "description": "သင့်အကောင့် စကားဝှက်ကို လုံခြုံစွာ ပြောင်းပါ။"
+    },
+    "twoFactorAuth": {
+      "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+      "description": "နှစ်ဆင့်အတည်ပြုခြင်းကို ဖွင့်/ပိတ် ပြုလုပ်ပါ။"
+    },
+    "security": {
+      "title": "လုံခြုံရေး",
+      "description": "သင့်အကောင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်စစ်ဆေးပါ။"
+    },
+    "language": {
+      "title": "ဘာသာစကား",
+      "description": "Dashboard တစ်လျှောက် အသုံးပြုမည့် ဘာသာစကားကို ရွေးပါ။"
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "သင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်သုံးသပ်ပါ။",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "အတည်ပြုခြင်း အဆင့်တစ်ဆင့် ထပ်ထည့်ပါ။"
+      },
+      "password": {
+        "title": "Password",
+        "description": "လုံခြုံရေးအတွက် ပုံမှန် update လုပ်ထားသည်။"
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "အများဆုံးအသုံးပြုသော account ပြောင်းလဲမှုများ။",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
+    }
+  },
+  "TeacherSite": {
+    "sections": {
+      "title": "ကျွန်ုပ်၏ Sections",
+      "description": "သင့်အား တာဝန်ပေးထားသော sections များကို ကြည့်ရှုပါ။",
+      "empty": "သင့်အတွက် section မသတ်မှတ်ထားသေးပါ။",
+      "labels": {
+        "students": "ကျောင်းသား {count}/{capacity}",
+        "room": "အခန်း: {room}",
+        "roomNotSet": "အခန်း: မသတ်မှတ်ရသေး"
+      },
+      "actions": {
+        "openMeeting": "Link ဖွင့်မည်",
+        "viewDetails": "အသေးစိတ်ကြည့်ရန်"
+      }
+    },
+    "sectionDetails": {
+      "description": "Section အသေးစိတ်၊ အချိန်ဇယားနှင့် ကျောင်းသားအချက်အလက်များ။",
+      "back": "Sections သို့ ပြန်သွားမည်",
+      "notAvailable": "-",
+      "joinMeeting": "Meeting ဝင်မည်",
+      "summary": {
+        "class": "အတန်း",
+        "students": "ကျောင်းသား",
+        "studentsValue": "ကျောင်းသား {count}/{capacity}",
+        "room": "အခန်း",
+        "meeting": "Meeting",
+        "assignedTeacher": "တာဝန်ပေးထားသော ဆရာ/မ"
+      },
+      "timetable": {
+        "title": "အချိန်ဇယား",
+        "columns": {
+          "day": "နေ့",
+          "time": "အချိန်",
+          "teacher": "ဆရာ/မ",
+          "room": "အခန်း"
+        },
+        "empty": "ဤ section အတွက် အချိန်ဇယား slot မရှိသေးပါ။"
+      },
+      "students": {
+        "title": "ကျောင်းသားများ",
+        "columns": {
+          "name": "ကျောင်းသား",
+          "phone": "ဖုန်း",
+          "status": "အခြေအနေ"
+        },
+        "status": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "empty": "ဤ section ထဲတွင် enrollment မရှိသေးပါ။"
+      }
+    },
+    "timetable": {
+      "title": "ကျွန်ုပ်၏ အချိန်ဇယား",
+      "description": "သင်ကြားရေးအချိန်ဇယားကို ကြည့်ရှုပါ။",
+      "filters": "Filters"
+    },
+    "attendance": {
+      "title": "ကျောင်းသား တက်ရောက်မှု",
+      "description": "သင့် section များအတွက် attendance ကို မှတ်သားပြီး ပြန်လည်ကြည့်ရှုပါ။",
+      "filters": "Filters"
+    },
+    "students": {
+      "title": "ကျွန်ုပ်၏ ကျောင်းသားများ",
+      "description": "သင့် section များရှိ ကျောင်းသားများ၏ တိုးတက်မှုကို စောင့်ကြည့်ပါ။",
+      "filters": "Filters",
+      "search": "ရှာဖွေရန်",
+      "searchPlaceholder": "ကျောင်းသား၊ အတန်း၊ section ကို ရှာဖွေပါ",
+      "section": "Section",
+      "allSections": "Section အားလုံး",
+      "status": "Enrollment Status",
+      "allStatuses": "Status အားလုံး",
+      "columns": {
+        "student": "ကျောင်းသား",
+        "section": "Section",
+        "status": "အခြေအနေ",
+        "progress": "တိုးတက်မှု"
+      },
+      "statusOptions": {
+        "active": "Active",
+        "completed": "Completed",
+        "dropped": "Dropped"
+      },
+      "notAvailable": "-",
+      "empty": "စစ်ထုတ်မှုအလိုက် ကျောင်းသားမတွေ့ပါ။"
+    },
+    "dashboard": {
+      "timetable": {
+        "title": "အပတ်စဉ် အချိန်ဇယား",
+        "description": "ဤအပတ်အတွက် သင့်အား သတ်မှတ်ထားသော သင်ကြားရေးအချိန်ဇယား။",
+        "viewFullTimetable": "အချိန်ဇယား အပြည့်အစုံကြည့်ရန်",
+        "empty": "အချိန်ဇယား slot မသတ်မှတ်ရသေးပါ။",
+        "noSlots": "Slot မရှိပါ"
+      }
+    }
+  },
+  "SchoolDashboard": {
+    "stats": {
+      "totalStudents": "ကျောင်းသားစုစုပေါင်း",
+      "activeClasses": "လက်ရှိဖွင့်ထားသော အတန်းများ",
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "charts": {
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "highlights": {
+      "title": "အနှစ်ချုပ်",
+      "topProgram": "အကောင်းဆုံးအစီအစဉ်: Regular (2 days)",
+      "avgAttendance": "ပျမ်းမျှတက်ရောက်မှုနှုန်း: 92%",
+      "pendingInvoices": "ဒီလ မပေးသေးသော Invoice: 14"
+    },
+    "deviceApprovals": {
+      "title": "ဝန်ထမ်းနှင့် ကျောင်းသား Device အတည်ပြုရန် တောင်းဆိုမှုများ"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "PlatformDashboard": {
+    "eyebrow": "Platform Dashboard",
+    "title": "Super Admin အကျဉ်းချုပ်",
+    "stats": {
+      "totalSchools": "ကျောင်းစုစုပေါင်း",
+      "activeSubscriptions": "အသုံးပြုနေသော Subscription များ",
+      "monthlyRevenue": "လစဉ် ဝင်ငွေ"
+    },
+    "charts": {
+      "revenueTrend": "Platform ဝင်ငွေ လမ်းကြောင်း"
+    },
+    "highlights": {
+      "title": "အနှစ်ချုပ်",
+      "totalSchools": "Onboard ပြုလုပ်ထားသော ကျောင်းစုစုပေါင်း: {count}",
+      "activeSubscriptions": "လက်ရှိ အသက်ဝင် Paid Subscription များ: {count}",
+      "latestGrowth": "နောက်ဆုံး ကြီးထွားမှုအညွှန်း: {count}"
+    },
+    "deviceApprovals": {
+      "title": "Admin Device Approval Requests"
+    },
+    "schools": {
+      "title": "ကျောင်းများ",
+      "columns": {
+        "name": "အမည်",
+        "plan": "အစီအစဉ်",
+        "status": "အခြေအနေ",
+        "created": "ဖန်တီးသည့်နေ့",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "status": {
+        "active": "ACTIVE",
+        "disabled": "DISABLED"
+      },
+      "actions": {
+        "view": "ကြည့်မည်",
+        "disable": "ပိတ်မည်"
+      },
+      "empty": "ကျောင်း မရှိသေးပါ။"
+    },
+    "subscriptions": {
+      "title": "Subscription များ",
+      "columns": {
+        "school": "ကျောင်း",
+        "plan": "အစီအစဉ်",
+        "status": "အခြေအနေ",
+        "nextBilling": "နောက်တစ်ကြိမ် Billing"
+      },
+      "status": {
+        "active": "ACTIVE"
+      },
+      "empty": "Subscription မရှိသေးပါ။"
+    },
+    "activity": {
+      "title": "လုပ်ဆောင်ချက် Timeline",
+      "empty": "မကြာသေးမီ လုပ်ဆောင်ချက် မရှိပါ။",
+      "system": "System"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "deviceTable": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "AnalyticsPage": {
+    "charts": {
+      "attendanceTrend": "တက်ရောက်မှု လမ်းကြောင်း (30 ရက်)"
+    },
+    "stats": {
+      "attendanceRate": "တက်ရောက်မှုနှုန်း",
+      "present": "တက်ရောက်",
+      "absent": "ပျက်ကွက်",
+      "lateLeave": "နောက်ကျ / ခွင့်"
+    },
+    "notes": {
+      "title": "မှတ်ချက်များ",
+      "item1": "Count တွင် ရွေးချယ်ထားသော tenant ၏ section အားလုံး ပါဝင်သည်။",
+      "item2": "Trend သည် မှတ်တမ်းရှိသော နောက်ဆုံးရက် 30 ကို ပြသသည်။"
+    }
+  },
+  "DeviceApprovalsPage": {
+    "school": {
+      "title": "Device အတည်ပြုချက်များ",
+      "description": "ဝန်ထမ်းနှင့် ကျောင်းသား device login request များကို စစ်ဆေးပြီး ဆောင်ရွက်ပါ။"
+    },
+    "platform": {
+      "title": "Device အတည်ပြုချက်များ",
+      "description": "ကျောင်း admin device login request များကို စစ်ဆေးပြီး ဆောင်ရွက်ပါ။"
+    },
+    "filters": {
+      "title": "Filter များ",
+      "search": {
+        "label": "ရှာဖွေရန်",
+        "placeholder": {
+          "school": "အမည်, email, IP, user agent",
+          "platform": "အမည်, email, ကျောင်း, IP, user agent"
+        }
+      },
+      "requesterRole": {
+        "label": "တောင်းဆိုသူ Role",
+        "placeholder": "Role အားလုံး",
+        "options": {
+          "schoolSuperAdmin": "School Owner",
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher",
+          "student": "Student"
+        }
+      },
+      "requestedFrom": "တောင်းဆိုချိန် (မှ)",
+      "requestedTo": "တောင်းဆိုချိန် (အထိ)",
+      "expiresFrom": "သက်တမ်းကုန်ချိန် (မှ)",
+      "expiresTo": "သက်တမ်းကုန်ချိန် (အထိ)",
+      "apply": "အသုံးပြုမည်",
+      "reset": "ပြန်စမည်"
+    },
+    "pagination": {
+      "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+      "previous": "ယခင်",
+      "next": "နောက်"
+    },
+    "table": {
+      "errors": {
+        "unableToProcess": "Login request ကို မဆောင်ရွက်နိုင်ပါ။"
+      },
+      "success": {
+        "approved": "Login request ကို အတည်ပြုလိုက်ပါပြီ။",
+        "denied": "Login request ကို ငြင်းပယ်လိုက်ပါပြီ။"
+      },
+      "columns": {
+        "requester": "တောင်းဆိုသူ",
+        "role": "Role",
+        "school": "ကျောင်း",
+        "requested": "တောင်းဆိုချိန်",
+        "expires": "သက်တမ်းကုန်ချိန်",
+        "deviceIp": "Device / IP",
+        "status": "အခြေအနေ",
+        "actions": "လုပ်ဆောင်ရန်"
+      },
+      "roleLabels": {
+        "superAdmin": "Super Admin",
+        "schoolSuperAdmin": "School Owner",
+        "schoolAdmin": "School Admin",
+        "teacher": "Teacher",
+        "student": "Student"
+      },
+      "fallbacks": {
+        "unnamedUser": "အမည်မဖော်ပြထားသော user",
+        "notAvailable": "-"
+      },
+      "actions": {
+        "deny": "ငြင်းပယ်မည်",
+        "denying": "ငြင်းပယ်နေသည်...",
+        "approve": "အတည်ပြုမည်",
+        "approving": "အတည်ပြုနေသည်..."
+      },
+      "empty": "စောင့်ဆိုင်းနေသော device approval request မရှိပါ။"
+    }
+  },
+  "SchoolEntities": {
+    "students": {
+      "list": {
+        "title": "ကျောင်းသားများ",
+        "description": "ကျောင်းသားများကို စီမံပြီး အတန်းများသို့ အပ်နှံပါ။",
+        "exportExcel": "Excel အဖြစ် ထုတ်ယူမည်",
+        "new": "ကျောင်းသားအသစ် ထည့်ပါ",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "ကျောင်းသားအသစ် ဖန်တီးမည်",
+        "description": "ကျောင်းသားအသစ်ကို ထည့်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "edit": {
+        "title": "ကျောင်းသား အချက်အလက် ပြင်ဆင်မည်",
+        "description": "ကျောင်းသား အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "အမည် သို့မဟုတ် ဖုန်းဖြင့် ရှာပါ",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "active": "တက်ရောက်နေသည်",
+          "inactive": "မတက်ရောက်တော့ပါ",
+          "graduated": "အောင်မြင်သွားပြီး"
+        },
+        "gender": "လိင်",
+        "allGenders": "အားလုံး",
+        "genderOptions": {
+          "male": "ကျား",
+          "female": "မ",
+          "other": "အခြေအနေအားလုံး"
+        },
+        "admissionFrom": "ဝင်ရောက်သည့်နေ့ (မှ)",
+        "admissionTo": "ဝင်ရောက်သည့်နေ့ (အထိ)"
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "gender": "လိင်",
+          "phone": "ဖုန်းနံပါတ်",
+          "status": "အခြေအနေ",
+          "admissionDate": "ဝင်ရောက်သည့်နေ့",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "actions": {
+          "view": "ကြည့်မည်",
+          "edit": "ပြင်ဆင်မည်"
+        },
+        "empty": "ကျောင်းသား မရှိသေးပါ။"
+      },
+      "rowActions": {
+        "delete": "ဖျက်မည်",
+        "deleting": "ဖျက်နေသည်...",
+        "cancel": "မလုပ်တော့ပါ",
+        "messages": {
+          "deleted": "ကျောင်းသားကို ဖျက်ပြီးပါပြီ။",
+          "deleteFailed": "ကျောင်းသားကို ဖျက်ရန် မအောင်မြင်ပါ"
+        },
+        "dialog": {
+          "title": "ဤကျောင်းသားကို ဖျက်မည်",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "staff": {
+      "list": {
+        "title": "ဝန်ထမ်းများ",
+        "description": "ဝန်ထမ်း account များကို စီမံပါ။",
+        "exportExcel": "Excel အဖြစ် ထုတ်ယူမည်",
+        "new": "ဝန်ထမ်းအသစ်",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "ဝန်ထမ်းအသစ် ဖန်တီးမည်",
+        "description": "ဝန်ထမ်း account အသစ်တစ်ခု ဖန်တီးပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "edit": {
+        "title": "ဝန်ထမ်း အချက်အလက် ပြင်ဆင်မည်",
+        "description": "ဝန်ထမ်းအချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "အမည်၊ အီးမေလ်၊ ဖုန်းနံပါတ်",
+        "role": "Role",
+        "allRoles": "အားလုံး",
+        "roleOptions": {
+          "schoolAdmin": "School Admin",
+          "teacher": "Teacher"
+        },
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "active": "Active",
+          "onLeave": "On Leave",
+          "resigned": "Resigned",
+          "terminated": "Terminated"
+        },
+        "hireFrom": "အလုပ်ခန့်အပ်သည့်နေ့ (မှ)",
+        "hireTo": "အလုပ်ခန့်အပ်သည့်နေ့ (အထိ)"
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "email": "အီးမေးလ်",
+          "phone": "ဖုန်းနံပါတ်",
+          "role": "Role",
+          "status": "အခြေအနေ",
+          "hireDate": "အလုပ်ခန့်အပ်သည့်နေ့",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "actions": {
+          "view": "ကြည့်မည်",
+          "edit": "ပြင်ဆင်မည်",
+          "delete": "ဖျက်မည်"
+        },
+        "securityActions": {
+          "buttons": {
+            "resetTwoFactor": "2FA Reset",
+            "resetPassword": "Password Reset"
+          },
+          "dialog": {
+            "title": "ဝန်ထမ်း Password ကို Reset လုပ်မည်",
+            "newPassword": "Password အသစ်",
+            "confirmPassword": "Password ကို အတည်ပြုရန်",
+            "cancel": "မလုပ်တော့ပါ",
+            "submit": "Password reset လုပ်မည်",
+            "submitting": "Reset လုပ်နေသည်..."
+          },
+          "messages": {
+            "twoFactorReset": "2FA ကို အောင်မြင်စွာ reset လုပ်ပြီးပါပြီ။",
+            "twoFactorResetFailed": "2FA ကို reset မလုပ်နိုင်ပါ။",
+            "passwordReset": "Password ကို အောင်မြင်စွာ reset လုပ်ပြီးပါပြီ။",
+            "passwordResetFailed": "Password ကို reset မလုပ်နိုင်ပါ။"
+          }
+        },
+        "empty": "ဝန်ထမ်း မရှိသေးပါ။"
+      }
+    },
+    "subjects": {
+      "list": {
+        "title": "ဘာသာရပ်များ",
+        "description": "ဘာသာရပ်များကို စီမံပါ။",
+        "new": "ဘာသာရပ်အသစ်တစ်ခု ထည့်မည်",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "ဘာသာရပ်အမည်ဖြင့် ရှာပါ",
+        "createdFrom": "စတင်ခဲ့သည့်နေ့ (မှ)",
+        "createdTo": "စတင်ခဲ့သည့်နေ့ (အထိ)"
+      },
+      "create": {
+        "title": "ဘာသာရပ်အသစ် ဖန်တီးမည်",
+        "description": "ဘာသာရပ်အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "ဘာသာရပ်များသို့ ပန်ကန်"
+      },
+      "edit": {
+        "title": "ဘာသာရပ် အချက်အလက် ပြင်ဆင်မည်",
+        "description": "ဘာသာရပ်အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "courses": "Courses",
+          "createdAt": "ဖန်တီးသည့်နေ့",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "empty": "ဘာသာရပ် မရှိသေးပါ။",
+        "pagination": {
+          "showing": "{total} ခုထဲမှ {start}-{end} ကို ပြသနေသည်",
+          "previous": "ယခင်",
+          "next": "နောက်"
+        }
+      },
+      "rowActions": {
+        "edit": "ပြင်ဆင်မည်",
+        "delete": "ဖျက်မည်",
+        "deleting": "ဖျက်နေသည်...",
+        "cancel": "မလုပ်တော့ပါ",
+        "messages": {
+          "deleted": "ဘာသာရပ်ကို ဖျက်ပြီးပါပြီ။",
+          "deleteFailed": "ဘာသာရပ်ကို ဖျက်ရန် မအောင်မြင်ပါ။"
+        },
+        "dialog": {
+          "title": "ဤဘာသာရပ်ကို ဖျက်မည်",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "courses": {
+      "list": {
+        "title": "သင်တန်းများ",
+        "description": "သင်တန်းများကို subject များနှင့် တွဲဖက်စီမံပါ။",
+        "new": "သင်တန်းအသစ်တစ်ခု ထည့်မည်",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "သင်တန်းအမည် သို့မဟုတ် ဘာသာရပ်ဖြင့် ရှာပါ",
+        "createdFrom": "စတင်ခဲ့သည့်နေ့ (မှ)",
+        "createdTo": "စတင်ခဲ့သည့်နေ့ (အထိ)"
+      },
+      "create": {
+        "title": "သင်တန်းအသစ်တစ်ခု ထည့်မည်",
+        "description": "သင်တန်း အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "edit": {
+        "title": "သင်တန်း ပြင်ဆင်မည်",
+        "description": "သင်တန်း အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "subject": "ဘာသာရပ်",
+          "classes": "အသုံးပြုထားသည့် အတန်းများ",
+          "createdAt": "ဖန်တီးသည့်နေ့",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "notAvailable": "-",
+        "empty": "သင်တန်းများ မရှိသေးပါ။"
+      },
+      "rowActions": {
+        "edit": "ပြင်ဆင်မည်",
+        "delete": "ဖျက်မည်",
+        "deleting": "ဖျက်နေသည်...",
+        "cancel": "မလုပ်တော့ပါ",
+        "messages": {
+          "deleted": "သင်တန်းကို ဖျက်ပြီးပါပြီ။",
+          "deleteFailed": "သင်တန်းကို ဖျက်ရန် မအောင်မြင်ပါ။"
+        },
+        "dialog": {
+          "title": "ဤသင်တန်းကို ဖျက်မည်",
+          "description": "{name} ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      }
+    },
+    "classes": {
+      "list": {
+        "title": "အတန်းများ",
+        "description": "အတန်းများကို စီမံပါ။",
+        "new": "အတန်းအသစ် ဖန်တီးမည်",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "အတန်းအသစ် ဖန်တီးမည်",
+        "description": "အတန်း အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "အတန်းများသို့ ပန်ကန်"
+      },
+      "edit": {
+        "title": "အတန်း ပြင်ဆင်မည်",
+        "description": "အတန်း အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "အတန်း သို့မဟုတ် သင်တန်းဖြင့် ရှာပါ",
+        "classType": "အတန်းအမျိုးအစား",
+        "allClassTypes": "အားလုံး",
+        "classTypeOptions": {
+          "oneOnOne": "One On One",
+          "private": "Private",
+          "group": "Group"
+        },
+        "programType": "အစီအစဉ်အမျိုးအစား",
+        "allProgramTypes": "အားလုံး",
+        "programTypeOptions": {
+          "regular": "Regular",
+          "intensive": "Intensive"
+        },
+        "billingType": "Billing အမျိုးအစား",
+        "allBillingTypes": "အားလုံး",
+        "billingTypeOptions": {
+          "oneTime": "One Time",
+          "monthly": "Monthly"
+        },
+        "createdFrom": "စတင်ခဲ့သည့်နေ့ (မှ)",
+        "createdTo": "စတင်ခဲ့သည့်နေ့ (အထိ)",
+        "feeMin": "အနည်းဆုံး သင်တန်းကြေး",
+        "feeMax": "အများဆုံး သင်တန်းကြေး"
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "course": "သင်တန်း",
+          "type": "အတန်းအမျိုးအစား",
+          "programType": "အစီအစဉ်အမျိုးအစား",
+          "billingType": "Billing အမျိုးအစား",
+          "fee": "သင်တန်းကြေး",
+          "createdAt": "ဖန်တီးသည့်နေ့",
+          "actions": "လုပ်ဆင်ရန"
+        },
+        "actions": {
+          "edit": "ပြင်ဆင်မည်",
+          "delete": "ဖျက်မည်"
+        },
+        "empty": "အတန်း မရှိသေးပါ။"
+      }
+    },
+    "sections": {
+      "list": {
+        "title": "Section များ",
+        "description": "Section များနှင့် ဝန်ထမ်း များကို စီမံပါ။",
+        "new": "Section အသစ် ဖန်တီးမည်",
+        "filters": "Filter များ",
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Section အမည်၊ အတန်း သို့မဟုတ် သင်တန်းဖြင့် ရှာပါ",
+        "createdFrom": "စတင်ခဲ့သည့်နေ့ (မှ)",
+        "createdTo": "စတင်ခဲ့သည့်နေ့ (အထိ)"
+      },
+      "create": {
+        "title": "Section အသစ် ဖန်တီးမည်",
+        "description": "Section အသစ်တစ်ခု ထည့်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "edit": {
+        "title": "Section ပြင်ဆင်မည်",
+        "description": "Section အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "form": {
+        "name": "Section အမည်",
+        "class": "အတန်း",
+        "classPlaceholder": "အတန်း ရွေးပါ...",
+        "teacherOptional": "ဆရာ/မ (လိုသလို)",
+        "searchStaff": "ဝန်ထမ်း ရှာပါ...",
+        "noItemsFound": "မတွေ့ပါ။",
+        "noStaffFound": "ဝန်ထမ်း မတွေ့ပါ။",
+        "room": "အခန်း",
+        "meetingLink": "Meeting Link",
+        "meetingLinkPlaceholder": "https://meet.google.com/...",
+        "capacity": "ကျောင်းသားအများဆုံး",
+        "actions": {
+          "create": "Section အသစ် ဖန်တီးမည်",
+          "save": "ပြောင်းလဲမှုများ သိမ်းမည်",
+          "creating": "ဖန်တီးနေသည်...",
+          "saving": "သိမ်းနေသည်..."
+        }
+      },
+      "table": {
+        "columns": {
+          "name": "နာမည်",
+          "class": "အတန်း",
+          "capacity": "ကျောင်းသားဦးရေ",
+          "teacher": "ဆရာ/မ",
+          "meetingLink": "Meeting Link",
+          "status": "အခြေအနေ",
+          "createdAt": "ဖန်တီးသည့်နေ့",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "status": {
+          "full": "ပြည့်နေသည်",
+          "available": "ရရှိနိုင်သည်"
+        },
+        "actions": {
+          "view": "ကြည့်မည်",
+          "edit": "ပြင်ဆင်မည်",
+          "delete": "ဖျက်မည်",
+          "openMeeting": "Link ဖွင့်မည်"
+        },
+        "notAvailable": "-",
+        "empty": "Section မရှိသေးပါ။"
+      }
+    },
+    "enrollments": {
+      "list": {
+        "title": "Enrollment များ",
+        "description": "Enrollment, billing နှင့် progress များကို စီမံပါ။",
+        "new": "Enrollment အသစ် ဖန်တီးမည်",
+        "filters": "Filter များ"
+      },
+      "create": {
+        "title": "Enrollment အသစ် ဖန်တီးမည်",
+        "description": "Student ကို section ထဲသို့ အပ်နှံပြီး invoice ဖန်တီးပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "edit": {
+        "title": "Enrollment ပြင်ဆင်မည်",
+        "description": "Enrollment အချက်အလက်များကို ပြင်ဆင်ပါ။",
+        "back": "နောက်သို့ ပြန်သွားမည်"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "ကျောင်းသားအမည်၊ section အမည် သို့မဟုတ် သင်တန်းအမည်ဖြင့် ရှာပါ",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "enrolledFrom": "စာရင်းသွင်းသည့်နေ့ (မှ)",
+        "enrolledTo": "စာရင်းသွင်းသည့်နေ့ (အထိ)"
+      },
+      "table": {
+        "columns": {
+          "student": "ကျောင်းသား",
+          "section": "Section",
+          "status": "အခြေအနေ",
+          "enrolledDate": "စာရင်းသွင်းသည့်နေ့",
+          "autoInvoice": "အလိုအလျောက် Invoice",
+          "progress": "တိုးတက်မှု",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "invoice": {
+          "final": "နောက်ဆုံး",
+          "original": "မူရင်း",
+          "discount": "လျှော့စျေး",
+          "paid": "ပေးပြီးငွေ",
+          "remaining": "ကျန်ငွေ",
+          "due": "ပေးရမည့်နေ့"
+        },
+        "notAvailable": "-",
+        "empty": "Enrollment မရှိသေးပါ။"
+      },
+      "rowActions": {
+        "edit": "ပြင်ဆင်မည်",
+        "delete": "ဖျက်မည်",
+        "deleting": "ဖျက်နေသည်...",
+        "cancel": "ပယ်ဖျက်မည်",
+        "messages": {
+          "deleted": "Enrollment ကို ဖျက်ပြီးပါပြီ။",
+          "deleteFailed": "Enrollment ကို ဖျက်ရန် မအောင်မြင်ပါ။"
+        },
+        "dialog": {
+          "title": "ဤ enrollment ကို ဖျက်မည်",
+          "description": "{studentName} အတွက် enrollment ကို ဖျက်မည်။ ပြန်မရနိုင်ပါ။"
+        }
+      },
+      "progress": {
+        "update": "ပြင်ဆင်မည်",
+        "updating": "ပြင်ဆင်နေသည်...",
+        "remarkPlaceholder": "Remark (optional)",
+        "messages": {
+          "updated": "Progress ကို update လုပ်ပြီးပါပြီ။",
+          "updateFailed": "Progress ကို update မလုပ်နိုင်ပါ။"
+        }
+      },
+      "status": {
+        "status": "အခြေအနေ",
+        "save": "သိမ်းဆည်းမည်",
+        "saving": "သိမ်းဆည်းနေသည်...",
+        "options": {
+          "active": "Active",
+          "completed": "Completed",
+          "dropped": "Dropped"
+        },
+        "messages": {
+          "updated": "Enrollment ကို update လုပ်ပြီးပါပြီ။",
+          "updateFailed": "Enrollment ကို update မလုပ်နိုင်ပါ။"
+        }
+      }
+    },
+    "timetable": {
+      "list": {
+        "title": "အချိန်ဇယား",
+        "description": "တစ်ပတ်စာ အချိန်ဇယားများကို စီမံပြီး ဝန်ထမ်းအချိန်တိုက်မိမှုများကို ကာကွယ်ပါ။",
+        "new": "Slot ဖန်တီးမည်",
+        "filters": "Filter များ"
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "ဝန်ထမ်း၊ section၊ class၊ room",
+        "day": "နေ့",
+        "allDays": "နေ့အားလုံး",
+        "days": {
+          "mon": "တနင်္လာ",
+          "tue": "အင်္ဂါ",
+          "wed": "ဗုဒ္ဓဟူး",
+          "thu": "ကြာသပတေး",
+          "fri": "သောကြာ",
+          "sat": "စနေ",
+          "sun": "တနင်္ဂနွေ"
+        }
+      },
+      "board": {
+        "title": "တစ်ပတ်စာ Board",
+        "description": "Drag လုပ်၍ ရွှေ့နိုင်ပြီး right-click ဖြင့် slot များကို copy/paste လုပ်နိုင်သည်။",
+        "updating": "Updating...",
+        "days": {
+          "mon": "တနင်္လာ",
+          "tue": "အင်္ဂါ",
+          "wed": "ဗုဒ္ဓဟူး",
+          "thu": "ကြာသပတေး",
+          "fri": "သောကြာ",
+          "sat": "စနေ",
+          "sun": "တနင်္ဂနွေ"
+        },
+        "dropHere": "ဤနေရာတွင် ချပါ",
+        "actions": {
+          "copySlot": "Slot ကို copy",
+          "pasteInto": "{day} ထဲသို့ paste",
+          "deleteSlot": "Slot ဖျက်မည်",
+          "pasteCopiedHere": "ကူးယူထားသော slot ကို ဤနေရာတွင် paste မည်"
+        },
+        "messages": {
+          "unableToMove": "Slot ကို မရွှေ့နိုင်ပါ",
+          "updated": "Slot ကို update လုပ်ပြီးပါပြီ",
+          "copyFirst": "အရင် slot ကို copy လုပ်ပါ",
+          "unableToPaste": "Slot ကို paste မလုပ်နိုင်ပါ",
+          "pastedTo": "{day} သို့ slot ကို paste လုပ်ပြီးပါပြီ",
+          "unableToDelete": "Slot ကို ဖျက်မရပါ",
+          "deleted": "Slot ကို ဖျက်ပြီးပါပြီ",
+          "copied": "Slot ကို copy လုပ်ပြီးပါပြီ"
+        },
+        "dialog": {
+          "title": "Timetable slot ကို ဖျက်မလား?",
+          "descriptionWithSlot": "{day} • {time} • {section}",
+          "descriptionFallback": "ဤလုပ်ဆောင်ချက်ကို ပြန်ယူ၍ မရနိုင်ပါ။",
+          "cancel": "မလုပ်ဆောင်ပါ",
+          "delete": "ဖျက်မည်",
+          "deleting": "ဖျက်နေသည်..."
+        }
+      },
+      "table": {
+        "columns": {
+          "day": "နေ့",
+          "time": "အချိန်",
+          "staff": "ဝန်ထမ်း",
+          "section": "Section",
+          "meetingLink": "Meeting Link",
+          "room": "အခန်း",
+          "actions": "လုပ်ဆောင်ရန်"
+        },
+        "days": {
+          "mon": "တနင်္လာ",
+          "tue": "အင်္ဂါ",
+          "wed": "ဗုဒ္ဓဟူး",
+          "thu": "ကြာသပတေး",
+          "fri": "သောကြာ",
+          "sat": "စနေ",
+          "sun": "တနင်္ဂနွေ"
+        },
+        "actions": {
+          "edit": "ပြင်မည်",
+          "delete": "ဖျက်မည်",
+          "openMeeting": "Link ဖွင့်မည်"
+        },
+        "empty": "Timetable slot မရှိသေးပါ။ ပထမဆုံး slot ကို ဖန်တီးပါ။"
+      }
+    },
+    "attendance": {
+      "list": {
+        "title": "တက်ရောက်မှု",
+        "description": "Enrollment တစ်ခုချင်းစီအလိုက် တက်ရောက်မှုကို မှတ်တမ်းတင်ပြီး စစ်ဆေးပါ။",
+        "filters": "Filter များ"
+      },
+      "form": {
+        "title": "တက်ရောက်မှု မှတ်မည်",
+        "enrollment": "Enrollment",
+        "selectEnrollment": "Enrollment ရွေးပါ",
+        "date": "ရက်စွဲ",
+        "status": "အခြေအနေ",
+        "selectStatus": "အခြေအနေ ရွေးပါ",
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "save": "တက်ရောက်မှု သိမ်းမည်",
+        "saving": "သိမ်းနေသည်...",
+        "messages": {
+          "saved": "တက်ရောက်မှုကို သိမ်းပြီးပါပြီ။",
+          "saveFailed": "တက်ရောက်မှုကို မသိမ်းနိုင်ပါ။"
+        }
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "ကျောင်းသား၊ section၊ class",
+        "student": "ကျောင်းသား",
+        "allStudents": "ကျောင်းသားအားလုံး",
+        "section": "Section",
+        "allSections": "Section အားလုံး",
+        "date": "ရက်စွဲ",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "dateFrom": "စတင်ရက်",
+        "dateTo": "ဆုံးရက်"
+      },
+      "table": {
+        "columns": {
+          "date": "ရက်စွဲ",
+          "student": "ကျောင်းသား",
+          "section": "Section",
+          "status": "အခြေအနေ"
+        },
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "empty": "တက်ရောက်မှု မှတ်တမ်း မရှိသေးပါ။"
+      }
+    },
+    "staffAttendance": {
+      "list": {
+        "title": "ဝန်ထမ်း တက်ရောက်မှု",
+        "description": "နေ့စဉ် section အလိုက် ဝန်ထမ်းတက်ရောက်မှုကို စီမံပါ။",
+        "filters": "Table Filter များ"
+      },
+      "form": {
+        "title": "ဝန်ထမ်း တက်ရောက်မှု မှတ်မည်",
+        "staff": "ဝန်ထမ်း",
+        "searchStaff": "ဝန်ထမ်း ရှာပါ...",
+        "noStaffFound": "ဝန်ထမ်း မတွေ့ပါ။",
+        "section": "Section",
+        "searchSection": "Section ရှာပါ...",
+        "noSectionsFound": "Section မတွေ့ပါ။",
+        "date": "ရက်စွဲ",
+        "status": "အခြေအနေ",
+        "selectStatus": "အခြေအနေ ရွေးပါ",
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "save": "တက်ရောက်မှု သိမ်းမည်",
+        "saving": "သိမ်းနေသည်...",
+        "messages": {
+          "saved": "သိမ်းပြီးပါပြီ",
+          "saveFailed": "တက်ရောက်မှုကို မသိမ်းနိုင်ပါ",
+          "selectStaff": "ဝန်ထမ်းတစ်ဦး ရွေးပါ။",
+          "selectSection": "Section တစ်ခု ရွေးပါ။"
+        }
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "ဝန်ထမ်း၊ section၊ class",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "dateFrom": "စတင်ရက်",
+        "dateTo": "ဆုံးရက်",
+        "apply": "Apply",
+        "reset": "Reset"
+      },
+      "table": {
+        "columns": {
+          "date": "ရက်စွဲ",
+          "staff": "ဝန်ထမ်း",
+          "section": "Section",
+          "status": "အခြေအနေ"
+        },
+        "statusOptions": {
+          "present": "တက်",
+          "absent": "ပျက်ကွက်",
+          "late": "နောက်ကျ",
+          "leave": "ခွင့်"
+        },
+        "empty": "ဝန်ထမ်း တက်ရောက်မှု မှတ်တမ်း မရှိသေးပါ။"
+      }
+    },
+    "invoices": {
+      "list": {
+        "title": "ဘောက်ချာများ",
+        "description": "လျှော့ဈေး၊ အစိတ်အပိုင်းပေးချေမှု၊ ပြန်အမ်းငွေနှင့် invoice စာရွက်စာတမ်းများကို စီမံပါ။",
+        "filters": "Filter များ",
+        "table": {
+          "columns": {
+            "invoice": "Invoice",
+            "student": "ကျောင်းသား",
+            "section": "Section",
+            "type": "အမျိုးအစား",
+            "period": "ကာလ",
+            "finalAmount": "နောက်ဆုံးငွေပမာဏ",
+            "paid": "ပေးချေပြီး",
+            "remaining": "ကျန်ငွေ",
+            "status": "အခြေအနေ",
+            "actions": "လုပ်ဆောင်ရန်"
+          },
+          "invoiceTypeOptions": {
+            "oneTime": "တစ်ကြိမ်",
+            "monthly": "လစဉ်"
+          },
+          "statusOptions": {
+            "unpaid": "မပေးရသေး",
+            "partial": "အစိတ်အပိုင်းပေးပြီး",
+            "paid": "ပေးပြီး"
+          },
+          "actions": {
+            "view": "ကြည့်မည်",
+            "downloadPdf": "PDF ဒေါင်းလုဒ်"
+          },
+          "empty": "Invoice မရှိသေးပါ။"
+        }
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Invoice၊ ကျောင်းသား၊ class၊ section",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "unpaid": "မပေးရသေး",
+          "partial": "အစိတ်အပိုင်းပေးပြီး",
+          "paid": "ပေးပြီး"
+        },
+        "invoiceType": "Invoice အမျိုးအစား",
+        "allInvoiceTypes": "Invoice အမျိုးအစားအားလုံး",
+        "invoiceTypeOptions": {
+          "oneTime": "တစ်ကြိမ်",
+          "monthly": "လစဉ်"
+        },
+        "dueFrom": "စတင်ရက်",
+        "dueTo": "ဆုံးရက်",
+        "finalMin": "နောက်ဆုံးအနည်းဆုံး",
+        "finalMax": "နောက်ဆုံးအများဆုံး"
+      },
+      "generate": {
+        "button": "Invoice များ ထုတ်မည်",
+        "loading": "ထုတ်နေသည်...",
+        "messages": {
+          "generated": "Invoice များကို ထုတ်ပြီးပါပြီ။",
+          "generateFailed": "Invoice များကို မထုတ်နိုင်ပါ။"
+        }
+      },
+      "bulkPaidAll": {
+        "button": "အားလုံး ပေးချေပြီး",
+        "loading": "လုပ်ဆောင်နေသည်...",
+        "confirm": {
+          "title": "Filter လုပ်ထားသော invoice အားလုံးကို ပေးချေပြီးအဖြစ် သတ်မှတ်မလား?",
+          "description": "စာမျက်နှာအားလုံးအတွင်း filter ကိုက်ညီသော unpaid/partial invoice များအတွက် ကျန်ငွေအပြည့်ကို method \"Bulk Paid All\" ဖြင့် payment အဖြစ် ဖန်တီးပါမည်။",
+          "cancel": "မလုပ်ဆောင်ပါ",
+          "confirm": "အားလုံး ပေးချေပြီး"
+        },
+        "messages": {
+          "success": "Paid All ကို အောင်မြင်စွာ လုပ်ဆောင်ပြီးပါပြီ။",
+          "error": "Paid All ကို မလုပ်ဆောင်နိုင်ပါ။"
+        }
+      }
+    },
+    "payments": {
+      "list": {
+        "title": "ပေးချေမှုများ",
+        "description": "လစဉ်ကြေး၊ deposit နှင့် invoice အခြေအနေကို ခြေရာခံပါ။",
+        "exportPdf": "PDF Export",
+        "filters": "Table Filter များ",
+        "table": {
+          "title": "Invoices",
+          "columns": {
+            "invoice": "Invoice",
+            "student": "ကျောင်းသား",
+            "finalAmount": "နောက်ဆုံးငွေပမာဏ",
+            "paid": "ပေးချေပြီး",
+            "dueDate": "Due Date",
+            "status": "အခြေအနေ"
+          },
+          "statusOptions": {
+            "unpaid": "မပေးရသေး",
+            "partial": "အစိတ်အပိုင်းပေးပြီး",
+            "paid": "ပေးပြီး"
+          },
+          "empty": "Invoice မရှိသေးပါ။"
+        }
+      },
+      "filters": {
+        "search": "ရှာဖွေရန်",
+        "searchPlaceholder": "Invoice ID သို့မဟုတ် ကျောင်းသား",
+        "status": "အခြေအနေ",
+        "allStatuses": "အခြေအနေအားလုံး",
+        "statusOptions": {
+          "unpaid": "မပေးရသေး",
+          "partial": "အစိတ်အပိုင်းပေးပြီး",
+          "paid": "ပေးပြီး"
+        },
+        "dueFrom": "စတင်ရက်",
+        "dueTo": "ဆုံးရက်",
+        "totalMin": "အနည်းဆုံး စုစုပေါင်း",
+        "totalMax": "အများဆုံး စုစုပေါင်း"
+      }
+    },
+    "payroll": {
+      "list": {
+        "title": "လစာစာရင်း",
+        "description": "လစဉ် ဝန်ထမ်းလစာစာရင်းကို ထုတ်ပြီး ပြန်လည်သုံးသပ်ပါ။",
+        "filters": "Filter များ",
+        "form": {
+          "searchStaff": "ဝန်ထမ်းရှာရန်",
+          "monthFrom": "စတင်လ",
+          "monthTo": "ဆုံးလ",
+          "totalMin": "Total Min",
+          "totalMax": "Total Max",
+          "apply": "Apply",
+          "reset": "Reset"
+        }
+      },
+      "generate": {
+        "title": "Payroll ထုတ်မည်",
+        "month": "လ",
+        "description": "ဝန်ထမ်းအားလုံးအတွက် payroll ကို ထုတ်မည် (သို့) update လုပ်မည်။",
+        "generate": "ထုတ်မည်",
+        "generating": "ထုတ်နေသည်...",
+        "messages": {
+          "generated": "ထုတ်ပြီးပါပြီ",
+          "generateFailed": "Payroll ကို မထုတ်နိုင်ပါ"
+        }
+      },
+      "table": {
+        "columns": {
+          "month": "လ",
+          "staff": "ဝန်ထမ်း",
+          "sections": "Section များ",
+          "total": "စုစုပေါင်း"
+        },
+        "empty": "Payroll မထုတ်ရသေးပါ။"
+      }
+    }
+  },
+  "SettingsPages": {
+    "theme": {
+      "eyebrow": "Appearance",
+      "title": "Theme",
+      "description": "System, Light, သို့မဟုတ် Dark mode အကြား ရွေးချယ်ပါ။"
+    },
+    "profilePhoto": {
+      "eyebrow": "Profile",
+      "title": "Profile Photo",
+      "description": "သင့် profile image ကို upload လုပ်ပါ သို့မဟုတ် ဖယ်ရှားပါ။"
+    },
+    "changeEmail": {
+      "eyebrow": "Account",
+      "title": "Change Email",
+      "description": "သင့် account နှင့်ချိတ်ဆက်ထားသော email address ကို update လုပ်ပါ။"
+    },
+    "changePassword": {
+      "eyebrow": "Security",
+      "title": "Change Password",
+      "description": "သင့် password ကို update လုပ်ပြီး account ကို လုံခြုံအောင်ထားပါ။"
+    },
+    "twoFactor": {
+      "eyebrow": "Security",
+      "title": "Two-Factor Authentication",
+      "description": "Authenticator app ဖြင့် သင့် account ကို လုံခြုံစေပါ။"
+    },
+    "security": {
+      "eyebrow": "Security",
+      "title": "Account Security",
+      "description": "Sign-in protections နှင့် session visibility ကို ထိန်းချုပ်ပါ။"
+    },
+    "schoolProfile": {
+      "eyebrow": "School",
+      "title": "School Info",
+      "description": "သင့်ကျောင်းအတွက် tenant profile fields များကို စီမံပါ။"
+    }
+  },
+  "SettingsThemeToggle": {
+    "title": "Appearance",
+    "description": "Dashboard အမြင်ကို သင်နှစ်သက်သလို ရွေးချယ်ပါ။",
+    "options": {
+      "system": {
+        "label": "System",
+        "description": "သင့်စက်၏ settings များအတိုင်း လိုက်လျောပါ"
+      },
+      "light": {
+        "label": "Light",
+        "description": "တောက်ပပြီး ရှင်းလင်းသည်"
+      },
+      "dark": {
+        "label": "Dark",
+        "description": "အလင်းနည်းသောနေရာများအတွက် သင့်တော်သည်"
+      }
+    }
+  },
+  "SettingsChangeEmailForm": {
+    "title": "Account Email",
+    "description": "သင့် email ကို ပြောင်းလဲပါက နောက်တစ်ကြိမ် sign in ဝင်ချိန်တွင် အသစ်ကို အသုံးပြုရပါမည်။",
+    "fields": {
+      "currentEmail": "Current email",
+      "newEmail": "New email",
+      "confirmPassword": "Confirm password"
+    },
+    "buttons": {
+      "submit": "Update Email",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Email updated",
+      "updateFailed": "Email ကို update မလုပ်နိုင်ပါ"
+    }
+  },
+  "SettingsChangePasswordForm": {
+    "title": "Password",
+    "description": "အခြားနေရာတွင် မသုံးသော အားကောင်းသော password ကို ရွေးချယ်ပါ။",
+    "fields": {
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password"
+    },
+    "buttons": {
+      "submit": "Update Password",
+      "updating": "Updating..."
+    },
+    "messages": {
+      "updated": "Password updated",
+      "updateFailed": "Password ကို update မလုပ်နိုင်ပါ"
+    }
+  },
+  "SettingsProfilePhoto": {
+    "title": "Profile Photo",
+    "description": "Dashboard တစ်လျှောက် သင့် avatar ကို update လုပ်ပါ။",
+    "altProfile": "Profile",
+    "yourProfile": "Your profile",
+    "fileHelp": "JPG, PNG သို့မဟုတ် WEBP ကို 2MB အထိ အသုံးပြုနိုင်သည်။",
+    "buttons": {
+      "upload": "Upload Photo",
+      "remove": "Remove Photo"
+    },
+    "messages": {
+      "updated": "Updated",
+      "removed": "Removed",
+      "failed": "Failed"
+    }
+  },
+  "SettingsSchoolProfileForm": {
+    "title": "School Profile",
+    "descriptionEditable": "သင့်ကျောင်းအမည်၊ slug နှင့် default currency ကို update လုပ်ပါ။",
+    "descriptionReadOnly": "School owner admin သာ school info ကို update လုပ်နိုင်ပါသည်။",
+    "fields": {
+      "schoolName": "School name",
+      "schoolSlug": "School slug",
+      "status": "Status",
+      "currency": "Currency",
+      "selectCurrency": "Select currency",
+      "billingDay": "Monthly billing day (1-28)"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "buttons": {
+      "save": "Save School Info",
+      "saving": "Saving..."
+    },
+    "viewOnly": "ဤအကောင့်သည် school info ကို ကြည့်ရှုနိုင်သော်လည်း ပြင်ဆင်၍ မရပါ။",
+    "messages": {
+      "updated": "School profile updated.",
+      "updateFailed": "School profile ကို update မလုပ်နိုင်ပါ။"
+    }
+  },
+  "SettingsSecurity": {
+    "title": "Security Overview",
+    "description": "Authentication options နှင့် active session controls များကို စီမံပါ။",
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "description": "Sign in ဝင်တိုင်း one-time code လိုအပ်စေပါ။",
+      "enable": "Enable",
+      "disable": "Disable",
+      "disableDialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "disableSubmit": "Disable 2FA"
+    },
+    "lastLogin": {
+      "title": "Last login",
+      "viewSessions": "View sessions"
+    },
+    "logoutAll": {
+      "title": "Logout from all devices",
+      "description": "သင့်စက်များအားလုံးရှိ active sessions များကို အဆုံးသတ်ပါ။",
+      "button": "Logout all",
+      "working": "Working..."
+    },
+    "messages": {
+      "twoFactorDisabled": "2FA disabled",
+      "disableFailed": "2FA ကို disable မလုပ်နိုင်ပါ",
+      "loggedOutAll": "စက်အားလုံးမှ logout လုပ်ပြီးပါပြီ (mock)."
+    }
+  },
+  "SettingsTwoFactor": {
+    "title": "Two-Factor Authentication",
+    "description": "Time-based one-time password (TOTP) ဖြင့် သင့် account ကို လုံခြုံစေပါ။",
+    "enabledBanner": "သင့် account အတွက် 2FA ကို လက်ရှိဖွင့်ထားပါသည်။",
+    "disable": {
+      "button": "Disable 2FA",
+      "dialogTitle": "Disable 2FA",
+      "confirmPassword": "Confirm password",
+      "disabling": "Disabling...",
+      "submit": "Disable"
+    },
+    "enable": {
+      "button": "Enable 2FA",
+      "qrAlt": "2FA QR code",
+      "tokenLabel": "ဂဏန်း 6 လုံး code ကို ထည့်ပါ",
+      "verifying": "Verifying...",
+      "verify": "Verify & Enable"
+    },
+    "messages": {
+      "scanQr": "QR code ကို scan လုပ်ပါ",
+      "unableToStart": "2FA ကို စတင်မလုပ်နိုင်ပါ",
+      "enabled": "2FA enabled",
+      "disabled": "2FA disabled",
+      "failed": "Failed"
+    }
+  },
+  "SettingsActions": {
+    "validation": {
+      "otp": {
+        "required": "OTP code လိုအပ်ပါသည်",
+        "length": "OTP code သည် ဂဏန်း 6 လုံး ဖြစ်ရမည်"
+      },
+      "shared": {
+        "passwordRequired": "Password လိုအပ်ပါသည်"
+      },
+      "changeEmail": {
+        "invalidEmail": "မှန်ကန်သော email ကို ထည့်ပါ"
+      },
+      "changePassword": {
+        "currentPasswordRequired": "Current password လိုအပ်ပါသည်",
+        "newPasswordMin": "New password သည် အနည်းဆုံး 8 လုံး ရှိရမည်",
+        "confirmPasswordRequired": "New password ကို အတည်ပြုပါ",
+        "passwordsDoNotMatch": "Passwords မတူညီပါ"
+      },
+      "schoolProfile": {
+        "nameMin": "School name သည် အနည်းဆုံး 2 လုံး ရှိရမည်။",
+        "slugRequired": "Slug လိုအပ်ပါသည်။",
+        "currencyInvalid": "မှန်ကန်သော currency ကို ရွေးပါ။",
+        "billingDayInteger": "Billing day သည် whole number ဖြစ်ရမည်",
+        "billingDayRange": "Billing day သည် 1 နှင့် 28 အကြား ဖြစ်ရမည်"
+      }
+    },
+    "errors": {
+      "unknown": "တစ်ခုခု မှားယွင်းသွားပါသည်။",
+      "unauthorized": "Unauthorized",
+      "selectImage": "Image တစ်ခု ရွေးချယ်ပါ",
+      "userNotFound": "User မတွေ့ပါ",
+      "twoFactorNotStarted": "2FA setup မစတင်ရသေးပါ။",
+      "invalidCode": "Code မမှန်ပါ။ ထပ်ကြိုးစားပါ။",
+      "passwordLoginNotConfigured": "Password login ကို configure မလုပ်ထားပါ။",
+      "invalidPassword": "Password မမှန်ပါ။",
+      "emailUnchanged": "Email မပြောင်းလဲသေးပါ။",
+      "emailInUse": "Email ကို အသုံးပြုပြီးသား ဖြစ်သည်။",
+      "currentPasswordIncorrect": "Current password မမှန်ပါ။",
+      "schoolOwnerOnly": "School owner admin သာ school info ကို update လုပ်နိုင်ပါသည်။",
+      "schoolContextNotFound": "School context မတွေ့ပါ။",
+      "invalidSchoolSlug": "မှန်ကန်သော school slug ကို ထည့်ပါ။",
+      "slugTaken": "Slug ကို အသုံးပြုပြီးသား ဖြစ်သည်။"
+    },
+    "success": {
+      "profilePhotoUpdated": "Profile photo updated",
+      "profilePhotoRemoved": "Profile photo removed",
+      "scanQr": "Authenticator app ဖြင့် QR code ကို scan လုပ်ပါ။",
+      "twoFactorEnabled": "2FA ကို အောင်မြင်စွာ ဖွင့်ပြီးပါပြီ။",
+      "twoFactorDisabled": "2FA disabled.",
+      "emailUpdated": "Email ကို အောင်မြင်စွာ update လုပ်ပြီးပါပြီ။",
+      "passwordUpdated": "Password ကို အောင်မြင်စွာ update လုပ်ပြီးပါပြီ။",
+      "schoolProfileUpdated": "School profile updated."
+    }
+  },
+  "Notifications": {
+    "title": "အသိပေးချက်များ",
+    "markAllRead": "အားလုံးဖတ်ပြီးဟု မှတ်သားမည်",
+    "markRead": "ဖတ်ပြီးဟု မှတ်သားမည်",
+    "loadMore": "နောက်ထပ်ကြည့်မည်",
+    "unreadCount": "မဖတ်ရသေး: {count}",
+    "loading": "ဖတ်ယူနေသည်...",
+    "empty": "အသိပေးချက်များ မရှိသေးပါ။",
+    "viewAll": "အသိပေးချက်အားလုံး ကြည့်မည်",
+    "loadFailed": "အသိပေးချက်များကို မဖတ်ယူနိုင်ပါ။",
+    "updateFailedSingle": "အသိပေးချက်ကို မအပ်ဒိတ်လုပ်နိုင်ပါ။",
+    "updateFailedAll": "အသိပေးချက်များကို မအပ်ဒိတ်လုပ်နိုင်ပါ။"
+  },
+  "Breadcrumb": {
+    "school": "ကျောင်း",
+    "dashboard": "Dashboard",
+    "platform": "Platform",
+    "tenants": "Tenant များ",
+    "subscriptions": "Subscription များ",
+    "students": "ကျောင်းသားများ",
+    "classes": "အတန်းများ",
+    "attendance": "တက်ရောက်မှု",
+    "payments": "ပေးချေမှုများ",
+    "settings": "ဆက်တင်များ",
+    "changeEmail": "Email ပြောင်းရန်",
+    "changePassword": "စကားဝှက် ပြောင်းရန်",
+    "profilePhoto": "Profile Photo",
+    "twoFactorAuth": "နှစ်ဆင့်အတည်ပြုခြင်း",
+    "security": "လုံခြုံရေး",
+    "theme": "Theme",
+    "notifications": "အသိပေးချက်များ"
+  },
+  "Topbar": {
+    "welcomeBack": "ပြန်လည်ကြိုဆိုပါသည်",
+    "signOut": "ထွက်မည်",
+    "account": "အကောင့်"
+  },
+  "ErrorPage": {
+    "title": "တစ်ခုခု မှားယွင်းသွားပါသည်",
+    "description": "မမျှော်လင့်ထားသော ပြဿနာတစ်ခု ဖြစ်ပွားခဲ့သည်။ ယခု ပြန်ကြိုးစားနိုင်သလို ဘေးကင်းစွာ ပြန်သွားနိုင်ပါသည်။",
+    "reference": "အမှားအညွှန်း: {digest}",
+    "retry": "ထပ်မံကြိုးစားမည်",
+    "backHome": "ပင်မစာမျက်နှာသို့ ပြန်မည်"
+  },
+  "NotFoundPage": {
+    "title": "စာမျက်နှာ မတွေ့ပါ",
+    "description": "သင်ရှာနေသော စာမျက်နှာ မရှိတော့နိုင်ပါ သို့မဟုတ် နေရာပြောင်းရွှေ့ထားနိုင်ပါသည်။",
+    "goHome": "ပင်မစာမျက်နှာသို့ သွားမည်",
+    "goDashboard": "Dashboard သို့ သွားမည်"
+  },
+  "UnauthorizedPage": {
+    "title": "ခွင့်ပြုချက် မရှိပါ",
+    "description": "ဤစာမျက်နှာကို ဝင်ရောက်ကြည့်ရှုရန် သင့်တွင် ခွင့်ပြုချက် မရှိပါ။",
+    "goDashboard": "Dashboard သို့ သွားမည်"
+  }
+}

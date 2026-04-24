@@ -4,8 +4,17 @@ import {
 } from "@/app/(school)/school/courses/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { CourseRowActions } from "@/components/courses/course-row-actions";
+import { getLocale, getTranslations } from "next-intl/server";
+import { dateFormatter } from "@/lib/formatter";
 
 export async function CourseTable({
   page,
@@ -16,19 +25,22 @@ export async function CourseTable({
   filters?: CourseTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.courses.table"),
+    getLocale(),
+  ]);
   const courses = await getPaginatedCourses({ page, filters });
-  const formatter = new Intl.DateTimeFormat("en-US", { dateStyle: "medium" });
 
   return (
     <div className="rounded-lg border bg-background">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Subject</TableHead>
-            <TableHead>Classes</TableHead>
-            <TableHead>Created At</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>{t("columns.name")}</TableHead>
+            <TableHead>{t("columns.subject")}</TableHead>
+            <TableHead>{t("columns.classes")}</TableHead>
+            <TableHead>{t("columns.createdAt")}</TableHead>
+            <TableHead className="text-right">{t("columns.actions")}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -38,7 +50,9 @@ export async function CourseTable({
               <TableCell>
                 <div className="flex flex-wrap gap-1">
                   {course.subjects.length === 0 ? (
-                    <span className="text-sm text-muted-foreground">-</span>
+                    <span className="text-sm text-muted-foreground">
+                      {t("notAvailable")}
+                    </span>
                   ) : (
                     course.subjects.map((subject) => (
                       <Badge key={subject.id} variant="outline">
@@ -51,7 +65,9 @@ export async function CourseTable({
               <TableCell>
                 <Badge variant="outline">{course._count.classes}</Badge>
               </TableCell>
-              <TableCell>{formatter.format(course.createdAt)}</TableCell>
+              <TableCell>
+                {dateFormatter(locale).format(course.createdAt)}
+              </TableCell>
               <TableCell className="text-right">
                 <CourseRowActions id={course.id} name={course.name} />
               </TableCell>
@@ -59,8 +75,11 @@ export async function CourseTable({
           ))}
           {courses.totalCount === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
-                No courses yet. Create your first course to start building classes.
+              <TableCell
+                colSpan={5}
+                className="py-10 text-center text-sm text-muted-foreground"
+              >
+                {t("empty")}
               </TableCell>
             </TableRow>
           ) : null}

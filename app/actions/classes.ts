@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate";
 import { getPrismaClient } from "@/lib/prisma-tenant";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
@@ -50,7 +50,7 @@ export async function createClass(
     return { status: "error", message: "Unable to create class." };
   }
 
-  revalidatePath("/school/classes");
+  revalidateLocalizedPath("/school/classes");
   return { status: "success", message: "Class created successfully." };
 }
 
@@ -113,6 +113,6 @@ export async function createSection(
     return { status: "error", message: "Unable to create section." };
   }
 
-  revalidatePath("/school/classes");
+  revalidateLocalizedPath("/school/classes");
   return { status: "success", message: "Section created successfully." };
 }

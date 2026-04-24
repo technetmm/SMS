@@ -1,6 +1,5 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -10,6 +9,9 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { AppLocale } from "@/i18n/config";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 
 type NavItem = {
   title: string;
@@ -27,7 +29,7 @@ function isActivePath(pathname: string, url: string) {
   return pathname === url || pathname.startsWith(`${url}/`);
 }
 
-function NavItems({ items }: { items: NavItem[] }) {
+function NavItems({ items, locale }: { items: NavItem[]; locale?: AppLocale }) {
   const pathname = usePathname();
 
   return (
@@ -37,11 +39,12 @@ function NavItems({ items }: { items: NavItem[] }) {
           <SidebarMenuSubButton
             asChild
             isActive={isActivePath(pathname, item.url)}
+            locale={locale}
           >
-            <a href={item.url}>
+            <Link href={item.url}>
               {item.icon}
               {item.title}
-            </a>
+            </Link>
           </SidebarMenuSubButton>
         </SidebarMenuSubItem>
       ))}
@@ -59,6 +62,7 @@ export function NavMain({
   groups?: NavGroup[];
 }) {
   const sidebar = useSidebar();
+  const locale = useLocale() as AppLocale;
 
   const renderGroups = (navGroups: NavGroup[]) => {
     return (
@@ -68,7 +72,7 @@ export function NavMain({
             return (
               <SidebarGroup key={group.label}>
                 <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-                <NavItems items={group.items} />
+                <NavItems items={group.items} locale={locale} />
               </SidebarGroup>
             );
           }
@@ -76,7 +80,9 @@ export function NavMain({
           return (
             <SidebarMenuItem key={group.label}>
               <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-              {group.items?.length ? <NavItems items={group.items} /> : null}
+              {group.items?.length ? (
+                <NavItems items={group.items} locale={locale} />
+              ) : null}
             </SidebarMenuItem>
           );
         })}
@@ -91,7 +97,7 @@ export function NavMain({
       ) : (
         <SidebarGroup>
           <SidebarGroupLabel>{label}</SidebarGroupLabel>
-          <NavItems items={items ?? []} />
+          <NavItems items={items ?? []} locale={locale} />
         </SidebarGroup>
       )}
     </div>

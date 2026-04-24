@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { AppSidebar } from "@/components/app-sidebar";
 import {
   SidebarInset,
@@ -10,15 +10,20 @@ import { getServerAuth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppBreadcrumb } from "@/components/shared/app-breadcrumb";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { redirect } from "@/i18n/navigation";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   const session = await getServerAuth();
-  if (!session?.user?.id) {
-    redirect("/login");
+  const sessionUser = session?.user;
+
+  if (!sessionUser?.id) {
+    redirect({ href: "/login", locale });
   }
+  const verifiedSessionUser = sessionUser!;
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+    where: { id: verifiedSessionUser.id },
     select: {
       name: true,
       email: true,
@@ -28,20 +33,21 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
   });
 
   if (!user) {
-    redirect("/login");
+    redirect({ href: "/login", locale });
   }
+  const currentUser = user!;
 
   return (
     <SidebarProvider>
       <AppSidebar
         user={{
-          name: user.name ?? "Your account",
-          email: user.email,
-          avatar: user.image ?? "",
+          name: currentUser.name ?? "Your account",
+          email: currentUser.email,
+          avatar: currentUser.image ?? "",
         }}
-        role={session.user.role}
-        schoolId={session.user.schoolId ?? null}
-        schoolName={user.school?.name ?? null}
+        role={verifiedSessionUser.role}
+        schoolId={verifiedSessionUser.schoolId ?? null}
+        schoolName={currentUser.school?.name ?? null}
       />
       <SidebarInset>
         <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between gap-2 rounded-t-xl bg-background z-50">

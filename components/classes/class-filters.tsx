@@ -5,6 +5,7 @@ import { Input } from "../ui/input";
 import { TableFilterSelect } from "../shared/table-filter-select";
 import { Button } from "../ui/button";
 import { parseTextParam } from "@/lib/table-filters";
+import { useTranslations } from "next-intl";
 
 export function ClassFilters({
   q,
@@ -25,48 +26,55 @@ export function ClassFilters({
   feeMin?: string;
   feeMax?: string;
 }) {
+  const t = useTranslations("SchoolEntities.classes.filters");
+  const commonT = useTranslations("Common");
   return (
     <form className="grid gap-4 md:grid-cols-4" method="get">
       <div className="grid gap-2">
-        <Label htmlFor="q">Search</Label>
-        <Input id="q" name="q" defaultValue={q} placeholder="Class or course" />
+        <Label htmlFor="q">{t("search")}</Label>
+        <Input
+          id="q"
+          name="q"
+          defaultValue={q}
+          placeholder={t("searchPlaceholder")}
+        />
       </div>
       <TableFilterSelect
         id="classType"
         name="classType"
-        label="Class Type"
-        placeholder="All class types"
+        label={t("classType")}
+        placeholder={t("allClassTypes")}
         defaultValue={classType}
         options={[
-          { value: "ONE_ON_ONE", label: "One On One" },
-          { value: "PRIVATE", label: "Private" },
-          { value: "GROUP", label: "Group" },
+          { value: "ONE_ON_ONE", label: t("classTypeOptions.oneOnOne") },
+          { value: "PRIVATE", label: t("classTypeOptions.private") },
+          { value: "GROUP", label: t("classTypeOptions.group") },
         ]}
       />
       <TableFilterSelect
         id="programType"
         name="programType"
-        label="Program Type"
-        placeholder="All program types"
+        label={t("programType")}
+        placeholder={t("allProgramTypes")}
         defaultValue={programType}
         options={[
-          { value: "REGULAR", label: "Regular" },
-          { value: "INTENSIVE", label: "Intensive" },
+          { value: "REGULAR", label: t("programTypeOptions.regular") },
+          { value: "INTENSIVE", label: t("programTypeOptions.intensive") },
         ]}
       />
       <TableFilterSelect
         id="billingType"
         name="billingType"
-        label="Billing Type"
-        placeholder="All billing types"
+        label={t("billingType")}
+        placeholder={t("allBillingTypes")}
         defaultValue={billingType}
         options={[
-          { value: "ONE_TIME", label: "One Time" },
-          { value: "MONTHLY", label: "Monthly" },
+          { value: "ONE_TIME", label: t("billingTypeOptions.oneTime") },
+          { value: "MONTHLY", label: t("billingTypeOptions.monthly") },
         ]}
       />
       <div className="grid gap-2">
-        <Label htmlFor="createdFrom">Created From</Label>
+        <Label htmlFor="createdFrom">{t("createdFrom")}</Label>
         <Input
           id="createdFrom"
           name="createdFrom"
@@ -75,7 +83,7 @@ export function ClassFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="createdTo">Created To</Label>
+        <Label htmlFor="createdTo">{t("createdTo")}</Label>
         <Input
           id="createdTo"
           name="createdTo"
@@ -84,7 +92,7 @@ export function ClassFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="feeMin">Fee Min</Label>
+        <Label htmlFor="feeMin">{t("feeMin")}</Label>
         <Input
           id="feeMin"
           name="feeMin"
@@ -94,7 +102,7 @@ export function ClassFilters({
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="feeMax">Fee Max</Label>
+        <Label htmlFor="feeMax">{t("feeMax")}</Label>
         <Input
           id="feeMax"
           name="feeMax"
@@ -104,13 +112,13 @@ export function ClassFilters({
         />
       </div>
       <div className="flex items-end gap-2">
-        <Button type="submit">Apply</Button>
+        <Button type="submit">{commonT("apply")}</Button>
         <Button
           type="button"
           variant="outline"
           onClick={() => (window.location.href = "/school/classes")}
         >
-          Reset
+          {commonT("reset")}
         </Button>
       </div>
     </form>

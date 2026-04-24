@@ -19,11 +19,11 @@ const data = [
   { month: "Jun", value: 2800 },
 ];
 
-export function RevenueChart() {
+export function RevenueChart({ title = "Monthly Revenue" }: { title?: string }) {
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>Monthly Revenue</CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
