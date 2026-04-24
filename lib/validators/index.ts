@@ -217,7 +217,7 @@ export const enrollmentAttendanceSchema = z.object({
 export const enrollmentProgressSchema = z.object({
   enrollmentId: z.string().min(1, "Enrollment is required"),
   progress: z.coerce.number().min(0, "Progress must be at least 0").max(100, "Progress cannot exceed 100"),
-  remark: z.string().optional(),
+  remark: z.string().nullable().optional(),
 });
 
 export const invoiceUpdateSchema = z.object({

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getServerAuth } from "@/auth";
 import {
   getPaginatedStaff,
   deleteStaff,
@@ -20,6 +21,8 @@ import {
   STAFF_STATUS_LABELS,
   USER_ROLE_LABELS,
 } from "@/lib/enum-labels";
+import { UserRole } from "@/app/generated/prisma/enums";
+import { StaffSecurityActions } from "@/components/staff/staff-security-actions";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export async function StaffTable({
@@ -35,6 +38,8 @@ export async function StaffTable({
     getTranslations("SchoolEntities.staff.table"),
     getLocale(),
   ]);
+  const session = await getServerAuth();
+  const actorRole = session?.user?.role;
   const staff = await getPaginatedStaff({ page, filters });
   const formatter = new Intl.DateTimeFormat(locale, {
     dateStyle: locale === "en" ? "medium" : "long",
@@ -73,6 +78,17 @@ export async function StaffTable({
               <TableCell>{formatter.format(staff.hireDate)}</TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
+                  {actorRole === UserRole.SCHOOL_SUPER_ADMIN &&
+                  (staff.user.role === UserRole.SCHOOL_ADMIN ||
+                    staff.user.role === UserRole.TEACHER) ? (
+                    <StaffSecurityActions targetUserId={staff.userId} />
+                  ) : null}
+                  {actorRole === UserRole.SUPER_ADMIN &&
+                  (staff.user.role === UserRole.SCHOOL_SUPER_ADMIN ||
+                    staff.user.role === UserRole.SCHOOL_ADMIN ||
+                    staff.user.role === UserRole.TEACHER) ? (
+                    <StaffSecurityActions targetUserId={staff.userId} />
+                  ) : null}
                   <Button asChild size="sm" variant="outline">
                     <Link href={`/school/staff/${staff.id}`}>
                       {t("actions.view")}

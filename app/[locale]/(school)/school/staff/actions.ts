@@ -34,6 +34,46 @@ export type StaffSystemRoleActionState = {
   redirectTo?: string;
 };
 
+const resetStaffTwoFactorSchema = z.object({
+  targetUserId: z.string().min(1, "User is required."),
+});
+
+const resetStaffPasswordSchema = z.object({
+  targetUserId: z.string().min(1, "User is required."),
+  newPassword: z.string().min(8, "Password must be at least 8 characters."),
+  confirmPassword: z.string().min(1, "Confirm password is required."),
+});
+
+function canResetTargetByRole({
+  actorRole,
+  actorSchoolId,
+  targetRole,
+  targetSchoolId,
+}: {
+  actorRole: UserRole;
+  actorSchoolId: string | null | undefined;
+  targetRole: UserRole;
+  targetSchoolId: string | null | undefined;
+}) {
+  if (actorRole === UserRole.SUPER_ADMIN) {
+    return (
+      targetRole === UserRole.SCHOOL_SUPER_ADMIN ||
+      targetRole === UserRole.SCHOOL_ADMIN ||
+      targetRole === UserRole.TEACHER
+    );
+  }
+
+  if (actorRole === UserRole.SCHOOL_SUPER_ADMIN) {
+    return (
+      Boolean(actorSchoolId) &&
+      actorSchoolId === targetSchoolId &&
+      (targetRole === UserRole.SCHOOL_ADMIN || targetRole === UserRole.TEACHER)
+    );
+  }
+
+  return false;
+}
+
 const setStaffSystemRoleSchema = z.object({
   targetUserId: z.string().min(1, "User is required."),
   nextRole: z
@@ -145,13 +185,17 @@ export async function createStaff(
 export async function getStaff() {
   const sessionUser = await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const allowedRoles =
+    sessionUser.role === UserRole.SUPER_ADMIN
+      ? [UserRole.SCHOOL_SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.TEACHER]
+      : [UserRole.SCHOOL_ADMIN, UserRole.TEACHER];
 
   return prisma.staff.findMany({
     where: {
       schoolId,
       userId: { not: sessionUser.id },
       user: {
-        role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+        role: { in: allowedRoles },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -181,11 +225,15 @@ export async function getPaginatedStaff({
 }) {
   const sessionUser = await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+  const allowedRoles =
+    sessionUser.role === UserRole.SUPER_ADMIN
+      ? [UserRole.SCHOOL_SUPER_ADMIN, UserRole.SCHOOL_ADMIN, UserRole.TEACHER]
+      : [UserRole.SCHOOL_ADMIN, UserRole.TEACHER];
   const where: Record<string, unknown> = {
     schoolId,
     userId: { not: sessionUser.id },
     user: {
-      role: { not: UserRole.SCHOOL_SUPER_ADMIN },
+      role: { in: allowedRoles },
     },
   };
 
@@ -315,6 +363,135 @@ export async function updateStaff(
 
   revalidateLocalizedPath("/school/staff");
   return { status: "success", message: "Staff updated successfully." };
+}
+
+export async function resetStaffTwoFactor(
+  _prevState: StaffActionState,
+  formData: FormData,
+): Promise<StaffActionState> {
+  const session = await getServerAuth();
+  if (!session?.user?.id) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const parsed = resetStaffTwoFactorSchema.safeParse({
+    targetUserId: formData.get("targetUserId"),
+  });
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.errors[0]?.message };
+  }
+
+  if (parsed.data.targetUserId === session.user.id) {
+    return { status: "error", message: "You cannot reset your own 2FA here." };
+  }
+
+  const targetUser = await prisma.user.findUnique({
+    where: { id: parsed.data.targetUserId },
+    select: { id: true, role: true, schoolId: true },
+  });
+  if (!targetUser) {
+    return { status: "error", message: "User not found." };
+  }
+
+  const allowed = canResetTargetByRole({
+    actorRole: session.user.role,
+    actorSchoolId: session.user.schoolId,
+    targetRole: targetUser.role,
+    targetSchoolId: targetUser.schoolId,
+  });
+  if (!allowed) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  await prisma.user.update({
+    where: { id: targetUser.id },
+    data: { twoFactorEnabled: false, twoFactorSecret: null },
+  });
+
+  await logAction({
+    action: "UPDATE",
+    entity: "User",
+    entityId: targetUser.id,
+    schoolId: targetUser.schoolId ?? undefined,
+    userId: session.user.id,
+    metadata: {
+      field: "twoFactor",
+      operation: "reset_two_factor_by_admin",
+      actorRole: session.user.role,
+      targetRole: targetUser.role,
+    },
+  });
+
+  revalidateLocalizedPath("/school/staff");
+  return { status: "success", message: "Two-factor authentication has been reset." };
+}
+
+export async function resetStaffPassword(
+  _prevState: StaffActionState,
+  formData: FormData,
+): Promise<StaffActionState> {
+  const session = await getServerAuth();
+  if (!session?.user?.id) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const parsed = resetStaffPasswordSchema.safeParse({
+    targetUserId: formData.get("targetUserId"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { status: "error", message: parsed.error.errors[0]?.message };
+  }
+
+  if (parsed.data.newPassword !== parsed.data.confirmPassword) {
+    return { status: "error", message: "Passwords do not match." };
+  }
+
+  if (parsed.data.targetUserId === session.user.id) {
+    return { status: "error", message: "Use your own change password page." };
+  }
+
+  const targetUser = await prisma.user.findUnique({
+    where: { id: parsed.data.targetUserId },
+    select: { id: true, role: true, schoolId: true },
+  });
+  if (!targetUser) {
+    return { status: "error", message: "User not found." };
+  }
+
+  const allowed = canResetTargetByRole({
+    actorRole: session.user.role,
+    actorSchoolId: session.user.schoolId,
+    targetRole: targetUser.role,
+    targetSchoolId: targetUser.schoolId,
+  });
+  if (!allowed) {
+    return { status: "error", message: "Unauthorized." };
+  }
+
+  const newHash = await bcrypt.hash(parsed.data.newPassword, 10);
+  await prisma.user.update({
+    where: { id: targetUser.id },
+    data: { passwordHash: newHash },
+  });
+
+  await logAction({
+    action: "UPDATE",
+    entity: "User",
+    entityId: targetUser.id,
+    schoolId: targetUser.schoolId ?? undefined,
+    userId: session.user.id,
+    metadata: {
+      field: "password",
+      operation: "reset_password_by_admin",
+      actorRole: session.user.role,
+      targetRole: targetUser.role,
+    },
+  });
+
+  revalidateLocalizedPath("/school/staff");
+  return { status: "success", message: "Password has been reset successfully." };
 }
 
 export async function deleteStaff(formData: FormData) {

@@ -166,6 +166,7 @@
     "fields": {
       "email": "Email",
       "password": "Password",
+      "twoFactorCode": "Authenticator code",
       "showPassword": "Show password",
       "hidePassword": "Hide password"
     },
@@ -185,7 +186,32 @@
       "deviceExpired": "Login approval request expired. Please try signing in again.",
       "deviceInvalid": "Login approval request is no longer valid. Please sign in again.",
       "finishFailed": "Unable to finish sign in. Please try again.",
-      "sessionLocked": "This account is already signed in on another device."
+      "sessionLocked": "This account is already signed in on another device.",
+      "twoFactorRequired": "Enter your authenticator app code to continue.",
+      "invalidTwoFactorCode": "The authenticator code is invalid. Please try again."
+    }
+  },
+  "TwoFactorPage": {
+    "title": "Two-factor verification",
+    "description": "Enter the 6-digit code from your authenticator app to finish signing in.",
+    "backToLoginPrompt": "Need to use another account?",
+    "backToLogin": "Back to sign in"
+  },
+  "TwoFactorForm": {
+    "fields": {
+      "code": "Authenticator code"
+    },
+    "buttons": {
+      "submit": "Verify and sign in",
+      "verifying": "Verifying..."
+    },
+    "messages": {
+      "codeLength": "Authenticator code must be 6 digits.",
+      "codeRequired": "Enter your authenticator app code to continue.",
+      "invalidCode": "The authenticator code is invalid. Please try again.",
+      "sessionExpired": "Your sign-in session expired. Please sign in again.",
+      "signInFailed": "Unable to finish sign in. Please try again.",
+      "signInSuccess": "Signed in successfully."
     }
   },
   "VerifyEmailPage": {
@@ -378,6 +404,28 @@
     "language": {
       "title": "Language",
       "description": "Choose the language used across your dashboard."
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "Review your protection status.",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "Add a second verification step."
+      },
+      "password": {
+        "title": "Password",
+        "description": "Updated regularly for safety."
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "Common account changes.",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
     }
   },
   "TeacherSite": {
@@ -856,6 +904,26 @@
           "view": "View",
           "edit": "Edit",
           "delete": "Delete"
+        },
+        "securityActions": {
+          "buttons": {
+            "resetTwoFactor": "Reset 2FA",
+            "resetPassword": "Reset Password"
+          },
+          "dialog": {
+            "title": "Reset Staff Password",
+            "newPassword": "New password",
+            "confirmPassword": "Confirm password",
+            "cancel": "Cancel",
+            "submit": "Reset password",
+            "submitting": "Resetting..."
+          },
+          "messages": {
+            "twoFactorReset": "2FA reset successfully.",
+            "twoFactorResetFailed": "Unable to reset 2FA.",
+            "passwordReset": "Password reset successfully.",
+            "passwordResetFailed": "Unable to reset password."
+          }
         },
         "empty": "No staff yet.",
         "pagination": {

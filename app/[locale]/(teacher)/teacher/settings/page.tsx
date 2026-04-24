@@ -1,5 +1,6 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ArrowRight, Image as ImageIcon, KeyRound, LockKeyhole, Mail, Palette, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,10 +11,13 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
+import { type AppLocale } from "@/i18n/config";
+import { cn } from "@/lib/utils";
 
 export default async function TeacherSettingsPage() {
   const t = await getTranslations("TeacherSettingsOverview");
   const tCommon = await getTranslations("Common");
+  const locale = (await getLocale()) as AppLocale;
 
   const cards = [
     {
@@ -59,7 +63,14 @@ export default async function TeacherSettingsPage() {
       <div className="space-y-2">
         <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
+            <h1
+              className={cn(
+                "text-3xl font-semibold tracking-tight",
+                locale === "my" && "leading-loose",
+              )}
+            >
+              {t("title")}
+            </h1>
             <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -95,7 +106,14 @@ export default async function TeacherSettingsPage() {
                       </div>
                       <div>
                         <p className="text-sm font-semibold">{card.title}</p>
-                        <p className="text-sm text-muted-foreground">{card.description}</p>
+                        <p
+                          className={cn(
+                            "text-sm text-muted-foreground",
+                            locale === "my" && "mt-1",
+                          )}
+                        >
+                          {card.description}
+                        </p>
                       </div>
                     </div>
                     <Button asChild variant="outline">
@@ -111,6 +129,71 @@ export default async function TeacherSettingsPage() {
             })}
           </CardContent>
         </Card>
+
+        <div className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("securitySnapshot.title")}</CardTitle>
+              <CardDescription>{t("securitySnapshot.description")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between rounded-xl border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">
+                    {t("securitySnapshot.twoFactor.title")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("securitySnapshot.twoFactor.description")}
+                  </p>
+                </div>
+                <Badge variant="outline">{t("securitySnapshot.recommended")}</Badge>
+              </div>
+              <div className="flex items-center justify-between rounded-xl border px-3 py-2">
+                <div>
+                  <p className="text-sm font-medium">
+                    {t("securitySnapshot.password.title")}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("securitySnapshot.password.description")}
+                  </p>
+                </div>
+                <Badge variant="default">{t("securitySnapshot.good")}</Badge>
+              </div>
+              <Button asChild className="w-full">
+                <Link href="/teacher/settings/security">
+                  {t("securitySnapshot.reviewSecurity")}
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("quickUpdates.title")}</CardTitle>
+              <CardDescription>{t("quickUpdates.description")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/teacher/settings/profile-photo">
+                  {t("quickUpdates.updateProfilePhoto")}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/teacher/settings/change-email">
+                  {t("quickUpdates.changeEmail")}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-between">
+                <Link href="/teacher/settings/change-password">
+                  {t("quickUpdates.changePassword")}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

@@ -174,6 +174,7 @@
     "fields": {
       "email": "အီးမေးလ်",
       "password": "စကားဝှက်",
+      "twoFactorCode": "Authenticator code",
       "showPassword": "စကားဝှက် ပြရန်",
       "hidePassword": "စကားဝှက် ဖျောက်ရန်"
     },
@@ -193,7 +194,32 @@
       "deviceExpired": "Login approval request သက်တမ်းကုန်သွားပါပြီ။ ထပ်မံ အကောင့်ဝင်ပါ။",
       "deviceInvalid": "Login approval request သည် မမှန်ကန်တော့ပါ။ ထပ်မံ အကောင့်ဝင်ပါ။",
       "finishFailed": "အကောင့်ဝင်ခြင်းကို အဆုံးသတ်မလုပ်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။",
-      "sessionLocked": "ဤအကောင့်သည် အခြားစက်တစ်ခုတွင် ဝင်ထားပြီးဖြစ်သည်။"
+      "sessionLocked": "ဤအကောင့်သည် အခြားစက်တစ်ခုတွင် ဝင်ထားပြီးဖြစ်သည်။",
+      "twoFactorRequired": "ဆက်လုပ်ရန် authenticator code ကို ထည့်ပါ။",
+      "invalidTwoFactorCode": "Authenticator code မမှန်ကန်ပါ။ ထပ်မံကြိုးစားပါ။"
+    }
+  },
+  "TwoFactorPage": {
+    "title": "နှစ်ဆင့်အတည်ပြုခြင်း",
+    "description": "အကောင့်ဝင်ခြင်းကို အပြီးသတ်ရန် authenticator app ထဲက ဂဏန်း 6 လုံး code ကို ထည့်ပါ။",
+    "backToLoginPrompt": "အခြားအကောင့်ဖြင့် ဝင်မလား?",
+    "backToLogin": "အကောင့်ဝင်ရန် ပြန်သွားမည်"
+  },
+  "TwoFactorForm": {
+    "fields": {
+      "code": "Authenticator code"
+    },
+    "buttons": {
+      "submit": "အတည်ပြုပြီး အကောင့်ဝင်မည်",
+      "verifying": "အတည်ပြုနေသည်..."
+    },
+    "messages": {
+      "codeLength": "Authenticator code သည် ဂဏန်း 6 လုံး ဖြစ်ရမည်။",
+      "codeRequired": "ဆက်လုပ်ရန် authenticator code ကို ထည့်ပါ။",
+      "invalidCode": "Authenticator code မမှန်ကန်ပါ။ ထပ်မံကြိုးစားပါ။",
+      "sessionExpired": "အကောင့်ဝင် session သက်တမ်းကုန်သွားပါပြီ။ ထပ်မံ အကောင့်ဝင်ပါ။",
+      "signInFailed": "အကောင့်ဝင်ခြင်းကို အဆုံးသတ်မလုပ်နိုင်ပါ။ ထပ်မံကြိုးစားပါ။",
+      "signInSuccess": "အကောင့်ဝင်ပြီးပါပြီ။"
     }
   },
   "VerifyEmailPage": {
@@ -386,6 +412,28 @@
     "language": {
       "title": "ဘာသာစကား",
       "description": "Dashboard တစ်လျှောက် အသုံးပြုမည့် ဘာသာစကားကို ရွေးပါ။"
+    },
+    "securitySnapshot": {
+      "title": "Security snapshot",
+      "description": "သင့်ကာကွယ်မှုအခြေအနေကို ပြန်လည်သုံးသပ်ပါ။",
+      "recommended": "Recommended",
+      "good": "Good",
+      "reviewSecurity": "Review security",
+      "twoFactor": {
+        "title": "Two-factor auth",
+        "description": "အတည်ပြုခြင်း အဆင့်တစ်ဆင့် ထပ်ထည့်ပါ။"
+      },
+      "password": {
+        "title": "Password",
+        "description": "လုံခြုံရေးအတွက် ပုံမှန် update လုပ်ထားသည်။"
+      }
+    },
+    "quickUpdates": {
+      "title": "Quick updates",
+      "description": "အများဆုံးအသုံးပြုသော account ပြောင်းလဲမှုများ။",
+      "updateProfilePhoto": "Update profile photo",
+      "changeEmail": "Change email",
+      "changePassword": "Change password"
     }
   },
   "TeacherSite": {
@@ -860,6 +908,26 @@
           "view": "ကြည့်မည်",
           "edit": "ပြင်ဆင်မည်",
           "delete": "ဖျက်မည်"
+        },
+        "securityActions": {
+          "buttons": {
+            "resetTwoFactor": "2FA Reset",
+            "resetPassword": "Password Reset"
+          },
+          "dialog": {
+            "title": "ဝန်ထမ်း Password ကို Reset လုပ်မည်",
+            "newPassword": "Password အသစ်",
+            "confirmPassword": "Password ကို အတည်ပြုရန်",
+            "cancel": "မလုပ်တော့ပါ",
+            "submit": "Password reset လုပ်မည်",
+            "submitting": "Reset လုပ်နေသည်..."
+          },
+          "messages": {
+            "twoFactorReset": "2FA ကို အောင်မြင်စွာ reset လုပ်ပြီးပါပြီ။",
+            "twoFactorResetFailed": "2FA ကို reset မလုပ်နိုင်ပါ။",
+            "passwordReset": "Password ကို အောင်မြင်စွာ reset လုပ်ပြီးပါပြီ။",
+            "passwordResetFailed": "Password ကို reset မလုပ်နိုင်ပါ။"
+          }
         },
         "empty": "ဝန်ထမ်း မရှိသေးပါ။"
       }

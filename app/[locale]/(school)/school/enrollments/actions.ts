@@ -13,7 +13,7 @@ import {
 } from "@/app/generated/prisma/enums";
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma/client";
-import { emptyToUndefined, formDataToObject } from "@/lib/form-utils";
+import { emptyToNull, formDataToObject } from "@/lib/form-utils";
 import {
   enrollmentAttendanceSchema,
   enrollmentActorRoleSchema,
@@ -1067,7 +1067,7 @@ export async function updateProgress(
   const raw = formDataToObject(formData);
   const parsed = enrollmentProgressSchema.safeParse({
     ...raw,
-    remark: emptyToUndefined(raw.remark as string | undefined),
+    remark: emptyToNull(raw.remark as string | undefined),
   });
 
   if (!parsed.success) {

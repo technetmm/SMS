@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
 import { paginateQuery } from "@/lib/pagination";
 import { containsInsensitive } from "@/lib/table-filters";
-import { formDataToObject, emptyToUndefined } from "@/lib/form-utils";
+import { emptyToNull, formDataToObject } from "@/lib/form-utils";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import {
   enrollmentAttendanceSchema,
@@ -19,14 +19,7 @@ export type TeacherActionState = {
 
 export type TeacherTimetableFilters = {
   q?: string;
-  dayOfWeek?:
-    | "MON"
-    | "TUE"
-    | "WED"
-    | "THU"
-    | "FRI"
-    | "SAT"
-    | "SUN";
+  dayOfWeek?: "MON" | "TUE" | "WED" | "THU" | "FRI" | "SAT" | "SUN";
 };
 
 export type TeacherAttendanceFilters = {
@@ -90,7 +83,10 @@ export async function getTeacherSections() {
       staffId: scope.staffId,
       section: { schoolId: scope.schoolId },
     },
-    orderBy: [{ section: { class: { name: "asc" } } }, { section: { name: "asc" } }],
+    orderBy: [
+      { section: { class: { name: "asc" } } },
+      { section: { name: "asc" } },
+    ],
     select: {
       section: {
         select: {
@@ -273,7 +269,10 @@ export async function getTeacherAttendanceFormOptions() {
           },
         },
       },
-      orderBy: [{ section: { class: { name: "asc" } } }, { student: { name: "asc" } }],
+      orderBy: [
+        { section: { class: { name: "asc" } } },
+        { student: { name: "asc" } },
+      ],
       select: {
         id: true,
         student: { select: { id: true, name: true } },
@@ -338,7 +337,10 @@ export async function markTeacherAttendance(
 ): Promise<TeacherActionState> {
   const scope = await getTeacherScope();
   if (!scope.schoolId || !scope.staffId) {
-    return { status: "error", message: "Your staff profile is not linked yet." };
+    return {
+      status: "error",
+      message: "Your staff profile is not linked yet.",
+    };
   }
 
   const raw = formDataToObject(formData);
@@ -361,7 +363,10 @@ export async function markTeacherAttendance(
   });
 
   if (!enrollment) {
-    return { status: "error", message: "You can only mark attendance for assigned sections." };
+    return {
+      status: "error",
+      message: "You can only mark attendance for assigned sections.",
+    };
   }
 
   try {
@@ -558,13 +563,16 @@ export async function updateTeacherProgress(
 ): Promise<TeacherActionState> {
   const scope = await getTeacherScope();
   if (!scope.schoolId || !scope.staffId) {
-    return { status: "error", message: "Your staff profile is not linked yet." };
+    return {
+      status: "error",
+      message: "Your staff profile is not linked yet.",
+    };
   }
 
   const raw = formDataToObject(formData);
   const parsed = enrollmentProgressSchema.safeParse({
     ...raw,
-    remark: emptyToUndefined(raw.remark as string | undefined),
+    remark: emptyToNull(raw.remark as string | undefined),
   });
 
   if (!parsed.success) {
@@ -585,7 +593,10 @@ export async function updateTeacherProgress(
   });
 
   if (!enrollment) {
-    return { status: "error", message: "You can only update progress for assigned sections." };
+    return {
+      status: "error",
+      message: "You can only update progress for assigned sections.",
+    };
   }
 
   try {

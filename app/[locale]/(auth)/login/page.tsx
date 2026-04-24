@@ -31,6 +31,14 @@ import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_ERROR_MESSAGE,
 } from "@/lib/auth/session-lock";
+import {
+  TWO_FACTOR_INVALID_CODE,
+  TWO_FACTOR_REQUIRED_CODE,
+} from "@/lib/auth/2fa";
+import {
+  clearPendingLoginCredentials,
+  savePendingLoginCredentials,
+} from "@/lib/auth/pending-login";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 
@@ -41,20 +49,26 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [approvalToken, setApprovalToken] = useState<string | null>(null);
+  const [resolvedApprovalToken, setResolvedApprovalToken] = useState<
+    string | null
+  >(null);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
-  const lastCredentialsRef = useRef<{ email: string; password: string } | null>(
-    null,
-  );
+  const lastCredentialsRef = useRef<{
+    email: string;
+    password: string;
+  } | null>(null);
 
   async function attemptSignIn(
     email: string,
     password: string,
     token?: string,
+    twoFactorToken?: string,
   ) {
     return signIn("credentials", {
       email,
       password,
       approvalToken: token,
+      twoFactorToken,
       redirect: false,
       callbackUrl: "/",
     });
@@ -70,15 +84,23 @@ export default function LoginPage() {
     const formData = new FormData(event.currentTarget);
     const email = String(formData.get("email") ?? "");
     const password = String(formData.get("password") ?? "");
+    const pendingApprovalToken =
+      resolvedApprovalToken ?? approvalToken ?? undefined;
+    savePendingLoginCredentials({
+      email,
+      password,
+      approvalToken: pendingApprovalToken ?? null,
+    });
     lastCredentialsRef.current = { email, password };
 
-    const result = await attemptSignIn(email, password);
+    const result = await attemptSignIn(email, password, pendingApprovalToken);
 
     if (result?.error) {
       if (result.error === EMAIL_NOT_VERIFIED_CODE) {
         setUnverifiedEmail(email);
         setError(EMAIL_NOT_VERIFIED_MESSAGE);
         toast.error(EMAIL_NOT_VERIFIED_MESSAGE);
+        clearPendingLoginCredentials();
         setIsSubmitting(false);
         return;
       }
@@ -86,15 +108,44 @@ export default function LoginPage() {
       const deviceApprovalToken = extractDeviceApprovalToken(result.error);
       if (deviceApprovalToken) {
         setApprovalToken(deviceApprovalToken);
+        setResolvedApprovalToken(null);
+        savePendingLoginCredentials({
+          email,
+          password,
+          approvalToken: deviceApprovalToken,
+        });
         setError(DEVICE_APPROVAL_REQUIRED_MESSAGE);
         toast.message(DEVICE_APPROVAL_REQUIRED_MESSAGE);
         setIsSubmitting(false);
         return;
       }
 
+      if (result.error === TWO_FACTOR_REQUIRED_CODE) {
+        const query = pendingApprovalToken
+          ? `?approvalToken=${encodeURIComponent(pendingApprovalToken)}`
+          : "";
+        router.push(`/login/2fa${query}`);
+        return;
+      }
+
+      if (result.error === TWO_FACTOR_INVALID_CODE) {
+        const message = t("messages.invalidTwoFactorCode");
+        setError(message);
+        toast.error(message);
+        setIsSubmitting(false);
+        const query = pendingApprovalToken
+          ? `?approvalToken=${encodeURIComponent(pendingApprovalToken)}`
+          : "";
+        router.push(`/login/2fa${query}`);
+        return;
+      }
+
       if (result.error === DEVICE_APPROVAL_DENIED_CODE) {
         setError(DEVICE_APPROVAL_DENIED_MESSAGE);
         toast.error(DEVICE_APPROVAL_DENIED_MESSAGE);
+        setResolvedApprovalToken(null);
+        setApprovalToken(null);
+        clearPendingLoginCredentials();
         setIsSubmitting(false);
         return;
       }
@@ -102,6 +153,9 @@ export default function LoginPage() {
       if (result.error === DEVICE_APPROVAL_EXPIRED_CODE) {
         setError(DEVICE_APPROVAL_EXPIRED_MESSAGE);
         toast.error(DEVICE_APPROVAL_EXPIRED_MESSAGE);
+        setResolvedApprovalToken(null);
+        setApprovalToken(null);
+        clearPendingLoginCredentials();
         setIsSubmitting(false);
         return;
       }
@@ -114,15 +168,19 @@ export default function LoginPage() {
         : t("messages.invalidCredentials");
 
       setUnverifiedEmail(null);
+      setResolvedApprovalToken(null);
       setError(message);
       toast.error(message);
+      clearPendingLoginCredentials();
       setIsSubmitting(false);
       return;
     }
 
     toast.success(t("messages.signInSuccess"));
+    clearPendingLoginCredentials();
     setUnverifiedEmail(null);
     setApprovalToken(null);
+    setResolvedApprovalToken(null);
     router.push("/");
   }
 
@@ -155,6 +213,40 @@ export default function LoginPage() {
         );
 
         if (result?.error) {
+          if (result.error === TWO_FACTOR_REQUIRED_CODE) {
+            const message = t("messages.twoFactorRequired");
+            setResolvedApprovalToken(approvalToken);
+            setApprovalToken(null);
+            setError(message);
+            toast.message(message);
+            savePendingLoginCredentials({
+              email: credentials.email,
+              password: credentials.password,
+              approvalToken,
+            });
+            router.push(
+              `/login/2fa?approvalToken=${encodeURIComponent(approvalToken)}`,
+            );
+            return;
+          }
+
+          if (result.error === TWO_FACTOR_INVALID_CODE) {
+            const message = t("messages.invalidTwoFactorCode");
+            setResolvedApprovalToken(approvalToken);
+            setApprovalToken(null);
+            setError(message);
+            toast.error(message);
+            savePendingLoginCredentials({
+              email: credentials.email,
+              password: credentials.password,
+              approvalToken,
+            });
+            router.push(
+              `/login/2fa?approvalToken=${encodeURIComponent(approvalToken)}`,
+            );
+            return;
+          }
+
           if (result.error === DEVICE_APPROVAL_DENIED_CODE) {
             setError(DEVICE_APPROVAL_DENIED_MESSAGE);
             toast.error(DEVICE_APPROVAL_DENIED_MESSAGE);
@@ -166,11 +258,15 @@ export default function LoginPage() {
             toast.error(t("messages.finishFailed"));
           }
           setApprovalToken(null);
+          setResolvedApprovalToken(null);
+          clearPendingLoginCredentials();
           return;
         }
 
         toast.success(t("messages.signInSuccess"));
+        clearPendingLoginCredentials();
         setApprovalToken(null);
+        setResolvedApprovalToken(null);
         router.push("/");
         return;
       }
@@ -186,6 +282,8 @@ export default function LoginPage() {
         toast.error(DEVICE_APPROVAL_EXPIRED_MESSAGE);
       }
       setApprovalToken(null);
+      setResolvedApprovalToken(null);
+      clearPendingLoginCredentials();
     };
 
     const intervalId = window.setInterval(() => {

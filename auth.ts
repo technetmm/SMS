@@ -30,6 +30,11 @@ import {
   finalizeDeviceApprovalRequest,
 } from "@/lib/auth/device-approval-lifecycle";
 import {
+  TWO_FACTOR_INVALID_CODE,
+  TWO_FACTOR_REQUIRED_CODE,
+  verifyTwoFactorToken,
+} from "@/lib/auth/2fa";
+import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
@@ -40,7 +45,39 @@ const credentialsSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   approvalToken: z.string().optional(),
+  twoFactorToken: z.string().optional(),
 });
+
+function normalizeOptionalCredential(value: string | undefined) {
+  if (!value) return null;
+  const normalized = value.trim();
+  if (!normalized) return null;
+  if (normalized === String(undefined) || normalized === String(null)) {
+    return null;
+  }
+  return normalized;
+}
+
+function resolveTwoFactorError(input: {
+  twoFactorEnabled: boolean;
+  twoFactorSecret: string | null;
+  providedToken: string | null;
+}) {
+  if (!input.twoFactorEnabled || !input.twoFactorSecret) {
+    return null;
+  }
+
+  if (!input.providedToken) {
+    return TWO_FACTOR_REQUIRED_CODE;
+  }
+
+  const isValid = verifyTwoFactorToken({
+    token: input.providedToken,
+    secret: input.twoFactorSecret,
+  });
+
+  return isValid ? null : TWO_FACTOR_INVALID_CODE;
+}
 
 type SessionLockState = {
   activeSessionId: string | null;
@@ -73,10 +110,18 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         approvalToken: { label: "Approval Token", type: "text" },
+        twoFactorToken: { label: "Two Factor Token", type: "text" },
       },
       async authorize(credentials, req) {
         const parsed = credentialsSchema.safeParse(credentials);
         if (!parsed.success) return null;
+
+        const approvalToken = normalizeOptionalCredential(
+          parsed.data.approvalToken,
+        );
+        const twoFactorToken = normalizeOptionalCredential(
+          parsed.data.twoFactorToken,
+        );
 
         const user = await prisma.user.findUnique({
           where: { email: parsed.data.email.toLowerCase() },
@@ -90,6 +135,8 @@ export const authOptions: NextAuthOptions = {
             isSchoolOwner: true,
             emailVerifiedAt: true,
             passwordHash: true,
+            twoFactorSecret: true,
+            twoFactorEnabled: true,
             activeSessionId: true,
             activeSessionExpiresAt: true,
             activeSessionUserAgent: true,
@@ -187,12 +234,10 @@ export const authOptions: NextAuthOptions = {
 
         if (
           user.role !== "SUPER_ADMIN" &&
-          parsed.data.approvalToken &&
-          parsed.data.approvalToken !== String(undefined) &&
-          parsed.data.approvalToken !== String(null)
+          approvalToken
         ) {
           const approvalRequest = await prisma.loginApprovalRequest.findUnique({
-            where: { publicToken: parsed.data.approvalToken },
+            where: { publicToken: approvalToken },
             select: {
               id: true,
               publicToken: true,
@@ -233,6 +278,15 @@ export const authOptions: NextAuthOptions = {
             throw new Error(
               buildDeviceApprovalError(approvalRequest.publicToken),
             );
+          }
+
+          const twoFactorError = resolveTwoFactorError({
+            twoFactorEnabled: user.twoFactorEnabled,
+            twoFactorSecret: user.twoFactorSecret,
+            providedToken: twoFactorToken,
+          });
+          if (twoFactorError) {
+            throw new Error(twoFactorError);
           }
 
           if (
@@ -287,6 +341,15 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (locked.count > 0) {
+          const twoFactorError = resolveTwoFactorError({
+            twoFactorEnabled: user.twoFactorEnabled,
+            twoFactorSecret: user.twoFactorSecret,
+            providedToken: twoFactorToken,
+          });
+          if (twoFactorError) {
+            throw new Error(twoFactorError);
+          }
+
           return {
             ...user,
             sessionId,
@@ -319,6 +382,15 @@ export const authOptions: NextAuthOptions = {
 
           if (transferred.count === 0) {
             throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          const twoFactorError = resolveTwoFactorError({
+            twoFactorEnabled: user.twoFactorEnabled,
+            twoFactorSecret: user.twoFactorSecret,
+            providedToken: twoFactorToken,
+          });
+          if (twoFactorError) {
+            throw new Error(twoFactorError);
           }
 
           return {
@@ -357,6 +429,15 @@ export const authOptions: NextAuthOptions = {
 
           if (transferred.count === 0) {
             throw new Error(SESSION_LOCK_ERROR_CODE);
+          }
+
+          const twoFactorError = resolveTwoFactorError({
+            twoFactorEnabled: user.twoFactorEnabled,
+            twoFactorSecret: user.twoFactorSecret,
+            providedToken: twoFactorToken,
+          });
+          if (twoFactorError) {
+            throw new Error(twoFactorError);
           }
 
           return {

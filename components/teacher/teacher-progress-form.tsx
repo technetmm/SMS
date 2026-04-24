@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -24,9 +24,19 @@ export function TeacherProgressForm({
 }) {
   const t = useTranslations("SchoolEntities.enrollments.progress");
   const router = useRouter();
-  const [state, formAction] = useActionState(updateTeacherProgress, initialState);
+  const [state, formAction] = useActionState(
+    updateTeacherProgress,
+    initialState,
+  );
+  const handledStateKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (state.status === "idle") return;
+
+    const stateKey = `${state.status}:${state.message ?? ""}`;
+    if (handledStateKeyRef.current === stateKey) return;
+    handledStateKeyRef.current = stateKey;
+
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.updated"));
       router.refresh();
@@ -34,10 +44,16 @@ export function TeacherProgressForm({
     if (state.status === "error") {
       toast.error(state.message ?? t("messages.updateFailed"));
     }
-  }, [router, state, t]);
+  }, [router, state.message, state.status, t]);
 
   return (
-    <form action={formAction} className="space-y-2">
+    <form
+      action={formAction}
+      className="space-y-2"
+      onSubmit={() => {
+        handledStateKeyRef.current = null;
+      }}
+    >
       <input type="hidden" name="enrollmentId" value={enrollmentId} />
       <div className="flex items-center gap-2">
         <Input
