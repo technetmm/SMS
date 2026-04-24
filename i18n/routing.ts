@@ -8,7 +8,7 @@ import {
 export const routing = defineRouting({
   locales,
   defaultLocale,
-  localePrefix: "always",
+  localePrefix: "as-needed",
   localeCookie: {
     name: localeCookieName,
     sameSite: "lax",

@@ -359,7 +359,7 @@ export async function updateSection(
           classId: parsed.data.classId,
           name: parsed.data.name,
           room: parsed.data.room,
-          meetingLink: parsed.data.meetingLink,
+          meetingLink: parsed.data.meetingLink ?? null,
           capacity: parsed.data.capacity,
         },
       });

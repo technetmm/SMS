@@ -80,7 +80,11 @@ export async function TeacherDashboardTimetableGrid({
                       </div>
                     ) : (
                       (byDay.get(day) ?? []).map((slot) => (
-                        <div key={slot.id} className="rounded-md border bg-background p-2 text-xs shadow-sm">
+                        <Link
+                          key={slot.id}
+                          href={`/teacher/sections/${slot.section.id}`}
+                          className="block rounded-md border bg-background p-2 text-xs shadow-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
                           <div className="font-medium">
                             {slot.startTime} - {slot.endTime}
                           </div>
@@ -93,7 +97,7 @@ export async function TeacherDashboardTimetableGrid({
                               {slot.room}
                             </Badge>
                           ) : null}
-                        </div>
+                        </Link>
                       ))
                     )}
                   </div>

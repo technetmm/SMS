@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { AuthSessionProvider } from "@/components/shared/session-provider";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,9 +36,6 @@ export default async function LocaleLayout({
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <div className="fixed right-4 top-4 z-50">
-            <LocaleSwitcher />
-          </div>
           <AuthSessionProvider>{children}</AuthSessionProvider>
           <Toaster position="top-right" />
         </TooltipProvider>

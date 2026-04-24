@@ -16,5 +16,9 @@ export function getLocaleFromPathname(pathname: string): {
 
 export function withLocale(pathname: string, locale: AppLocale = defaultLocale) {
   const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  if (locale === defaultLocale) {
+    return normalizedPath;
+  }
+
   return `/${locale}${normalizedPath === "/" ? "" : normalizedPath}`;
 }

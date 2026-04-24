@@ -27,6 +27,10 @@ export default async function proxy(req: NextRequest) {
   );
   const resolvedLocale = locale ?? routing.defaultLocale;
 
+  if (locale === "my") {
+    return new NextResponse("Not Found", { status: 404 });
+  }
+
   if (!locale) {
     return handleI18nRouting(req);
   }

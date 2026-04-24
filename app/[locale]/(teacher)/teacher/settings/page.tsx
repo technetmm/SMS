@@ -1,5 +1,5 @@
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, Image as ImageIcon, KeyRound, Languages, LockKeyhole, Mail, Palette, ShieldCheck } from "lucide-react";
+import { ArrowRight, Image as ImageIcon, KeyRound, LockKeyhole, Mail, Palette, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 
@@ -110,19 +109,6 @@ export default async function TeacherSettingsPage() {
                 </div>
               );
             })}
-            <Separator />
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-muted/40 text-primary">
-                  <Languages className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{t("language.title")}</p>
-                  <p className="text-sm text-muted-foreground">{t("language.description")}</p>
-                </div>
-              </div>
-              <LocaleSwitcher className="self-start md:self-center" />
-            </div>
           </CardContent>
         </Card>
       </div>

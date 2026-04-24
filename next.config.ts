@@ -14,6 +14,16 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/platform",
+        destination: "/platform/dashboard",
+        permanent: true,
+      },
+      {
+        source: "/teacher",
+        destination: "/teacher/dashboard",
+        permanent: true,
+      },
+      {
         source: "/:locale(en|my)/school",
         destination: "/:locale/school/dashboard",
         permanent: true,

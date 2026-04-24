@@ -232,10 +232,14 @@ export function SectionForm({
       <div className="flex justify-end">
         <SubmitButton
           label={
-            mode === "create" ? t("form.actions.create") : t("form.actions.save")
+            mode === "create"
+              ? t("form.actions.create")
+              : t("form.actions.save")
           }
           loadingLabel={
-            mode === "create" ? t("form.actions.creating") : t("form.actions.saving")
+            mode === "create"
+              ? t("form.actions.creating")
+              : t("form.actions.saving")
           }
         />
       </div>

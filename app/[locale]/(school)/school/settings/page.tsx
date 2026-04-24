@@ -5,7 +5,6 @@ import {
   Image as ImageIcon,
   KeyRound,
   LockKeyhole,
-  Languages,
   Mail,
   Palette,
   ShieldCheck,
@@ -19,7 +18,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { type AppLocale } from "@/i18n/config";
@@ -144,21 +142,6 @@ export default async function SettingsOverviewPage() {
                 </div>
               );
             })}
-            <Separator />
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-muted/40 text-primary">
-                  <Languages className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">{t("language.title")}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("language.description")}
-                  </p>
-                </div>
-              </div>
-              <LocaleSwitcher className="self-start md:self-center" />
-            </div>
           </CardContent>
         </Card>
 

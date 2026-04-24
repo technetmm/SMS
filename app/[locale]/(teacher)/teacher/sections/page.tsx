@@ -27,7 +27,10 @@ export default async function TeacherSectionsPage() {
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {sections.map((section) => (
-          <Card key={section.id} className="transition-colors hover:bg-muted/20">
+          <Card
+            key={section.id}
+            className="transition-colors hover:bg-muted/20"
+          >
             <CardHeader>
               <CardTitle className="text-base">
                 <Link
@@ -53,14 +56,14 @@ export default async function TeacherSectionsPage() {
                     : t("labels.roomNotSet")}
                 </Badge>
               </div>
-              {section.meetingLink ? (
-                <div className="flex items-center justify-between pt-1">
-                  <Link
-                    href={`/teacher/sections/${section.id}`}
-                    className="text-sm text-primary hover:underline"
-                  >
-                    {t("actions.viewDetails")}
-                  </Link>
+              <div className="flex items-center justify-between pt-1">
+                <Link
+                  href={`/teacher/sections/${section.id}`}
+                  className="text-sm text-primary hover:underline"
+                >
+                  {t("actions.viewDetails")}
+                </Link>
+                {section.meetingLink ? (
                   <a
                     href={section.meetingLink}
                     target="_blank"
@@ -71,8 +74,8 @@ export default async function TeacherSectionsPage() {
                   >
                     <ExternalLink className="size-4" />
                   </a>
-                </div>
-              ) : null}
+                ) : null}
+              </div>
             </CardContent>
           </Card>
         ))}
