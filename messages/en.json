@@ -443,23 +443,23 @@
         "viewDetails": "View details"
       }
     },
-  "sectionDetails": {
-    "description": "Section details, timetable, and student information.",
-    "back": "Back to sections",
-    "notAvailable": "-",
-    "joinMeeting": "Join meeting",
-    "activeTimetable": {
-      "title": "Active Timetable",
-      "liveNow": "A class for this section is active right now.",
-      "noActive": "No active timetable slot right now.",
-      "startsAt": "Next slot today:",
-      "noMoreToday": "No more timetable slots for today.",
-      "teacher": "Teacher",
-      "room": "Room"
-    },
-    "summary": {
-      "class": "Class",
-      "students": "Students",
+    "sectionDetails": {
+      "description": "Section details, timetable, and student information.",
+      "back": "Back to sections",
+      "notAvailable": "-",
+      "joinMeeting": "Join meeting",
+      "activeTimetable": {
+        "title": "Active Timetable",
+        "liveNow": "A class for this section is active right now.",
+        "noActive": "No active timetable slot right now.",
+        "startsAt": "Next slot today:",
+        "noMoreToday": "No more timetable slots for today.",
+        "teacher": "Teacher",
+        "room": "Room"
+      },
+      "summary": {
+        "class": "Class",
+        "students": "Students",
         "studentsValue": "{count}/{capacity} students",
         "room": "Room",
         "meeting": "Meeting",
@@ -1370,7 +1370,7 @@
         "columns": {
           "day": "Day",
           "time": "Time",
-          "staff": "Staff",
+          "staff": "Teacher",
           "section": "Section",
           "meetingLink": "Meeting Link",
           "room": "Room",

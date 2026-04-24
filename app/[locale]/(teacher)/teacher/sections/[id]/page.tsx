@@ -132,7 +132,9 @@ export default async function TeacherSectionDetailPage({
                 {t("activeTimetable.liveNow")}
               </p>
               <p className="text-sm">
-                <span className="font-medium">{dayLabel(activeSlot.dayOfWeek)}</span>{" "}
+                <span className="font-medium">
+                  {dayLabel(activeSlot.dayOfWeek)}
+                </span>{" "}
                 •{" "}
                 {formatTimetableTimeRange(
                   activeSlot.startTime,
@@ -144,7 +146,8 @@ export default async function TeacherSectionDetailPage({
                 {t("activeTimetable.teacher")}: {activeSlot.staff.name}
               </p>
               <p className="text-sm text-muted-foreground">
-                {t("activeTimetable.room")}: {activeSlot.room ?? t("notAvailable")}
+                {t("activeTimetable.room")}:{" "}
+                {activeSlot.room ?? t("notAvailable")}
               </p>
             </>
           ) : upcomingTodaySlot ? (
@@ -153,7 +156,9 @@ export default async function TeacherSectionDetailPage({
                 {t("activeTimetable.noActive")}
               </p>
               <p className="text-sm">
-                <span className="font-medium">{t("activeTimetable.startsAt")}</span>{" "}
+                <span className="font-medium">
+                  {t("activeTimetable.startsAt")}
+                </span>{" "}
                 {formatTimetableTimeRange(
                   upcomingTodaySlot.startTime,
                   upcomingTodaySlot.endTime,
@@ -196,7 +201,11 @@ export default async function TeacherSectionDetailPage({
                 <TableRow key={slot.id}>
                   <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
                   <TableCell className="font-medium">
-                    {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
+                    {formatTimetableTimeRange(
+                      slot.startTime,
+                      slot.endTime,
+                      locale,
+                    )}
                   </TableCell>
                   <TableCell>{slot.staff.name}</TableCell>
                   <TableCell>{slot.room ?? t("notAvailable")}</TableCell>
@@ -233,11 +242,19 @@ export default async function TeacherSectionDetailPage({
             <TableBody>
               {section.students.map((row) => (
                 <TableRow key={row.id}>
-                  <TableCell className="font-medium">{row.student.name}</TableCell>
-                  <TableCell>{row.student.phone ?? t("notAvailable")}</TableCell>
+                  <TableCell className="font-medium">
+                    {row.student.name}
+                  </TableCell>
                   <TableCell>
-                    <Badge variant={row.status === "ACTIVE" ? "default" : "outline"}>
-                      {t(`students.status.${row.status.toLowerCase() as "active" | "completed" | "dropped"}`)}
+                    {row.student.phone ?? t("notAvailable")}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant={row.status === "ACTIVE" ? "default" : "outline"}
+                    >
+                      {t(
+                        `students.status.${row.status.toLowerCase() as "active" | "completed" | "dropped"}`,
+                      )}
                     </Badge>
                   </TableCell>
                 </TableRow>
