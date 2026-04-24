@@ -26,11 +26,13 @@ export async function TimetableTable({
   filters,
   searchParams,
   slots: slotsProp,
+  pathname = "/school/timetable",
 }: {
   page?: number;
   filters?: TimetableTableFilters;
   searchParams?: Record<string, string | string[] | undefined>;
   slots?: Awaited<ReturnType<typeof getTimetable>>;
+  pathname?: string;
 } = {}) {
   const [t, locale] = await Promise.all([
     getTranslations("SchoolEntities.timetable.table"),
@@ -79,7 +81,14 @@ export async function TimetableTable({
               <TableCell className="font-medium">
                 {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
               </TableCell>
-              <TableCell>{slot.staff.name}</TableCell>
+              <TableCell>
+                <Link
+                  href={`/school/timetable/staff/${slot.staff.id}`}
+                  className="hover:underline"
+                >
+                  {slot.staff.name}
+                </Link>
+              </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">
                   <Link
@@ -144,7 +153,7 @@ export async function TimetableTable({
       {slotsProp == null ? (
         <TablePagination
           pagination={slots}
-          pathname="/school/timetable"
+          pathname={pathname}
           searchParams={searchParams}
         />
       ) : null}

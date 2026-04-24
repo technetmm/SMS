@@ -443,14 +443,23 @@
         "viewDetails": "View details"
       }
     },
-    "sectionDetails": {
-      "description": "Section details, timetable, and student information.",
-      "back": "Back to sections",
-      "notAvailable": "-",
-      "joinMeeting": "Join meeting",
-      "summary": {
-        "class": "Class",
-        "students": "Students",
+  "sectionDetails": {
+    "description": "Section details, timetable, and student information.",
+    "back": "Back to sections",
+    "notAvailable": "-",
+    "joinMeeting": "Join meeting",
+    "activeTimetable": {
+      "title": "Active Timetable",
+      "liveNow": "A class for this section is active right now.",
+      "noActive": "No active timetable slot right now.",
+      "startsAt": "Next slot today:",
+      "noMoreToday": "No more timetable slots for today.",
+      "teacher": "Teacher",
+      "room": "Room"
+    },
+    "summary": {
+      "class": "Class",
+      "students": "Students",
         "studentsValue": "{count}/{capacity} students",
         "room": "Room",
         "meeting": "Meeting",
@@ -1282,7 +1291,23 @@
         "title": "Timetable",
         "description": "Manage weekly schedules and prevent staff conflicts.",
         "new": "Create Slot",
-        "filters": "Filters"
+        "filters": "Filters",
+        "activeTimetable": {
+          "title": "Active Timetable",
+          "titleWithStaff": "{staff} Active Timetable",
+          "liveNow": "Live now",
+          "noActiveNow": "No active slot at this moment.",
+          "nextToday": "Next slot today",
+          "noneToday": "No more timetable slots for today.",
+          "section": "Section",
+          "staff": "Staff",
+          "room": "Room"
+        },
+        "staffWeekly": {
+          "title": "{staff} Weekly Timetable",
+          "description": "Weekly board and timetable slots for {staff}.",
+          "back": "Back to Timetable"
+        }
       },
       "filters": {
         "search": "Search",
@@ -1318,6 +1343,7 @@
         "actions": {
           "copySlot": "Copy slot",
           "pasteInto": "Paste into {day}",
+          "editSlot": "Edit slot",
           "deleteSlot": "Delete slot",
           "pasteCopiedHere": "Paste copied slot here"
         },

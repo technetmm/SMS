@@ -451,14 +451,23 @@
         "viewDetails": "အသေးစိတ်ကြည့်ရန်"
       }
     },
-    "sectionDetails": {
-      "description": "Section အသေးစိတ်၊ အချိန်ဇယားနှင့် ကျောင်းသားအချက်အလက်များ။",
-      "back": "Sections သို့ ပြန်သွားမည်",
-      "notAvailable": "-",
-      "joinMeeting": "Meeting ဝင်မည်",
-      "summary": {
-        "class": "အတန်း",
-        "students": "ကျောင်းသား",
+  "sectionDetails": {
+    "description": "Section အသေးစိတ်၊ အချိန်ဇယားနှင့် ကျောင်းသားအချက်အလက်များ။",
+    "back": "Sections သို့ ပြန်သွားမည်",
+    "notAvailable": "-",
+    "joinMeeting": "Meeting ဝင်မည်",
+    "activeTimetable": {
+      "title": "လက်ရှိ အချိန်ဇယား",
+      "liveNow": "ဤ section အတွက် အခုချိန်တွင် class ရှိနေပါသည်။",
+      "noActive": "အခုချိန်တွင် active slot မရှိသေးပါ။",
+      "startsAt": "ဒီနေ့ နောက်တစ်ကြိမ်:",
+      "noMoreToday": "ဒီနေ့အတွက် timetable slot မရှိတော့ပါ။",
+      "teacher": "ဆရာ/မ",
+      "room": "အခန်း"
+    },
+    "summary": {
+      "class": "အတန်း",
+      "students": "ကျောင်းသား",
         "studentsValue": "ကျောင်းသား {count}/{capacity}",
         "room": "အခန်း",
         "meeting": "Meeting",
@@ -1251,7 +1260,23 @@
         "title": "အချိန်ဇယား",
         "description": "တစ်ပတ်စာ အချိန်ဇယားများကို စီမံပြီး ဝန်ထမ်းအချိန်တိုက်မိမှုများကို ကာကွယ်ပါ။",
         "new": "Slot ဖန်တီးမည်",
-        "filters": "Filter များ"
+        "filters": "Filter များ",
+        "activeTimetable": {
+          "title": "လက်ရှိ အချိန်ဇယား",
+          "titleWithStaff": "{staff} ၏ လက်ရှိ အချိန်ဇယား",
+          "liveNow": "အခုလက်ရှိ",
+          "noActiveNow": "အခုချိန်တွင် active slot မရှိသေးပါ။",
+          "nextToday": "ဒီနေ့ နောက်တစ်ကြိမ်",
+          "noneToday": "ဒီနေ့အတွက် timetable slot မရှိတော့ပါ။",
+          "section": "Section",
+          "staff": "ဝန်ထမ်း",
+          "room": "အခန်း"
+        },
+        "staffWeekly": {
+          "title": "{staff} အပတ်စဉ် အချိန်ဇယား",
+          "description": "{staff} အတွက် တစ်ပတ်စာ board နှင့် timetable slot များ။",
+          "back": "အချိန်ဇယားသို့ ပြန်သွားမည်"
+        }
       },
       "filters": {
         "search": "ရှာဖွေရန်",
@@ -1285,6 +1310,7 @@
         "actions": {
           "copySlot": "Slot ကို copy",
           "pasteInto": "{day} ထဲသို့ paste",
+          "editSlot": "Slot ကို ပြင်မည်",
           "deleteSlot": "Slot ဖျက်မည်",
           "pasteCopiedHere": "ကူးယူထားသော slot ကို ဤနေရာတွင် paste မည်"
         },
