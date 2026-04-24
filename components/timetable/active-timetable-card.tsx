@@ -1,14 +1,18 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
+  createTimetableNowContext,
   getTimetableDayBackgroundClass,
   getTimetableSlotBackgroundClass,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { cn } from "@/lib/utils";
-import { getLocale, getTranslations } from "next-intl/server";
+import { useLocale, useTranslations } from "next-intl";
 
 type TimetableSlot = {
   id: string;
@@ -21,20 +25,27 @@ type TimetableSlot = {
 };
 const DAYS: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export async function ActiveTimetableCard({
+export function ActiveTimetableCard({
   slots,
   staffName,
 }: {
   slots: TimetableSlot[];
   staffName?: string;
 }) {
-  const [t, tableT, boardT, locale] = await Promise.all([
-    getTranslations("SchoolEntities.timetable.list"),
-    getTranslations("SchoolEntities.timetable.table"),
-    getTranslations("SchoolEntities.timetable.board"),
-    getLocale(),
-  ]);
-  const now = new Date();
+  const t = useTranslations("SchoolEntities.timetable.list");
+  const tableT = useTranslations("SchoolEntities.timetable.table");
+  const boardT = useTranslations("SchoolEntities.timetable.board");
+  const locale = useLocale();
+  const [nowContext, setNowContext] = useState(() =>
+    createTimetableNowContext(new Date()),
+  );
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowContext(createTimetableNowContext(new Date()));
+    }, 30_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
@@ -48,9 +59,9 @@ export async function ActiveTimetableCard({
     return tableT(`days.${key}`);
   };
 
-  const activeSlots = slots.filter((slot) => getTimetableSlotState(slot, now) === "active");
+  const activeSlots = slots.filter((slot) => getTimetableSlotState(slot, nowContext) === "active");
   const upcomingToday = slots
-    .filter((slot) => getTimetableSlotState(slot, now) === "upcoming")
+    .filter((slot) => getTimetableSlotState(slot, nowContext) === "upcoming")
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
   const byDay = new Map<DayOfWeek, TimetableSlot[]>(
     DAYS.map((day) => [
@@ -99,7 +110,7 @@ export async function ActiveTimetableCard({
           <div className="overflow-x-auto pb-2">
             <div className="grid min-w-237.5 grid-cols-7 gap-3 lg:min-w-0">
               {DAYS.map((day) => (
-                <div key={day} className={getTimetableDayBackgroundClass(day, now)}>
+                <div key={day} className={getTimetableDayBackgroundClass(day, nowContext)}>
                   <div className="mb-2 text-xs font-medium text-muted-foreground">
                     {dayLabel(day)}
                   </div>
@@ -110,7 +121,7 @@ export async function ActiveTimetableCard({
                       </div>
                     ) : (
                       (byDay.get(day) ?? []).map((slot) => {
-                        const slotState = getTimetableSlotState(slot, now);
+                        const slotState = getTimetableSlotState(slot, nowContext);
                         return (
                           <Link
                             key={slot.id}

@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -13,13 +16,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
+  createTimetableNowContext,
   getTimetableSlotBackgroundClass,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { cn } from "@/lib/utils";
-import { getLocale, getTranslations } from "next-intl/server";
+import { useLocale, useTranslations } from "next-intl";
 
-export async function TeacherTimetableTable({
+export function TeacherTimetableTable({
   rows,
   searchParams,
 }: {
@@ -44,10 +48,8 @@ export async function TeacherTimetableTable({
   };
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const [t, locale] = await Promise.all([
-    getTranslations("SchoolEntities.timetable.table"),
-    getLocale(),
-  ]);
+  const t = useTranslations("SchoolEntities.timetable.table");
+  const locale = useLocale();
 
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
@@ -60,7 +62,16 @@ export async function TeacherTimetableTable({
       | "sun";
     return t(`days.${key}`);
   };
-  const now = new Date();
+  const [nowContext, setNowContext] = useState(() =>
+    createTimetableNowContext(new Date()),
+  );
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNowContext(createTimetableNowContext(new Date()));
+    }, 30_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   return (
     <div className="rounded-lg border bg-background">
@@ -79,7 +90,7 @@ export async function TeacherTimetableTable({
             <TableRow
               key={slot.id}
               className={cn(
-                getTimetableSlotBackgroundClass(getTimetableSlotState(slot, now)),
+                getTimetableSlotBackgroundClass(getTimetableSlotState(slot, nowContext)),
               )}
             >
               <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>

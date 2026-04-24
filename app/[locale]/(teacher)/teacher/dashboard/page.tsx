@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeacherDashboardTimetableGrid } from "@/components/teacher/teacher-dashboard-timetable-grid";
+import { getAppStartOfMonthUtc } from "@/lib/app-time";
 
 export default async function TeacherDashboardPage() {
   const session = await requireRole([UserRole.TEACHER]);
@@ -28,8 +29,7 @@ export default async function TeacherDashboardPage() {
     );
   }
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfMonth = getAppStartOfMonthUtc();
 
   const [sectionCount, timetableCount, attendanceCount, timetableSlots] = await Promise.all([
     prisma.sectionStaff.count({

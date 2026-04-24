@@ -17,6 +17,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { getTranslations } from "next-intl/server";
+import { getAppIsoDate } from "@/lib/app-time";
 
 export default async function TeacherAttendancePage({
   searchParams,
@@ -70,7 +71,7 @@ export default async function TeacherAttendancePage({
     return <TeacherAccessFallback />;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getAppIsoDate();
 
   return (
     <div className="space-y-6">
