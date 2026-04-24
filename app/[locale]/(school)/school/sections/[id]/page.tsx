@@ -13,7 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getSectionDetailById } from "@/app/(school)/school/sections/actions";
-import { getTranslations } from "next-intl/server";
+import { formatTimetableTimeRange } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function SectionDetailPage({
   params,
@@ -21,11 +22,12 @@ export default async function SectionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [section, t, timetableT, commonT] = await Promise.all([
+  const [section, t, timetableT, commonT, locale] = await Promise.all([
     getSectionDetailById(id),
     getTranslations("TeacherSite.sectionDetails"),
     getTranslations("SchoolEntities.timetable.table"),
     getTranslations("Common"),
+    getLocale(),
   ]);
 
   if (!section) {
@@ -142,7 +144,7 @@ export default async function SectionDetailPage({
                 <TableRow key={slot.id}>
                   <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
                   <TableCell className="font-medium">
-                    {slot.startTime} - {slot.endTime}
+                    {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
                   </TableCell>
                   <TableCell>{slot.staff.name}</TableCell>
                   <TableCell>{slot.room ?? "-"}</TableCell>

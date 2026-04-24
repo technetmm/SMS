@@ -27,8 +27,9 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { formatTimetableTimeRange } from "@/lib/formatter";
 import { cn } from "@/lib/utils";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type Slot = {
   id: string;
@@ -43,6 +44,7 @@ const days: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
   const t = useTranslations("SchoolEntities.timetable.board");
+  const locale = useLocale();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [copiedSlotId, setCopiedSlotId] = useState<string | null>(null);
@@ -71,6 +73,9 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
       | "sun";
     return t(`days.${key}`);
   };
+
+  const formattedTimeRange = (start: string, end: string) =>
+    formatTimetableTimeRange(start, end, locale);
 
   const onDropDay = (day: DayOfWeek, slotId: string) => {
     startTransition(async () => {
@@ -170,7 +175,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                           title={`${slot.staff.name} • ${slot.section.class.name} • ${slot.section.name}`}
                         >
                           <div className="font-medium">
-                            {slot.startTime}-{slot.endTime}
+                            {formattedTimeRange(slot.startTime, slot.endTime)}
                           </div>
                           <div className="mt-1 text-muted-foreground">
                             {slot.section.name}
@@ -239,7 +244,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
               {slotToDelete
                 ? t("dialog.descriptionWithSlot", {
                     day: dayLabel(slotToDelete.dayOfWeek),
-                    time: `${slotToDelete.startTime}-${slotToDelete.endTime}`,
+                    time: formattedTimeRange(slotToDelete.startTime, slotToDelete.endTime),
                     section: slotToDelete.section.name,
                   })
                 : t("dialog.descriptionFallback")}

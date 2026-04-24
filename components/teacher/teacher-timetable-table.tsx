@@ -11,7 +11,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { getTranslations } from "next-intl/server";
+import { formatTimetableTimeRange } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function TeacherTimetableTable({
   rows,
@@ -38,7 +39,10 @@ export async function TeacherTimetableTable({
   };
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
-  const t = await getTranslations("SchoolEntities.timetable.table");
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.timetable.table"),
+    getLocale(),
+  ]);
 
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
@@ -69,7 +73,7 @@ export async function TeacherTimetableTable({
             <TableRow key={slot.id}>
               <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
               <TableCell className="font-medium">
-                {slot.startTime} - {slot.endTime}
+                {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
               </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-0.5">

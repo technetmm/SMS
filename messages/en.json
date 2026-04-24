@@ -901,6 +901,7 @@
           "actions": "Actions"
         },
         "actions": {
+          "more": "More actions",
           "view": "View",
           "edit": "Edit",
           "delete": "Delete"

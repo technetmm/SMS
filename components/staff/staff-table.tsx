@@ -1,13 +1,10 @@
-import Link from "next/link";
 import { getServerAuth } from "@/auth";
 import {
   getPaginatedStaff,
-  deleteStaff,
   type StaffTableFilters,
 } from "@/app/(school)/school/staff/actions";
 import { TablePagination } from "@/components/shared/table-pagination";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,9 +18,8 @@ import {
   STAFF_STATUS_LABELS,
   USER_ROLE_LABELS,
 } from "@/lib/enum-labels";
-import { UserRole } from "@/app/generated/prisma/enums";
-import { StaffSecurityActions } from "@/components/staff/staff-security-actions";
 import { getLocale, getTranslations } from "next-intl/server";
+import { StaffRowActionsMenu } from "@/components/staff/staff-row-actions-menu";
 
 export async function StaffTable({
   page,
@@ -77,35 +73,16 @@ export async function StaffTable({
               </TableCell>
               <TableCell>{formatter.format(staff.hireDate)}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  {actorRole === UserRole.SCHOOL_SUPER_ADMIN &&
-                  (staff.user.role === UserRole.SCHOOL_ADMIN ||
-                    staff.user.role === UserRole.TEACHER) ? (
-                    <StaffSecurityActions targetUserId={staff.userId} />
-                  ) : null}
-                  {actorRole === UserRole.SUPER_ADMIN &&
-                  (staff.user.role === UserRole.SCHOOL_SUPER_ADMIN ||
-                    staff.user.role === UserRole.SCHOOL_ADMIN ||
-                    staff.user.role === UserRole.TEACHER) ? (
-                    <StaffSecurityActions targetUserId={staff.userId} />
-                  ) : null}
-                  <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/staff/${staff.id}`}>
-                      {t("actions.view")}
-                    </Link>
-                  </Button>
-                  <Button asChild size="sm" variant="default">
-                    <Link href={`/school/staff/${staff.id}/edit`}>
-                      {t("actions.edit")}
-                    </Link>
-                  </Button>
-                  <form action={deleteStaff}>
-                    <input type="hidden" name="id" value={staff.id} />
-                    <Button size="sm" variant="destructive" type="submit">
-                      {t("actions.delete")}
-                    </Button>
-                  </form>
-                </div>
+                {actorRole ? (
+                  <div className="flex justify-end">
+                    <StaffRowActionsMenu
+                      staffId={staff.id}
+                      targetUserId={staff.userId}
+                      actorRole={actorRole}
+                      targetRole={staff.user.role}
+                    />
+                  </div>
+                ) : null}
               </TableCell>
             </TableRow>
           ))}

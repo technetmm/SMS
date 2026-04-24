@@ -18,7 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getTranslations } from "next-intl/server";
+import { formatTimetableTimeRange } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export async function TimetableTable({
   page,
@@ -31,7 +32,10 @@ export async function TimetableTable({
   searchParams?: Record<string, string | string[] | undefined>;
   slots?: Awaited<ReturnType<typeof getTimetable>>;
 } = {}) {
-  const t = await getTranslations("SchoolEntities.timetable.table");
+  const [t, locale] = await Promise.all([
+    getTranslations("SchoolEntities.timetable.table"),
+    getLocale(),
+  ]);
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
       | "mon"
@@ -73,7 +77,7 @@ export async function TimetableTable({
             <TableRow key={slot.id}>
               <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
               <TableCell className="font-medium">
-                {slot.startTime} - {slot.endTime}
+                {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
               </TableCell>
               <TableCell>{slot.staff.name}</TableCell>
               <TableCell>
