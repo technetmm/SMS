@@ -1,7 +1,5 @@
 import { DayOfWeek } from "@/app/generated/prisma/enums";
-import { Link } from "@/i18n/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
@@ -18,25 +16,25 @@ type TimetableSlot = {
   startTime: string;
   endTime: string;
   room: string | null;
-  section: {
-    id: string;
-    name: string;
-    class: { name: string };
-  };
+  staff: { id: string; name: string };
+  section: { id: string; name: string; class: { id: string; name: string } };
 };
-
 const DAYS: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export async function TeacherDashboardTimetableGrid({
+export async function ActiveTimetableCard({
   slots,
+  staffName,
 }: {
   slots: TimetableSlot[];
+  staffName?: string;
 }) {
-  const [t, timetableT, locale] = await Promise.all([
-    getTranslations("TeacherSite.dashboard.timetable"),
+  const [t, tableT, boardT, locale] = await Promise.all([
+    getTranslations("SchoolEntities.timetable.list"),
     getTranslations("SchoolEntities.timetable.table"),
+    getTranslations("SchoolEntities.timetable.board"),
     getLocale(),
   ]);
+  const now = new Date();
 
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
@@ -47,9 +45,13 @@ export async function TeacherDashboardTimetableGrid({
       | "fri"
       | "sat"
       | "sun";
-    return timetableT(`days.${key}`);
+    return tableT(`days.${key}`);
   };
 
+  const activeSlots = slots.filter((slot) => getTimetableSlotState(slot, now) === "active");
+  const upcomingToday = slots
+    .filter((slot) => getTimetableSlotState(slot, now) === "upcoming")
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
   const byDay = new Map<DayOfWeek, TimetableSlot[]>(
     DAYS.map((day) => [
       day,
@@ -58,37 +60,53 @@ export async function TeacherDashboardTimetableGrid({
         .sort((a, b) => a.startTime.localeCompare(b.startTime)),
     ]),
   );
-  const now = new Date();
+
+  const nextUpcomingSlots =
+    upcomingToday.length === 0
+      ? []
+      : upcomingToday.filter((slot) => slot.startTime === upcomingToday[0]?.startTime);
+
+  const title = staffName
+    ? t("activeTimetable.titleWithStaff", { staff: staffName })
+    : t("activeTimetable.title");
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle>{t("title")}</CardTitle>
-          <p className="text-sm text-muted-foreground">{t("description")}</p>
-        </div>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/teacher/timetable">{t("viewFullTimetable")}</Link>
-        </Button>
+    <Card className="border-emerald-300/80 bg-emerald-50/70 dark:border-emerald-900/70 dark:bg-emerald-950/30">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent>
-        {slots.length === 0 ? (
-          <p className="py-8 text-sm text-muted-foreground">{t("empty")}</p>
+      <CardContent className="space-y-3">
+        {activeSlots.length > 0 ? (
+          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+            {t("activeTimetable.liveNow")}
+          </p>
+        ) : nextUpcomingSlots.length > 0 ? (
+          <>
+            <p className="text-sm text-muted-foreground">{t("activeTimetable.noActiveNow")}</p>
+            <p className="text-sm font-medium">{t("activeTimetable.nextToday")}</p>
+            {nextUpcomingSlots.map((slot) => (
+              <p key={slot.id} className="text-sm">
+                {dayLabel(slot.dayOfWeek)} •{" "}
+                {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
+              </p>
+            ))}
+          </>
         ) : (
+          <p className="text-sm text-muted-foreground">{t("activeTimetable.noneToday")}</p>
+        )}
+
+        {slots.length > 0 ? (
           <div className="overflow-x-auto pb-2">
             <div className="grid min-w-237.5 grid-cols-7 gap-3 lg:min-w-0">
               {DAYS.map((day) => (
-                <div
-                  key={day}
-                  className={getTimetableDayBackgroundClass(day, now)}
-                >
+                <div key={day} className={getTimetableDayBackgroundClass(day, now)}>
                   <div className="mb-2 text-xs font-medium text-muted-foreground">
                     {dayLabel(day)}
                   </div>
                   <div className="space-y-2">
                     {(byDay.get(day) ?? []).length === 0 ? (
                       <div className="rounded-md border border-dashed bg-background/60 p-2 text-center text-[11px] text-muted-foreground">
-                        {t("noSlots")}
+                        {boardT("dropHere")}
                       </div>
                     ) : (
                       (byDay.get(day) ?? []).map((slot) => {
@@ -96,7 +114,7 @@ export async function TeacherDashboardTimetableGrid({
                         return (
                           <Link
                             key={slot.id}
-                            href={`/teacher/sections/${slot.section.id}`}
+                            href={`/school/sections/${slot.section.id}`}
                             className={cn(
                               "block rounded-md border bg-background p-2 text-xs shadow-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                               getTimetableSlotBackgroundClass(slotState),
@@ -109,17 +127,16 @@ export async function TeacherDashboardTimetableGrid({
                                 locale,
                               )}
                             </div>
-                            <div className="mt-1 text-muted-foreground">
-                              {slot.section.name}
-                            </div>
+                            <div className="mt-1 text-muted-foreground">{slot.section.name}</div>
                             <div className="text-[11px] text-muted-foreground">
                               {slot.section.class.name}
                             </div>
-                            {slot.room ? (
-                              <Badge className="mt-2" variant="outline">
-                                {slot.room}
-                              </Badge>
-                            ) : null}
+                            <div className="text-[11px] text-muted-foreground">
+                              {t("activeTimetable.staff")}: {slot.staff.name}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground">
+                              {t("activeTimetable.room")}: {slot.room ?? "-"}
+                            </div>
                           </Link>
                         );
                       })
@@ -129,7 +146,7 @@ export async function TeacherDashboardTimetableGrid({
               ))}
             </div>
           </div>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );

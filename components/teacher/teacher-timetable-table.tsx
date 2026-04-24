@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { formatTimetableTimeRange } from "@/lib/formatter";
+import {
+  getTimetableSlotBackgroundClass,
+  getTimetableSlotState,
+} from "@/lib/teacher-timetable-highlight";
+import { cn } from "@/lib/utils";
 import { getLocale, getTranslations } from "next-intl/server";
 
 export async function TeacherTimetableTable({
@@ -55,6 +60,7 @@ export async function TeacherTimetableTable({
       | "sun";
     return t(`days.${key}`);
   };
+  const now = new Date();
 
   return (
     <div className="rounded-lg border bg-background">
@@ -70,7 +76,12 @@ export async function TeacherTimetableTable({
         </TableHeader>
         <TableBody>
           {rows.items.map((slot) => (
-            <TableRow key={slot.id}>
+            <TableRow
+              key={slot.id}
+              className={cn(
+                getTimetableSlotBackgroundClass(getTimetableSlotState(slot, now)),
+              )}
+            >
               <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
               <TableCell className="font-medium">
                 {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}

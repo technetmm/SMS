@@ -135,7 +135,7 @@ export default async function SectionDetailPage({
               <TableRow>
                 <TableHead>{timetableT("columns.day")}</TableHead>
                 <TableHead>{timetableT("columns.time")}</TableHead>
-                <TableHead>{timetableT("columns.teacher")}</TableHead>
+                <TableHead>{timetableT("columns.staff")}</TableHead>
                 <TableHead>{timetableT("columns.room")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -144,7 +144,11 @@ export default async function SectionDetailPage({
                 <TableRow key={slot.id}>
                   <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
                   <TableCell className="font-medium">
-                    {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
+                    {formatTimetableTimeRange(
+                      slot.startTime,
+                      slot.endTime,
+                      locale,
+                    )}
                   </TableCell>
                   <TableCell>{slot.staff.name}</TableCell>
                   <TableCell>{slot.room ?? "-"}</TableCell>

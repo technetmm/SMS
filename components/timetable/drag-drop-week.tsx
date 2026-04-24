@@ -197,6 +197,12 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                         >
                           {t("actions.pasteInto", { day: dayLabel(day) })}
                         </ContextMenuItem>
+                        <ContextMenuItem
+                          disabled={pending}
+                          onClick={() => router.push(`/school/timetable/${slot.id}/edit`)}
+                        >
+                          {t("actions.editSlot")}
+                        </ContextMenuItem>
                         <ContextMenuSeparator />
                         <ContextMenuItem
                           variant="destructive"

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidateLocalizedPath } from "@/lib/revalidate";
-import { DayOfWeek} from "@/app/generated/prisma/enums";
+import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { formDataToObject } from "@/lib/form-utils";
 import { paginateQuery } from "@/lib/pagination";
@@ -18,14 +18,18 @@ export type TimetableActionState = {
 export type TimetableTableFilters = {
   q?: string;
   dayOfWeek?: DayOfWeek;
+  staffId?: string;
 };
 
-export async function getTimetable() {
+export async function getTimetable(filters?: Pick<TimetableTableFilters, "staffId">) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
   return prisma.timetable.findMany({
-    where: { schoolId },
+    where: {
+      schoolId,
+      ...(filters?.staffId ? { staffId: filters.staffId } : {}),
+    },
     orderBy: [
       { dayOfWeek: "asc" },
       { startTime: "asc" },
@@ -64,6 +68,9 @@ export async function getPaginatedTimetable({
 
   if (filters?.dayOfWeek) {
     where.dayOfWeek = filters.dayOfWeek;
+  }
+  if (filters?.staffId) {
+    where.staffId = filters.staffId;
   }
 
   if (filters?.q) {
