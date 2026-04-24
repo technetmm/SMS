@@ -299,7 +299,6 @@ export async function updateStaff(
     currentAddress: emptyToUndefined(raw.currentAddress),
     phone: emptyToUndefined(raw.phone),
     remark: emptyToUndefined(raw.remark),
-    exitDate: emptyToUndefined(raw.exitDate),
   });
 
   if (!parsed.success) {
@@ -349,7 +348,8 @@ export async function updateStaff(
           currentAddress: parsed.data.currentAddress,
           phone: parsed.data.phone,
           hireDate: parsed.data.hireDate,
-          exitDate: parsed.data.exitDate,
+          exitDate:
+            parsed.data.exitDate === undefined ? undefined : parsed.data.exitDate,
           status: parsed.data.status,
           remark: parsed.data.remark,
           ratePerSection: parsed.data.ratePerSection,

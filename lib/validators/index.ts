@@ -141,6 +141,10 @@ export const staffUpdateSchema = staffCreateSchema
   .omit({ password: true })
   .extend({
     id: z.string().min(1, "Staff id is required"),
+    exitDate: z.preprocess(
+      (value) => (value === "" ? null : value),
+      z.coerce.date().nullable().optional(),
+    ),
   });
 
 const timeString = z

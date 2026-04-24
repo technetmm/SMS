@@ -25,7 +25,6 @@ import {
 } from "@/lib/auth/device-approval";
 import {
   EMAIL_NOT_VERIFIED_CODE,
-  EMAIL_NOT_VERIFIED_MESSAGE,
 } from "@/lib/auth/email-verification";
 import {
   SESSION_LOCK_ERROR_CODE,
@@ -52,7 +51,6 @@ export default function LoginPage() {
   const [resolvedApprovalToken, setResolvedApprovalToken] = useState<
     string | null
   >(null);
-  const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
   const lastCredentialsRef = useRef<{
     email: string;
     password: string;
@@ -78,7 +76,6 @@ export default function LoginPage() {
     event.preventDefault();
     if (isSubmitting) return;
     setError(null);
-    setUnverifiedEmail(null);
     setIsSubmitting(true);
 
     const formData = new FormData(event.currentTarget);
@@ -97,11 +94,9 @@ export default function LoginPage() {
 
     if (result?.error) {
       if (result.error === EMAIL_NOT_VERIFIED_CODE) {
-        setUnverifiedEmail(email);
-        setError(EMAIL_NOT_VERIFIED_MESSAGE);
-        toast.error(EMAIL_NOT_VERIFIED_MESSAGE);
         clearPendingLoginCredentials();
-        setIsSubmitting(false);
+        const normalizedEmail = email.trim().toLowerCase();
+        router.push(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
         return;
       }
 
@@ -167,7 +162,6 @@ export default function LoginPage() {
         ? SESSION_LOCK_ERROR_MESSAGE
         : t("messages.invalidCredentials");
 
-      setUnverifiedEmail(null);
       setResolvedApprovalToken(null);
       setError(message);
       toast.error(message);
@@ -178,7 +172,6 @@ export default function LoginPage() {
 
     toast.success(t("messages.signInSuccess"));
     clearPendingLoginCredentials();
-    setUnverifiedEmail(null);
     setApprovalToken(null);
     setResolvedApprovalToken(null);
     router.push("/");
@@ -348,17 +341,6 @@ export default function LoginPage() {
             </InputGroup>
           </div>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
-          {unverifiedEmail ? (
-            <p className="text-sm text-muted-foreground">
-              {t("verifyPrompt")}{" "}
-              <Link
-                href={`/verify-email?email=${encodeURIComponent(unverifiedEmail)}`}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                {t("verifyLink")}
-              </Link>
-            </p>
-          ) : null}
           <Button
             type="submit"
             className={"w-full"}
