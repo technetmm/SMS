@@ -3,7 +3,8 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
+import { formatTimetableTimeRange } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 type TimetableSlot = {
   id: string;
@@ -25,9 +26,10 @@ export async function TeacherDashboardTimetableGrid({
 }: {
   slots: TimetableSlot[];
 }) {
-  const [t, timetableT] = await Promise.all([
+  const [t, timetableT, locale] = await Promise.all([
     getTranslations("TeacherSite.dashboard.timetable"),
     getTranslations("SchoolEntities.timetable.table"),
+    getLocale(),
   ]);
 
   const dayLabel = (day: DayOfWeek) => {
@@ -86,7 +88,7 @@ export async function TeacherDashboardTimetableGrid({
                           className="block rounded-md border bg-background p-2 text-xs shadow-sm transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         >
                           <div className="font-medium">
-                            {slot.startTime} - {slot.endTime}
+                            {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
                           </div>
                           <div className="mt-1 text-muted-foreground">{slot.section.name}</div>
                           <div className="text-[11px] text-muted-foreground">

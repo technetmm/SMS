@@ -16,7 +16,8 @@ import {
   getTeacherSectionDetail,
   requireTeacherAccess,
 } from "@/app/(teacher)/teacher/actions";
-import { getTranslations } from "next-intl/server";
+import { formatTimetableTimeRange } from "@/lib/formatter";
+import { getLocale, getTranslations } from "next-intl/server";
 
 export default async function TeacherSectionDetailPage({
   params,
@@ -24,11 +25,12 @@ export default async function TeacherSectionDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [scope, t, timetableT, section] = await Promise.all([
+  const [scope, t, timetableT, section, locale] = await Promise.all([
     requireTeacherAccess(),
     getTranslations("TeacherSite.sectionDetails"),
     getTranslations("SchoolEntities.timetable.table"),
     getTeacherSectionDetail(id),
+    getLocale(),
   ]);
 
   if (!scope.schoolId || !scope.staffId) {
@@ -130,7 +132,7 @@ export default async function TeacherSectionDetailPage({
                 <TableRow key={slot.id}>
                   <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
                   <TableCell className="font-medium">
-                    {slot.startTime} - {slot.endTime}
+                    {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
                   </TableCell>
                   <TableCell>{slot.staff.name}</TableCell>
                   <TableCell>{slot.room ?? t("notAvailable")}</TableCell>
