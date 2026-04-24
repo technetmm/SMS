@@ -3,12 +3,18 @@ import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
 import { UserRole } from "@/app/generated/prisma/enums";
 import { ProfileOverview } from "@/components/profile/profile-overview";
-import { enumLabel, GENDER_LABELS, STUDENT_STATUS_LABELS } from "@/lib/enum-labels";
-import { dateFormatter } from "@/lib/helper";
+import {
+  enumLabel,
+  GENDER_LABELS,
+  STUDENT_STATUS_LABELS,
+} from "@/lib/enum-labels";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale } from "next-intl/server";
 
 export default async function StudentProfilePage() {
   const session = await requireRole([UserRole.STUDENT]);
   const schoolId = session.user.schoolId;
+  const locale = await getLocale();
 
   if (!schoolId) {
     redirect("/login");
@@ -43,13 +49,19 @@ export default async function StudentProfilePage() {
         address: true,
       },
     }),
-    prisma.student.findFirst({
-      where: { userId: session.user.id, schoolId },
-      select: { id: true },
-    }).then(async (student) => {
-      if (!student) return null;
-      const [enrollments, attendanceRecords, pendingInvoices, progressRecords] =
-        await Promise.all([
+    prisma.student
+      .findFirst({
+        where: { userId: session.user.id, schoolId },
+        select: { id: true },
+      })
+      .then(async (student) => {
+        if (!student) return null;
+        const [
+          enrollments,
+          attendanceRecords,
+          pendingInvoices,
+          progressRecords,
+        ] = await Promise.all([
           prisma.enrollment.count({
             where: { schoolId, studentId: student.id },
           }),
@@ -73,13 +85,13 @@ export default async function StudentProfilePage() {
             },
           }),
         ]);
-      return {
-        enrollments,
-        attendanceRecords,
-        pendingInvoices,
-        progressRecords,
-      };
-    }),
+        return {
+          enrollments,
+          attendanceRecords,
+          pendingInvoices,
+          progressRecords,
+        };
+      }),
   ]);
 
   if (!user) {
@@ -102,11 +114,11 @@ export default async function StudentProfilePage() {
         },
         {
           label: "Joined",
-          value: dateFormatter.format(user.createdAt),
+          value: dateFormatter(locale).format(user.createdAt),
         },
         {
           label: "Last Updated",
-          value: dateFormatter.format(user.updatedAt),
+          value: dateFormatter(locale).format(user.updatedAt),
         },
       ]}
       profileDetails={[
@@ -123,7 +135,7 @@ export default async function StudentProfilePage() {
         {
           label: "Admission Date",
           value: studentProfile?.admissionDate
-            ? dateFormatter.format(studentProfile.admissionDate)
+            ? dateFormatter(locale).format(studentProfile.admissionDate)
             : "-",
         },
         {
@@ -138,7 +150,9 @@ export default async function StudentProfilePage() {
         },
         {
           label: "Date of Birth",
-          value: studentProfile?.dob ? dateFormatter.format(studentProfile.dob) : "-",
+          value: studentProfile?.dob
+            ? dateFormatter(locale).format(studentProfile.dob)
+            : "-",
         },
         {
           label: "Father Name",

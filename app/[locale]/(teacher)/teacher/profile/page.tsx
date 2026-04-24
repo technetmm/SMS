@@ -9,11 +9,13 @@ import {
   MARITAL_STATUS_LABELS,
   STAFF_STATUS_LABELS,
 } from "@/lib/enum-labels";
-import { dateFormatter } from "@/lib/helper";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale } from "next-intl/server";
 
 export default async function TeacherProfilePage() {
   const session = await requireRole([UserRole.TEACHER]);
   const schoolId = session.user.schoolId;
+  const locale = await getLocale();
 
   if (!schoolId) {
     redirect("/login");
@@ -53,13 +55,19 @@ export default async function TeacherProfilePage() {
         ratePerSection: true,
       },
     }),
-    prisma.staff.findFirst({
-      where: { userId: session.user.id, schoolId },
-      select: { id: true },
-    }).then(async (staff) => {
-      if (!staff) return null;
-      const [assignedSections, timetableSlots, attendanceMarks, payrollRecords] =
-        await Promise.all([
+    prisma.staff
+      .findFirst({
+        where: { userId: session.user.id, schoolId },
+        select: { id: true },
+      })
+      .then(async (staff) => {
+        if (!staff) return null;
+        const [
+          assignedSections,
+          timetableSlots,
+          attendanceMarks,
+          payrollRecords,
+        ] = await Promise.all([
           prisma.sectionStaff.count({ where: { staffId: staff.id } }),
           prisma.timetable.count({ where: { schoolId, staffId: staff.id } }),
           prisma.staffAttendance.count({
@@ -67,13 +75,13 @@ export default async function TeacherProfilePage() {
           }),
           prisma.payroll.count({ where: { schoolId, staffId: staff.id } }),
         ]);
-      return {
-        assignedSections,
-        timetableSlots,
-        attendanceMarks,
-        payrollRecords,
-      };
-    }),
+        return {
+          assignedSections,
+          timetableSlots,
+          attendanceMarks,
+          payrollRecords,
+        };
+      }),
   ]);
 
   if (!user) {
@@ -96,11 +104,11 @@ export default async function TeacherProfilePage() {
         },
         {
           label: "Joined",
-          value: dateFormatter.format(user.createdAt),
+          value: dateFormatter(locale).format(user.createdAt),
         },
         {
           label: "Last Updated",
-          value: dateFormatter.format(user.updatedAt),
+          value: dateFormatter(locale).format(user.updatedAt),
         },
       ]}
       profileDetails={[
@@ -140,18 +148,20 @@ export default async function TeacherProfilePage() {
         },
         {
           label: "Date of Birth",
-          value: staffProfile?.dob ? dateFormatter.format(staffProfile.dob) : "-",
+          value: staffProfile?.dob
+            ? dateFormatter(locale).format(staffProfile.dob)
+            : "-",
         },
         {
           label: "Hire Date",
           value: staffProfile?.hireDate
-            ? dateFormatter.format(staffProfile.hireDate)
+            ? dateFormatter(locale).format(staffProfile.hireDate)
             : "-",
         },
         {
           label: "Exit Date",
           value: staffProfile?.exitDate
-            ? dateFormatter.format(staffProfile.exitDate)
+            ? dateFormatter(locale).format(staffProfile.exitDate)
             : "-",
         },
         {

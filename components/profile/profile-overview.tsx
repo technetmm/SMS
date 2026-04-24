@@ -9,8 +9,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { dateFormatter } from "@/lib/helper";
+import { dateFormatter } from "@/lib/formatter";
 import { enumLabel, USER_ROLE_LABELS } from "@/lib/enum-labels";
+import { getLocale } from "next-intl/server";
 
 type DetailItem = {
   label: string;
@@ -111,7 +112,7 @@ function StatsGrid({ items }: { items: StatItem[] }) {
   );
 }
 
-export function ProfileOverview({
+export async function ProfileOverview({
   heading,
   description,
   settingsBasePath,
@@ -121,6 +122,8 @@ export function ProfileOverview({
   stats = [],
   schoolInfo,
 }: ProfileOverviewProps) {
+  const locale = await getLocale();
+
   return (
     <div className="space-y-6">
       <div>
@@ -239,7 +242,7 @@ export function ProfileOverview({
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Created</p>
                 <p className="font-medium">
-                  {dateFormatter.format(schoolInfo.createdAt)}
+                  {dateFormatter(locale).format(schoolInfo.createdAt)}
                 </p>
               </div>
             ) : null}
@@ -247,7 +250,7 @@ export function ProfileOverview({
               <div className="rounded-xl border p-3">
                 <p className="text-xs text-muted-foreground">Updated</p>
                 <p className="font-medium">
-                  {dateFormatter.format(schoolInfo.updatedAt)}
+                  {dateFormatter(locale).format(schoolInfo.updatedAt)}
                 </p>
               </div>
             ) : null}

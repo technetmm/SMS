@@ -4,9 +4,11 @@ import { Plan, UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { ProfileOverview } from "@/components/profile/profile-overview";
 import { enumLabel, PLAN_LABELS } from "@/lib/enum-labels";
-import { dateFormatter } from "@/lib/helper";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale } from "next-intl/server";
 
 export default async function SchoolProfilePage() {
+  const locale = await getLocale();
   const session = await getServerAuth();
   if (
     !session?.user?.id ||
@@ -92,11 +94,11 @@ export default async function SchoolProfilePage() {
         },
         {
           label: "Joined",
-          value: dateFormatter.format(user.createdAt),
+          value: dateFormatter(locale).format(user.createdAt),
         },
         {
           label: "Last Updated",
-          value: dateFormatter.format(user.updatedAt),
+          value: dateFormatter(locale).format(user.updatedAt),
         },
         {
           label: "School Access",
