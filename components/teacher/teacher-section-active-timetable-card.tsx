@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
-  createTimetableNowContext,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLocale, useTranslations } from "next-intl";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
+import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
 
 type Slot = {
   id: string;
@@ -29,18 +28,7 @@ export function TeacherSectionActiveTimetableCard({
   const t = useTranslations("TeacherSite.sectionDetails");
   const timetableT = useTranslations("SchoolEntities.timetable.table");
   const locale = useLocale();
-  const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date(), timeZone),
-  );
-
-  useEffect(() => {
-    const syncNowContext = () => {
-      setNowContext(createTimetableNowContext(new Date(), timeZone));
-    };
-    syncNowContext();
-    const intervalId = window.setInterval(syncNowContext, 30_000);
-    return () => window.clearInterval(intervalId);
-  }, [timeZone]);
+  const nowContext = useTimetableNowContext(timeZone);
 
   const dayLabel = (day: string) => {
     const key = day.toLowerCase() as
@@ -54,12 +42,14 @@ export function TeacherSectionActiveTimetableCard({
     return timetableT(`days.${key}`);
   };
 
-  const activeSlot = slots.find(
-    (slot) => getTimetableSlotState(slot, nowContext) === "active",
-  );
-  const upcomingTodaySlot = slots
-    .filter((slot) => getTimetableSlotState(slot, nowContext) === "upcoming")
-    .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+  const activeSlot = nowContext
+    ? slots.find((slot) => getTimetableSlotState(slot, nowContext) === "active")
+    : undefined;
+  const upcomingTodaySlot = nowContext
+    ? slots
+        .filter((slot) => getTimetableSlotState(slot, nowContext) === "upcoming")
+        .sort((a, b) => a.startTime.localeCompare(b.startTime))[0]
+    : undefined;
 
   return (
     <Card className="border-emerald-300/80 bg-emerald-50/70 dark:border-emerald-900/70 dark:bg-emerald-950/30">

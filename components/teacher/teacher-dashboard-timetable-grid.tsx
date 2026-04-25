@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
@@ -8,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
-  createTimetableNowContext,
   getTimetableDayBackgroundClass,
   getTimetableSlotBackgroundClass,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
+import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
 
 type TimetableSlot = {
   id: string;
@@ -62,18 +61,7 @@ export function TeacherDashboardTimetableGrid({
         .sort((a, b) => a.startTime.localeCompare(b.startTime)),
     ]),
   );
-  const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date(), timeZone),
-  );
-
-  useEffect(() => {
-    const syncNowContext = () => {
-      setNowContext(createTimetableNowContext(new Date(), timeZone));
-    };
-    syncNowContext();
-    const intervalId = window.setInterval(syncNowContext, 30_000);
-    return () => window.clearInterval(intervalId);
-  }, [timeZone]);
+  const nowContext = useTimetableNowContext(timeZone);
 
   return (
     <Card>
@@ -95,7 +83,11 @@ export function TeacherDashboardTimetableGrid({
               {DAYS.map((day) => (
                 <div
                   key={day}
-                  className={getTimetableDayBackgroundClass(day, nowContext)}
+                  className={
+                    nowContext
+                      ? getTimetableDayBackgroundClass(day, nowContext)
+                      : "rounded-md border bg-muted/40 p-2"
+                  }
                 >
                   <div className="mb-2 text-xs font-medium text-muted-foreground">
                     {dayLabel(day)}
@@ -107,7 +99,9 @@ export function TeacherDashboardTimetableGrid({
                       </div>
                     ) : (
                       (byDay.get(day) ?? []).map((slot) => {
-                        const slotState = getTimetableSlotState(slot, nowContext);
+                        const slotState = nowContext
+                          ? getTimetableSlotState(slot, nowContext)
+                          : "default";
                         return (
                           <Link
                             key={slot.id}
