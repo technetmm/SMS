@@ -18,6 +18,7 @@ import {
 } from "@/lib/table-filters";
 import { AttendanceFilters } from "@/components/attendance/attendance-filters";
 import { getTranslations } from "next-intl/server";
+import { getAppIsoDate } from "@/lib/app-time";
 
 export default async function AttendancePage({
   searchParams,
@@ -75,7 +76,7 @@ export default async function AttendancePage({
       },
     }),
   ]);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getAppIsoDate();
 
   return (
     <div className="space-y-6">

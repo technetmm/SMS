@@ -70,13 +70,11 @@ export default async function TeacherAttendancePage({
     return <TeacherAccessFallback />;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-
   return (
     <div className="space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      <TeacherAttendanceForm defaultDate={today} enrollments={formOptions.enrollments} />
+      <TeacherAttendanceForm enrollments={formOptions.enrollments} />
 
       <Card>
         <CardHeader>

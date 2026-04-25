@@ -20,27 +20,38 @@ const JS_DAY_TO_TIMETABLE_DAY: Record<number, DayOfWeek> = {
   6: DayOfWeek.SAT,
 };
 
-function isTodayTimetableDay(day: DayOfWeek, now: Date) {
-  return JS_DAY_TO_TIMETABLE_DAY[now.getDay()] === day;
+export type TimetableNowContext = {
+  dayOfWeek: DayOfWeek;
+  nowMinutes: number;
+};
+
+export function createTimetableNowContext(now: Date): TimetableNowContext {
+  return {
+    dayOfWeek: JS_DAY_TO_TIMETABLE_DAY[now.getDay()] ?? DayOfWeek.SUN,
+    nowMinutes: now.getHours() * 60 + now.getMinutes(),
+  };
+}
+
+function isTodayTimetableDay(day: DayOfWeek, now: TimetableNowContext) {
+  return now.dayOfWeek === day;
 }
 
 export function getTimetableSlotState(
   slot: TimetableSlotLike,
-  now: Date,
+  now: TimetableNowContext,
 ): TimetableSlotState {
   if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
     return "default";
   }
 
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const startMinutes = timeToMinutes(slot.startTime);
   const endMinutes = timeToMinutes(slot.endTime);
 
-  if (nowMinutes < startMinutes) {
+  if (now.nowMinutes < startMinutes) {
     return "upcoming";
   }
 
-  if (nowMinutes >= endMinutes) {
+  if (now.nowMinutes >= endMinutes) {
     return "past";
   }
 
@@ -63,7 +74,7 @@ export function getTimetableSlotBackgroundClass(state: TimetableSlotState) {
   return "";
 }
 
-export function getTimetableDayBackgroundClass(day: DayOfWeek, now: Date) {
+export function getTimetableDayBackgroundClass(day: DayOfWeek, now: TimetableNowContext) {
   return cn(
     "rounded-md border p-2",
     isTodayTimetableDay(day, now)
