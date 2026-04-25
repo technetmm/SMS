@@ -29,7 +29,10 @@ const APP_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("en-US", {
 
 type AppDateTimePartKey = "year" | "month" | "day" | "hour" | "minute";
 
-function getNumericPart(parts: Intl.DateTimeFormatPart[], key: AppDateTimePartKey) {
+function getNumericPart(
+  parts: Intl.DateTimeFormatPart[],
+  key: AppDateTimePartKey,
+) {
   const value = parts.find((part) => part.type === key)?.value;
   if (!value) {
     throw new Error(`Missing ${key} part for app time conversion.`);
@@ -39,7 +42,8 @@ function getNumericPart(parts: Intl.DateTimeFormatPart[], key: AppDateTimePartKe
 
 export function getAppDateTimeParts(now = new Date()) {
   const parts = APP_DATE_TIME_FORMATTER.formatToParts(now);
-  const weekdayShort = parts.find((part) => part.type === "weekday")?.value ?? "Sun";
+  const weekdayShort =
+    parts.find((part) => part.type === "weekday")?.value ?? "Sun";
 
   return {
     year: getNumericPart(parts, "year"),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { DayOfWeek } from "@/app/generated/prisma/enums";
@@ -30,13 +30,13 @@ import {
 } from "@/components/ui/context-menu";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
-  createTimetableNowContext,
   getTimetableDayBackgroundClass,
   getTimetableSlotBackgroundClass,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
+import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
 
 type Slot = {
   id: string;
@@ -49,23 +49,22 @@ type Slot = {
 
 const days: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
+export function DragDropWeekTimetable({
+  slots,
+  returnTo = "/school/timetable",
+  timeZone,
+}: {
+  slots: Slot[];
+  returnTo?: string;
+  timeZone?: string;
+}) {
   const t = useTranslations("SchoolEntities.timetable.board");
   const locale = useLocale();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [copiedSlotId, setCopiedSlotId] = useState<string | null>(null);
   const [slotToDelete, setSlotToDelete] = useState<Slot | null>(null);
-  const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
-  );
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
-    return () => window.clearInterval(intervalId);
-  }, []);
+  const nowContext = useTimetableNowContext(timeZone);
 
   const byDay = useMemo(() => {
     const map = new Map<DayOfWeek, Slot[]>();
@@ -153,7 +152,7 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
         </div>
         <div className="flex flex-col items-end gap-2">
           <Badge variant="outline" className="text-[11px]">
-            {t("activeDay", { day: dayLabel(nowContext.dayOfWeek) })}
+            {t("activeDay", { day: dayLabel(nowContext?.dayOfWeek ?? "MON") })}
           </Badge>
           <p className={cn("text-xs text-muted-foreground", pending && "text-primary")}>
             {pending ? t("updating") : null}
@@ -166,7 +165,11 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
           <ContextMenu key={day}>
             <ContextMenuTrigger asChild>
               <div
-                className={getTimetableDayBackgroundClass(day, nowContext)}
+                className={
+                  nowContext
+                    ? getTimetableDayBackgroundClass(day, nowContext)
+                    : "rounded-md border bg-muted/40 p-2"
+                }
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   event.preventDefault();
@@ -179,12 +182,12 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                   <div
                     className={cn(
                       "text-xs font-medium text-muted-foreground",
-                      nowContext.dayOfWeek === day && "text-foreground",
+                      nowContext?.dayOfWeek === day && "text-foreground",
                     )}
                   >
                     {dayLabel(day)}
                   </div>
-                  {nowContext.dayOfWeek === day ? (
+                  {nowContext?.dayOfWeek === day ? (
                     <span
                       className="size-2 rounded-full bg-emerald-500"
                       aria-label={t("activeDay", { day: dayLabel(day) })}
@@ -205,7 +208,9 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                           className={cn(
                             "cursor-grab rounded-md border bg-background p-2 text-xs shadow-sm active:cursor-grabbing",
                             getTimetableSlotBackgroundClass(
-                              getTimetableSlotState(slot, nowContext),
+                              nowContext
+                                ? getTimetableSlotState(slot, nowContext)
+                                : "default",
                             ),
                             copiedSlotId === slot.id &&
                               "border-primary/60 ring-1 ring-primary/30",
@@ -238,7 +243,12 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                         </ContextMenuItem>
                         <ContextMenuItem
                           disabled={pending}
-                          onClick={() => router.push(`/school/timetable/${slot.id}/edit`)}
+                          onClick={() => {
+                            const params = new URLSearchParams({ returnTo });
+                            router.push(
+                              `/school/timetable/${slot.id}/edit?${params.toString()}`,
+                            );
+                          }}
                         >
                           {t("actions.editSlot")}
                         </ContextMenuItem>

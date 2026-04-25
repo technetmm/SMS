@@ -48,6 +48,8 @@ type TimetableFormProps = {
     endTime: string;
     room: string | null;
   };
+  redirectPath?: string;
+  cancelPath?: string;
 };
 
 const days: Array<{ value: DayOfWeek; label: string }> = [
@@ -66,6 +68,8 @@ export function TimetableForm({
   staff,
   sections,
   initialData,
+  redirectPath = "/school/timetable",
+  cancelPath = "/school/timetable",
 }: TimetableFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
@@ -92,13 +96,13 @@ export function TimetableForm({
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
-      router.push("/school/timetable");
+      router.push(redirectPath);
       router.refresh();
     }
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save timetable slot");
     }
-  }, [router, state]);
+  }, [redirectPath, router, state]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!selectedStaff) {
@@ -229,7 +233,7 @@ export function TimetableForm({
 
       <div className="flex items-center justify-end gap-2">
         <Button asChild variant="outline">
-          <Link href="/school/timetable">Cancel</Link>
+          <Link href={cancelPath}>Cancel</Link>
         </Button>
         <SubmitButton
           label={mode === "create" ? "Create Slot" : "Save Changes"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-
-type PendingRequest = {
-  id: string;
-  createdAt: string;
-  expiresAt: string;
-  requestedIp: string | null;
-  requestedUserAgent: string | null;
-};
+import {
+  isRealtimeStreamSupported,
+  subscribeRealtimeSnapshots,
+} from "@/lib/realtime/client";
+import type { RealtimePendingDeviceApprovalRequest } from "@/lib/realtime/types";
 
 const POLL_INTERVAL_MS = 3000;
+const SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY =
+  "sms.seen-device-approval-request-ids";
+
+type PendingRequest = RealtimePendingDeviceApprovalRequest;
 
 function formatWhen(iso: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -30,18 +31,92 @@ function formatWhen(iso: string) {
   }).format(new Date(iso));
 }
 
-export function DeviceApprovalListener() {
+const APPROVER_ROLES = new Set([
+  "SUPER_ADMIN",
+  "SCHOOL_SUPER_ADMIN",
+  "SCHOOL_ADMIN",
+]);
+
+function readSeenApproverRequestIds() {
+  if (typeof window === "undefined") return new Set<string>();
+
+  try {
+    const raw = window.sessionStorage.getItem(
+      SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY,
+    );
+    if (!raw) return new Set<string>();
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return new Set<string>();
+    return new Set(parsed.filter((id): id is string => typeof id === "string"));
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function saveSeenApproverRequestIds(seenRequestIds: Set<string>) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY,
+      JSON.stringify([...seenRequestIds]),
+    );
+  } catch {
+    // Ignore storage errors so polling still works.
+  }
+}
+
+export function DeviceApprovalListener({ role }: { role: string }) {
   const [request, setRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
+  const seenApproverRequestIdsRef = useRef<Set<string> | null>(null);
 
-  const expiresLabel = useMemo(
-    () => (request ? formatWhen(request.expiresAt) : null),
-    [request],
+  if (seenApproverRequestIdsRef.current === null) {
+    seenApproverRequestIdsRef.current = readSeenApproverRequestIds();
+  }
+
+  const applyRequests = useCallback(
+    (requests: PendingRequest[]) => {
+      const canApproveOthers = APPROVER_ROLES.has(role);
+      const next = requests.find((item) => !item.requester) ?? null;
+      setRequest(next);
+
+      if (!canApproveOthers) {
+        return;
+      }
+
+      const approverRequests = requests.filter((item) => Boolean(item.requester));
+      const incomingIds = new Set(approverRequests.map((item) => item.id));
+      const updated = new Set(
+        [...seenApproverRequestIdsRef.current!].filter((requestId) =>
+          incomingIds.has(requestId),
+        ),
+      );
+
+      for (const approvalRequest of approverRequests) {
+        if (updated.has(approvalRequest.id)) {
+          continue;
+        }
+
+        const name = approvalRequest.requester?.name?.trim() || "a user";
+        toast(`New device approval request from ${name}.`);
+        updated.add(approvalRequest.id);
+      }
+
+      seenApproverRequestIdsRef.current = updated;
+      saveSeenApproverRequestIds(updated);
+    },
+    [role],
   );
 
   const fetchPending = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/device-approvals/pending", {
+      const canApproveOthers = APPROVER_ROLES.has(role);
+      const url = canApproveOthers
+        ? "/api/auth/device-approvals/pending"
+        : "/api/auth/device-approvals/pending?scope=self";
+      const res = await fetch(url, {
         cache: "no-store",
         credentials: "include",
       });
@@ -52,14 +127,20 @@ export function DeviceApprovalListener() {
       }
 
       const data = (await res.json()) as { requests?: PendingRequest[] };
-      const next = data.requests?.[0] ?? null;
-      setRequest(next);
+      const requests = data.requests ?? [];
+      applyRequests(requests);
     } catch {
       setRequest(null);
     }
-  }, []);
+  }, [applyRequests, role]);
 
   useEffect(() => {
+    if (isRealtimeStreamSupported()) {
+      return subscribeRealtimeSnapshots((snapshot) => {
+        applyRequests(snapshot.pendingDeviceApprovals);
+      });
+    }
+
     let active = true;
     const tick = async () => {
       if (!active) return;
@@ -75,7 +156,7 @@ export function DeviceApprovalListener() {
       active = false;
       window.clearInterval(id);
     };
-  }, [fetchPending]);
+  }, [applyRequests, fetchPending]);
 
   async function respond(action: "approve" | "deny") {
     if (!request || loading) return;
@@ -93,11 +174,6 @@ export function DeviceApprovalListener() {
         status?: string;
         error?: string;
       };
-
-      console.log("Device approval response:", {
-        status: data.status,
-        error: data.error,
-      });
 
       if (!res.ok) {
         toast.error(data.error ?? "Unable to process login request.");
@@ -135,10 +211,6 @@ export function DeviceApprovalListener() {
             <p>
               <span className="font-medium text-foreground">Requested at:</span>{" "}
               {formatWhen(request.createdAt)}
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Expires at:</span>{" "}
-              {expiresLabel}
             </p>
             {request.requestedIp ? (
               <p>
