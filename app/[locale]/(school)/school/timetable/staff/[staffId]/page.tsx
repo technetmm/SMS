@@ -5,7 +5,6 @@ import { getTimetable } from "@/app/(school)/school/timetable/actions";
 import { TimetableFilters } from "@/components/timetable/timetable-filters";
 import { TimetableTable } from "@/components/timetable/timetable-table";
 import { DragDropWeekTimetable } from "@/components/timetable/drag-drop-week";
-import { ActiveTimetableCard } from "@/components/timetable/active-timetable-card";
 import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +66,6 @@ export default async function StaffWeeklyTimetablePage({
           </Button>
         }
       />
-      <ActiveTimetableCard slots={slots} staffName={staff.name} />
       <DragDropWeekTimetable slots={slots} />
       <Card>
         <CardHeader>

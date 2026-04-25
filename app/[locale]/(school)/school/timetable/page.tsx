@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { TimetableTable } from "@/components/timetable/timetable-table";
 import { DragDropWeekTimetable } from "@/components/timetable/drag-drop-week";
-import { ActiveTimetableCard } from "@/components/timetable/active-timetable-card";
 import { requireSchoolAdminAccess } from "@/lib/rbac";
 import { getTimetable } from "@/app/(school)/school/timetable/actions";
 import { parsePageParam } from "@/lib/pagination";
@@ -46,7 +45,6 @@ export default async function TimetablePage({
           </Button>
         }
       />
-      <ActiveTimetableCard slots={slots} />
       <DragDropWeekTimetable slots={slots} />
       <Card>
         <CardHeader>

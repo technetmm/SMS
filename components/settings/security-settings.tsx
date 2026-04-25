@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { disableTwoFactor } from "@/app/(school)/school/settings/actions";
 import { Button } from "@/components/ui/button";
@@ -14,16 +14,25 @@ import { useRouter } from "@/i18n/navigation";
 
 export function SecuritySettings({
   lastLogin,
+  lastLoginIso,
   twoFactorEnabled,
 }: {
   lastLogin: string;
+  lastLoginIso?: string;
   twoFactorEnabled: boolean;
 }) {
   const t = useTranslations("SettingsSecurity");
+  const locale = useLocale();
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [pending, startTransition] = useTransition();
+  const localizedLastLogin = lastLoginIso
+    ? new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(lastLoginIso))
+    : lastLogin;
 
   return (
     <Card>
@@ -97,7 +106,7 @@ export function SecuritySettings({
         <div className="flex flex-col gap-3 rounded-2xl border p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-medium">{t("lastLogin.title")}</p>
-            <p className="text-xs text-muted-foreground">{lastLogin}</p>
+            <p className="text-xs text-muted-foreground">{localizedLastLogin}</p>
           </div>
           <Button type="button" variant="outline" disabled>
             {t("lastLogin.viewSessions")}

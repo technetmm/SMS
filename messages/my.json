@@ -1296,6 +1296,7 @@
       "board": {
         "title": "တစ်ပတ်စာ Board",
         "description": "Drag လုပ်၍ ရွှေ့နိုင်ပြီး right-click ဖြင့် slot များကို copy/paste လုပ်နိုင်သည်။",
+        "activeDay": "လက်ရှိနေ့: {day}",
         "updating": "Updating...",
         "days": {
           "mon": "တနင်္လာ",

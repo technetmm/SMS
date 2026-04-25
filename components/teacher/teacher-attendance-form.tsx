@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -29,15 +29,18 @@ type EnrollmentOption = {
 
 export function TeacherAttendanceForm({
   enrollments,
-  defaultDate,
 }: {
   enrollments: EnrollmentOption[];
-  defaultDate: string;
+  defaultDate?: string;
 }) {
   const t = useTranslations("SchoolEntities.attendance.form");
   const router = useRouter();
   const [state, formAction] = useActionState(markTeacherAttendance, initialState);
   const [handled, setHandled] = useState(false);
+  const machineToday = useMemo(
+    () => new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10),
+    [],
+  );
 
   useEffect(() => {
     if (handled) return;
@@ -86,7 +89,7 @@ export function TeacherAttendanceForm({
               id="date"
               name="date"
               type="date"
-              defaultValue={defaultDate}
+              defaultValue={machineToday}
               required
             />
           </div>
