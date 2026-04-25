@@ -119,7 +119,7 @@ export async function getTeacherSections() {
   });
 
   return sections.map((item) => {
-    console.log("Sections => ", item);
+    console.log("Sections => ", item.section?.timetables);
     return {
       id: item.section.id,
       name: item.section.name,
