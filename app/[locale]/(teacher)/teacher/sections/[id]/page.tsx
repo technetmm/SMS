@@ -113,7 +113,10 @@ export default async function TeacherSectionDetailPage({
         </Card>
       </div>
 
-      <TeacherSectionActiveTimetableCard slots={section.timetable} />
+      <TeacherSectionActiveTimetableCard
+        slots={section.timetable}
+        timeZone={scope.timeZone}
+      />
 
       <Card>
         <CardHeader>
