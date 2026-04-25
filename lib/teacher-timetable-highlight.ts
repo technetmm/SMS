@@ -95,6 +95,11 @@ export function getTimetableSlotState(
 
   console.log(nowTime, startTime, endTime);
 
+  const nowMinute = now.nowMinutes;
+  const startMinute = timeToMinutes(slot.startTime);
+  const endMinute = timeToMinutes(slot.endTime);
+  console.log(nowMinute, startMinute, endMinute);
+
   if (nowTime < startTime) {
     return "upcoming";
   }
