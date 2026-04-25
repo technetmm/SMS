@@ -36,7 +36,6 @@ type DeviceApprovalTableMessages = {
     role: string;
     school: string;
     requested: string;
-    expires: string;
     deviceIp: string;
     status: string;
     actions: string;
@@ -74,7 +73,6 @@ const defaultMessages: DeviceApprovalTableMessages = {
     role: "Role",
     school: "School",
     requested: "Requested",
-    expires: "Expires",
     deviceIp: "Device / IP",
     status: "Status",
     actions: "Actions",
@@ -149,7 +147,9 @@ export function DeviceApprovalTable({
         return;
       }
 
-      setRequests((current) => current.filter((request) => request.id !== requestId));
+      setRequests((current) =>
+        current.filter((request) => request.id !== requestId),
+      );
       toast.success(
         action === "approve"
           ? messages.success.approved
@@ -171,10 +171,11 @@ export function DeviceApprovalTable({
           <TableHead>{messages.columns.role}</TableHead>
           {showSchool ? <TableHead>{messages.columns.school}</TableHead> : null}
           <TableHead>{messages.columns.requested}</TableHead>
-          <TableHead>{messages.columns.expires}</TableHead>
           <TableHead>{messages.columns.deviceIp}</TableHead>
           <TableHead>{messages.columns.status}</TableHead>
-          <TableHead className="text-right">{messages.columns.actions}</TableHead>
+          <TableHead className="text-right">
+            {messages.columns.actions}
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -198,15 +199,16 @@ export function DeviceApprovalTable({
               </TableCell>
               {showSchool ? (
                 <TableCell>
-                  {request.requester.schoolName ?? messages.fallbacks.notAvailable}
+                  {request.requester.schoolName ??
+                    messages.fallbacks.notAvailable}
                 </TableCell>
               ) : null}
               <TableCell>{formatWhen(request.createdAt, locale)}</TableCell>
-              <TableCell>{formatWhen(request.expiresAt, locale)}</TableCell>
               <TableCell>
                 <div className="space-y-1">
                   <div className="max-w-xs truncate text-sm">
-                    {request.requestedUserAgent ?? messages.fallbacks.notAvailable}
+                    {request.requestedUserAgent ??
+                      messages.fallbacks.notAvailable}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     {request.requestedIp ?? messages.fallbacks.notAvailable}
@@ -245,7 +247,7 @@ export function DeviceApprovalTable({
         {requests.length === 0 ? (
           <TableRow>
             <TableCell
-              colSpan={showSchool ? 8 : 7}
+              colSpan={showSchool ? 7 : 6}
               className="py-10 text-center text-sm text-muted-foreground"
             >
               {messages.empty}

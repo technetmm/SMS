@@ -15,6 +15,8 @@ const requestSchema = z.object({
 export async function POST(request: NextRequest) {
   const token = await getToken({ req: request });
   const approverId = typeof token?.id === "string" ? token.id : null;
+  const approverSessionId =
+    typeof token?.sessionId === "string" ? token.sessionId : null;
   const approverRole = token?.role;
   const approverSchoolId =
     typeof token?.schoolId === "string" ? token.schoolId : null;
@@ -40,7 +42,6 @@ export async function POST(request: NextRequest) {
       status: true,
       currentSessionId: true,
       requestedSessionId: true,
-      expiresAt: true,
       user: {
         select: {
           role: true,
@@ -54,33 +55,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Request not found" }, { status: 404 });
   }
 
-  if (
-    !canApproveDeviceRequest(
-      {
-        role: approverRole as UserRole,
-        schoolId: approverSchoolId,
-      },
-      {
-        role: approvalRequest.user.role,
-        schoolId: approvalRequest.user.schoolId,
-      },
-    )
-  ) {
+  const canSelfApproveCurrentSession =
+    approvalRequest.userId === approverId &&
+    Boolean(approverSessionId) &&
+    approverSessionId === approvalRequest.currentSessionId;
+
+  const canRoleApprove = canApproveDeviceRequest(
+    {
+      role: approverRole as UserRole,
+      schoolId: approverSchoolId,
+    },
+    {
+      role: approvalRequest.user.role,
+      schoolId: approvalRequest.user.schoolId,
+    },
+  );
+
+  if (!canSelfApproveCurrentSession && !canRoleApprove) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   if (approvalRequest.status !== "PENDING") {
     return NextResponse.json({ error: "Request already handled", status: approvalRequest.status }, { status: 409 });
-  }
-
-  if (approvalRequest.expiresAt.getTime() <= now.getTime()) {
-    await finalizeDeviceApprovalRequest(prisma, {
-      requestId: approvalRequest.id,
-      userId: approvalRequest.userId,
-      outcome: "EXPIRED",
-      now,
-    });
-    return NextResponse.json({ error: "Request expired", status: "EXPIRED" }, { status: 410 });
   }
 
   if (parsed.data.action === "deny") {

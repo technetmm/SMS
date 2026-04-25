@@ -1,6 +1,7 @@
 import type { NextAuthOptions } from "next-auth";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { getToken } from "next-auth/jwt";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { getServerSession } from "next-auth/next";
 import { randomUUID } from "crypto";
@@ -11,7 +12,6 @@ import {
   buildDeviceApprovalError,
   DEVICE_APPROVAL_DENIED_CODE,
   DEVICE_APPROVAL_EXPIRED_CODE,
-  DEVICE_APPROVAL_TTL_MS,
 } from "@/lib/auth/device-approval";
 import {
   buildEmailVerificationIdentifier,
@@ -245,21 +245,10 @@ export const authOptions: NextAuthOptions = {
               status: true,
               currentSessionId: true,
               requestedSessionId: true,
-              expiresAt: true,
             },
           });
 
           if (!approvalRequest || approvalRequest.userId !== user.id) {
-            throw new Error(DEVICE_APPROVAL_EXPIRED_CODE);
-          }
-
-          if (approvalRequest.expiresAt.getTime() <= now.getTime()) {
-            await finalizeDeviceApprovalRequest(prisma, {
-              requestId: approvalRequest.id,
-              userId: user.id,
-              outcome: "EXPIRED",
-              now,
-            });
             throw new Error(DEVICE_APPROVAL_EXPIRED_CODE);
           }
 
@@ -399,10 +388,18 @@ export const authOptions: NextAuthOptions = {
           };
         }
 
+        const existingSessionToken = await getToken({
+          req: req as Parameters<typeof getToken>[0]["req"],
+          secret: resolveAuthSecret(),
+        });
+        const existingSessionId =
+          typeof existingSessionToken?.sessionId === "string"
+            ? existingSessionToken.sessionId
+            : null;
         const isSameBrowserSessionReclaim =
-          Boolean(requestedUserAgent) &&
-          Boolean(user.activeSessionUserAgent) &&
-          requestedUserAgent === user.activeSessionUserAgent;
+          Boolean(existingSessionId) &&
+          Boolean(user.activeSessionId) &&
+          existingSessionId === user.activeSessionId;
 
         if (isSameBrowserSessionReclaim) {
           await expirePendingDeviceApprovalsForUser(user.id, {
@@ -456,7 +453,6 @@ export const authOptions: NextAuthOptions = {
             userId: user.id,
             currentSessionId: user.activeSessionId,
             status: "PENDING",
-            expiresAt: { gt: now },
           },
           orderBy: { createdAt: "desc" },
           select: { publicToken: true },
@@ -468,9 +464,6 @@ export const authOptions: NextAuthOptions = {
           );
         }
 
-        const approvalExpiresAt = new Date(
-          now.getTime() + DEVICE_APPROVAL_TTL_MS,
-        );
         const publicToken = randomUUID();
 
         await prisma.loginApprovalRequest.create({
@@ -480,7 +473,7 @@ export const authOptions: NextAuthOptions = {
             requestedSessionId: sessionId,
             currentSessionId: user.activeSessionId,
             status: "PENDING",
-            expiresAt: approvalExpiresAt,
+            expiresAt: now,
             requestedIp,
             requestedUserAgent,
           },
