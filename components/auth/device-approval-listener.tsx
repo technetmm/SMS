@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dialog";
 
 const POLL_INTERVAL_MS = 3000;
+const SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY =
+  "sms.seen-device-approval-request-ids";
 
 type PendingRequest = {
   id: string;
@@ -42,10 +44,44 @@ const APPROVER_ROLES = new Set([
   "SCHOOL_ADMIN",
 ]);
 
+function readSeenApproverRequestIds() {
+  if (typeof window === "undefined") return new Set<string>();
+
+  try {
+    const raw = window.sessionStorage.getItem(
+      SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY,
+    );
+    if (!raw) return new Set<string>();
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return new Set<string>();
+    return new Set(parsed.filter((id): id is string => typeof id === "string"));
+  } catch {
+    return new Set<string>();
+  }
+}
+
+function saveSeenApproverRequestIds(seenRequestIds: Set<string>) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.sessionStorage.setItem(
+      SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY,
+      JSON.stringify([...seenRequestIds]),
+    );
+  } catch {
+    // Ignore storage errors so polling still works.
+  }
+}
+
 export function DeviceApprovalListener({ role }: { role: string }) {
   const [request, setRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
-  const seenApproverRequestIdsRef = useRef(new Set<string>());
+  const seenApproverRequestIdsRef = useRef<Set<string> | null>(null);
+
+  if (seenApproverRequestIdsRef.current === null) {
+    seenApproverRequestIdsRef.current = readSeenApproverRequestIds();
+  }
 
   const fetchPending = useCallback(async () => {
     try {
@@ -69,10 +105,12 @@ export function DeviceApprovalListener({ role }: { role: string }) {
       setRequest(next);
 
       if (canApproveOthers) {
-        const approverRequests = requests.filter((item) => Boolean(item.requester));
+        const approverRequests = requests.filter((item) =>
+          Boolean(item.requester),
+        );
         const incomingIds = new Set(approverRequests.map((item) => item.id));
         const updated = new Set(
-          [...seenApproverRequestIdsRef.current].filter((requestId) =>
+          [...seenApproverRequestIdsRef.current!].filter((requestId) =>
             incomingIds.has(requestId),
           ),
         );
@@ -88,6 +126,7 @@ export function DeviceApprovalListener({ role }: { role: string }) {
         }
 
         seenApproverRequestIdsRef.current = updated;
+        saveSeenApproverRequestIds(updated);
       }
     } catch {
       setRequest(null);
