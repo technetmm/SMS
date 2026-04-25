@@ -13,6 +13,7 @@ self.addEventListener("push", (event) => {
         title: "Reminder",
         body: "You have a timetable reminder.",
         url: "/teacher/dashboard",
+        type: "teacher-timetable-reminder",
       };
     }
 
@@ -23,9 +24,14 @@ self.addEventListener("push", (event) => {
         title: "Reminder",
         body: event.data.text(),
         url: "/teacher/dashboard",
+        type: "teacher-timetable-reminder",
       };
     }
   })();
+
+  const payloadType =
+    typeof payload.type === "string" ? payload.type : "generic-push";
+  const shouldPlayTeacherAlert = payloadType === "teacher-timetable-reminder";
 
   event.waitUntil(
     Promise.all([
@@ -36,7 +42,12 @@ self.addEventListener("push", (event) => {
         })
         .then((windowClients) => {
           for (const client of windowClients) {
-            client.postMessage({ type: "teacher-reminder-alert" });
+            client.postMessage({
+              type: shouldPlayTeacherAlert
+                ? "teacher-reminder-alert"
+                : "push-notification-received",
+              payloadType,
+            });
           }
         }),
       self.registration.showNotification(payload.title || "Reminder", {
@@ -50,6 +61,11 @@ self.addEventListener("push", (event) => {
         vibrate: [200, 100, 200],
         data: {
           url: payload.url || "/teacher/dashboard",
+          type: payloadType,
+          metadata:
+            payload.metadata && typeof payload.metadata === "object"
+              ? payload.metadata
+              : {},
         },
       }),
     ]),

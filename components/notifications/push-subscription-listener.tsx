@@ -2,6 +2,14 @@
 
 import { useEffect } from "react";
 
+const PUSH_ENABLED_ROLES = new Set([
+  "SUPER_ADMIN",
+  "SCHOOL_SUPER_ADMIN",
+  "SCHOOL_ADMIN",
+  "TEACHER",
+  "STUDENT",
+]);
+
 function urlBase64ToUint8Array(base64String: string) {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replaceAll("-", "+").replaceAll("_", "/");
@@ -56,7 +64,7 @@ function vibrateReminderPattern() {
 
 export function PushSubscriptionListener({ role }: { role: string }) {
   useEffect(() => {
-    if (role !== "TEACHER") {
+    if (!PUSH_ENABLED_ROLES.has(role)) {
       return;
     }
 
