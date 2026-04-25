@@ -33,8 +33,10 @@ const DAYS: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export function TeacherDashboardTimetableGrid({
   slots,
+  timeZone,
 }: {
   slots: TimetableSlot[];
+  timeZone?: string;
 }) {
   const t = useTranslations("TeacherSite.dashboard.timetable");
   const timetableT = useTranslations("SchoolEntities.timetable.table");
@@ -61,15 +63,17 @@ export function TeacherDashboardTimetableGrid({
     ]),
   );
   const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
+    createTimetableNowContext(new Date(), timeZone),
   );
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
+    const syncNowContext = () => {
+      setNowContext(createTimetableNowContext(new Date(), timeZone));
+    };
+    syncNowContext();
+    const intervalId = window.setInterval(syncNowContext, 30_000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [timeZone]);
 
   return (
     <Card>

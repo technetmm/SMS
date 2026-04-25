@@ -49,7 +49,15 @@ type Slot = {
 
 const days: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
-export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
+export function DragDropWeekTimetable({
+  slots,
+  returnTo = "/school/timetable",
+  timeZone,
+}: {
+  slots: Slot[];
+  returnTo?: string;
+  timeZone?: string;
+}) {
   const t = useTranslations("SchoolEntities.timetable.board");
   const locale = useLocale();
   const router = useRouter();
@@ -57,15 +65,17 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
   const [copiedSlotId, setCopiedSlotId] = useState<string | null>(null);
   const [slotToDelete, setSlotToDelete] = useState<Slot | null>(null);
   const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
+    createTimetableNowContext(new Date(), timeZone),
   );
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
+    const syncNowContext = () => {
+      setNowContext(createTimetableNowContext(new Date(), timeZone));
+    };
+    syncNowContext();
+    const intervalId = window.setInterval(syncNowContext, 30_000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [timeZone]);
 
   const byDay = useMemo(() => {
     const map = new Map<DayOfWeek, Slot[]>();
@@ -238,7 +248,12 @@ export function DragDropWeekTimetable({ slots }: { slots: Slot[] }) {
                         </ContextMenuItem>
                         <ContextMenuItem
                           disabled={pending}
-                          onClick={() => router.push(`/school/timetable/${slot.id}/edit`)}
+                          onClick={() => {
+                            const params = new URLSearchParams({ returnTo });
+                            router.push(
+                              `/school/timetable/${slot.id}/edit?${params.toString()}`,
+                            );
+                          }}
                         >
                           {t("actions.editSlot")}
                         </ContextMenuItem>

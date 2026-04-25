@@ -26,6 +26,7 @@ import { useLocale, useTranslations } from "next-intl";
 export function TeacherTimetableTable({
   rows,
   searchParams,
+  timeZone,
 }: {
   rows: {
     items: Array<{
@@ -47,6 +48,7 @@ export function TeacherTimetableTable({
     totalPages: number;
   };
   searchParams?: Record<string, string | string[] | undefined>;
+  timeZone?: string;
 }) {
   const t = useTranslations("SchoolEntities.timetable.table");
   const locale = useLocale();
@@ -63,15 +65,17 @@ export function TeacherTimetableTable({
     return t(`days.${key}`);
   };
   const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
+    createTimetableNowContext(new Date(), timeZone),
   );
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
+    const syncNowContext = () => {
+      setNowContext(createTimetableNowContext(new Date(), timeZone));
+    };
+    syncNowContext();
+    const intervalId = window.setInterval(syncNowContext, 30_000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [timeZone]);
 
   return (
     <div className="rounded-lg border bg-background">

@@ -19,20 +19,28 @@ type Slot = {
   staff: { name: string };
 };
 
-export function TeacherSectionActiveTimetableCard({ slots }: { slots: Slot[] }) {
+export function TeacherSectionActiveTimetableCard({
+  slots,
+  timeZone,
+}: {
+  slots: Slot[];
+  timeZone?: string;
+}) {
   const t = useTranslations("TeacherSite.sectionDetails");
   const timetableT = useTranslations("SchoolEntities.timetable.table");
   const locale = useLocale();
   const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
+    createTimetableNowContext(new Date(), timeZone),
   );
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
+    const syncNowContext = () => {
+      setNowContext(createTimetableNowContext(new Date(), timeZone));
+    };
+    syncNowContext();
+    const intervalId = window.setInterval(syncNowContext, 30_000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [timeZone]);
 
   const dayLabel = (day: string) => {
     const key = day.toLowerCase() as
