@@ -17,7 +17,6 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { getTranslations } from "next-intl/server";
-import { getAppIsoDate } from "@/lib/app-time";
 
 export default async function TeacherAttendancePage({
   searchParams,
@@ -71,13 +70,11 @@ export default async function TeacherAttendancePage({
     return <TeacherAccessFallback />;
   }
 
-  const today = getAppIsoDate();
-
   return (
     <div className="space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      <TeacherAttendanceForm defaultDate={today} enrollments={formOptions.enrollments} />
+      <TeacherAttendanceForm enrollments={formOptions.enrollments} />
 
       <Card>
         <CardHeader>

@@ -1329,6 +1329,7 @@
       "board": {
         "title": "Weekly Board",
         "description": "Drag to move, or right-click to copy and paste slots across days.",
+        "activeDay": "Active day: {day}",
         "updating": "Updating...",
         "days": {
           "mon": "Monday",

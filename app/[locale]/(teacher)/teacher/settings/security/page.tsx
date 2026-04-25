@@ -44,6 +44,7 @@ export default async function TeacherSecurityPage() {
       </div>
       <SecuritySettings
         lastLogin={lastLogin}
+        lastLoginIso={currentUser.updatedAt.toISOString()}
         twoFactorEnabled={currentUser.twoFactorEnabled}
       />
     </div>
