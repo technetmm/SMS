@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -16,12 +15,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
-  createTimetableNowContext,
   getTimetableSlotBackgroundClass,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
+import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
 
 export function TeacherTimetableTable({
   rows,
@@ -64,18 +63,7 @@ export function TeacherTimetableTable({
       | "sun";
     return t(`days.${key}`);
   };
-  const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date(), timeZone),
-  );
-
-  useEffect(() => {
-    const syncNowContext = () => {
-      setNowContext(createTimetableNowContext(new Date(), timeZone));
-    };
-    syncNowContext();
-    const intervalId = window.setInterval(syncNowContext, 30_000);
-    return () => window.clearInterval(intervalId);
-  }, [timeZone]);
+  const nowContext = useTimetableNowContext(timeZone);
 
   return (
     <div className="rounded-lg border bg-background">
@@ -94,7 +82,9 @@ export function TeacherTimetableTable({
             <TableRow
               key={slot.id}
               className={cn(
-                getTimetableSlotBackgroundClass(getTimetableSlotState(slot, nowContext)),
+                getTimetableSlotBackgroundClass(
+                  nowContext ? getTimetableSlotState(slot, nowContext) : "default",
+                ),
               )}
             >
               <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>

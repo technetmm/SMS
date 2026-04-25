@@ -1,6 +1,6 @@
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { cn } from "@/lib/utils";
-import { timeToMinutes } from "@/lib/time";
+import { minutesToTime, timeToMinutes } from "@/lib/time";
 
 type TimetableSlotLike = {
   dayOfWeek: DayOfWeek;
@@ -50,7 +50,9 @@ export function createTimetableNowContext(
       }).formatToParts(now);
       const weekday = parts.find((part) => part.type === "weekday")?.value;
       const hour = Number(parts.find((part) => part.type === "hour")?.value);
-      const minute = Number(parts.find((part) => part.type === "minute")?.value);
+      const minute = Number(
+        parts.find((part) => part.type === "minute")?.value,
+      );
 
       if (
         weekday &&
@@ -86,14 +88,14 @@ export function getTimetableSlotState(
     return "default";
   }
 
-  const startMinutes = timeToMinutes(slot.startTime);
-  const endMinutes = timeToMinutes(slot.endTime);
+  const startTime = minutesToTime(slot.startTime);
+  const endTime = minutesToTime(slot.endTime);
 
-  if (now.nowMinutes < startMinutes) {
+  if (new Date().getTime() < startTime) {
     return "upcoming";
   }
 
-  if (now.nowMinutes >= endMinutes) {
+  if (new Date().getTime() >= endTime) {
     return "past";
   }
 
@@ -116,7 +118,10 @@ export function getTimetableSlotBackgroundClass(state: TimetableSlotState) {
   return "";
 }
 
-export function getTimetableDayBackgroundClass(day: DayOfWeek, now: TimetableNowContext) {
+export function getTimetableDayBackgroundClass(
+  day: DayOfWeek,
+  now: TimetableNowContext,
+) {
   return cn(
     "rounded-md border p-2",
     isTodayTimetableDay(day, now)
