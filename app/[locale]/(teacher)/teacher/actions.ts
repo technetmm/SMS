@@ -128,9 +128,11 @@ export async function getTeacherSections() {
       meetingLink: item.section.meetingLink,
       className: item.section.class.name,
       activeStudents: item.section.enrollments.length,
-      isActiveNow: item.section.timetables.some(
-        (slot) => getTimetableSlotState(slot, nowContext) === "active",
-      ),
+      isActiveNow: item.section.timetables.some((slot) => {
+        const value = getTimetableSlotState(slot, nowContext) === "active";
+        console.log("Slot => ", slot, "Value => ", value);
+        return value;
+      }),
     };
   });
 }
