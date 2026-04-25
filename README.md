@@ -1,140 +1,135 @@
-# SMS SaaS Infrastructure
+# Technet SMS
 
-Production-ready infra stack for a multi-tenant SMS:
+Multi-tenant School Management System built with Next.js 16, Prisma, PostgreSQL, and Redis.
 
-- Next.js app (standalone)
-- PostgreSQL
-- Redis
-- NGINX reverse proxy
-- Certbot (auto-renew)
-- Prometheus + Grafana
-- Elasticsearch + Logstash + Kibana
+## What This Project Includes
 
-## 1) Environment
+- Role-based portals for `SUPER_ADMIN`, `SCHOOL_SUPER_ADMIN`, `SCHOOL_ADMIN`, `TEACHER`, and `STUDENT`
+- School operations modules: students, staff, subjects, courses, classes, sections, enrollments
+- Scheduling modules: section schedules, timetables, student attendance, staff attendance
+- Finance modules: invoices, payments, refunds, payroll, monthly billing
+- Platform modules: tenant management and subscriptions
+- Security modules: email verification, 2FA, device approval flow, session lock, audit logs
+- Internationalization with English (`en`) and Myanmar (`my`)
+
+## Tech Stack
+
+- `next@16.2.0` + `react@19.2.4`
+- Prisma ORM (`prisma@7.5.0`, `@prisma/client@7.5.0`)
+- PostgreSQL (`@prisma/adapter-pg`)
+- Redis (`ioredis`)
+- NextAuth credentials login + Prisma adapter
+- Tailwind CSS v4 + shadcn/ui components
+
+## ER Diagram
+
+The ERD is generated from `prisma/schema.prisma`.
+
+![LMS ER Diagram](docs/erd-lms.png)
+
+Source files:
+- `docs/erd-lms.svg`
+- `docs/erd-lms.png`
+
+## Quick Start (Local)
+
+### 1) Install dependencies
 
 ```bash
-cp .env.example .env
+pnpm install
 ```
 
-Update secrets in `.env`:
+### 2) Configure environment
 
-- `AUTH_SECRET`
-- `POSTGRES_PASSWORD`
-- `GRAFANA_ADMIN_PASSWORD`
+Create local env files from your own secure values.
+
+Recommended baseline variables:
+- `DATABASE_URL`
+- `DIRECT_URL` (for Prisma shadow DB / direct migrations when needed)
+- `AUTH_SECRET` (preferred) or `NEXTAUTH_SECRET` (legacy fallback)
 - `NEXTAUTH_URL`
+- `REDIS_URL`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`
+- `FROM_EMAIL`, `FROM_NAME`
+- `APP_TIME_ZONE` (optional, defaults to `Asia/Yangon`)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` (Web Push VAPID public key)
+- `VAPID_PRIVATE_KEY` (Web Push VAPID private key)
+- `VAPID_CONTACT_EMAIL` (optional, e.g. `mailto:ops@example.com`)
+- `PUSH_REMINDER_CRON_SECRET` (secret header for reminder dispatch route)
+- `PUSH_REMINDER_LEAD_MINUTES` (optional, defaults to `2`)
 
-## 2) Run With Docker Compose
-
-Start:
-
-```bash
-docker compose up -d
-```
-
-Logs:
-
-```bash
-docker compose logs -f
-```
-
-Stop:
+### 3) Generate Prisma client
 
 ```bash
-docker compose down
-```
-
-Rebuild:
-
-```bash
-docker compose up --build -d
-```
-
-## 3) Prisma Migration / Seed
-
-Run migration with the dedicated tools container:
-
-```bash
-docker compose --profile tools run --rm migrate
-```
-
-Seed from migrate container:
-
-```bash
-docker compose --profile tools run --rm migrate pnpm prisma db seed
-```
-
-Supabase migration flow (recommended for Vercel deployments):
-
-```bash
-# 1) Set DATABASE_URL (pooler) and DIRECT_URL (direct DB) in .env
-# 2) Check migration status
-pnpm db:migrate:status
-
-# 3) Apply existing migrations safely
-pnpm db:migrate:deploy
-
-# 4) Generate Prisma client
 pnpm db:generate
 ```
 
-## 4) SSL (Certbot + NGINX)
-
-Set your domain/email in `.env`:
-
-- `DOMAIN=your-domain.com`
-- `CERTBOT_EMAIL=you@example.com`
-
-Initial certificate issue:
+### 4) Apply migrations
 
 ```bash
-sh infra/certbot/init-cert.sh your-domain.com you@example.com
+pnpm db:migrate:deploy
 ```
 
-Then reload NGINX:
+### 5) Seed initial super admin
 
 ```bash
-docker compose restart nginx
+pnpm db:seed
 ```
 
-Auto-renew is already configured in `certbot` service.
+Optional seed env vars:
+- `SEED_SUPER_ADMIN_EMAIL`
+- `SEED_SUPER_ADMIN_NAME`
+- `SEED_SUPER_ADMIN_PASSWORD`
 
-## 5) Monitoring
+### 6) Start development server
 
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3001`
-- Grafana datasource is provisioned automatically.
+```bash
+pnpm dev
+```
 
-## 6) Logging (ELK)
+## Database Commands
 
-- Elasticsearch: `http://localhost:9200`
-- Logstash TCP JSON input: `localhost:${LOGSTASH_TCP_PORT:-15000}`
-- Kibana: `http://localhost:5601`
+Default profile:
+- `pnpm db:generate`
+- `pnpm db:migrate`
+- `pnpm db:migrate:deploy`
+- `pnpm db:migrate:status`
+- `pnpm db:seed`
+- `pnpm db:studio`
 
-## 7) Development vs Production
+Environment-specific profiles:
+- Local (`.env.local`): `pnpm db:local:*`
+- Production migrate env (`.env.migrate`): `pnpm db:prod:*`
+- UAT migrate env (`.env.migrate.uat`): `pnpm db:uat:*`
 
-Development (hot reload):
+## Docker Compose Stack
+
+Production-like stack in `docker-compose.yml` includes:
+- App (`Next.js standalone`)
+- PostgreSQL
+- Redis
+- NGINX reverse proxy
+- Prometheus + Grafana
+- Elasticsearch + Logstash + Kibana
+
+Useful commands:
+
+```bash
+docker compose up -d
+docker compose logs -f
+docker compose down
+docker compose --profile tools run --rm migrate
+```
+
+Development hot-reload overlay:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-Local email delivery (signup verification/resend):
-
-- Set real SMTP values in `.env` (`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `FROM_EMAIL`).
-- For Gmail, use `SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`, `SMTP_SECURE=false`, and a Google App Password.
-- Email is sent directly by app server actions once SMTP is configured.
-
-Production:
-
-- Use built images
-- No bind-mount for source code
-- Use real secrets via environment/secret manager
-- Keep Postgres/Redis private (no public exposure in cloud firewall)
-
-## 8) Kubernetes
+## Kubernetes
 
 Manifests are in `k8s/`:
-
 - `namespace.yaml`
 - `configmap.yaml`
 - `secret.example.yaml`
@@ -149,43 +144,42 @@ Apply:
 kubectl apply -f k8s/
 ```
 
-## 9) Vercel + Supabase (Production)
+## Deployment Notes (Vercel + Supabase)
 
-Vercel project is linked via `.vercel/project.json` (`technetmm`).
+- App deploy target: Vercel
+- Database target: Supabase Postgres
+- Before release: run `pnpm db:migrate:status`, `pnpm db:migrate:deploy`, `pnpm db:generate`
+- CI safety scripts:
+  - `pnpm release:build-gate`
+  - `pnpm release:migration-gate`
+  - `pnpm release:check`
 
-Deployment topology:
+## Project Structure
 
-- Web app: Vercel (Git auto-deploy from `main`)
-- Shared backing services: Supabase Postgres + Redis
+- `app/`: Next.js app routes, layouts, server actions
+- `components/`: UI and domain components
+- `lib/`: domain logic, auth, billing, exports, jobs
+- `prisma/`: schema, migrations, seed script
+- `docs/`: documentation artifacts (including ERD)
+- `infra/` and `k8s/`: ops and deployment configs
 
-Set these Vercel environment variables (Production/Preview as needed):
+## Push Reminder Dispatch
 
-- `DATABASE_URL` (Supabase pooled URL)
-- `DIRECT_URL` (Supabase direct DB URL)
-- `AUTH_SECRET` (canonical auth secret; `NEXTAUTH_SECRET` is only a legacy fallback)
-- `NEXTAUTH_URL` (your Vercel app URL)
-- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`
-- `FROM_EMAIL`, `FROM_NAME`
+Teacher timetable push reminders are dispatched via:
 
-Configure Vercel Git integration:
+`POST /api/push/teacher-reminders`
 
-- Connect this repository to the linked Vercel project.
-- Enable Preview deployments for pull requests.
-- Set Production Branch to `main`.
+Required header:
 
-Run migrations against Supabase before first production cutover:
+- `x-cron-secret: <PUSH_REMINDER_CRON_SECRET>`
 
-```bash
-pnpm db:migrate:status
-pnpm db:migrate:deploy
-pnpm db:generate
-```
+Recommended: run this endpoint every minute from your scheduler/cron service.
 
-Release gates in CI (`.github/workflows/deploy.yml`):
+## Current Data Model Scope
 
-- Always gate on `pnpm db:generate` + `pnpm build`.
-- On pushes to `main`, also gate on `pnpm db:migrate:status` if `PRODUCTION_DATABASE_URL` secret is configured.
-- Optional secret: `PRODUCTION_DIRECT_URL` (falls back to `PRODUCTION_DATABASE_URL` if omitted).
-- Local equivalent checks: `pnpm release:build-gate` and `pnpm release:check`.
-
-Monthly invoice generation is currently manual-trigger only (no persistent background worker).
+Core entities in Prisma include:
+- Tenancy and identity: `Tenant`, `User`, `Subscription`, `Account`, `Session`, `LoginApprovalRequest`, `Notification`, `AuditLog`
+- School org: `Branch`, `Staff`, `Student`
+- Academic setup: `Subject`, `Course`, `CourseSubject`, `Class`, `Section`, `SectionStaff`, `SectionSchedule`, `Timetable`
+- Learning lifecycle: `Enrollment`, `Attendance`, `Progress`, `StaffAttendance`
+- Finance: `Invoice`, `Payment`, `Refund`, `Payroll`

@@ -11,7 +11,9 @@
     "back": "Back",
     "export": "Export",
     "joinMeeting": "Join Meeting",
-    "edit": "Edit"
+    "edit": "Edit",
+    "installApp": "Install App",
+    "installingApp": "Installing..."
   },
   "LocaleSwitcher": {
     "label": "Language switcher",
@@ -436,7 +438,8 @@
       "labels": {
         "students": "{count}/{capacity} students",
         "room": "Room: {room}",
-        "roomNotSet": "Room: Not set"
+        "roomNotSet": "Room: Not set",
+        "activeNow": "Active now"
       },
       "actions": {
         "openMeeting": "Open link",
@@ -451,6 +454,7 @@
       "activeTimetable": {
         "title": "Active Timetable",
         "liveNow": "A class for this section is active right now.",
+        "endingSoon": "Ending in {minutes} min",
         "noActive": "No active timetable slot right now.",
         "startsAt": "Next slot today:",
         "noMoreToday": "No more timetable slots for today.",
@@ -528,6 +532,10 @@
       "timetable": {
         "title": "Weekly Timetable",
         "description": "Your assigned schedule for this week.",
+        "endingSoon": "Ending in {minutes} min",
+        "startingSoon": "Starting in {minutes} min",
+        "desktopReminderTitle": "Class reminder",
+        "desktopReminderBody": "{section} ({className}) starts in {minutes} min.",
         "viewFullTimetable": "View full timetable",
         "empty": "No timetable slots assigned yet.",
         "noSlots": "No slots"

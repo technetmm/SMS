@@ -11,7 +11,9 @@
     "back": "နောက်သို့ ပြန်သွားမည်",
     "export": "ထုတ်ယူမည်",
     "joinMeeting": "အစည်းအဝေးတွင် ပါဝင်မည်",
-    "edit": "ပြင်ဆင်မည်"
+    "edit": "ပြင်ဆင်မည်",
+    "installApp": "App ထည့်သွင်းမည်",
+    "installingApp": "ထည့်သွင်းနေသည်..."
   },
   "LocaleSwitcher": {
     "label": "ဘာသာစကား ရွေးချယ်မှု",
@@ -444,7 +446,8 @@
       "labels": {
         "students": "ကျောင်းသား {count}/{capacity}",
         "room": "အခန်း: {room}",
-        "roomNotSet": "အခန်း: မသတ်မှတ်ရသေး"
+        "roomNotSet": "အခန်း: မသတ်မှတ်ရသေး",
+        "activeNow": "လက်ရှိအတန်းရှိနေသည်"
       },
       "actions": {
         "openMeeting": "Link ဖွင့်မည်",
@@ -459,6 +462,7 @@
       "activeTimetable": {
         "title": "လက်ရှိ အချိန်ဇယား",
         "liveNow": "ဤ section အတွက် အခုချိန်တွင် class ရှိနေပါသည်။",
+        "endingSoon": "{minutes} မိနစ်အတွင်း ပြီးဆုံးမည်",
         "noActive": "အခုချိန်တွင် active slot မရှိသေးပါ။",
         "startsAt": "ဒီနေ့ နောက်တစ်ကြိမ်:",
         "noMoreToday": "ဒီနေ့အတွက် timetable slot မရှိတော့ပါ။",
@@ -536,6 +540,10 @@
       "timetable": {
         "title": "အပတ်စဉ် အချိန်ဇယား",
         "description": "ဤအပတ်အတွက် သင့်အား သတ်မှတ်ထားသော သင်ကြားရေးအချိန်ဇယား။",
+        "endingSoon": "{minutes} မိနစ်အတွင်း ပြီးဆုံးမည်",
+        "startingSoon": "{minutes} မိနစ်အတွင်း စတင်မည်",
+        "desktopReminderTitle": "အတန်း သတိပေးချက်",
+        "desktopReminderBody": "{section} ({className}) သည် {minutes} မိနစ်အတွင်း စတင်ပါမည်။",
         "viewFullTimetable": "အချိန်ဇယား အပြည့်အစုံကြည့်ရန်",
         "empty": "အချိန်ဇယား slot မသတ်မှတ်ရသေးပါ။",
         "noSlots": "Slot မရှိပါ"

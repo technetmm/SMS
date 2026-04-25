@@ -2,9 +2,12 @@
 
 import { formatTimetableTimeRange } from "@/lib/formatter";
 import {
+  getTimetableSlotRemainingMinutes,
   getTimetableSlotState,
+  isTimetableSlotEndingSoon,
 } from "@/lib/teacher-timetable-highlight";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useLocale, useTranslations } from "next-intl";
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
@@ -45,6 +48,10 @@ export function TeacherSectionActiveTimetableCard({
   const activeSlot = nowContext
     ? slots.find((slot) => getTimetableSlotState(slot, nowContext) === "active")
     : undefined;
+  const activeRemainingMinutes =
+    activeSlot && nowContext ? getTimetableSlotRemainingMinutes(activeSlot, nowContext) : null;
+  const activeIsEndingSoon =
+    activeSlot && nowContext ? isTimetableSlotEndingSoon(activeSlot, nowContext) : false;
   const upcomingTodaySlot = nowContext
     ? slots
         .filter((slot) => getTimetableSlotState(slot, nowContext) === "upcoming")
@@ -62,6 +69,14 @@ export function TeacherSectionActiveTimetableCard({
             <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
               {t("activeTimetable.liveNow")}
             </p>
+            {activeIsEndingSoon && activeRemainingMinutes != null ? (
+              <Badge
+                className="w-fit border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                variant="outline"
+              >
+                {t("activeTimetable.endingSoon", { minutes: activeRemainingMinutes })}
+              </Badge>
+            ) : null}
             <p className="text-sm">
               <span className="font-medium">{dayLabel(activeSlot.dayOfWeek)}</span>{" "}
               •{" "}

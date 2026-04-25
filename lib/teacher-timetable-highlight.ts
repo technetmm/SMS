@@ -1,6 +1,6 @@
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { cn } from "@/lib/utils";
-import { minutesToTime, timeToMinutes } from "@/lib/time";
+import { timeToMinutes } from "@/lib/time";
 
 type TimetableSlotLike = {
   dayOfWeek: DayOfWeek;
@@ -88,18 +88,68 @@ export function getTimetableSlotState(
     return "default";
   }
 
-  const startTime = minutesToTime(slot.startTime);
-  const endTime = minutesToTime(slot.endTime);
+  const startMinutes = timeToMinutes(slot.startTime);
+  const endMinutes = timeToMinutes(slot.endTime);
 
-  if (new Date().getTime() < startTime) {
+  if (now.nowMinutes < startMinutes) {
     return "upcoming";
   }
 
-  if (new Date().getTime() >= endTime) {
+  if (now.nowMinutes >= endMinutes) {
     return "past";
   }
 
   return "active";
+}
+
+export function getTimetableSlotRemainingMinutes(
+  slot: TimetableSlotLike,
+  now: TimetableNowContext,
+) {
+  if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
+    return null;
+  }
+
+  const remainingMinutes = timeToMinutes(slot.endTime) - now.nowMinutes;
+  return Math.max(0, remainingMinutes);
+}
+
+export function getTimetableSlotStartsInMinutes(
+  slot: TimetableSlotLike,
+  now: TimetableNowContext,
+) {
+  if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
+    return null;
+  }
+
+  const startsInMinutes = timeToMinutes(slot.startTime) - now.nowMinutes;
+  return Math.max(0, startsInMinutes);
+}
+
+export function isTimetableSlotEndingSoon(
+  slot: TimetableSlotLike,
+  now: TimetableNowContext,
+  thresholdMinutes = 2,
+) {
+  if (getTimetableSlotState(slot, now) !== "active") {
+    return false;
+  }
+
+  const remainingMinutes = getTimetableSlotRemainingMinutes(slot, now);
+  return remainingMinutes != null && remainingMinutes <= thresholdMinutes;
+}
+
+export function isTimetableSlotStartingSoon(
+  slot: TimetableSlotLike,
+  now: TimetableNowContext,
+  thresholdMinutes = 2,
+) {
+  if (getTimetableSlotState(slot, now) !== "upcoming") {
+    return false;
+  }
+
+  const startsInMinutes = getTimetableSlotStartsInMinutes(slot, now);
+  return startsInMinutes != null && startsInMinutes <= thresholdMinutes;
 }
 
 export function getTimetableSlotBackgroundClass(state: TimetableSlotState) {
