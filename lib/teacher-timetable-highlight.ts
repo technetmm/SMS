@@ -20,12 +20,54 @@ const JS_DAY_TO_TIMETABLE_DAY: Record<number, DayOfWeek> = {
   6: DayOfWeek.SAT,
 };
 
+const WEEKDAY_SHORT_TO_TIMETABLE_DAY: Record<string, DayOfWeek> = {
+  Sun: DayOfWeek.SUN,
+  Mon: DayOfWeek.MON,
+  Tue: DayOfWeek.TUE,
+  Wed: DayOfWeek.WED,
+  Thu: DayOfWeek.THU,
+  Fri: DayOfWeek.FRI,
+  Sat: DayOfWeek.SAT,
+};
+
 export type TimetableNowContext = {
   dayOfWeek: DayOfWeek;
   nowMinutes: number;
 };
 
-export function createTimetableNowContext(now: Date): TimetableNowContext {
+export function createTimetableNowContext(
+  now: Date,
+  timeZone?: string,
+): TimetableNowContext {
+  if (timeZone) {
+    try {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }).formatToParts(now);
+      const weekday = parts.find((part) => part.type === "weekday")?.value;
+      const hour = Number(parts.find((part) => part.type === "hour")?.value);
+      const minute = Number(parts.find((part) => part.type === "minute")?.value);
+
+      if (
+        weekday &&
+        WEEKDAY_SHORT_TO_TIMETABLE_DAY[weekday] &&
+        Number.isFinite(hour) &&
+        Number.isFinite(minute)
+      ) {
+        return {
+          dayOfWeek: WEEKDAY_SHORT_TO_TIMETABLE_DAY[weekday],
+          nowMinutes: hour * 60 + minute,
+        };
+      }
+    } catch {
+      // Fall back to browser-local time if timezone is invalid/unavailable.
+    }
+  }
+
   return {
     dayOfWeek: JS_DAY_TO_TIMETABLE_DAY[now.getDay()] ?? DayOfWeek.SUN,
     nowMinutes: now.getHours() * 60 + now.getMinutes(),

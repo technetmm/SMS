@@ -66,7 +66,10 @@ export default async function StaffWeeklyTimetablePage({
           </Button>
         }
       />
-      <DragDropWeekTimetable slots={slots} />
+      <DragDropWeekTimetable
+        slots={slots}
+        returnTo={`/school/timetable/staff/${staff.id}`}
+      />
       <Card>
         <CardHeader>
           <CardTitle>{t("filters")}</CardTitle>

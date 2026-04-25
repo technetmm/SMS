@@ -124,7 +124,12 @@ export async function TimetableTable({
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button asChild size="sm" variant="outline">
-                    <Link href={`/school/timetable/${slot.id}/edit`}>
+                    <Link
+                      href={{
+                        pathname: `/school/timetable/${slot.id}/edit`,
+                        query: { returnTo: pathname },
+                      }}
+                    >
                       {t("actions.edit")}
                     </Link>
                   </Button>

@@ -7,12 +7,19 @@ import { updateTimetableSlot } from "@/app/(school)/school/timetable/actions";
 
 export default async function EditTimetablePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
   const { id } = await params;
+  const query = await searchParams;
+  const returnTo =
+    query.returnTo && query.returnTo.startsWith("/school/")
+      ? query.returnTo
+      : "/school/timetable";
 
   const [slot, staff, sections] = await Promise.all([
     prisma.timetable.findFirst({
@@ -53,8 +60,9 @@ export default async function EditTimetablePage({
           name: `${section.class.name} • ${section.name}`,
         }))}
         initialData={slot}
+        redirectPath={returnTo}
+        cancelPath={returnTo}
       />
     </div>
   );
 }
-

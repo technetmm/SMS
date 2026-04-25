@@ -28,24 +28,28 @@ const DAYS: DayOfWeek[] = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 export function ActiveTimetableCard({
   slots,
   staffName,
+  timeZone,
 }: {
   slots: TimetableSlot[];
   staffName?: string;
+  timeZone?: string;
 }) {
   const t = useTranslations("SchoolEntities.timetable.list");
   const tableT = useTranslations("SchoolEntities.timetable.table");
   const boardT = useTranslations("SchoolEntities.timetable.board");
   const locale = useLocale();
   const [nowContext, setNowContext] = useState(() =>
-    createTimetableNowContext(new Date()),
+    createTimetableNowContext(new Date(), timeZone),
   );
 
   useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNowContext(createTimetableNowContext(new Date()));
-    }, 30_000);
+    const syncNowContext = () => {
+      setNowContext(createTimetableNowContext(new Date(), timeZone));
+    };
+    syncNowContext();
+    const intervalId = window.setInterval(syncNowContext, 30_000);
     return () => window.clearInterval(intervalId);
-  }, []);
+  }, [timeZone]);
 
   const dayLabel = (day: DayOfWeek) => {
     const key = day.toLowerCase() as
