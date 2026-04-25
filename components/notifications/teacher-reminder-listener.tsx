@@ -1,24 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { DayOfWeek } from "@/app/generated/prisma/enums";
 import {
   getTimetableSlotStartsInMinutes,
   isTimetableSlotStartingSoon,
 } from "@/lib/teacher-timetable-highlight";
 import { useTimetableNowContext } from "@/hooks/use-timetable-now-context";
 import { useTranslations } from "next-intl";
+import {
+  isRealtimeStreamSupported,
+  subscribeRealtimeSnapshots,
+} from "@/lib/realtime/client";
+import type { RealtimeReminderSlot } from "@/lib/realtime/types";
 
-type ReminderSlot = {
-  id: string;
-  dayOfWeek: DayOfWeek;
-  startTime: string;
-  endTime: string;
-  section: {
-    name: string;
-    class: { name: string };
-  };
-};
+type ReminderSlot = RealtimeReminderSlot;
 
 const REMINDER_STORAGE_KEY = "teacher_reminder_notified_keys_v1";
 
@@ -123,6 +118,12 @@ export function TeacherReminderListener({
   useEffect(() => {
     if (role !== "TEACHER" || typeof window === "undefined") {
       return;
+    }
+
+    if (isRealtimeStreamSupported()) {
+      return subscribeRealtimeSnapshots((snapshot) => {
+        setSlots(snapshot.reminderSlots);
+      });
     }
 
     const fetchSlots = async () => {

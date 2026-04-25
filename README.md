@@ -173,7 +173,7 @@ Required header:
 
 - `x-cron-secret: <PUSH_REMINDER_CRON_SECRET>`
 
-Recommended: run this endpoint every minute from your scheduler/cron service.
+Run this endpoint every minute from your scheduler/cron service.
 
 ## Current Data Model Scope
 

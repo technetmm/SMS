@@ -3,7 +3,7 @@ import { DayOfWeek, UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { timeToMinutes } from "@/lib/time";
 import { createNotification } from "@/lib/notifications/notifications";
-import { sendWebPushNotification } from "@/lib/push/web-push";
+import { deliverPushPayloadToSubscriptions } from "@/lib/push/delivery";
 import { APP_TIME_ZONE } from "@/lib/app-time";
 import { resolveEffectiveTimeZone } from "@/lib/time-zone";
 
@@ -193,6 +193,8 @@ export async function POST(request: NextRequest) {
 
   let sentCount = 0;
   let skippedCount = 0;
+  let removedSubscriptionCount = 0;
+  let failedPushCount = 0;
 
   for (const slot of dueSlots) {
     const staff = staffById.get(slot.staffId);
@@ -246,31 +248,25 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    for (const subscription of subscriptions) {
-      try {
-        await sendWebPushNotification(subscription, {
-          title,
-          body: message,
-          url: "/teacher/dashboard",
-          tag: sourceKey,
-        });
-        sentCount += 1;
-      } catch (error) {
-        const statusCode =
-          typeof error === "object" &&
-          error != null &&
-          "statusCode" in error &&
-          typeof (error as { statusCode?: unknown }).statusCode === "number"
-            ? (error as { statusCode: number }).statusCode
-            : null;
-
-        if (statusCode === 404 || statusCode === 410) {
-          await prisma.pushSubscription.deleteMany({
-            where: { endpoint: subscription.endpoint },
-          });
-        }
-      }
-    }
+    const delivery = await deliverPushPayloadToSubscriptions(prisma, {
+      subscriptions,
+      payload: {
+        title,
+        body: message,
+        url: "/teacher/dashboard",
+        tag: sourceKey,
+        type: "teacher-timetable-reminder",
+        metadata: {
+          slotId: slot.id,
+          sectionId: section.id,
+          staffId: staff.id,
+          dateKey: slot.dateKey,
+        },
+      },
+    });
+    sentCount += delivery.sentCount;
+    removedSubscriptionCount += delivery.removedCount;
+    failedPushCount += delivery.failedCount;
   }
 
   return NextResponse.json({
@@ -279,6 +275,8 @@ export async function POST(request: NextRequest) {
     dueSlots: dueSlots.length,
     sentCount,
     skippedCount,
+    removedSubscriptionCount,
+    failedPushCount,
     leadMinutes: effectiveLeadMinutes,
     timeZone: APP_TIME_ZONE,
     evaluatedTimeZones: staffIdsByTimeZone.size,

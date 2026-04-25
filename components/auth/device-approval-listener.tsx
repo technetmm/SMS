@@ -12,24 +12,17 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  isRealtimeStreamSupported,
+  subscribeRealtimeSnapshots,
+} from "@/lib/realtime/client";
+import type { RealtimePendingDeviceApprovalRequest } from "@/lib/realtime/types";
 
 const POLL_INTERVAL_MS = 3000;
 const SEEN_APPROVER_REQUEST_IDS_STORAGE_KEY =
   "sms.seen-device-approval-request-ids";
 
-type PendingRequest = {
-  id: string;
-  createdAt: string;
-  requestedIp: string | null;
-  requestedUserAgent: string | null;
-  requester: {
-    id: string;
-    name: string | null;
-    email: string;
-    role: string;
-    schoolName: string | null;
-  } | null;
-};
+type PendingRequest = RealtimePendingDeviceApprovalRequest;
 
 function formatWhen(iso: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -83,6 +76,40 @@ export function DeviceApprovalListener({ role }: { role: string }) {
     seenApproverRequestIdsRef.current = readSeenApproverRequestIds();
   }
 
+  const applyRequests = useCallback(
+    (requests: PendingRequest[]) => {
+      const canApproveOthers = APPROVER_ROLES.has(role);
+      const next = requests.find((item) => !item.requester) ?? null;
+      setRequest(next);
+
+      if (!canApproveOthers) {
+        return;
+      }
+
+      const approverRequests = requests.filter((item) => Boolean(item.requester));
+      const incomingIds = new Set(approverRequests.map((item) => item.id));
+      const updated = new Set(
+        [...seenApproverRequestIdsRef.current!].filter((requestId) =>
+          incomingIds.has(requestId),
+        ),
+      );
+
+      for (const approvalRequest of approverRequests) {
+        if (updated.has(approvalRequest.id)) {
+          continue;
+        }
+
+        const name = approvalRequest.requester?.name?.trim() || "a user";
+        toast(`New device approval request from ${name}.`);
+        updated.add(approvalRequest.id);
+      }
+
+      seenApproverRequestIdsRef.current = updated;
+      saveSeenApproverRequestIds(updated);
+    },
+    [role],
+  );
+
   const fetchPending = useCallback(async () => {
     try {
       const canApproveOthers = APPROVER_ROLES.has(role);
@@ -101,39 +128,19 @@ export function DeviceApprovalListener({ role }: { role: string }) {
 
       const data = (await res.json()) as { requests?: PendingRequest[] };
       const requests = data.requests ?? [];
-      const next = requests.find((item) => !item.requester) ?? null;
-      setRequest(next);
-
-      if (canApproveOthers) {
-        const approverRequests = requests.filter((item) =>
-          Boolean(item.requester),
-        );
-        const incomingIds = new Set(approverRequests.map((item) => item.id));
-        const updated = new Set(
-          [...seenApproverRequestIdsRef.current!].filter((requestId) =>
-            incomingIds.has(requestId),
-          ),
-        );
-
-        for (const approvalRequest of approverRequests) {
-          if (updated.has(approvalRequest.id)) {
-            continue;
-          }
-
-          const name = approvalRequest.requester?.name?.trim() || "a user";
-          toast(`New device approval request from ${name}.`);
-          updated.add(approvalRequest.id);
-        }
-
-        seenApproverRequestIdsRef.current = updated;
-        saveSeenApproverRequestIds(updated);
-      }
+      applyRequests(requests);
     } catch {
       setRequest(null);
     }
-  }, [role]);
+  }, [applyRequests, role]);
 
   useEffect(() => {
+    if (isRealtimeStreamSupported()) {
+      return subscribeRealtimeSnapshots((snapshot) => {
+        applyRequests(snapshot.pendingDeviceApprovals);
+      });
+    }
+
     let active = true;
     const tick = async () => {
       if (!active) return;
@@ -149,7 +156,7 @@ export function DeviceApprovalListener({ role }: { role: string }) {
       active = false;
       window.clearInterval(id);
     };
-  }, [fetchPending]);
+  }, [applyRequests, fetchPending]);
 
   async function respond(action: "approve" | "deny") {
     if (!request || loading) return;

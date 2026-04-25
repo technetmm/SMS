@@ -21,6 +21,10 @@ import {
   markNotificationRead,
   type NotificationItem,
 } from "@/lib/notifications/client";
+import {
+  isRealtimeStreamSupported,
+  subscribeRealtimeSnapshots,
+} from "@/lib/realtime/client";
 
 const POLL_INTERVAL_MS = 15000;
 
@@ -100,9 +104,13 @@ export function NotificationBell() {
   useEffect(() => {
     void refreshUnreadCount();
 
-    const intervalId = window.setInterval(() => {
-      void refreshUnreadCount();
-    }, POLL_INTERVAL_MS);
+    if (isRealtimeStreamSupported()) {
+      return subscribeRealtimeSnapshots((snapshot) => {
+        setUnreadCount(snapshot.unreadCount);
+      });
+    }
+
+    const intervalId = window.setInterval(refreshUnreadCount, POLL_INTERVAL_MS);
 
     return () => {
       window.clearInterval(intervalId);

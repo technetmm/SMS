@@ -27,8 +27,8 @@ import {
 import {
   clearPendingDeviceApprovalsForUser,
   expirePendingDeviceApprovalsForUser,
-  finalizeDeviceApprovalRequest,
 } from "@/lib/auth/device-approval-lifecycle";
+import { sendDeviceApprovalRequestPushNotifications } from "@/lib/auth/device-approval-push";
 import {
   TWO_FACTOR_INVALID_CODE,
   TWO_FACTOR_REQUIRED_CODE,
@@ -466,7 +466,7 @@ export const authOptions: NextAuthOptions = {
 
         const publicToken = randomUUID();
 
-        await prisma.loginApprovalRequest.create({
+        const approvalRequest = await prisma.loginApprovalRequest.create({
           data: {
             userId: user.id,
             publicToken,
@@ -477,7 +477,26 @@ export const authOptions: NextAuthOptions = {
             requestedIp,
             requestedUserAgent,
           },
+          select: {
+            id: true,
+          },
         });
+
+        try {
+          await sendDeviceApprovalRequestPushNotifications(prisma, {
+            requestId: approvalRequest.id,
+            requestedByUserId: user.id,
+            requestedByUserRole: user.role,
+            requestedBySchoolId: user.schoolId ?? null,
+          });
+        } catch (error) {
+          // Do not block device-approval flow if push delivery fails.
+          console.error("Failed to dispatch device-approval push notification", {
+            requestId: approvalRequest.id,
+            userId: user.id,
+            error,
+          });
+        }
 
         throw new Error(buildDeviceApprovalError(publicToken));
       },
