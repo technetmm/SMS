@@ -84,6 +84,7 @@ export function getTimetableSlotState(
   slot: TimetableSlotLike,
   now: TimetableNowContext,
 ): TimetableSlotState {
+  console.log("Slot => ", slot, "Now => ", now);
   if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
     return "default";
   }
