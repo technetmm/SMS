@@ -118,18 +118,21 @@ export async function getTeacherSections() {
     },
   });
 
-  return sections.map((item) => ({
-    id: item.section.id,
-    name: item.section.name,
-    room: item.section.room,
-    capacity: item.section.capacity,
-    meetingLink: item.section.meetingLink,
-    className: item.section.class.name,
-    activeStudents: item.section.enrollments.length,
-    isActiveNow: item.section.timetables.some(
-      (slot) => getTimetableSlotState(slot, nowContext) === "active",
-    ),
-  }));
+  return sections.map((item) => {
+    console.log("Sections => ", item);
+    return {
+      id: item.section.id,
+      name: item.section.name,
+      room: item.section.room,
+      capacity: item.section.capacity,
+      meetingLink: item.section.meetingLink,
+      className: item.section.class.name,
+      activeStudents: item.section.enrollments.length,
+      isActiveNow: item.section.timetables.some(
+        (slot) => getTimetableSlotState(slot, nowContext) === "active",
+      ),
+    };
+  });
 }
 
 export async function getTeacherSectionDetail(sectionId: string) {

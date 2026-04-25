@@ -84,6 +84,7 @@ export function getTimetableSlotState(
   slot: TimetableSlotLike,
   now: TimetableNowContext,
 ): TimetableSlotState {
+  console.log("getTimetableSlotState", slot, now);
   if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
     return "default";
   }
@@ -91,6 +92,8 @@ export function getTimetableSlotState(
   const nowTime = new Date().getTime();
   const startTime = minutesToTime(slot.startTime);
   const endTime = minutesToTime(slot.endTime);
+
+  console.log(nowTime, startTime, endTime);
 
   if (nowTime < startTime) {
     return "upcoming";
