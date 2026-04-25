@@ -17,6 +17,8 @@ export default async function TeacherSectionsPage() {
     getTeacherSections(),
   ]);
 
+  console.log(sections);
+
   if (!scope.schoolId || !scope.staffId) {
     return <TeacherAccessFallback />;
   }
