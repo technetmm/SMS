@@ -108,9 +108,15 @@ function writeStoredReminderKeys(keys: Set<string>) {
   }
 }
 
-export function TeacherReminderListener({ role }: { role: string }) {
+export function TeacherReminderListener({
+  role,
+  timeZone,
+}: {
+  role: string;
+  timeZone?: string;
+}) {
   const [slots, setSlots] = useState<ReminderSlot[]>([]);
-  const nowContext = useTimetableNowContext();
+  const nowContext = useTimetableNowContext(timeZone);
   const t = useTranslations("TeacherSite.dashboard.timetable");
   const notifiedSlotKeysRef = useRef(new Set<string>());
 

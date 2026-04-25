@@ -88,14 +88,15 @@ export function getTimetableSlotState(
     return "default";
   }
 
-  const startMinutes = timeToMinutes(slot.startTime);
-  const endMinutes = timeToMinutes(slot.endTime);
+  const nowMinute = now.nowMinutes;
+  const startMinute = timeToMinutes(slot.startTime);
+  const endMinute = timeToMinutes(slot.endTime);
 
-  if (now.nowMinutes < startMinutes) {
+  if (nowMinute < startMinute) {
     return "upcoming";
   }
 
-  if (now.nowMinutes >= endMinutes) {
+  if (nowMinute >= endMinute) {
     return "past";
   }
 

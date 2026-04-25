@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,13 @@ type PendingRequest = {
   createdAt: string;
   requestedIp: string | null;
   requestedUserAgent: string | null;
+  requester: {
+    id: string;
+    name: string | null;
+    email: string;
+    role: string;
+    schoolName: string | null;
+  } | null;
 };
 
 function formatWhen(iso: string) {
@@ -29,13 +36,24 @@ function formatWhen(iso: string) {
   }).format(new Date(iso));
 }
 
-export function DeviceApprovalListener() {
+const APPROVER_ROLES = new Set([
+  "SUPER_ADMIN",
+  "SCHOOL_SUPER_ADMIN",
+  "SCHOOL_ADMIN",
+]);
+
+export function DeviceApprovalListener({ role }: { role: string }) {
   const [request, setRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
+  const seenApproverRequestIdsRef = useRef(new Set<string>());
 
   const fetchPending = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/device-approvals/pending?scope=self", {
+      const canApproveOthers = APPROVER_ROLES.has(role);
+      const url = canApproveOthers
+        ? "/api/auth/device-approvals/pending"
+        : "/api/auth/device-approvals/pending?scope=self";
+      const res = await fetch(url, {
         cache: "no-store",
         credentials: "include",
       });
@@ -46,12 +64,35 @@ export function DeviceApprovalListener() {
       }
 
       const data = (await res.json()) as { requests?: PendingRequest[] };
-      const next = data.requests?.[0] ?? null;
+      const requests = data.requests ?? [];
+      const next = requests.find((item) => !item.requester) ?? null;
       setRequest(next);
+
+      if (canApproveOthers) {
+        const approverRequests = requests.filter((item) => Boolean(item.requester));
+        const incomingIds = new Set(approverRequests.map((item) => item.id));
+        const updated = new Set(
+          [...seenApproverRequestIdsRef.current].filter((requestId) =>
+            incomingIds.has(requestId),
+          ),
+        );
+
+        for (const approvalRequest of approverRequests) {
+          if (updated.has(approvalRequest.id)) {
+            continue;
+          }
+
+          const name = approvalRequest.requester?.name?.trim() || "a user";
+          toast(`New device approval request from ${name}.`);
+          updated.add(approvalRequest.id);
+        }
+
+        seenApproverRequestIdsRef.current = updated;
+      }
     } catch {
       setRequest(null);
     }
-  }, []);
+  }, [role]);
 
   useEffect(() => {
     let active = true;

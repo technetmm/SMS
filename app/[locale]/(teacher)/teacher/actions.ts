@@ -9,6 +9,8 @@ import {
   createTimetableNowContext,
   getTimetableSlotState,
 } from "@/lib/teacher-timetable-highlight";
+import { APP_TIME_ZONE } from "@/lib/app-time";
+import { resolveEffectiveTimeZone } from "@/lib/time-zone";
 import { emptyToNull, formDataToObject } from "@/lib/form-utils";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import {
@@ -47,6 +49,7 @@ type TeacherScope = {
   userId: string;
   staffId: string | null;
   staffName: string | null;
+  timeZone: string;
 };
 
 async function getTeacherScope(): Promise<TeacherScope> {
@@ -58,19 +61,27 @@ async function getTeacherScope(): Promise<TeacherScope> {
       userId: session.user.id,
       staffId: null,
       staffName: null,
+      timeZone: APP_TIME_ZONE,
     };
   }
 
-  const staffProfile = await prisma.staff.findFirst({
-    where: { userId: session.user.id, schoolId },
-    select: { id: true, name: true },
-  });
+  const [staffProfile, userProfile] = await Promise.all([
+    prisma.staff.findFirst({
+      where: { userId: session.user.id, schoolId },
+      select: { id: true, name: true },
+    }),
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { timeZone: true },
+    }),
+  ]);
 
   return {
     schoolId,
     userId: session.user.id,
     staffId: staffProfile?.id ?? null,
     staffName: staffProfile?.name ?? null,
+    timeZone: resolveEffectiveTimeZone(userProfile?.timeZone),
   };
 }
 
@@ -81,7 +92,7 @@ export async function requireTeacherAccess() {
 export async function getTeacherSections() {
   const scope = await getTeacherScope();
   if (!scope.schoolId || !scope.staffId) return [];
-  const nowContext = createTimetableNowContext(new Date());
+  const nowContext = createTimetableNowContext(new Date(), scope.timeZone);
 
   const sections = await prisma.sectionStaff.findMany({
     where: {
@@ -118,18 +129,20 @@ export async function getTeacherSections() {
     },
   });
 
-  return sections.map((item) => ({
-    id: item.section.id,
-    name: item.section.name,
-    room: item.section.room,
-    capacity: item.section.capacity,
-    meetingLink: item.section.meetingLink,
-    className: item.section.class.name,
-    activeStudents: item.section.enrollments.length,
-    isActiveNow: item.section.timetables.some(
-      (slot) => getTimetableSlotState(slot, nowContext) === "active",
-    ),
-  }));
+  return sections.map((item) => {
+    return {
+      id: item.section.id,
+      name: item.section.name,
+      room: item.section.room,
+      capacity: item.section.capacity,
+      meetingLink: item.section.meetingLink,
+      className: item.section.class.name,
+      activeStudents: item.section.enrollments.length,
+      isActiveNow: item.section.timetables.some((slot) => {
+        return getTimetableSlotState(slot, nowContext) === "active";
+      }),
+    };
+  });
 }
 
 export async function getTeacherSectionDetail(sectionId: string) {

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DayOfWeek } from "@/app/generated/prisma/enums";
+import { DayOfWeek, UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
 import { timeToMinutes } from "@/lib/time";
 import { createNotification } from "@/lib/notifications/notifications";
 import { sendWebPushNotification } from "@/lib/push/web-push";
+import { APP_TIME_ZONE } from "@/lib/app-time";
+import { resolveEffectiveTimeZone } from "@/lib/time-zone";
 
 const WEEKDAY_SHORT_TO_DAY: Record<string, DayOfWeek> = {
   Sun: DayOfWeek.SUN,
@@ -15,7 +17,11 @@ const WEEKDAY_SHORT_TO_DAY: Record<string, DayOfWeek> = {
   Sat: DayOfWeek.SAT,
 };
 
-function getTargetScheduleContext(now: Date, leadMinutes: number, timeZone: string) {
+function getTargetScheduleContext(
+  now: Date,
+  leadMinutes: number,
+  timeZone: string,
+) {
   const target = new Date(now.getTime() + leadMinutes * 60_000);
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
@@ -28,12 +34,15 @@ function getTargetScheduleContext(now: Date, leadMinutes: number, timeZone: stri
     hourCycle: "h23",
   }).formatToParts(target);
 
-  const weekdayShort = parts.find((part) => part.type === "weekday")?.value ?? "Mon";
+  const weekdayShort =
+    parts.find((part) => part.type === "weekday")?.value ?? "Mon";
   const year = parts.find((part) => part.type === "year")?.value ?? "1970";
   const month = parts.find((part) => part.type === "month")?.value ?? "01";
   const day = parts.find((part) => part.type === "day")?.value ?? "01";
   const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
-  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+  const minute = Number(
+    parts.find((part) => part.type === "minute")?.value ?? "0",
+  );
 
   return {
     dayOfWeek: WEEKDAY_SHORT_TO_DAY[weekdayShort] ?? DayOfWeek.MON,
@@ -57,29 +66,108 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const leadMinutes = Number.parseInt(process.env.PUSH_REMINDER_LEAD_MINUTES ?? "2", 10);
-  const effectiveLeadMinutes = Number.isFinite(leadMinutes) ? Math.max(1, leadMinutes) : 2;
-  const timeZone = process.env.APP_TIME_ZONE?.trim() || "Asia/Yangon";
-  const context = getTargetScheduleContext(new Date(), effectiveLeadMinutes, timeZone);
-
-  const slots = await prisma.timetable.findMany({
+  const leadMinutes = Number.parseInt(
+    process.env.PUSH_REMINDER_LEAD_MINUTES ?? "2",
+    10,
+  );
+  const effectiveLeadMinutes = Number.isFinite(leadMinutes)
+    ? Math.max(1, leadMinutes)
+    : 2;
+  const now = new Date();
+  const staffRows = await prisma.staff.findMany({
     where: {
-      dayOfWeek: context.dayOfWeek,
+      user: {
+        role: UserRole.TEACHER,
+      },
     },
     select: {
       id: true,
-      startTime: true,
-      staffId: true,
-      sectionId: true,
+      user: {
+        select: {
+          timeZone: true,
+        },
+      },
     },
   });
 
-  const dueSlots = slots.filter((slot) => timeToMinutes(slot.startTime) === context.targetMinutes);
+  const staffIdsByTimeZone = new Map<string, string[]>();
+  for (const row of staffRows) {
+    const timeZone = resolveEffectiveTimeZone(row.user.timeZone);
+    const existing = staffIdsByTimeZone.get(timeZone);
+    if (existing) {
+      existing.push(row.id);
+    } else {
+      staffIdsByTimeZone.set(timeZone, [row.id]);
+    }
+  }
+
+  type DueSlot = {
+    id: string;
+    startTime: string;
+    staffId: string;
+    sectionId: string;
+    dateKey: string;
+    dayOfWeek: DayOfWeek;
+    targetMinutes: number;
+    timeZone: string;
+  };
+
+  const dueSlots: DueSlot[] = [];
+  const evaluatedContexts: Array<{
+    timeZone: string;
+    dayOfWeek: DayOfWeek;
+    targetMinutes: number;
+    dateKey: string;
+  }> = [];
+  let scanned = 0;
+
+  for (const [timeZone, staffIds] of staffIdsByTimeZone) {
+    const context = getTargetScheduleContext(
+      now,
+      effectiveLeadMinutes,
+      timeZone,
+    );
+    evaluatedContexts.push({
+      timeZone,
+      dayOfWeek: context.dayOfWeek,
+      targetMinutes: context.targetMinutes,
+      dateKey: context.dateKey,
+    });
+
+    const slots = await prisma.timetable.findMany({
+      where: {
+        staffId: { in: staffIds },
+        dayOfWeek: context.dayOfWeek,
+      },
+      select: {
+        id: true,
+        startTime: true,
+        staffId: true,
+        sectionId: true,
+      },
+    });
+
+    scanned += slots.length;
+
+    for (const slot of slots) {
+      if (timeToMinutes(slot.startTime) !== context.targetMinutes) {
+        continue;
+      }
+
+      dueSlots.push({
+        ...slot,
+        dateKey: context.dateKey,
+        dayOfWeek: context.dayOfWeek,
+        targetMinutes: context.targetMinutes,
+        timeZone,
+      });
+    }
+  }
 
   const staffIds = [...new Set(dueSlots.map((slot) => slot.staffId))];
   const sectionIds = [...new Set(dueSlots.map((slot) => slot.sectionId))];
 
-  const [staffRows, sectionRows] = await Promise.all([
+  const [staffDetailRows, sectionRows] = await Promise.all([
     prisma.staff.findMany({
       where: { id: { in: staffIds } },
       select: {
@@ -98,8 +186,10 @@ export async function POST(request: NextRequest) {
     }),
   ]);
 
-  const staffById = new Map(staffRows.map((staff) => [staff.id, staff]));
-  const sectionById = new Map(sectionRows.map((section) => [section.id, section]));
+  const staffById = new Map(staffDetailRows.map((staff) => [staff.id, staff]));
+  const sectionById = new Map(
+    sectionRows.map((section) => [section.id, section]),
+  );
 
   let sentCount = 0;
   let skippedCount = 0;
@@ -119,7 +209,7 @@ export async function POST(request: NextRequest) {
       continue;
     }
 
-    const sourceKey = `teacher-timetable-reminder:${slot.id}:${context.dateKey}`;
+    const sourceKey = `teacher-timetable-reminder:${slot.id}:${slot.dateKey}`;
     const exists = await prisma.notification.findUnique({
       where: { sourceKey },
       select: { id: true },
@@ -143,7 +233,7 @@ export async function POST(request: NextRequest) {
         slotId: slot.id,
         sectionId: section.id,
         staffId: staff.id,
-        dateKey: context.dateKey,
+        dateKey: slot.dateKey,
       },
     });
 
@@ -185,14 +275,13 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    scanned: slots.length,
+    scanned,
     dueSlots: dueSlots.length,
     sentCount,
     skippedCount,
-    dayOfWeek: context.dayOfWeek,
-    targetMinutes: context.targetMinutes,
-    dateKey: context.dateKey,
     leadMinutes: effectiveLeadMinutes,
-    timeZone,
+    timeZone: APP_TIME_ZONE,
+    evaluatedTimeZones: staffIdsByTimeZone.size,
+    evaluatedContexts,
   });
 }

@@ -1,18 +1,17 @@
-import { UserRole } from "@/app/generated/prisma/enums";
 import { prisma } from "@/lib/prisma/client";
-import { requireRole } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TeacherDashboardTimetableGrid } from "@/components/teacher/teacher-dashboard-timetable-grid";
 import { getAppStartOfMonthUtc } from "@/lib/app-time";
+import { requireTeacherAccess } from "@/app/(teacher)/teacher/actions";
 
 export default async function TeacherDashboardPage() {
-  const session = await requireRole([UserRole.TEACHER]);
-  const schoolId = session.user.schoolId;
+  const scope = await requireTeacherAccess();
+  const schoolId = scope.schoolId;
 
   if (!schoolId) return null;
 
   const staffProfile = await prisma.staff.findFirst({
-    where: { userId: session.user.id, schoolId },
+    where: { userId: scope.userId, schoolId },
     select: { id: true, name: true },
   });
 
@@ -102,7 +101,7 @@ export default async function TeacherDashboardPage() {
         </Card>
       </div>
 
-      <TeacherDashboardTimetableGrid slots={timetableSlots} />
+      <TeacherDashboardTimetableGrid slots={timetableSlots} timeZone={scope.timeZone} />
 
       <Card>
         <CardHeader>

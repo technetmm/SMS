@@ -19,8 +19,20 @@ export function rangesOverlap(
   return aStart < bEnd && aEnd > bStart;
 }
 
-export function minutesToTime(value: string) {
-  const date = new Date();
-  date.setHours(Number(value.split(":")[0]), Number(value.split(":")[1]), 0, 0);
+export function minutesToTime(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+
+  const now = new Date();
+
+  const date = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes,
+    0,
+    0,
+  );
+
   return date.getTime();
 }

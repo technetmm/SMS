@@ -53,6 +53,7 @@ export default async function TeacherTimetablePage({
       </Card>
       <TeacherTimetableTable
         rows={rows}
+        timeZone={scope.timeZone}
         searchParams={{ q: params.q, dayOfWeek: params.dayOfWeek, page: params.page }}
       />
     </div>
