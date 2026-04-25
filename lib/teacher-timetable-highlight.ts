@@ -1,6 +1,6 @@
 import { DayOfWeek } from "@/app/generated/prisma/enums";
 import { cn } from "@/lib/utils";
-import { timeToMinutes } from "@/lib/time";
+import { minutesToTime, timeToMinutes } from "@/lib/time";
 
 type TimetableSlotLike = {
   dayOfWeek: DayOfWeek;
@@ -84,19 +84,19 @@ export function getTimetableSlotState(
   slot: TimetableSlotLike,
   now: TimetableNowContext,
 ): TimetableSlotState {
-  console.log("Slot => ", slot, "Now => ", now);
   if (!isTodayTimetableDay(slot.dayOfWeek, now)) {
     return "default";
   }
 
-  const startMinutes = timeToMinutes(slot.startTime);
-  const endMinutes = timeToMinutes(slot.endTime);
+  const nowTime = new Date().getTime();
+  const startTime = minutesToTime(slot.startTime);
+  const endTime = minutesToTime(slot.endTime);
 
-  if (now.nowMinutes < startMinutes) {
+  if (nowTime < startTime) {
     return "upcoming";
   }
 
-  if (now.nowMinutes >= endMinutes) {
+  if (nowTime >= endTime) {
     return "past";
   }
 
