@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma/client";
 import { requireRole } from "@/lib/permissions";
 import { paginateQuery } from "@/lib/pagination";
 import { containsInsensitive } from "@/lib/table-filters";
+import {
+  createTimetableNowContext,
+  getTimetableSlotState,
+} from "@/lib/teacher-timetable-highlight";
 import { emptyToNull, formDataToObject } from "@/lib/form-utils";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import {
@@ -77,6 +81,7 @@ export async function requireTeacherAccess() {
 export async function getTeacherSections() {
   const scope = await getTeacherScope();
   if (!scope.schoolId || !scope.staffId) return [];
+  const nowContext = createTimetableNowContext(new Date());
 
   const sections = await prisma.sectionStaff.findMany({
     where: {
@@ -100,6 +105,14 @@ export async function getTeacherSections() {
             where: { status: "ACTIVE" },
             select: { id: true },
           },
+          timetables: {
+            where: { dayOfWeek: nowContext.dayOfWeek },
+            select: {
+              dayOfWeek: true,
+              startTime: true,
+              endTime: true,
+            },
+          },
         },
       },
     },
@@ -113,6 +126,9 @@ export async function getTeacherSections() {
     meetingLink: item.section.meetingLink,
     className: item.section.class.name,
     activeStudents: item.section.enrollments.length,
+    isActiveNow: item.section.timetables.some(
+      (slot) => getTimetableSlotState(slot, nowContext) === "active",
+    ),
   }));
 }
 

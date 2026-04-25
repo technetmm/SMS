@@ -150,6 +150,7 @@ model User {
   sessions              Session[]
   loginApprovalRequests LoginApprovalRequest[]
   notifications         Notification[]
+  pushSubscriptions     PushSubscription[]
 }
 
 model Tenant {
@@ -678,4 +679,19 @@ model Notification {
 
   @@index([userId, createdAt])
   @@index([userId, isRead])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

@@ -50,6 +50,7 @@ export function TeacherTimetableTable({
   timeZone?: string;
 }) {
   const t = useTranslations("SchoolEntities.timetable.table");
+  const boardT = useTranslations("SchoolEntities.timetable.board");
   const locale = useLocale();
 
   const dayLabel = (day: DayOfWeek) => {
@@ -83,11 +84,28 @@ export function TeacherTimetableTable({
               key={slot.id}
               className={cn(
                 getTimetableSlotBackgroundClass(
-                  nowContext ? getTimetableSlotState(slot, nowContext) : "default",
+                  nowContext
+                    ? getTimetableSlotState(slot, nowContext)
+                    : "default",
                 ),
               )}
             >
-              <TableCell>{dayLabel(slot.dayOfWeek)}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <span>{dayLabel(slot.dayOfWeek)}</span>
+                  {nowContext?.dayOfWeek === slot.dayOfWeek ? (
+                    <span
+                      className="size-2 rounded-full bg-emerald-500"
+                      aria-label={boardT("activeDay", {
+                        day: dayLabel(slot.dayOfWeek),
+                      })}
+                      title={boardT("activeDay", {
+                        day: dayLabel(slot.dayOfWeek),
+                      })}
+                    />
+                  ) : null}
+                </div>
+              </TableCell>
               <TableCell className="font-medium">
                 {formatTimetableTimeRange(slot.startTime, slot.endTime, locale)}
               </TableCell>

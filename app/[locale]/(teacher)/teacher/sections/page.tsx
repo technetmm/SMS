@@ -33,12 +33,24 @@ export default async function TeacherSectionsPage() {
           >
             <CardHeader>
               <CardTitle className="text-base">
-                <Link
-                  href={`/teacher/sections/${section.id}`}
-                  className="hover:underline"
-                >
-                  {section.name}
-                </Link>
+                <div className="flex items-center gap-2">
+                  <Link
+                    href={`/teacher/sections/${section.id}`}
+                    className="hover:underline"
+                  >
+                    {section.name}
+                  </Link>
+                  {section.isActiveNow ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 dark:text-emerald-300">
+                      <span
+                        className="size-2 rounded-full bg-emerald-500"
+                        aria-label={t("labels.activeNow")}
+                        title={t("labels.activeNow")}
+                      />
+                      {t("labels.activeNow")}
+                    </span>
+                  ) : null}
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">

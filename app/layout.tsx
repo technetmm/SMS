@@ -21,6 +21,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Technet SMS",
   description: "School management system for students, classes, and payments.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Technet SMS",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Technet SMS",
+  },
 };
 
 export default async function RootLayout({

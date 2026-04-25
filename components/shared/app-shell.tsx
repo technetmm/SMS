@@ -10,6 +10,8 @@ import { getServerAuth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AppBreadcrumb } from "@/components/shared/app-breadcrumb";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { PushSubscriptionListener } from "@/components/notifications/push-subscription-listener";
+import { TeacherReminderListener } from "@/components/notifications/teacher-reminder-listener";
 import { redirect } from "@/i18n/navigation";
 
 export async function AppShell({ children }: { children: React.ReactNode }) {
@@ -50,6 +52,8 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         schoolName={currentUser.school?.name ?? null}
       />
       <SidebarInset>
+        <PushSubscriptionListener role={String(verifiedSessionUser.role)} />
+        <TeacherReminderListener role={String(verifiedSessionUser.role)} />
         <header className="sticky top-0 flex h-16 shrink-0 items-center justify-between gap-2 rounded-t-xl bg-background z-50">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
