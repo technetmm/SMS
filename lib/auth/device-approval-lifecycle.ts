@@ -17,7 +17,6 @@ type DeviceApprovalClient = NotificationClient & {
       where: {
         userId: string;
         status: "PENDING";
-        expiresAt: { lte: Date };
         currentSessionId?: string;
       };
       select: { id: true };
@@ -131,7 +130,6 @@ export async function expirePendingDeviceApprovalsForUser(
     where: {
       userId,
       status: "PENDING",
-      expiresAt: { lte: now },
       ...(options?.currentSessionId
         ? { currentSessionId: options.currentSessionId }
         : {}),

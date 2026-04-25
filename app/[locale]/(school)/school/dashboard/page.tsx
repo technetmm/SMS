@@ -79,7 +79,6 @@ export default async function DashboardPage({
       role: t("deviceTable.columns.role"),
       school: t("deviceTable.columns.school"),
       requested: t("deviceTable.columns.requested"),
-      expires: t("deviceTable.columns.expires"),
       deviceIp: t("deviceTable.columns.deviceIp"),
       status: t("deviceTable.columns.status"),
       actions: t("deviceTable.columns.actions"),

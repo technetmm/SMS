@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,15 +13,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
+const POLL_INTERVAL_MS = 3000;
+
 type PendingRequest = {
   id: string;
   createdAt: string;
-  expiresAt: string;
   requestedIp: string | null;
   requestedUserAgent: string | null;
 };
-
-const POLL_INTERVAL_MS = 3000;
 
 function formatWhen(iso: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -34,14 +33,9 @@ export function DeviceApprovalListener() {
   const [request, setRequest] = useState<PendingRequest | null>(null);
   const [loading, setLoading] = useState<"approve" | "deny" | null>(null);
 
-  const expiresLabel = useMemo(
-    () => (request ? formatWhen(request.expiresAt) : null),
-    [request],
-  );
-
   const fetchPending = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/device-approvals/pending", {
+      const res = await fetch("/api/auth/device-approvals/pending?scope=self", {
         cache: "no-store",
         credentials: "include",
       });
@@ -94,11 +88,6 @@ export function DeviceApprovalListener() {
         error?: string;
       };
 
-      console.log("Device approval response:", {
-        status: data.status,
-        error: data.error,
-      });
-
       if (!res.ok) {
         toast.error(data.error ?? "Unable to process login request.");
         setLoading(null);
@@ -135,10 +124,6 @@ export function DeviceApprovalListener() {
             <p>
               <span className="font-medium text-foreground">Requested at:</span>{" "}
               {formatWhen(request.createdAt)}
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Expires at:</span>{" "}
-              {expiresLabel}
             </p>
             {request.requestedIp ? (
               <p>

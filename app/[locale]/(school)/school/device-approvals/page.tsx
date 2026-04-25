@@ -20,8 +20,6 @@ export default async function SchoolDeviceApprovalsPage({
     q?: string;
     createdFrom?: string;
     createdTo?: string;
-    expiresFrom?: string;
-    expiresTo?: string;
   }>;
 }) {
   const user = await requireSchoolAdminAccess();
@@ -38,11 +36,6 @@ export default async function SchoolDeviceApprovalsPage({
     from: params.createdFrom,
     to: params.createdTo,
   });
-  const expiresRange = parseDateRangeParams({
-    from: params.expiresFrom,
-    to: params.expiresTo,
-  });
-
   const requests = await getPaginatedPendingDeviceApprovalRows(
     {
       role: user.role,
@@ -54,8 +47,6 @@ export default async function SchoolDeviceApprovalsPage({
         q,
         createdFrom: createdRange.from,
         createdTo: createdRange.to,
-        expiresFrom: expiresRange.from,
-        expiresTo: expiresRange.to,
       },
     },
   );
@@ -72,7 +63,6 @@ export default async function SchoolDeviceApprovalsPage({
       role: t("table.columns.role"),
       school: t("table.columns.school"),
       requested: t("table.columns.requested"),
-      expires: t("table.columns.expires"),
       deviceIp: t("table.columns.deviceIp"),
       status: t("table.columns.status"),
       actions: t("table.columns.actions"),
@@ -137,24 +127,6 @@ export default async function SchoolDeviceApprovalsPage({
                 defaultValue={parseTextParam(params.createdTo)}
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="expiresFrom">{t("filters.expiresFrom")}</Label>
-              <Input
-                id="expiresFrom"
-                name="expiresFrom"
-                type="date"
-                defaultValue={parseTextParam(params.expiresFrom)}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="expiresTo">{t("filters.expiresTo")}</Label>
-              <Input
-                id="expiresTo"
-                name="expiresTo"
-                type="date"
-                defaultValue={parseTextParam(params.expiresTo)}
-              />
-            </div>
             <div className="flex items-end gap-2">
               <Button type="submit">{commonT("apply")}</Button>
               <Button asChild type="button" variant="outline">
@@ -178,8 +150,6 @@ export default async function SchoolDeviceApprovalsPage({
             q: params.q,
             createdFrom: params.createdFrom,
             createdTo: params.createdTo,
-            expiresFrom: params.expiresFrom,
-            expiresTo: params.expiresTo,
             page: params.page,
           }}
         />
