@@ -103,6 +103,11 @@ export function AppSidebar({
           url: "/school/staff",
           icon: <UserRoundIcon />,
         },
+        // {
+        //   title: t("items.hourlyRates"),
+        //   url: "/school/staff/hourly-rates",
+        //   icon: <CreditCardIcon />,
+        // },
       ],
     },
     {

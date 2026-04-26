@@ -62,7 +62,7 @@ export default async function EditStaffPage({
           hireDate: toDateInput(staff.hireDate),
           exitDate: toDateInput(staff.exitDate ?? null),
           status: staff.status,
-          ratePerSection: staff.ratePerSection.toString(),
+          ratePerHour: staff.ratePerHour.toString(),
           remark: staff.remark,
         }}
       />

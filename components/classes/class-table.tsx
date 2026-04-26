@@ -14,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import {
   BILLING_TYPE_LABELS,
   CLASS_TYPE_LABELS,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -28,7 +28,7 @@ import {
 import { SubmitButton } from "@/components/shared/submit-button";
 import { Input } from "@/components/ui/input";
 import { BillingType, Currency } from "@/app/generated/prisma/enums";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 
 const initialState: EnrollmentActionState = { status: "idle" };
 
@@ -60,7 +60,10 @@ export function EnrollmentCreateForm({
       .toISOString()
       .slice(0, 10);
   });
-  const [state, formAction] = useActionState(enrollStudent, initialState);
+  const [state, formAction, pending] = useActionState<
+    EnrollmentActionState,
+    FormData
+  >(enrollStudent, initialState);
   const [selectedStudent, setSelectedStudent] = useState<Option | null>(null);
   const [selectedSection, setSelectedSection] = useState<SectionOption | null>(
     null,
@@ -90,13 +93,26 @@ export function EnrollmentCreateForm({
 
     return { originalAmount, discountAmount: cappedDiscount, totalAmount };
   }, [discountType, discountValue, selectedSection]);
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Enrollment created.");
       router.push("/school/enrollments");
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to enroll student.");
     }

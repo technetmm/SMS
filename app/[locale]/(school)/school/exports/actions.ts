@@ -7,7 +7,7 @@ import { buildSimpleTablePdfBuffer } from "@/lib/export/pdf";
 import { saveExportFile } from "@/lib/export/storage";
 import { logAction } from "@/lib/audit-log";
 import { Currency } from "@/app/generated/prisma/enums";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 
 export type ExportState = {
   status: "idle" | "success" | "error";
@@ -38,7 +38,13 @@ export async function exportStudentsToExcel(): Promise<ExportState> {
   const buffer = await buildExcelBuffer({
     sheetName: "Students",
     headers: ["Name", "Gender", "Phone", "Status", "Admission Date"],
-    rows: students.map((s) => [s.name, s.gender, s.phone ?? "-", s.status, s.admissionDate]),
+    rows: students.map((s) => [
+      s.name,
+      s.gender,
+      s.phone ?? "-",
+      s.status,
+      s.admissionDate,
+    ]),
   });
 
   const filename = `${stamp("students")}.xlsx`;
@@ -73,7 +79,13 @@ export async function exportStaffToExcel(): Promise<ExportState> {
   const buffer = await buildExcelBuffer({
     sheetName: "Staff",
     headers: ["Name", "Email", "Phone", "Status", "Hire Date"],
-    rows: staff.map((t) => [t.name, t.email, t.phone ?? "-", t.status, t.hireDate]),
+    rows: staff.map((t) => [
+      t.name,
+      t.email,
+      t.phone ?? "-",
+      t.status,
+      t.hireDate,
+    ]),
   });
 
   const filename = `${stamp("staff")}.xlsx`;
@@ -159,19 +171,26 @@ export async function exportPaymentsToPDF(): Promise<ExportState> {
 
   const currency = tenant?.currency ?? Currency.USD;
 
-  const total = payments.reduce((sum, payment) => sum + Number(payment.finalAmount), 0);
+  const total = payments.reduce(
+    (sum, payment) => sum + Number(payment.finalAmount),
+    0,
+  );
 
   const buffer = await buildSimpleTablePdfBuffer({
     title: "Payment Summary Report",
     subtitle: `Generated ${new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
-    }).format(new Date())} | Records: ${payments.length} | Total: ${formatMoney(total, currency)}`,
+    }).format(
+      new Date(),
+    )} | Records: ${payments.length} | Total: ${formatMoney(total, currency)}`,
     headers: ["Invoice", "Student", "Due Date", "Status", "Final", "Paid"],
     rows: payments.map((payment) => [
       payment.id,
       payment.student.name,
-      new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(payment.dueDate),
+      new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
+        payment.dueDate,
+      ),
       payment.status,
       formatMoney(Number(payment.finalAmount), currency),
       formatMoney(Number(payment.paidAmount), currency),

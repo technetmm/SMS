@@ -14,13 +14,14 @@ import { resolveEffectiveTimeZone } from "@/lib/time-zone";
 import { emptyToNull, formDataToObject } from "@/lib/form-utils";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import {
-  enrollmentAttendanceSchema,
+  teacherAttendanceSchema,
   enrollmentProgressSchema,
 } from "@/lib/validators";
 
 export type TeacherActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type TeacherTimetableFilters = {
@@ -373,7 +374,7 @@ export async function markTeacherAttendance(
   }
 
   const raw = formDataToObject(formData);
-  const parsed = enrollmentAttendanceSchema.safeParse(raw);
+  const parsed = teacherAttendanceSchema.safeParse(raw);
   if (!parsed.success) {
     return { status: "error", message: parsed.error.errors[0]?.message };
   }

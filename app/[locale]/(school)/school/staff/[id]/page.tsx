@@ -188,10 +188,8 @@ export default async function StaffDetailPage({
                 </p>
               </div>
               <div className="rounded-xl border p-3">
-                <p className="text-xs text-muted-foreground">
-                  Rate per section
-                </p>
-                <p className="font-medium">{staff.ratePerSection.toString()}</p>
+                <p className="text-xs text-muted-foreground">Rate per hour</p>
+                <p className="font-medium">{staff.ratePerHour.toString()}</p>
               </div>
               <div className="flex items-center justify-between rounded-xl border p-3">
                 <div>

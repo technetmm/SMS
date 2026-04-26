@@ -7,7 +7,11 @@ import { requireSuperAdminAccess } from "@/lib/rbac";
 import { formDataToObject } from "@/lib/form-utils";
 import { logAction } from "@/lib/audit-log";
 import { createOrUpdateSubscription } from "@/lib/subscription";
-import { Plan, SubscriptionStatus, UserRole } from "@/app/generated/prisma/enums";
+import {
+  Plan,
+  SubscriptionStatus,
+  UserRole,
+} from "@/app/generated/prisma/enums";
 import { getPaginatedPendingDeviceApprovalRows } from "@/lib/auth/device-approval-queue";
 import { paginateQuery } from "@/lib/pagination";
 import { containsInsensitive } from "@/lib/table-filters";
@@ -15,6 +19,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type PlatformActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 const tenantSchema = z.object({
@@ -469,18 +474,17 @@ export async function getPlatformDashboardData({
     }),
   ]);
 
-  const monthlyRevenue = activePlans
-    .reduce((sum, sub) => {
-      const price =
-        sub.plan === "FREE"
-          ? 0
-          : sub.plan === "BASIC"
-            ? 49
-            : sub.plan === "PREMIUM"
-              ? 149
-              : 0;
-      return sum + price;
-    }, 0);
+  const monthlyRevenue = activePlans.reduce((sum, sub) => {
+    const price =
+      sub.plan === "FREE"
+        ? 0
+        : sub.plan === "BASIC"
+          ? 49
+          : sub.plan === "PREMIUM"
+            ? 149
+            : 0;
+    return sum + price;
+  }, 0);
 
   return {
     totalSchools,

@@ -185,6 +185,7 @@ model Tenant {
   auditLogs       AuditLog[]
   timetables      Timetable[]
   payrolls        Payroll[]
+  payrollAdjustments PayrollAdjustment[]
 }
 
 model Branch {
@@ -239,7 +240,7 @@ model Staff {
   status         StaffStatus   @default(ACTIVE)
   yearOfService  Int?
   remark         String?
-  ratePerSection Decimal       @default(0)
+  ratePerHour Decimal       @default(0)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
@@ -391,18 +392,34 @@ model Payroll {
   schoolId      String
   staffId       String
   month         DateTime
-  totalSections Int
+  totalHours Int
   totalAmount   Decimal
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   tenant Tenant @relation(fields: [schoolId], references: [id])
   staff  Staff  @relation(fields: [staffId], references: [id])
+  adjustments PayrollAdjustment[]
 
   @@unique([staffId, month])
   @@index([schoolId])
   @@index([staffId])
   @@index([month])
+}
+
+model PayrollAdjustment {
+  id               String   @id @default(cuid())
+  payrollId        String
+  adjustmentAmount  Decimal
+  adjustmentReason String
+  schoolId         String
+  createdAt        DateTime @default(now())
+
+  payroll Payroll @relation(fields: [payrollId], references: [id])
+  tenant  Tenant  @relation(fields: [schoolId], references: [id])
+
+  @@index([payrollId])
+  @@index([schoolId])
 }
 
 model Section {

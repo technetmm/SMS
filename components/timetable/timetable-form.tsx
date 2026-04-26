@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -72,7 +72,10 @@ export function TimetableForm({
   cancelPath = "/school/timetable",
 }: TimetableFormProps) {
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    TimetableActionState,
+    FormData
+  >(action, initialState);
 
   const initialStaff = useMemo(
     () => staff.find((item) => item.id === initialData?.staffId) ?? null,
@@ -90,15 +93,24 @@ export function TimetableForm({
     initialSection,
   );
 
-  // `initialData` is stable for the lifetime of the page render (server component),
-  // so we don't need to sync state from props via an effect.
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) lastHandledKeyRef.current = "";
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
       router.push(redirectPath);
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save timetable slot");
     }

@@ -35,6 +35,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type EnrollmentActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type EnrollmentTableFilters = {
@@ -91,14 +92,18 @@ export async function enrollStudent(
 ): Promise<EnrollmentActionState> {
   const actor = await requireEnrollmentActor();
   if (!actor.ok) {
-    return { status: "error", message: actor.message };
+    return { status: "error", message: actor.message, msgID: Date.now() };
   }
 
   const schoolId = actor.schoolId;
   const raw = formDataToObject(formData);
   const parsed = enrollmentCreateSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const student = await prisma.student.findFirst({
@@ -111,7 +116,11 @@ export async function enrollStudent(
   });
 
   if (!student) {
-    return { status: "error", message: "Selected student is invalid." };
+    return {
+      status: "error",
+      message: "Selected student is invalid.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -233,7 +242,7 @@ export async function enrollStudent(
         ? error.message
         : "Unable to enroll student.";
     console.error("enrollStudent failed", error);
-    return { status: "error", message };
+    return { status: "error", message, msgID: Date.now() };
   }
 
   revalidateLocalizedPath("/school/enrollments");
@@ -244,6 +253,7 @@ export async function enrollStudent(
   return {
     status: "success",
     message: "Student enrolled and invoice created.",
+    msgID: Date.now(),
   };
 }
 
@@ -590,7 +600,11 @@ export async function updateEnrollment(
   const raw = formDataToObject(formData);
   const parsed = enrollmentUpdateSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const existing = await prisma.enrollment.findFirst({
@@ -599,7 +613,11 @@ export async function updateEnrollment(
   });
 
   if (!existing) {
-    return { status: "error", message: "Enrollment not found." };
+    return {
+      status: "error",
+      message: "Enrollment not found.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -610,12 +628,20 @@ export async function updateEnrollment(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to update enrollment." };
+    return {
+      status: "error",
+      message: "Unable to update enrollment.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/enrollments");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success", message: "Enrollment updated." };
+  return {
+    status: "success",
+    message: "Enrollment updated.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteEnrollment(
@@ -627,7 +653,11 @@ export async function deleteEnrollment(
 
   const id = String(formData.get("id") ?? "");
   if (!id) {
-    return { status: "error", message: "Enrollment id is required." };
+    return {
+      status: "error",
+      message: "Enrollment id is required.",
+      msgID: Date.now(),
+    };
   }
 
   const enrollment = await prisma.enrollment.findFirst({
@@ -647,7 +677,11 @@ export async function deleteEnrollment(
   });
 
   if (!enrollment) {
-    return { status: "error", message: "Enrollment not found." };
+    return {
+      status: "error",
+      message: "Enrollment not found.",
+      msgID: Date.now(),
+    };
   }
 
   if (enrollment._count.invoices > 0) {
@@ -655,6 +689,7 @@ export async function deleteEnrollment(
       status: "error",
       message:
         "This enrollment has payment history. Remove payments first before deleting.",
+      msgID: Date.now(),
     };
   }
 
@@ -663,7 +698,11 @@ export async function deleteEnrollment(
       where: { id: enrollment.id },
     });
   } catch {
-    return { status: "error", message: "Unable to delete enrollment." };
+    return {
+      status: "error",
+      message: "Unable to delete enrollment.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/enrollments");
@@ -672,7 +711,11 @@ export async function deleteEnrollment(
   revalidateLocalizedPath("/school/invoices");
   revalidateLocalizedPath("/school/payments");
   revalidateLocalizedPath("/school/analytics");
-  return { status: "success", message: "Enrollment deleted." };
+  return {
+    status: "success",
+    message: "Enrollment deleted.",
+    msgID: Date.now(),
+  };
 }
 
 export async function updateEnrollmentDetails(
@@ -685,7 +728,11 @@ export async function updateEnrollmentDetails(
   const raw = formDataToObject(formData);
   const parsed = enrollmentDetailsUpdateSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const tenant = await prisma.tenant.findFirst({
@@ -863,7 +910,7 @@ export async function updateEnrollmentDetails(
       error instanceof Error && error.message
         ? error.message
         : "Unable to update enrollment.";
-    return { status: "error", message };
+    return { status: "error", message, msgID: Date.now() };
   }
 
   revalidateLocalizedPath("/school/enrollments");
@@ -873,7 +920,11 @@ export async function updateEnrollmentDetails(
   revalidateLocalizedPath("/school/invoices");
   revalidateLocalizedPath("/school/payments");
   revalidateLocalizedPath("/school/analytics");
-  return { status: "success", message: "Enrollment details updated." };
+  return {
+    status: "success",
+    message: "Enrollment details updated.",
+    msgID: Date.now(),
+  };
 }
 
 export async function markAttendance(
@@ -884,31 +935,47 @@ export async function markAttendance(
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
+
   const parsed = enrollmentAttendanceSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
+  // Find enrollment based on studentId and sectionId
   const enrollment = await prisma.enrollment.findFirst({
-    where: { id: parsed.data.enrollmentId, schoolId },
+    where: {
+      studentId: parsed.data.studentId,
+      sectionId: parsed.data.sectionId,
+      status: "ACTIVE",
+      schoolId,
+    },
     select: { id: true },
   });
 
   if (!enrollment) {
-    return { status: "error", message: "Selected enrollment is invalid." };
+    return {
+      status: "error",
+      message:
+        "No active enrollment found for the selected student and section.",
+      msgID: Date.now(),
+    };
   }
 
   try {
     await prisma.attendance.upsert({
       where: {
         enrollmentId_date: {
-          enrollmentId: parsed.data.enrollmentId,
+          enrollmentId: enrollment.id,
           date: parsed.data.date,
         },
       },
       create: {
         schoolId,
-        enrollmentId: parsed.data.enrollmentId,
+        enrollmentId: enrollment.id,
         date: parsed.data.date,
         status: parsed.data.status,
       },
@@ -917,13 +984,17 @@ export async function markAttendance(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to save attendance." };
+    return {
+      status: "error",
+      message: "Unable to save attendance.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/attendance");
   revalidateLocalizedPath("/school/enrollments");
   revalidateLocalizedPath("/school/analytics");
-  return { status: "success", message: "Attendance saved." };
+  return { status: "success", message: "Attendance saved.", msgID: Date.now() };
 }
 
 export async function getAttendanceRecords(filters?: {
@@ -981,7 +1052,7 @@ export async function getPaginatedAttendanceRecords({
     enrollmentId?: string;
     sectionId?: string;
     studentId?: string;
-    status?: "PRESENT" | "ABSENT" | "LATE" | "LEAVE";
+    status?: "PRESENT" | "ABSENT" | "LATE" | "LEAVE" | "ALL";
     q?: string;
     dateFrom?: Date;
     dateTo?: Date;
@@ -990,6 +1061,12 @@ export async function getPaginatedAttendanceRecords({
 }) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
+
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === "ALL") {
+      delete filters?.[key as keyof typeof filters];
+    }
+  });
 
   const where: Record<string, unknown> = {
     schoolId,
@@ -1071,7 +1148,11 @@ export async function updateProgress(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const enrollment = await prisma.enrollment.findFirst({
@@ -1080,7 +1161,11 @@ export async function updateProgress(
   });
 
   if (!enrollment) {
-    return { status: "error", message: "Selected enrollment is invalid." };
+    return {
+      status: "error",
+      message: "Selected enrollment is invalid.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -1098,9 +1183,97 @@ export async function updateProgress(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to save progress." };
+    return {
+      status: "error",
+      message: "Unable to save progress.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/enrollments");
-  return { status: "success", message: "Progress updated." };
+  return { status: "success", message: "Progress updated.", msgID: Date.now() };
+}
+
+export async function getSectionsByStudentId(studentId: string) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId,
+      enrollments: {
+        some: {
+          studentId,
+          status: "ACTIVE",
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  // Get unique sections
+  return sections.filter(
+    (section, index, self) =>
+      self.findIndex((s) => s.id === section.id) === index,
+  );
+}
+
+export async function getEnrolledStudents() {
+  const schoolId = await requireTenant();
+
+  const studnets = await prisma.student.findMany({
+    where: {
+      schoolId,
+      status: "ACTIVE",
+      enrollments: {
+        some: {
+          status: "ACTIVE",
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return studnets;
+}
+
+export async function getEnrolledSections() {
+  const schoolId = await requireTenant();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId,
+      enrollments: {
+        some: {
+          status: "ACTIVE",
+        },
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      class: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return sections.filter(
+    (section, index, self) =>
+      self.findIndex((s) => s.id === section.id) === index,
+  );
 }

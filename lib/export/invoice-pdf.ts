@@ -1,7 +1,7 @@
 import PDFDocument from "pdfkit";
 import { Currency } from "@/app/generated/prisma/enums";
 import { getPdfFontPath } from "@/lib/export/pdf-font";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 
 export async function buildInvoicePdfBuffer(input: {
   schoolName: string;
@@ -53,7 +53,9 @@ export async function buildInvoicePdfBuffer(input: {
   doc.moveDown(1);
   doc.text("Fee Breakdown");
   doc.moveDown(0.3);
-  doc.text(`Original Fee: ${formatMoney(input.originalAmount, input.currency)}`);
+  doc.text(
+    `Original Fee: ${formatMoney(input.originalAmount, input.currency)}`,
+  );
   doc.text(`Discount: ${formatMoney(input.discount, input.currency)}`);
   doc.text(`Final Amount: ${formatMoney(input.finalAmount, input.currency)}`);
   doc.text(`Paid Amount: ${formatMoney(input.paidAmount, input.currency)}`);

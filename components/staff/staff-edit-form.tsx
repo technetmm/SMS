@@ -36,7 +36,7 @@ type StaffFormData = {
   hireDate: string;
   exitDate?: string | null;
   status: "ACTIVE" | "ONLEAVE" | "RESIGNED" | "TERMINATED";
-  ratePerSection: string;
+  ratePerHour: string;
   remark?: string | null;
 };
 
@@ -203,14 +203,14 @@ export function StaffEditForm({ staff }: { staff: StaffFormData }) {
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ratePerSection">Rate per section</Label>
+            <Label htmlFor="ratePerHour">Rate per hour</Label>
             <Input
-              id="ratePerSection"
-              name="ratePerSection"
+              id="ratePerHour"
+              name="ratePerHour"
               type="number"
               min="0"
               step="0.01"
-              defaultValue={staff.ratePerSection}
+              defaultValue={staff.ratePerHour}
               placeholder="Optional (e.g. 25.00)"
             />
           </div>

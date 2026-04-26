@@ -7,7 +7,7 @@ import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
 import { StatCard } from "@/components/shared/stat-card";
 import { RevenueChart } from "@/components/shared/revenue-chart";
 import { Currency } from "@/app/generated/prisma/enums";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import { parsePageParam } from "@/lib/pagination";
 import { getLocale, getTranslations } from "next-intl/server";
 

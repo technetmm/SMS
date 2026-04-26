@@ -6,12 +6,13 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { enumLabel, GENDER_LABELS, STUDENT_STATUS_LABELS } from "@/lib/enum-labels";
-
-function formatDate(value: Date | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(value);
-}
+import {
+  enumLabel,
+  GENDER_LABELS,
+  STUDENT_STATUS_LABELS,
+} from "@/lib/enum-labels";
+import { dateFormatter } from "@/lib/formatter";
+import { getLocale } from "next-intl/server";
 
 export default async function StudentDetailPage({
   params,
@@ -19,6 +20,7 @@ export default async function StudentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   await requireSchoolAdmin();
+  const locale = await getLocale();
 
   const { id } = await params;
 
@@ -59,15 +61,23 @@ export default async function StudentDetailPage({
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Date of birth</span>
-              <span>{formatDate(student.dob)}</span>
+              <span>
+                {student.dob ? dateFormatter(locale).format(student.dob) : "-"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Admission Date</span>
-              <span>{formatDate(student.admissionDate)}</span>
+              <span>
+                {student.admissionDate
+                  ? dateFormatter(locale).format(student.admissionDate)
+                  : "-"}
+              </span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Status</span>
-              <Badge variant={student.status === "ACTIVE" ? "default" : "outline"}>
+              <Badge
+                variant={student.status === "ACTIVE" ? "default" : "outline"}
+              >
                 {enumLabel(student.status, STUDENT_STATUS_LABELS)}
               </Badge>
             </div>

@@ -1,6 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import React, {
+  useActionState,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -22,7 +28,6 @@ import {
   ComboboxValue,
   useComboboxAnchor,
 } from "@/components/ui/combobox";
-import { X } from "lucide-react";
 
 const initialState: SectionActionState = { status: "idle" };
 
@@ -60,7 +65,10 @@ export function SectionForm({
 }: SectionFormProps) {
   const t = useTranslations("SchoolEntities.sections");
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    SectionActionState,
+    FormData
+  >(action, initialState);
   const staffAnchor = useComboboxAnchor();
 
   const initialClass = useMemo(
@@ -80,24 +88,34 @@ export function SectionForm({
   );
   const [selectedStaff, setSelectedStaff] = useState<Option[]>(initialStaff);
 
-  // `initialData` is stable for the lifetime of the page render (server component),
-  // so we don't need to sync state from props via an effect.
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
-      toast.success(state.message ?? "Saved");
+      toast.success(state.message ?? t("messages.saved"));
       router.push("/school/sections");
-      router.refresh();
     }
     if (state.status === "error") {
-      toast.error(state.message ?? "Unable to save section");
+      toast.error(state.message ?? t("messages.saveFailed"));
     }
-  }, [router, state]);
+  }, [router, state, t]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     if (!selectedClass) {
       event.preventDefault();
-      toast.error("Please select a class.");
+      toast.error(t("messages.pleaseSelectClass"));
     }
   }
 
@@ -157,34 +175,24 @@ export function SectionForm({
               autoHighlight
               items={staff}
               value={selectedStaff}
-              onValueChange={(value: Option[]) =>
+              onValueChange={(value: Array<Option>) =>
                 setSelectedStaff(uniqueById(value))
               }
-              itemToStringLabel={(item) => item?.name ?? ""}
             >
               <ComboboxChips ref={staffAnchor} className="w-full">
                 <ComboboxValue>
                   {(values) => (
-                    <>
+                    <React.Fragment>
                       {values.map((value: Option) => (
                         <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                       ))}
-                      <ComboboxChipsInput placeholder={t("form.searchStaff")} />
-                    </>
+                      <ComboboxChipsInput />
+                    </React.Fragment>
                   )}
                 </ComboboxValue>
-
-                <button
-                  type="button"
-                  className="w-fit text-xs text-muted-foreground underline underline-offset-4"
-                  onClick={() => setSelectedStaff([])}
-                >
-                  <X size={16} />
-                </button>
               </ComboboxChips>
               <ComboboxContent anchor={staffAnchor}>
-                <ComboboxInput placeholder={t("form.searchStaff")} />
-                <ComboboxEmpty>{t("form.noStaffFound")}</ComboboxEmpty>
+                <ComboboxEmpty>No items found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Option) => (
                     <ComboboxItem key={item.id} value={item}>
@@ -223,7 +231,7 @@ export function SectionForm({
               name="capacity"
               type="number"
               min={1}
-              defaultValue={initialData?.capacity?.toString() ?? "3"}
+              defaultValue={initialData?.capacity?.toString() || ""}
             />
           </div>
         </CardContent>

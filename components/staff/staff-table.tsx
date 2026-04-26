@@ -20,6 +20,7 @@ import {
 } from "@/lib/enum-labels";
 import { getLocale, getTranslations } from "next-intl/server";
 import { StaffRowActionsMenu } from "@/components/staff/staff-row-actions-menu";
+import { dateFormatter } from "@/lib/formatter";
 
 export async function StaffTable({
   page,
@@ -37,9 +38,6 @@ export async function StaffTable({
   const session = await getServerAuth();
   const actorRole = session?.user?.role;
   const staff = await getPaginatedStaff({ page, filters });
-  const formatter = new Intl.DateTimeFormat(locale, {
-    dateStyle: locale === "en" ? "medium" : "long",
-  });
 
   return (
     <div className="rounded-lg border bg-background">
@@ -71,7 +69,11 @@ export async function StaffTable({
                   {enumLabel(staff.status, STAFF_STATUS_LABELS)}
                 </Badge>
               </TableCell>
-              <TableCell>{formatter.format(staff.hireDate)}</TableCell>
+              <TableCell>
+                {dateFormatter(locale, { dateStyle: "medium" }).format(
+                  staff.hireDate,
+                )}
+              </TableCell>
               <TableCell className="text-right">
                 {actorRole ? (
                   <div className="flex justify-end">

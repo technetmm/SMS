@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 
 const initialState: EnrollmentActionState = { status: "idle" };
 
@@ -69,10 +69,10 @@ export function EnrollmentEditForm({
   const router = useRouter();
   const studentAnchor = useComboboxAnchor();
   const sectionAnchor = useComboboxAnchor();
-  const [state, formAction] = useActionState(
-    updateEnrollmentDetails,
-    initialState,
-  );
+  const [state, formAction, pending] = useActionState<
+    EnrollmentActionState,
+    FormData
+  >(updateEnrollmentDetails, initialState);
   const initialStudent = useMemo(
     () =>
       students.find((student) => student.id === enrollment.student.id) ??
@@ -125,12 +125,22 @@ export function EnrollmentEditForm({
 
     return { originalAmount, discountAmount: cappedDiscount, totalAmount };
   }, [discountType, discountValue, selectedSection]);
+  const lastHandledKeyRef = useRef<string>(null);
 
   useEffect(() => {
+    if (pending) lastHandledKeyRef.current = "";
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Enrollment updated.");
       router.push("/school/enrollments");
-      router.refresh();
     }
 
     if (state.status === "error") {

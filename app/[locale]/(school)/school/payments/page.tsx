@@ -15,7 +15,7 @@ import {
 import { prisma } from "@/lib/prisma/client";
 import { requireTenantId } from "@/lib/tenant";
 import { Badge } from "@/components/ui/badge";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import { paginateQuery, parsePageParam } from "@/lib/pagination";
 import {
   parseDateRangeParams,

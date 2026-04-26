@@ -1,50 +1,92 @@
-export const dateFormatter = (locale: string) =>
-  new Intl.DateTimeFormat(locale, {
-    dateStyle: locale === "en" ? "medium" : "long",
-  });
+import { Currency } from "@/app/generated/prisma/enums";
 
-export const numberFormatter = (locale: string) =>
-  new Intl.NumberFormat(locale);
+export const dateFormatter = (
+  locale: string,
+  options?: Intl.DateTimeFormatOptions,
+) =>
+  new Intl.DateTimeFormat(
+    locale,
+    options || {
+      dateStyle: "long",
+    },
+  );
 
-export const currencyFormatter = (locale: string) =>
-  new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "USD",
-  });
+export const numberFormatter = (
+  locale: string,
+  options?: Intl.NumberFormatOptions,
+) => new Intl.NumberFormat(locale, options);
 
-export const percentFormatter = (locale: string) =>
-  new Intl.NumberFormat(locale, { style: "percent" });
+export const currencyFormatter = (
+  locale: string,
+  options?: Intl.NumberFormatOptions,
+) =>
+  new Intl.NumberFormat(
+    locale,
+    options || {
+      style: "currency",
+      currency: "USD",
+    },
+  );
 
-export const dateFormatterWithTime = (locale: string) =>
-  new Intl.DateTimeFormat(locale, {
-    dateStyle: locale === "en" ? "medium" : "long",
-    timeStyle: "short",
-  });
+export const percentFormatter = (
+  locale: string,
+  options?: Intl.NumberFormatOptions,
+) => new Intl.NumberFormat(locale, options || { style: "percent" });
 
-export const dateTimeFormatter = (locale: string) =>
-  new Intl.DateTimeFormat(locale, {
-    dateStyle: locale === "en" ? "medium" : "long",
-    timeStyle: "short",
-  });
+export const dateFormatterWithTime = (
+  locale: string,
+  options?: Intl.DateTimeFormatOptions,
+) =>
+  new Intl.DateTimeFormat(
+    locale,
+    options || {
+      dateStyle: "long",
+      timeStyle: "short",
+    },
+  );
 
-export const dateTimeFormatterWithSeconds = (locale: string) =>
-  new Intl.DateTimeFormat(locale, {
-    dateStyle: locale === "en" ? "medium" : "long",
-    timeStyle: "short",
-    second: "numeric",
-  });
+export const dateTimeFormatter = (
+  locale: string,
+  options?: Intl.DateTimeFormatOptions,
+) =>
+  new Intl.DateTimeFormat(
+    locale,
+    options || {
+      dateStyle: "long",
+      timeStyle: "short",
+    },
+  );
+
+export const dateTimeFormatterWithSeconds = (
+  locale: string,
+  options?: Intl.DateTimeFormatOptions,
+) =>
+  new Intl.DateTimeFormat(
+    locale,
+    options || {
+      dateStyle: "long",
+      timeStyle: "short",
+      second: "numeric",
+    },
+  );
 
 const TIME_24H_PATTERN = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 const timetableTimeFormatters = new Map<string, Intl.DateTimeFormat>();
 
-function getTimetableTimeFormatter(locale: string) {
+function getTimetableTimeFormatter(
+  locale: string,
+  options?: Intl.DateTimeFormatOptions,
+) {
   let formatter = timetableTimeFormatters.get(locale);
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat(locale, {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+    formatter = new Intl.DateTimeFormat(
+      locale,
+      options || {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      },
+    );
     timetableTimeFormatters.set(locale, formatter);
   }
   return formatter;
@@ -67,6 +109,30 @@ export function formatTimetableTime(value: string, locale: string) {
   return getTimetableTimeFormatter(locale).format(date);
 }
 
-export function formatTimetableTimeRange(start: string, end: string, locale: string) {
+export function formatTimetableTimeRange(
+  start: string,
+  end: string,
+  locale: string,
+) {
   return `${formatTimetableTime(start, locale)} - ${formatTimetableTime(end, locale)}`;
+}
+
+const moneyCache = new Map<string, Intl.NumberFormat>();
+export const money = (currency: Currency | string) => {
+  const cached = moneyCache.get(currency);
+  if (cached) return cached;
+  const fmt = new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  });
+  moneyCache.set(currency, fmt);
+  return fmt;
+};
+
+export function formatMoney(
+  amount: number | string,
+  currency: Currency | string,
+) {
+  return money(currency).format(Number(amount));
 }
