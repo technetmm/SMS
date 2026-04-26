@@ -28,6 +28,7 @@ import {
 export type BillingActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type InvoiceTableFilters = {
@@ -639,12 +640,14 @@ export async function generateMissingMonthlyInvoices(
     return {
       status: "success",
       message: `Created ${result.created} invoice${result.created === 1 ? "" : "s"} and skipped ${result.existing} existing invoice${result.existing === 1 ? "" : "s"}${result.gated > 0 ? ` (${result.gated} gated)` : ""}.`,
+      msgID: Date.now(),
     };
   } catch (error) {
     console.error("generateMissingMonthlyInvoices failed", error);
     return {
       status: "error",
       message: "Unable to generate monthly invoices.",
+      msgID: Date.now(),
     };
   }
 }

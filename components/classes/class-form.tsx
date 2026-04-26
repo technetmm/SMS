@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { ClassActionState } from "@/app/(school)/school/classes/actions";
@@ -58,17 +58,33 @@ export function ClassForm({
   initialData,
 }: ClassFormProps) {
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    ClassActionState,
+    FormData
+  >(action, initialState);
   const [selectedCourse, setSelectedCourse] = useState<Option | null>(
     courses.find((c) => c.id === initialData?.courseId) || null,
   );
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
       router.push("/school/classes");
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save class");
     }
@@ -119,19 +135,6 @@ export function ClassForm({
                 </ComboboxList>
               </ComboboxContent>
             </Combobox>
-
-            {/* <Select name="courseId" defaultValue={initialData?.courseId}>
-              <SelectTrigger id="courseId" className="w-full">
-                <SelectValue placeholder="Select course" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {courses.map((course) => (
-                  <SelectItem key={course.id} value={course.id}>
-                    {course.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> */}
           </div>
 
           <div className="grid gap-2">
@@ -151,7 +154,7 @@ export function ClassForm({
             <Label htmlFor="classType">Class Type</Label>
             <Select
               name="classType"
-              defaultValue={initialData?.classType ?? "GROUP"}
+              defaultValue={initialData?.classType ?? ClassType.ONE_ON_ONE}
             >
               <SelectTrigger id="classType" className="w-full">
                 <SelectValue placeholder="Select class type" />
@@ -184,7 +187,7 @@ export function ClassForm({
             <Label htmlFor="programType">Program Type</Label>
             <Select
               name="programType"
-              defaultValue={initialData?.programType ?? "REGULAR"}
+              defaultValue={initialData?.programType ?? ProgramType.REGULAR}
             >
               <SelectTrigger id="programType" className="w-full">
                 <SelectValue placeholder="Select program type" />

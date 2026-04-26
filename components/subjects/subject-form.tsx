@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { SubjectActionState } from "@/app/(school)/school/subjects/actions";
@@ -25,13 +25,28 @@ type SubjectFormProps = {
 
 export function SubjectForm({ mode, action, initialData }: SubjectFormProps) {
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    SubjectActionState,
+    FormData
+  >(action, initialState);
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
       router.push("/school/subjects");
-      router.refresh();
     }
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save subject");

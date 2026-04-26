@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { Prisma } from "@/app/generated/prisma/client";
 import { revalidateLocalizedPath } from "@/lib/revalidate";
 import { prisma } from "@/lib/prisma/client";
 import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
@@ -17,6 +18,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type StaffActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type StaffTableFilters = {
@@ -32,6 +34,7 @@ export type StaffSystemRoleActionState = {
   message?: string;
   shouldLogout?: boolean;
   redirectTo?: string;
+  msgID?: number;
 };
 
 const resetStaffTwoFactorSchema = z.object({
@@ -102,7 +105,11 @@ export async function createStaff(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const existing = await prisma.user.findUnique({
@@ -111,7 +118,11 @@ export async function createStaff(
   });
 
   if (existing) {
-    return { status: "error", message: "Email already exists." };
+    return {
+      status: "error",
+      message: "Email already exists.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -147,7 +158,7 @@ export async function createStaff(
           exitDate: parsed.data.exitDate,
           status: parsed.data.status,
           remark: parsed.data.remark,
-          ratePerSection: parsed.data.ratePerSection,
+          ratePerHour: parsed.data.ratePerHour,
         },
       });
       createdStaffId = staff.id;
@@ -175,11 +186,19 @@ export async function createStaff(
     });
   } catch (error) {
     console.error("createStaff failed", error);
-    return { status: "error", message: "Unable to create staff." };
+    return {
+      status: "error",
+      message: "Unable to create staff.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/staff");
-  return { status: "success", message: "Staff created successfully." };
+  return {
+    status: "success",
+    message: "Staff created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getStaff() {
@@ -302,7 +321,11 @@ export async function updateStaff(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const staff = await prisma.staff.findFirst({
@@ -311,7 +334,11 @@ export async function updateStaff(
   });
 
   if (!staff) {
-    return { status: "error", message: "Staff not found." };
+    return {
+      status: "error",
+      message: "Staff not found.",
+      msgID: Date.now(),
+    };
   }
 
   const existing = await prisma.user.findUnique({
@@ -320,7 +347,11 @@ export async function updateStaff(
   });
 
   if (existing && existing.id !== staff.userId) {
-    return { status: "error", message: "Email already exists." };
+    return {
+      status: "error",
+      message: "Email already exists.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -349,20 +380,30 @@ export async function updateStaff(
           phone: parsed.data.phone,
           hireDate: parsed.data.hireDate,
           exitDate:
-            parsed.data.exitDate === undefined ? undefined : parsed.data.exitDate,
+            parsed.data.exitDate === undefined
+              ? undefined
+              : parsed.data.exitDate,
           status: parsed.data.status,
           remark: parsed.data.remark,
-          ratePerSection: parsed.data.ratePerSection,
+          ratePerHour: parsed.data.ratePerHour,
         },
       });
     });
   } catch (error) {
     console.error("updateStaff failed", error);
-    return { status: "error", message: "Unable to update staff." };
+    return {
+      status: "error",
+      message: "Unable to update staff.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/staff");
-  return { status: "success", message: "Staff updated successfully." };
+  return {
+    status: "success",
+    message: "Staff updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function resetStaffTwoFactor(
@@ -371,18 +412,26 @@ export async function resetStaffTwoFactor(
 ): Promise<StaffActionState> {
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized." };
+    return { status: "error", message: "Unauthorized.", msgID: Date.now() };
   }
 
   const parsed = resetStaffTwoFactorSchema.safeParse({
     targetUserId: formData.get("targetUserId"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   if (parsed.data.targetUserId === session.user.id) {
-    return { status: "error", message: "You cannot reset your own 2FA here." };
+    return {
+      status: "error",
+      message: "You cannot reset your own 2FA here.",
+      msgID: Date.now(),
+    };
   }
 
   const targetUser = await prisma.user.findUnique({
@@ -390,7 +439,11 @@ export async function resetStaffTwoFactor(
     select: { id: true, role: true, schoolId: true },
   });
   if (!targetUser) {
-    return { status: "error", message: "User not found." };
+    return {
+      status: "error",
+      message: "User not found.",
+      msgID: Date.now(),
+    };
   }
 
   const allowed = canResetTargetByRole({
@@ -400,7 +453,11 @@ export async function resetStaffTwoFactor(
     targetSchoolId: targetUser.schoolId,
   });
   if (!allowed) {
-    return { status: "error", message: "Unauthorized." };
+    return {
+      status: "error",
+      message: "Unauthorized.",
+      msgID: Date.now(),
+    };
   }
 
   await prisma.user.update({
@@ -423,7 +480,11 @@ export async function resetStaffTwoFactor(
   });
 
   revalidateLocalizedPath("/school/staff");
-  return { status: "success", message: "Two-factor authentication has been reset." };
+  return {
+    status: "success",
+    message: "Two-factor authentication has been reset.",
+    msgID: Date.now(),
+  };
 }
 
 export async function resetStaffPassword(
@@ -432,7 +493,7 @@ export async function resetStaffPassword(
 ): Promise<StaffActionState> {
   const session = await getServerAuth();
   if (!session?.user?.id) {
-    return { status: "error", message: "Unauthorized." };
+    return { status: "error", message: "Unauthorized.", msgID: Date.now() };
   }
 
   const parsed = resetStaffPasswordSchema.safeParse({
@@ -441,15 +502,27 @@ export async function resetStaffPassword(
     confirmPassword: formData.get("confirmPassword"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   if (parsed.data.newPassword !== parsed.data.confirmPassword) {
-    return { status: "error", message: "Passwords do not match." };
+    return {
+      status: "error",
+      message: "Passwords do not match.",
+      msgID: Date.now(),
+    };
   }
 
   if (parsed.data.targetUserId === session.user.id) {
-    return { status: "error", message: "Use your own change password page." };
+    return {
+      status: "error",
+      message: "Use your own change password page.",
+      msgID: Date.now(),
+    };
   }
 
   const targetUser = await prisma.user.findUnique({
@@ -457,7 +530,11 @@ export async function resetStaffPassword(
     select: { id: true, role: true, schoolId: true },
   });
   if (!targetUser) {
-    return { status: "error", message: "User not found." };
+    return {
+      status: "error",
+      message: "User not found.",
+      msgID: Date.now(),
+    };
   }
 
   const allowed = canResetTargetByRole({
@@ -467,7 +544,11 @@ export async function resetStaffPassword(
     targetSchoolId: targetUser.schoolId,
   });
   if (!allowed) {
-    return { status: "error", message: "Unauthorized." };
+    return {
+      status: "error",
+      message: "Unauthorized.",
+      msgID: Date.now(),
+    };
   }
 
   const newHash = await bcrypt.hash(parsed.data.newPassword, 10);
@@ -491,7 +572,11 @@ export async function resetStaffPassword(
   });
 
   revalidateLocalizedPath("/school/staff");
-  return { status: "success", message: "Password has been reset successfully." };
+  return {
+    status: "success",
+    message: "Password has been reset successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteStaff(formData: FormData) {
@@ -512,11 +597,19 @@ export async function deleteStaff(formData: FormData) {
   });
 
   if (!staff) {
-    throw new Error("Staff not found");
+    return {
+      status: "error",
+      message: "Staff not found.",
+      msgID: Date.now(),
+    };
   }
 
   if (staff._count.sections > 0) {
-    throw new Error("Staff is assigned to sections. Remove assignments first.");
+    return {
+      status: "error",
+      message: "Staff is assigned to sections. Remove assignments first.",
+      msgID: Date.now(),
+    };
   }
 
   await prisma.$transaction(async (tx) => {
@@ -525,6 +618,93 @@ export async function deleteStaff(formData: FormData) {
   });
 
   revalidateLocalizedPath("/school/staff");
+}
+
+const updateStaffHourlyRateSchema = z.object({
+  staffId: z.string().min(1, "Staff ID is required."),
+  hourlyRate: z.string().min(1, "Hourly rate is required."),
+});
+
+export async function updateStaffHourlyRate(
+  _prevState: StaffActionState,
+  formData: FormData,
+): Promise<StaffActionState> {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const raw = formDataToObject(formData);
+  const parsed = updateStaffHourlyRateSchema.safeParse(raw);
+
+  if (!parsed.success) {
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
+  }
+
+  const staff = await prisma.staff.findFirst({
+    where: { id: parsed.data.staffId, schoolId },
+    select: { id: true, name: true },
+  });
+
+  if (!staff) {
+    return {
+      status: "error",
+      message: "Staff not found.",
+      msgID: Date.now(),
+    };
+  }
+
+  try {
+    await prisma.staff.update({
+      where: { id: parsed.data.staffId },
+      data: { ratePerHour: new Prisma.Decimal(parsed.data.hourlyRate) },
+    });
+
+    await logAction({
+      action: "UPDATE",
+      entity: "Staff",
+      entityId: staff.id,
+      schoolId,
+      metadata: {
+        field: "hourlyRate",
+        newValue: parsed.data.hourlyRate,
+      },
+    });
+  } catch (error) {
+    console.error("updateStaffHourlyRate failed", error);
+    return {
+      status: "error",
+      message: "Unable to update hourly rate.",
+      msgID: Date.now(),
+    };
+  }
+
+  revalidateLocalizedPath("/school/staff");
+  return {
+    status: "success",
+    message: "Hourly rate updated successfully.",
+    msgID: Date.now(),
+  };
+}
+
+export async function getStaffWithHourlyRates() {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  return prisma.staff.findMany({
+    where: { schoolId },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      ratePerHour: true,
+      status: true,
+      tenant: { select: { currency: true } },
+    },
+  });
 }
 
 export async function setStaffSystemRole(
@@ -538,7 +718,7 @@ export async function setStaffSystemRole(
     (session.user.role !== UserRole.SCHOOL_SUPER_ADMIN &&
       session.user.role !== UserRole.SCHOOL_ADMIN)
   ) {
-    return { status: "error", message: "Unauthorized." };
+    return { status: "error", message: "Unauthorized.", msgID: Date.now() };
   }
 
   const parsed = setStaffSystemRoleSchema.safeParse({
@@ -546,7 +726,11 @@ export async function setStaffSystemRole(
     nextRole: formData.get("nextRole"),
   });
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const targetUser = await prisma.user.findFirst({
@@ -560,10 +744,14 @@ export async function setStaffSystemRole(
   });
 
   if (!targetUser) {
-    return { status: "error", message: "User not found." };
+    return { status: "error", message: "User not found.", msgID: Date.now() };
   }
   if (targetUser.role === UserRole.SUPER_ADMIN) {
-    return { status: "error", message: "Cannot modify SUPER_ADMIN." };
+    return {
+      status: "error",
+      message: "Cannot modify SUPER_ADMIN.",
+      msgID: Date.now(),
+    };
   }
   if (
     targetUser.role === UserRole.SCHOOL_SUPER_ADMIN ||
@@ -572,10 +760,15 @@ export async function setStaffSystemRole(
     return {
       status: "error",
       message: "Target user cannot use staff admin roles.",
+      msgID: Date.now(),
     };
   }
   if (!targetUser.staffProfile || targetUser.studentProfile) {
-    return { status: "error", message: "Target user is not a staff account." };
+    return {
+      status: "error",
+      message: "Target user is not a staff account.",
+      msgID: Date.now(),
+    };
   }
   const isSchoolAdminDemotion =
     parsed.data.nextRole === UserRole.TEACHER &&
@@ -584,12 +777,14 @@ export async function setStaffSystemRole(
     return {
       status: "error",
       message: "Admin cannot demote admin accounts.",
+      msgID: Date.now(),
     };
   }
   if (targetUser.role === parsed.data.nextRole) {
     return {
       status: "success",
       message: `User is already ${parsed.data.nextRole}.`,
+      msgID: Date.now(),
     };
   }
 
@@ -626,6 +821,7 @@ export async function setStaffSystemRole(
       message: "Demoted to teacher.",
       shouldLogout: true,
       redirectTo: "/login?demoted=1",
+      msgID: Date.now(),
     };
   }
 
@@ -633,11 +829,13 @@ export async function setStaffSystemRole(
     return {
       status: "success",
       message: "Promoted to Admin.",
+      msgID: Date.now(),
     };
   }
 
   return {
     status: "success",
     message: "Demoted to Teacher.",
+    msgID: Date.now(),
   };
 }

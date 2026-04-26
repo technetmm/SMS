@@ -11,6 +11,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type SubjectActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type SubjectTableFilters = {
@@ -41,12 +42,20 @@ export async function createSubject(
       },
     });
   } catch {
-    return { status: "error", message: "Subject name already exists." };
+    return {
+      status: "error",
+      message: "Subject name already exists.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/subjects");
   revalidateLocalizedPath("/school/courses");
-  return { status: "success", message: "Subject created successfully." };
+  return {
+    status: "success",
+    message: "Subject created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getSubjects() {
@@ -161,12 +170,20 @@ export async function updateSubject(
       data: { name: parsed.data.name },
     });
   } catch {
-    return { status: "error", message: "Subject name already exists." };
+    return {
+      status: "error",
+      message: "Subject name already exists.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/subjects");
   revalidateLocalizedPath("/school/courses");
-  return { status: "success", message: "Subject updated successfully." };
+  return {
+    status: "success",
+    message: "Subject updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteSubject(
@@ -202,5 +219,9 @@ export async function deleteSubject(
 
   revalidateLocalizedPath("/school/subjects");
   revalidateLocalizedPath("/school/courses");
-  return { status: "success", message: "Subject deleted successfully." };
+  return {
+    status: "success",
+    message: "Subject deleted successfully.",
+    msgID: Date.now(),
+  };
 }

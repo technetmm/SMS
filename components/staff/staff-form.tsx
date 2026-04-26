@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -25,14 +25,30 @@ const initialState: StaffActionState = { status: "idle" };
 
 export function StaffForm() {
   const router = useRouter();
-  const [state, formAction] = useActionState(createStaff, initialState);
+  const [state, formAction, pending] = useActionState<
+    StaffActionState,
+    FormData
+  >(createStaff, initialState);
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Staff created");
       router.push("/school/staff");
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to create staff");
     }
@@ -160,10 +176,10 @@ export function StaffForm() {
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="ratePerSection">Rate per section</Label>
+            <Label htmlFor="ratePerHour">Rate per hour</Label>
             <Input
-              id="ratePerSection"
-              name="ratePerSection"
+              id="ratePerHour"
+              name="ratePerHour"
               type="number"
               min="0"
               step="0.01"

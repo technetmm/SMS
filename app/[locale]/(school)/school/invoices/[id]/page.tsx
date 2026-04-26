@@ -10,7 +10,7 @@ import {
   INVOICE_TYPE_LABELS,
   PAYMENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import { InvoicePaymentForm } from "@/components/invoices/invoice-payment-form";
 import { InvoiceRefundForm } from "@/components/invoices/invoice-refund-form";
 
@@ -56,7 +56,10 @@ export default async function InvoiceDetailPage({
             <CardTitle>Original Fee</CardTitle>
           </CardHeader>
           <CardContent>
-            {formatMoney(Number(invoice.originalAmount), invoice.tenant.currency)}
+            {formatMoney(
+              Number(invoice.originalAmount),
+              invoice.tenant.currency,
+            )}
           </CardContent>
         </Card>
         <Card>

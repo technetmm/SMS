@@ -949,6 +949,20 @@
           "previous": "Previous",
           "next": "Next"
         }
+      },
+      "hourlyRates": {
+        "title": "Hourly Rates",
+        "description": "Manage teacher hourly rates for payroll calculation.",
+        "currentRate": "Current Hourly Rate",
+        "updateRate": "Update Rate",
+        "updateDialogTitle": "Update Hourly Rate",
+        "updateDialogDescription": "Update the hourly rate for this staff member.",
+        "newHourlyRate": "New Hourly Rate",
+        "update": "Update",
+        "updating": "Updating...",
+        "cancel": "Cancel",
+        "updateSuccess": "Hourly rate updated successfully",
+        "updateError": "Unable to update hourly rate"
       }
     },
     "subjects": {
@@ -1190,12 +1204,12 @@
           "openMeeting": "Open link"
         },
         "notAvailable": "-",
-        "empty": "No sections yet. Create your first section.",
-        "pagination": {
-          "showing": "Showing {start}-{end} of {total}",
-          "previous": "Previous",
-          "next": "Next"
-        }
+        "empty": "No sections yet. Create your first section."
+      },
+      "messages": {
+        "saved": "Saved",
+        "saveFailed": "Unable to save section",
+        "pleaseSelectClass": "Please select a class."
       }
     },
     "enrollments": {
@@ -1410,11 +1424,14 @@
       },
       "form": {
         "title": "Mark Attendance",
-        "enrollment": "Enrollment",
-        "selectEnrollment": "Select enrollment",
+        "student": "Student",
+        "selectStudent": "Select student",
+        "section": "Section",
+        "selectSection": "Select section",
         "date": "Date",
         "status": "Status",
         "selectStatus": "Select status",
+        "noItemsFound": "No items found.",
         "statusOptions": {
           "present": "Present",
           "absent": "Absent",
@@ -1681,10 +1698,28 @@
         "columns": {
           "month": "Month",
           "staff": "Staff",
-          "sections": "Sections",
-          "total": "Total"
+          "hours": "Hours",
+          "total": "Total",
+          "adjustment": "Adjustment",
+          "reason": "Reason"
         },
         "empty": "No payroll generated yet."
+      },
+      "adjustment": {
+        "adjustDialogTitle": "Adjust Payroll",
+        "adjustDialogDescription": "Adjust payroll amount for",
+        "originalAmount": "Original Amount",
+        "currentAmount": "Current Amount",
+        "adjustmentAmount": "Adjustment Amount",
+        "adjustmentDescription": "Enter positive amount to increase, negative to decrease",
+        "adjustmentReason": "Adjustment Reason",
+        "adjustmentReasonPlaceholder": "e.g. Bonus, Deduction, Correction",
+        "adjust": "Adjust",
+        "adjusting": "Adjusting...",
+        "cancel": "Cancel",
+        "adjustmentSuccess": "Payroll adjusted successfully",
+        "adjustmentError": "Unable to adjust payroll",
+        "adjustPayroll": "Adjust Payroll"
       }
     }
   },

@@ -21,7 +21,6 @@ import {
   CreditCardIcon,
   BarChart3Icon,
   ReceiptIcon,
-  FileDownIcon,
   FileTextIcon,
   LayoutDashboardIcon,
   UsersIcon,
@@ -104,6 +103,11 @@ export function AppSidebar({
           url: "/school/staff",
           icon: <UserRoundIcon />,
         },
+        // {
+        //   title: t("items.hourlyRates"),
+        //   url: "/school/staff/hourly-rates",
+        //   icon: <CreditCardIcon />,
+        // },
       ],
     },
     {
@@ -173,11 +177,6 @@ export function AppSidebar({
           title: t("items.payroll"),
           url: "/school/payroll",
           icon: <ReceiptIcon />,
-        },
-        {
-          title: t("items.exports"),
-          url: "/school/exports",
-          icon: <FileDownIcon />,
         },
       ],
     },

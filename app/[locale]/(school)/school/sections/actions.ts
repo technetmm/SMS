@@ -12,6 +12,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type SectionActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type SectionTableFilters = {
@@ -111,12 +112,20 @@ export async function createSection(
       }
     });
   } catch {
-    return { status: "error", message: "Unable to create section." };
+    return {
+      status: "error",
+      message: "Unable to create section.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/sections");
   revalidateLocalizedPath("/school/classes");
-  return { status: "success", message: "Section created successfully." };
+  return {
+    status: "success",
+    message: "Section created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getSections() {
@@ -379,12 +388,20 @@ export async function updateSection(
       }
     });
   } catch {
-    return { status: "error", message: "Unable to update section." };
+    return {
+      status: "error",
+      message: "Unable to update section.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/sections");
   revalidateLocalizedPath("/school/classes");
-  return { status: "success", message: "Section updated successfully." };
+  return {
+    status: "success",
+    message: "Section updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function assignStaffToSection(

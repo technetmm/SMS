@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import { parsePageParam } from "@/lib/pagination";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {

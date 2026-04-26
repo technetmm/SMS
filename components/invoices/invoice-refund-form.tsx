@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SubmitButton } from "@/components/shared/submit-button";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 
 const initialState: BillingActionState = { status: "idle" };
 

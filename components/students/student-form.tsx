@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -46,15 +46,31 @@ export function StudentForm({
 }) {
   const router = useRouter();
   const action = mode === "create" ? createStudent : updateStudent;
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    StudentActionState,
+    FormData
+  >(action, initialState);
   const [createAccount, setCreateAccount] = useState(false);
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Student saved");
       router.push("/school/students");
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save student");
     }
