@@ -42,9 +42,11 @@ export default async function StaffAttendancePage({
     from: params.dateFrom,
     to: params.dateTo,
   });
-  const t = await getTranslations("SchoolEntities.staffAttendance.list");
 
-  const [staff] = await Promise.all([getAssignedStaffs()]);
+  const [t, staff] = await Promise.all([
+    getTranslations("SchoolEntities.staffAttendance.list"),
+    getAssignedStaffs(),
+  ]);
 
   return (
     <div className="space-y-6">

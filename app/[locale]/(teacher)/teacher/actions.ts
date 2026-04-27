@@ -413,6 +413,22 @@ export async function markTeacherAttendance(
     };
   }
 
+  const existingAttendance = await prisma.attendance.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      date: parsed.data.date,
+    },
+  });
+
+  if (existingAttendance) {
+    return {
+      status: "error",
+      message:
+        "Attendance has already been marked for this student on this date.",
+      msgID: Date.now(),
+    };
+  }
+
   try {
     await prisma.attendance.upsert({
       where: {
@@ -621,6 +637,7 @@ export async function updateTeacherProgress(
     return {
       status: "error",
       message: "Your staff profile is not linked yet.",
+      msgID: Date.now(),
     };
   }
 
@@ -631,7 +648,11 @@ export async function updateTeacherProgress(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const enrollment = await prisma.enrollment.findFirst({
@@ -651,6 +672,7 @@ export async function updateTeacherProgress(
     return {
       status: "error",
       message: "You can only update progress for assigned sections.",
+      msgID: Date.now(),
     };
   }
 
@@ -669,12 +691,16 @@ export async function updateTeacherProgress(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to save progress." };
+    return {
+      status: "error",
+      message: "Unable to save progress.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/teacher/students");
   revalidateLocalizedPath("/teacher/dashboard");
-  return { status: "success", message: "Progress updated." };
+  return { status: "success", message: "Progress updated.", msgID: Date.now() };
 }
 
 export async function getSectionsByStudentId(studentId: string) {
