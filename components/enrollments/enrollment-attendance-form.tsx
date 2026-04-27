@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useTranslations } from "next-intl";
 import {
   Combobox,
@@ -55,6 +56,7 @@ export function EnrollmentAttendanceForm({
   const [selectedSection, setSelectedSection] = useState<Option | null>(null);
   const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
   const [filteredSections, setFilteredSections] = useState<Option[]>([]);
+  const [remarkLength, setRemarkLength] = useState<number>(0);
   const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
@@ -104,6 +106,7 @@ export function EnrollmentAttendanceForm({
 
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.saved"));
+      setRemarkLength(0);
       router.refresh();
     }
     if (state.status === "error") {
@@ -193,6 +196,22 @@ export function EnrollmentAttendanceForm({
                 </SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="grid gap-2 md:col-span-2">
+            <Label htmlFor="remark">{t("remark")}</Label>
+            <Textarea
+              id="remark"
+              name="remark"
+              placeholder={t("remarkPlaceholder")}
+              className="w-full max-h-50"
+              rows={3}
+              maxLength={500}
+              onChange={(e) => setRemarkLength(e.target.value.length)}
+            />
+            <div className="text-xs text-muted-foreground text-right">
+              {remarkLength}/500
+            </div>
           </div>
         </CardContent>
       </Card>

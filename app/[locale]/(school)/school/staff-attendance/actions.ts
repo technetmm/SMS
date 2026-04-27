@@ -97,6 +97,7 @@ export async function getPaginatedStaffAttendance({
               class: { select: { id: true, name: true } },
             },
           },
+          remark: true,
           createdAt: true,
         },
       }),
@@ -191,9 +192,11 @@ export async function markStaffAttendance(
         sectionId: parsed.data.sectionId,
         date: parsed.data.date,
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
       update: {
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
     });
   } catch {
@@ -250,6 +253,59 @@ export async function getSectionsByStaffAndDay(
   });
 
   return sections;
+}
+
+export async function deleteStaffAttendance(
+  _prev: StaffAttendanceActionState,
+  formData: FormData,
+): Promise<StaffAttendanceActionState> {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const attendanceId = formData.get("id") as string;
+  if (!attendanceId) {
+    return {
+      status: "error",
+      message: "Attendance ID is required.",
+      msgID: Date.now(),
+    };
+  }
+
+  // Verify the attendance record belongs to the school
+  const existingAttendance = await prisma.staffAttendance.findFirst({
+    where: {
+      id: attendanceId,
+      schoolId,
+    },
+    select: { id: true },
+  });
+
+  if (!existingAttendance) {
+    return {
+      status: "error",
+      message: "Attendance record not found.",
+      msgID: Date.now(),
+    };
+  }
+
+  try {
+    await prisma.staffAttendance.delete({
+      where: { id: attendanceId },
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "Unable to delete staff attendance.",
+      msgID: Date.now(),
+    };
+  }
+
+  revalidateLocalizedPath("/school/staff-attendance");
+  return {
+    status: "success",
+    message: "Staff attendance deleted successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getAssignedStaffs() {

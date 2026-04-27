@@ -542,6 +542,97 @@
       }
     }
   },
+  "StudentDashboard": {
+    "title": "Student Dashboard",
+    "stats": {
+      "activeEnrollments": "Active Enrollments",
+      "attendanceRecords": "Attendance Records",
+      "pendingInvoices": "Pending Invoices"
+    },
+    "welcome": {
+      "title": "Welcome, {name}",
+      "description": "This dashboard is read-only. You can view your schedule, attendance, fees, and progress."
+    },
+    "sections": {
+      "title": "My Sections",
+      "empty": "You are not enrolled in any sections yet.",
+      "notAvailable": "Not available",
+      "columns": {
+        "section": "Section",
+        "class": "Class",
+        "teacher": "Teacher",
+        "capacity": "Capacity",
+        "enrolled": "Enrolled",
+        "actions": "Actions"
+      },
+      "actions": {
+        "view": "View"
+      }
+    },
+    "timetable": {
+      "title": "My Timetable",
+      "empty": "No timetable available for your enrolled sections.",
+      "noRoom": "No room",
+      "columns": {
+        "time": "Time",
+        "section": "Section",
+        "class": "Class",
+        "teacher": "Teacher",
+        "room": "Room"
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      }
+    },
+    "sectionDetails": {
+      "backToDashboard": "Back to Dashboard",
+      "sectionInfo": {
+        "title": "Section Information",
+        "class": "Class",
+        "capacity": "Capacity",
+        "room": "Room",
+        "meetingLink": "Meeting Link",
+        "joinMeeting": "Join Meeting",
+        "branch": "Branch",
+        "enrolledSince": "Enrolled Since"
+      },
+      "schedule": {
+        "title": "Schedule",
+        "empty": "No schedule available for this section.",
+        "noRoom": "No room",
+        "columns": {
+          "day": "Day",
+          "time": "Time",
+          "teacher": "Teacher",
+          "room": "Room"
+        },
+        "days": {
+          "monday": "Monday",
+          "tuesday": "Tuesday",
+          "wednesday": "Wednesday",
+          "thursday": "Thursday",
+          "friday": "Friday",
+          "saturday": "Saturday",
+          "sunday": "Sunday"
+        }
+      },
+      "teachers": {
+        "title": "Teachers",
+        "empty": "No teachers assigned to this section."
+      },
+      "classmates": {
+        "title": "Classmates",
+        "total": "{count} students",
+        "you": "You"
+      }
+    }
+  },
   "SchoolDashboard": {
     "stats": {
       "totalStudents": "Total Students",
@@ -1438,6 +1529,8 @@
           "late": "Late",
           "leave": "Leave"
         },
+        "remark": "Remark (Optional)",
+        "remarkPlaceholder": "Add any notes or comments...",
         "save": "Save Attendance",
         "saving": "Saving...",
         "messages": {
@@ -1471,13 +1564,21 @@
           "date": "Date",
           "student": "Student",
           "section": "Section",
-          "status": "Status"
+          "status": "Status",
+          "remark": "Remark",
+          "actions": "Actions"
         },
         "statusOptions": {
           "present": "Present",
           "absent": "Absent",
           "late": "Late",
           "leave": "Leave"
+        },
+        "delete": {
+          "title": "Delete Attendance",
+          "description": "Are you sure you want to delete this attendance record? This action cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Delete"
         },
         "empty": "No attendance records yet."
       }
@@ -1505,6 +1606,8 @@
           "late": "Late",
           "leave": "Leave"
         },
+        "remark": "Remark (Optional)",
+        "remarkPlaceholder": "Add any notes or comments...",
         "save": "Save Attendance",
         "saving": "Saving...",
         "messages": {
@@ -1535,13 +1638,21 @@
           "date": "Date",
           "staff": "Staff",
           "section": "Section",
-          "status": "Status"
+          "status": "Status",
+          "remark": "Remark",
+          "actions": "Actions"
         },
         "statusOptions": {
           "present": "Present",
           "absent": "Absent",
           "late": "Late",
           "leave": "Leave"
+        },
+        "delete": {
+          "title": "Delete Staff Attendance",
+          "description": "Are you sure you want to delete this staff attendance record? This action cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Delete"
         },
         "empty": "No staff attendance records yet."
       }

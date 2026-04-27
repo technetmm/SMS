@@ -94,6 +94,7 @@ export default async function AttendancePage({
       <EnrollmentAttendanceTable
         rows={rows}
         pathname="/school/attendance"
+        canDelete={true}
         searchParams={{
           studentId: params.studentId,
           sectionId: params.sectionId,

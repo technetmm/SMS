@@ -550,6 +550,97 @@
       }
     }
   },
+  "StudentDashboard": {
+    "title": "ကျောင်းသား Dashboard",
+    "stats": {
+      "activeEnrollments": "လက်ရှိ အပ်နှံမှုများ",
+      "attendanceRecords": "တက်ရောက်မှုမှတ်တမ်းများ",
+      "pendingInvoices": "မပေးသေးသော Invoice များ"
+    },
+    "welcome": {
+      "title": "ကြိုဆိုပါသည်, {name}",
+      "description": "ဤ dashboard သည် ဖတ်ရှုရန်သာဖြစ်သည်။ သင့်အချိန်ဇယား၊ တက်ရောက်မှု၊ ကြေးနှင့် တိုးတက်မှုများကို ကြည့်ရှုနိုင်သည်။"
+    },
+    "sections": {
+      "title": "ကျွန်ုပ်၏ Sections",
+      "empty": "သင်မည်သည့် section တွင်မှ အပ်နှံထားခြင်းမရှိပါ။",
+      "notAvailable": "မရှိပါ",
+      "columns": {
+        "section": "Section",
+        "class": "အတန်း",
+        "teacher": "ဆရာ/မ",
+        "capacity": "ဦးရေ",
+        "enrolled": "အပ်နှံရက်",
+        "actions": "လုပ်ဆောင်ချက်များ"
+      },
+      "actions": {
+        "view": "ကြည့်ရှုရန်"
+      }
+    },
+    "timetable": {
+      "title": "ကျွန်ုပ်၏ အချိန်ဇယား",
+      "empty": "သင်အပ်နှံထားသော sections အတွက် အချိန်ဇယားမရှိပါ။",
+      "noRoom": "အခန်းမရှိ",
+      "columns": {
+        "time": "အချိန်",
+        "section": "Section",
+        "class": "အတန်း",
+        "teacher": "ဆရာ/မ",
+        "room": "အခန်း"
+      },
+      "days": {
+        "monday": "တနင်္လာ",
+        "tuesday": "အင်္ဂါ",
+        "wednesday": "ဗုဒ္ဓဟူး",
+        "thursday": "ကြာသပတေး",
+        "friday": "သောကြာ",
+        "saturday": "စနေ",
+        "sunday": "တနင်္ဂလာ"
+      }
+    },
+    "sectionDetails": {
+      "backToDashboard": "Dashboard သို့ ပြန်သွားမည်",
+      "sectionInfo": {
+        "title": "Section အချက်အလက်",
+        "class": "အတန်း",
+        "capacity": "ဦးရေ",
+        "room": "အခန်း",
+        "meetingLink": "Meeting Link",
+        "joinMeeting": "Meeting ဝင်မည်",
+        "branch": "ဌာန",
+        "enrolledSince": "အပ်နှံထားသည့်နေ့"
+      },
+      "schedule": {
+        "title": "အချိန်ဇယား",
+        "empty": "ဤ section အတွက် အချိန်ဇယားမရှိပါ။",
+        "noRoom": "အခန်းမရှိ",
+        "columns": {
+          "day": "နေ့",
+          "time": "အချိန်",
+          "teacher": "ဆရာ/မ",
+          "room": "အခန်း"
+        },
+        "days": {
+          "monday": "တနင်္လာ",
+          "tuesday": "အင်္ဂါ",
+          "wednesday": "ဗုဒ္ဓဟူး",
+          "thursday": "ကြာသပတေး",
+          "friday": "သောကြာ",
+          "saturday": "စနေ",
+          "sunday": "တနင်္ဂလာ"
+        }
+      },
+      "teachers": {
+        "title": "ဆရာ/မများ",
+        "empty": "ဤ section တွင် ဆရာ/မများ မသတ်မှတ်ထားပါ။"
+      },
+      "classmates": {
+        "title": "အတန်းဖော်များ",
+        "total": "ကျောင်းသား {count} ဦး",
+        "you": "ကျွန်ုပ်"
+      }
+    }
+  },
   "SchoolDashboard": {
     "stats": {
       "totalStudents": "ကျောင်းသားစုစုပေါင်း",
@@ -1405,6 +1496,8 @@
           "late": "နောက်ကျ",
           "leave": "ခွင့်"
         },
+        "remark": "မှတ်ချက် (ရွေးချယ်ခွင့်)",
+        "remarkPlaceholder": "မှတ်ချက် သို့မဟုတ် အကြောင်းကြောင်းထည့်ပါ...",
         "save": "တက်ရောက်မှု သိမ်းမည်",
         "saving": "သိမ်းနေသည်...",
         "messages": {
@@ -1436,13 +1529,21 @@
           "date": "ရက်စွဲ",
           "student": "ကျောင်းသား",
           "section": "Section",
-          "status": "အခြေအနေ"
+          "status": "အခြေအနေ",
+          "remark": "မှတ်ချက်",
+          "actions": "လုပ်ဆောင်ချက်များ"
         },
         "statusOptions": {
           "present": "တက်",
           "absent": "ပျက်ကွက်",
           "late": "နောက်ကျ",
           "leave": "ခွင့်"
+        },
+        "delete": {
+          "title": "တက်ရောက်မှု ဖျက်မည်",
+          "description": "ဤတက်ရောက်မှု မှတ်တမ်းကို ဖျက်လိုသည်မှာ သေချာပါသလား? ဤလုပ်ငန်းကို ပြန်ဖျက်၍ မရပါ။",
+          "cancel": "ပယ်ဖျက်မည်",
+          "confirm": "ဖျက်မည်"
         },
         "empty": "တက်ရောက်မှု မှတ်တမ်း မရှိသေးပါ။"
       }
@@ -1470,6 +1571,8 @@
           "late": "နောက်ကျ",
           "leave": "ခွင့်"
         },
+        "remark": "မှတ်ချက် (ရွေးချယ်ခွင့်)",
+        "remarkPlaceholder": "မှတ်ချက် သို့မဟုတ် အကြောင်းကြောင်းထည့်ပါ...",
         "save": "တက်ရောက်မှု သိမ်းမည်",
         "saving": "သိမ်းနေသည်...",
         "messages": {
@@ -1500,13 +1603,21 @@
           "date": "ရက်စွဲ",
           "staff": "ဝန်ထမ်း",
           "section": "Section",
-          "status": "အခြေအနေ"
+          "status": "အခြေအနေ",
+          "remark": "မှတ်ချက်",
+          "actions": "လုပ်ဆောင်ချက်များ"
         },
         "statusOptions": {
           "present": "တက်",
           "absent": "ပျက်ကွက်",
           "late": "နောက်ကျ",
           "leave": "ခွင့်"
+        },
+        "delete": {
+          "title": "ဝန်ထမ်း တက်ရောက်မှု ဖျက်မည်",
+          "description": "ဤဝန်ထမ်း တက်ရောက်မှု မှတ်တမ်းကို ဖျက်လိုသည်မှာ သေချာပါသလား? ဤလုပ်ငန်းကို ပြန်ဖျက်၍ မရပါ။",
+          "cancel": "ပယ်ဖျက်မည်",
+          "confirm": "ဖျက်မည်"
         },
         "empty": "ဝန်ထမ်း တက်ရောက်မှု မှတ်တမ်း မရှိသေးပါ။"
       }

@@ -186,6 +186,7 @@ export const staffAttendanceSchema = z.object({
   sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
+  remark: z.string().max(500).nullable().optional(),
 });
 
 export const enrollmentCreateSchema = z.object({
@@ -224,6 +225,7 @@ export const enrollmentAttendanceSchema = z.object({
   sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
+  remark: z.string().max(500).nullable().optional(),
 });
 
 export const teacherAttendanceSchema = z.object({
@@ -231,6 +233,7 @@ export const teacherAttendanceSchema = z.object({
   sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
+  remark: z.string().max(500).nullable().optional(),
 });
 
 export const enrollmentProgressSchema = z.object({
