@@ -2,8 +2,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import {
   ArrowRight,
   Building2,
-  Image as ImageIcon,
   KeyRound,
+  Languages,
   LockKeyhole,
   Mail,
   Palette,
@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "@/i18n/navigation";
 import { type AppLocale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
+import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 
 export default async function SettingsOverviewPage() {
   const t = await getTranslations("SettingsOverview");
@@ -143,6 +144,21 @@ export default async function SettingsOverviewPage() {
                 </div>
               );
             })}
+            <Separator />
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl border bg-muted/40 text-primary">
+                  <Languages className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{t("language.title")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("language.description")}
+                  </p>
+                </div>
+              </div>
+              <LocaleSwitcher className="self-start md:self-center" />
+            </div>
           </CardContent>
         </Card>
 
@@ -193,7 +209,7 @@ export default async function SettingsOverviewPage() {
               <CardDescription>{t("quickUpdates.description")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button
+              {/* <Button
                 asChild
                 variant="outline"
                 className="w-full justify-between"
@@ -202,7 +218,7 @@ export default async function SettingsOverviewPage() {
                   {t("quickUpdates.updateProfilePhoto")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
-              </Button>
+              </Button> */}
               <Button
                 asChild
                 variant="outline"

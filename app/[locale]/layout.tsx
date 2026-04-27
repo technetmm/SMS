@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ActivityTracker } from "@/components/auth/activity-tracker";
 import { routing } from "@/i18n/routing";
+import { LocaleSwitcher } from "@/components/shared/locale-switcher";
 
 export function generateStaticParams() {
   return [{ locale: "en" }, { locale: "my" }];
@@ -37,6 +38,9 @@ export default async function LocaleLayout({
         disableTransitionOnChange
       >
         <TooltipProvider>
+          <div className="fixed right-4 top-4 z-50">
+            <LocaleSwitcher />
+          </div>
           <AuthSessionProvider>
             <ActivityTracker />
             {children}

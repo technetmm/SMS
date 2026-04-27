@@ -28,10 +28,6 @@ export default async function proxy(req: NextRequest) {
   );
   const resolvedLocale = locale ?? routing.defaultLocale;
 
-  if (locale === "my") {
-    return new NextResponse("Not Found", { status: 404 });
-  }
-
   if (!locale) {
     return handleI18nRouting(req);
   }
@@ -75,6 +71,14 @@ export default async function proxy(req: NextRequest) {
     (!token || !tokenUserId)
   ) {
     return redirectWithLocale(req, resolvedLocale, "/login");
+  }
+
+  if (
+    (matchesPath(pathname, "/login") || matchesPath(pathname, "/signup")) &&
+    token &&
+    tokenUserId
+  ) {
+    return redirectWithLocale(req, resolvedLocale, "/");
   }
 
   if (
