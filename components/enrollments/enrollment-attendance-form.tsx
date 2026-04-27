@@ -106,6 +106,7 @@ export function EnrollmentAttendanceForm({
 
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.saved"));
+      setRemarkLength(0);
       router.refresh();
     }
     if (state.status === "error") {

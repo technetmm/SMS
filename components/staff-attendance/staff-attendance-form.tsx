@@ -69,6 +69,7 @@ export function StaffAttendanceForm({ action, staff }: Props) {
 
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.saved"));
+      setRemarkLength(0);
       router.refresh();
     }
 
