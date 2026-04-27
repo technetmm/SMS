@@ -353,6 +353,7 @@ model StaffAttendance {
   sectionId String
   date      DateTime
   status    AttendanceStatus
+  remark    String?          @db.Text
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
 
@@ -510,6 +511,7 @@ model Attendance {
   enrollmentId String
   date         DateTime
   status       AttendanceStatus
+  remark       String?          @db.Text
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 

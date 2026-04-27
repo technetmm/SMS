@@ -103,6 +103,7 @@ export default async function TeacherAttendancePage({
       <EnrollmentAttendanceTable
         rows={rows}
         pathname="/teacher/attendance"
+        canDelete={false}
         searchParams={{
           studentId: params.studentId,
           sectionId: params.sectionId,

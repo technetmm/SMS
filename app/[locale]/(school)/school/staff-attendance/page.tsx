@@ -2,6 +2,7 @@ import { AttendanceStatus } from "@/app/generated/prisma/enums";
 import {
   getAssignedStaffs,
   markStaffAttendance,
+  getPaginatedStaffAttendance,
 } from "@/app/(school)/school/staff-attendance/actions";
 import { StaffAttendanceForm } from "@/components/staff-attendance/staff-attendance-form";
 import { StaffAttendanceTable } from "@/components/staff-attendance/staff-attendance-table";
@@ -43,9 +44,13 @@ export default async function StaffAttendancePage({
     to: params.dateTo,
   });
 
-  const [t, staff] = await Promise.all([
+  const [t, staff, logs] = await Promise.all([
     getTranslations("SchoolEntities.staffAttendance.list"),
     getAssignedStaffs(),
+    getPaginatedStaffAttendance({
+      page,
+      filters: { q, status, dateFrom, dateTo },
+    }),
   ]);
 
   return (
@@ -68,8 +73,7 @@ export default async function StaffAttendancePage({
       </Card>
 
       <StaffAttendanceTable
-        page={page}
-        filters={{ q, status, dateFrom, dateTo }}
+        logs={logs}
         searchParams={{
           q: params.q,
           status: params.status,

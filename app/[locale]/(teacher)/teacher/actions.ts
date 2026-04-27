@@ -442,9 +442,11 @@ export async function markTeacherAttendance(
         enrollmentId: enrollment.id,
         date: parsed.data.date,
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
       update: {
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
     });
   } catch {
@@ -546,6 +548,7 @@ export async function getTeacherPaginatedAttendanceRecords({
               },
             },
           },
+          remark: true,
         },
       }),
   });

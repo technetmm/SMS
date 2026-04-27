@@ -935,7 +935,6 @@ export async function markAttendance(
   const schoolId = await requireTenant();
 
   const raw = formDataToObject(formData);
-
   const parsed = enrollmentAttendanceSchema.safeParse(raw);
   if (!parsed.success) {
     return {
@@ -994,9 +993,11 @@ export async function markAttendance(
         enrollmentId: enrollment.id,
         date: parsed.data.date,
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
       update: {
         status: parsed.data.status,
+        remark: parsed.data.remark,
       },
     });
   } catch {
@@ -1057,6 +1058,61 @@ export async function getAttendanceRecords(filters?: {
       },
     },
   });
+}
+
+export async function deleteStudentAttendance(
+  _prevState: EnrollmentActionState,
+  formData: FormData,
+): Promise<EnrollmentActionState> {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const attendanceId = formData.get("id") as string;
+  if (!attendanceId) {
+    return {
+      status: "error",
+      message: "Attendance ID is required.",
+      msgID: Date.now(),
+    };
+  }
+
+  // Verify the attendance record belongs to the school
+  const existingAttendance = await prisma.attendance.findFirst({
+    where: {
+      id: attendanceId,
+      schoolId,
+    },
+    select: { id: true },
+  });
+
+  if (!existingAttendance) {
+    return {
+      status: "error",
+      message: "Attendance record not found.",
+      msgID: Date.now(),
+    };
+  }
+
+  try {
+    await prisma.attendance.delete({
+      where: { id: attendanceId },
+    });
+  } catch {
+    return {
+      status: "error",
+      message: "Unable to delete student attendance.",
+      msgID: Date.now(),
+    };
+  }
+
+  revalidateLocalizedPath("/school/attendance");
+  revalidateLocalizedPath("/school/enrollments");
+  revalidateLocalizedPath("/school/analytics");
+  return {
+    status: "success",
+    message: "Student attendance deleted successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getPaginatedAttendanceRecords({
@@ -1145,6 +1201,7 @@ export async function getPaginatedAttendanceRecords({
               },
             },
           },
+          remark: true,
         },
       }),
   });
