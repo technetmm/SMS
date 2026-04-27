@@ -1,5 +1,13 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import { ArrowRight, Image as ImageIcon, KeyRound, LockKeyhole, Mail, Palette, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  Image as ImageIcon,
+  KeyRound,
+  LockKeyhole,
+  Mail,
+  Palette,
+  ShieldCheck,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,12 +34,13 @@ export default async function TeacherSettingsPage() {
       href: "/teacher/settings/theme",
       icon: Palette,
     },
-    {
-      title: t("profilePhoto.title"),
-      description: t("profilePhoto.description"),
-      href: "/teacher/settings/profile-photo",
-      icon: ImageIcon,
-    },
+    // TODO: disabled until we implement profile photo
+    // {
+    //   title: t("profilePhoto.title"),
+    //   description: t("profilePhoto.description"),
+    //   href: "/teacher/settings/profile-photo",
+    //   icon: ImageIcon,
+    // },
     {
       title: t("email.title"),
       description: t("email.description"),
@@ -134,7 +143,9 @@ export default async function TeacherSettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("securitySnapshot.title")}</CardTitle>
-              <CardDescription>{t("securitySnapshot.description")}</CardDescription>
+              <CardDescription>
+                {t("securitySnapshot.description")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
@@ -146,7 +157,9 @@ export default async function TeacherSettingsPage() {
                     {t("securitySnapshot.twoFactor.description")}
                   </p>
                 </div>
-                <Badge variant="outline">{t("securitySnapshot.recommended")}</Badge>
+                <Badge variant="outline">
+                  {t("securitySnapshot.recommended")}
+                </Badge>
               </div>
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
                 <div>
@@ -173,19 +186,31 @@ export default async function TeacherSettingsPage() {
               <CardDescription>{t("quickUpdates.description")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/teacher/settings/profile-photo">
                   {t("quickUpdates.updateProfilePhoto")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/teacher/settings/change-email">
                   {t("quickUpdates.changeEmail")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/teacher/settings/change-password">
                   {t("quickUpdates.changePassword")}
                   <ArrowRight className="h-4 w-4" />

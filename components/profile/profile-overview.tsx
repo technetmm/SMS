@@ -174,7 +174,8 @@ export async function ProfileOverview({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button
+                {/* TODO: disabled until we implement profile photo */}
+                {/* <Button
                   asChild
                   variant="outline"
                   className="w-full justify-between"
@@ -182,7 +183,7 @@ export async function ProfileOverview({
                   <Link href={`${settingsBasePath}/profile-photo`}>
                     Update profile photo
                   </Link>
-                </Button>
+                </Button> */}
                 <Button
                   asChild
                   variant="outline"

@@ -38,6 +38,10 @@ import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_TTL_MS,
 } from "@/lib/auth/session-lock";
+import {
+  shouldRefreshSession,
+  isSessionInactive,
+} from "@/lib/auth/session-security";
 import { resolveAuthSecret } from "@/lib/auth/env";
 import { processEmailJob } from "@/lib/jobs/email.job";
 
@@ -232,10 +236,7 @@ export const authOptions: NextAuthOptions = {
           user.activeSessionExpiresAt &&
           user.activeSessionExpiresAt.getTime() > now.getTime();
 
-        if (
-          user.role !== "SUPER_ADMIN" &&
-          approvalToken
-        ) {
+        if (user.role !== "SUPER_ADMIN" && approvalToken) {
           const approvalRequest = await prisma.loginApprovalRequest.findUnique({
             where: { publicToken: approvalToken },
             select: {
@@ -491,11 +492,14 @@ export const authOptions: NextAuthOptions = {
           });
         } catch (error) {
           // Do not block device-approval flow if push delivery fails.
-          console.error("Failed to dispatch device-approval push notification", {
-            requestId: approvalRequest.id,
-            userId: user.id,
-            error,
-          });
+          console.error(
+            "Failed to dispatch device-approval push notification",
+            {
+              requestId: approvalRequest.id,
+              userId: user.id,
+              error,
+            },
+          );
         }
 
         throw new Error(buildDeviceApprovalError(publicToken));
@@ -503,7 +507,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -514,6 +518,7 @@ export const authOptions: NextAuthOptions = {
         token.sessionId = (
           user as typeof user & { sessionId?: string }
         ).sessionId;
+        token.lastActivity = new Date().toISOString();
         return token;
       }
 
@@ -534,10 +539,43 @@ export const authOptions: NextAuthOptions = {
         select: {
           activeSessionId: true,
           activeSessionExpiresAt: true,
+          activeSessionUserAgent: true,
+          activeSessionIp: true,
         },
       })) as SessionLockState | null;
 
       const now = new Date();
+      const lastActivity = token.lastActivity
+        ? new Date(String(token.lastActivity))
+        : now;
+
+      // Check for inactivity timeout
+      if (isSessionInactive(lastActivity, now)) {
+        if (dbUser?.activeSessionId === tokenSessionId) {
+          await (
+            prisma.user as unknown as {
+              updateMany: (args: unknown) => Promise<{ count: number }>;
+            }
+          ).updateMany({
+            where: { id: tokenUserId, activeSessionId: tokenSessionId },
+            data: {
+              activeSessionId: null,
+              activeSessionExpiresAt: null,
+              activeSessionUserAgent: null,
+              activeSessionIp: null,
+            },
+          });
+        }
+
+        delete token.id;
+        delete token.role;
+        delete token.schoolId;
+        delete token.isSchoolOwner;
+        delete token.sessionId;
+        delete token.lastActivity;
+        return token;
+      }
+
       const isExpired =
         !dbUser?.activeSessionExpiresAt ||
         dbUser.activeSessionExpiresAt.getTime() <= now.getTime();
@@ -566,6 +604,31 @@ export const authOptions: NextAuthOptions = {
         delete token.schoolId;
         delete token.isSchoolOwner;
         delete token.sessionId;
+        delete token.lastActivity;
+        return token;
+      }
+
+      // Implement sliding session expiration
+      if (
+        shouldRefreshSession(dbUser.activeSessionExpiresAt!, lastActivity, now)
+      ) {
+        const newExpiresAt = new Date(now.getTime() + SESSION_LOCK_TTL_MS);
+
+        await (
+          prisma.user as unknown as {
+            updateMany: (args: unknown) => Promise<{ count: number }>;
+          }
+        ).updateMany({
+          where: { id: tokenUserId, activeSessionId: tokenSessionId },
+          data: {
+            activeSessionExpiresAt: newExpiresAt,
+          },
+        });
+      }
+
+      // Update last activity on every token refresh (user interaction)
+      if (trigger === "update" || session) {
+        token.lastActivity = now.toISOString();
       }
 
       return token;

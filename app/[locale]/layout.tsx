@@ -5,6 +5,7 @@ import { AuthSessionProvider } from "@/components/shared/session-provider";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
+import { ActivityTracker } from "@/components/auth/activity-tracker";
 import { routing } from "@/i18n/routing";
 
 export function generateStaticParams() {
@@ -36,7 +37,10 @@ export default async function LocaleLayout({
         disableTransitionOnChange
       >
         <TooltipProvider>
-          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <AuthSessionProvider>
+            <ActivityTracker />
+            {children}
+          </AuthSessionProvider>
           <Toaster position="top-right" />
         </TooltipProvider>
       </ThemeProvider>

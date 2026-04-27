@@ -34,12 +34,13 @@ export default async function PlatformSettingsOverviewPage() {
       href: "/platform/settings/theme",
       icon: Palette,
     },
-    {
-      title: t("profilePhoto.title"),
-      description: t("profilePhoto.description"),
-      href: "/platform/settings/profile-photo",
-      icon: ImageIcon,
-    },
+    // TODO: disabled until we implement profile photo
+    // {
+    //   title: t("profilePhoto.title"),
+    //   description: t("profilePhoto.description"),
+    //   href: "/platform/settings/profile-photo",
+    //   icon: ImageIcon,
+    // },
     {
       title: t("email.title"),
       description: t("email.description"),
@@ -77,9 +78,7 @@ export default async function PlatformSettingsOverviewPage() {
             <h1 className="text-3xl font-semibold tracking-tight">
               {t("title")}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              {t("description")}
-            </p>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="secondary">
@@ -89,7 +88,9 @@ export default async function PlatformSettingsOverviewPage() {
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href="/platform/settings/2fa">{t("actions.enable2fa")}</Link>
+              <Link href="/platform/settings/2fa">
+                {t("actions.enable2fa")}
+              </Link>
             </Button>
           </div>
         </div>
@@ -142,7 +143,9 @@ export default async function PlatformSettingsOverviewPage() {
           <Card>
             <CardHeader>
               <CardTitle>{t("securitySnapshot.title")}</CardTitle>
-              <CardDescription>{t("securitySnapshot.description")}</CardDescription>
+              <CardDescription>
+                {t("securitySnapshot.description")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
@@ -154,7 +157,9 @@ export default async function PlatformSettingsOverviewPage() {
                     {t("securitySnapshot.twoFactor.description")}
                   </p>
                 </div>
-                <Badge variant="outline">{t("securitySnapshot.recommended")}</Badge>
+                <Badge variant="outline">
+                  {t("securitySnapshot.recommended")}
+                </Badge>
               </div>
               <div className="flex items-center justify-between rounded-xl border px-3 py-2">
                 <div>
@@ -181,19 +186,31 @@ export default async function PlatformSettingsOverviewPage() {
               <CardDescription>{t("quickUpdates.description")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/platform/settings/profile-photo">
                   {t("quickUpdates.updateProfilePhoto")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/platform/settings/change-email">
                   {t("quickUpdates.changeEmail")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full justify-between">
+              <Button
+                asChild
+                variant="outline"
+                className="w-full justify-between"
+              >
                 <Link href="/platform/settings/change-password">
                   {t("quickUpdates.changePassword")}
                   <ArrowRight className="h-4 w-4" />
