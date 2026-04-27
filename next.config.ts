@@ -28,12 +28,6 @@ const nextConfig: NextConfig = {
         destination: "/:locale/school/dashboard",
         permanent: true,
       },
-      // TODO: it's need to disable after implemented the locale selector
-      {
-        source: "/:locale(en|my)/:path*",
-        destination: "/:path*",
-        permanent: true,
-      },
     ];
   },
 };
