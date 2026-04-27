@@ -76,7 +76,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (approvalRequest.status !== "PENDING") {
-    return NextResponse.json({ error: "Request already handled", status: approvalRequest.status }, { status: 409 });
+    return NextResponse.json(
+      { error: "Request already handled", status: approvalRequest.status },
+      { status: 409 },
+    );
   }
 
   if (parsed.data.action === "deny") {
@@ -117,7 +120,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (!transferred) {
-    return NextResponse.json({ error: "Current session is no longer active" }, { status: 409 });
+    return NextResponse.json(
+      { error: "Current session is no longer active" },
+      { status: 409 },
+    );
   }
 
   return NextResponse.json({ status: "APPROVED" });

@@ -23,9 +23,7 @@ import {
   DEVICE_APPROVAL_REQUIRED_MESSAGE,
   extractDeviceApprovalToken,
 } from "@/lib/auth/device-approval";
-import {
-  EMAIL_NOT_VERIFIED_CODE,
-} from "@/lib/auth/email-verification";
+import { EMAIL_NOT_VERIFIED_CODE } from "@/lib/auth/email-verification";
 import {
   SESSION_LOCK_ERROR_CODE,
   SESSION_LOCK_ERROR_MESSAGE,
@@ -96,7 +94,9 @@ export default function LoginPage() {
       if (result.error === EMAIL_NOT_VERIFIED_CODE) {
         clearPendingLoginCredentials();
         const normalizedEmail = email.trim().toLowerCase();
-        router.push(`/verify-email?email=${encodeURIComponent(normalizedEmail)}`);
+        router.push(
+          `/verify-email?email=${encodeURIComponent(normalizedEmail)}`,
+        );
         return;
       }
 

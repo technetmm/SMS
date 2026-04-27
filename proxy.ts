@@ -6,6 +6,7 @@ import { UserRole } from "@/app/generated/prisma/enums";
 import type { AppLocale } from "@/i18n/config";
 import { getLocaleFromPathname, withLocale } from "@/i18n/locale";
 import { routing } from "@/i18n/routing";
+import { resolveAuthSecret } from "@/lib/auth/env";
 
 function matchesPath(pathname: string, base: string) {
   return pathname === base || pathname.startsWith(`${base}/`);
@@ -35,8 +36,13 @@ export default async function proxy(req: NextRequest) {
     return handleI18nRouting(req);
   }
 
-  const token = await getToken({ req });
+  const token = await getToken({
+    req,
+    secret: resolveAuthSecret(),
+  });
   const tokenUserId = typeof token?.id === "string" ? token.id : null;
+  const tokenSessionId =
+    typeof token?.sessionId === "string" ? token.sessionId : null;
   const role = token?.role as UserRole | undefined;
   const schoolId = token?.schoolId as string | null | undefined;
   const pathname = pathnameWithoutLocale;
@@ -71,7 +77,10 @@ export default async function proxy(req: NextRequest) {
     return redirectWithLocale(req, resolvedLocale, "/login");
   }
 
-  if (role === UserRole.SUPER_ADMIN && pathname.startsWith("/school/dashboard")) {
+  if (
+    role === UserRole.SUPER_ADMIN &&
+    pathname.startsWith("/school/dashboard")
+  ) {
     return redirectWithLocale(req, resolvedLocale, "/platform/dashboard");
   }
 
@@ -148,6 +157,13 @@ export default async function proxy(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   if (schoolId) {
     requestHeaders.set("x-school-id", schoolId);
+  }
+
+  // Add activity tracking for authenticated users
+  if (tokenUserId && tokenSessionId) {
+    requestHeaders.set("x-user-activity", "tracked");
+    requestHeaders.set("x-user-id", tokenUserId);
+    requestHeaders.set("x-session-id", tokenSessionId);
   }
 
   return NextResponse.next({

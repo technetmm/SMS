@@ -41,12 +41,13 @@ export default async function SettingsOverviewPage() {
       href: "/school/settings/theme",
       icon: Palette,
     },
-    {
-      title: t("profilePhoto.title"),
-      description: t("profilePhoto.description"),
-      href: "/school/settings/profile-photo",
-      icon: ImageIcon,
-    },
+    // TODO: disabled until we implement profile photo
+    // {
+    //   title: t("profilePhoto.title"),
+    //   description: t("profilePhoto.description"),
+    //   href: "/school/settings/profile-photo",
+    //   icon: ImageIcon,
+    // },
     {
       title: t("email.title"),
       description: t("email.description"),
