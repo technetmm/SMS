@@ -1,12 +1,14 @@
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
-import { markStaffAttendance } from "@/app/(school)/school/staff-attendance/actions";
+import {
+  getAssignedStaffs,
+  markStaffAttendance,
+} from "@/app/(school)/school/staff-attendance/actions";
 import { StaffAttendanceForm } from "@/components/staff-attendance/staff-attendance-form";
 import { StaffAttendanceTable } from "@/components/staff-attendance/staff-attendance-table";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parsePageParam } from "@/lib/pagination";
-import { prisma } from "@/lib/prisma/client";
-import { requireSchoolAdminAccess, requireTenant } from "@/lib/rbac";
+import { requireSchoolAdminAccess } from "@/lib/rbac";
 import {
   parseDateRangeParams,
   parseTableFilterEnumParam,
@@ -27,7 +29,6 @@ export default async function StaffAttendancePage({
   }>;
 }) {
   await requireSchoolAdminAccess();
-  const schoolId = await requireTenant();
   const params = await searchParams;
   const page = parsePageParam(params.page);
   const q = parseTextParam(params.q);
@@ -41,35 +42,16 @@ export default async function StaffAttendancePage({
     from: params.dateFrom,
     to: params.dateTo,
   });
-  const t = await getTranslations("SchoolEntities.staffAttendance.list");
 
-  const [staff, sections] = await Promise.all([
-    prisma.staff.findMany({
-      where: { schoolId },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
-    prisma.section.findMany({
-      where: { schoolId },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true, class: { select: { name: true } } },
-    }),
+  const [t, staff] = await Promise.all([
+    getTranslations("SchoolEntities.staffAttendance.list"),
+    getAssignedStaffs(),
   ]);
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("description")}
-      />
-      <StaffAttendanceForm
-        action={markStaffAttendance}
-        staff={staff}
-        sections={sections.map((section) => ({
-          id: section.id,
-          name: `${section.class.name} • ${section.name}`,
-        }))}
-      />
+      <PageHeader title={t("title")} description={t("description")} />
+      <StaffAttendanceForm action={markStaffAttendance} staff={staff} />
 
       <Card>
         <CardHeader>

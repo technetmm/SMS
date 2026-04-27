@@ -3,7 +3,10 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { generateMissingMonthlyInvoices, type BillingActionState } from "@/app/(school)/school/invoices/actions";
+import {
+  generateMissingMonthlyInvoices,
+  type BillingActionState,
+} from "@/app/(school)/school/invoices/actions";
 import { SubmitButton } from "@/components/shared/submit-button";
 import { useTranslations } from "next-intl";
 
@@ -27,7 +30,7 @@ export function InvoiceGenerateForm() {
   useEffect(() => {
     if (state.status === "idle") return;
 
-    const key = `${state.status}:${state.message ?? ""}`;
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
     if (lastHandledKeyRef.current === key) return;
     lastHandledKeyRef.current = key;
 

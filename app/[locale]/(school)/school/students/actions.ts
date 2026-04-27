@@ -13,6 +13,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type StudentActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export async function createStudent(
@@ -34,12 +35,20 @@ export async function createStudent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const shouldCreateAccount = Boolean(parsed.data.createAccount);
   if (shouldCreateAccount && (!parsed.data.email || !parsed.data.password)) {
-    return { status: "error", message: "Email and password are required." };
+    return {
+      status: "error",
+      message: "Email and password are required.",
+      msgID: Date.now(),
+    };
   }
 
   const existing = parsed.data.email
@@ -50,7 +59,11 @@ export async function createStudent(
     : null;
 
   if (existing) {
-    return { status: "error", message: "Email already exists." };
+    return {
+      status: "error",
+      message: "Email already exists.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -85,11 +98,19 @@ export async function createStudent(
     });
   } catch (error) {
     console.error("createStudent failed", error);
-    return { status: "error", message: "Unable to create student." };
+    return {
+      status: "error",
+      message: "Unable to create student.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/students");
-  return { status: "success", message: "Student created successfully." };
+  return {
+    status: "success",
+    message: "Student created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getStudents({
@@ -237,7 +258,11 @@ export async function updateStudent(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -246,7 +271,11 @@ export async function updateStudent(
       select: { id: true },
     });
     if (!existing) {
-      return { status: "error", message: "Student not found." };
+      return {
+        status: "error",
+        message: "Student not found.",
+        msgID: Date.now(),
+      };
     }
 
     await prisma.student.update({
@@ -265,11 +294,19 @@ export async function updateStudent(
     });
   } catch (error) {
     console.error("updateStudent failed", error);
-    return { status: "error", message: "Unable to update student." };
+    return {
+      status: "error",
+      message: "Unable to update student.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/students");
-  return { status: "success", message: "Student updated successfully." };
+  return {
+    status: "success",
+    message: "Student updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteStudent(
@@ -281,7 +318,11 @@ export async function deleteStudent(
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) {
-    return { status: "error", message: "Student id is required" };
+    return {
+      status: "error",
+      message: "Student id is required",
+      msgID: Date.now(),
+    };
   }
 
   const student = await prisma.student.findFirst({
@@ -294,17 +335,22 @@ export async function deleteStudent(
   });
 
   if (!student) {
-    return { status: "error", message: "Student not found" };
+    return { status: "error", message: "Student not found", msgID: Date.now() };
   }
 
   if (student._count.enrollments > 0 || student._count.invoices > 0) {
     return {
       status: "error",
       message: "Student has related records. Remove them first.",
+      msgID: Date.now(),
     };
   }
 
   await prisma.student.delete({ where: { id } });
   revalidateLocalizedPath("/school/students");
-  return { status: "success", message: "Student deleted successfully." };
+  return {
+    status: "success",
+    message: "Student deleted successfully.",
+    msgID: Date.now(),
+  };
 }

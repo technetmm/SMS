@@ -948,6 +948,20 @@
           }
         },
         "empty": "ဝန်ထမ်း မရှိသေးပါ။"
+      },
+      "hourlyRates": {
+        "title": "နာရီအလုပ်ခများ",
+        "description": "ဆရာ/ဆရာမများ၏ နာရီအလုပ်ခများကို လစာစာရင်းတွက်ချက်ရန် စီမံပါ။",
+        "currentRate": "လက်ရှိ နာရီအလုပ်ခ",
+        "updateRate": "အလုပ်ခ ပြုပြင်မည်",
+        "updateDialogTitle": "နာရီအလုပ်ခ ပြုပြင်မည်",
+        "updateDialogDescription": "ဤဝန်ထမ်းအတွက် နာရီအလုပ်ခကို ပြုပြင်မည်။",
+        "newHourlyRate": "အသစ်ဖြစ်မည့် နာရီအလုပ်ခ",
+        "update": "ပြုပြင်မည်",
+        "updating": "ပြုပြင်နေသည်...",
+        "cancel": "မလုပ်ဆောင်ပါ",
+        "updateSuccess": "နာရီအလုပ်ခကို အောင်မြင်စွာ ပြုပြင်ပြီးပါပြီ",
+        "updateError": "နာရီအလုပ်ခကို မပြုပြင်နိုင်ပါ"
       }
     },
     "subjects": {
@@ -1377,11 +1391,14 @@
       },
       "form": {
         "title": "တက်ရောက်မှု မှတ်မည်",
-        "enrollment": "Enrollment",
-        "selectEnrollment": "Enrollment ရွေးပါ",
+        "student": "ကျောင်းသား",
+        "selectStudent": "ကျောင်းသား ရွေးပါ",
+        "section": "Section",
+        "selectSection": "Section ရွေးပါ",
         "date": "ရက်စွဲ",
         "status": "အခြေအနေ",
         "selectStatus": "အခြေအနေ ရွေးပါ",
+        "noItemsFound": "အချက်အလက် မရှိပါ",
         "statusOptions": {
           "present": "တက်",
           "absent": "ပျက်ကွက်",
@@ -1642,10 +1659,28 @@
         "columns": {
           "month": "လ",
           "staff": "ဝန်ထမ်း",
-          "sections": "Section များ",
-          "total": "စုစုပေါင်း"
+          "hours": "နာရီများ",
+          "total": "စုစုပေါင်း",
+          "adjustment": "ပြုပြင်မှု",
+          "reason": "အကြောင်းပြချက်"
         },
         "empty": "Payroll မထုတ်ရသေးပါ။"
+      },
+      "adjustment": {
+        "adjustDialogTitle": "လစာစာရင်း ပြုပြင်မည်",
+        "adjustDialogDescription": "အောက်ပါအတွက် လစာစာရင်း ပမာဏ ပြုပြင်မည်",
+        "originalAmount": "မူလ ပမာဏ",
+        "currentAmount": "လက်ရှိ ပမာဏ",
+        "adjustmentAmount": "ပြုပြင်မည့် ပမာဏ",
+        "adjustmentDescription": "တိုးမြှင့်လိုပါက အပေါင်းတန်ဖိုး၊ လျှော့ချလိုပါက အနှုတ်တန်ဖိုး ထည့်ပါ",
+        "adjustmentReason": "ပြုပြင်ရခြင်း အကြောင်းရင်း",
+        "adjustmentReasonPlaceholder": "ဥပမာ - ဘောနပ်စ်၊ ခုနှိမ်မှု၊ ပြင်ဆင်မှု",
+        "adjust": "ပြုပြင်မည်",
+        "adjusting": "ပြုပြင်နေသည်...",
+        "cancel": "မလုပ်ဆောင်ပါ",
+        "adjustmentSuccess": "လစာစာရင်း ပြုပြင်ပြီးပါပြီ",
+        "adjustmentError": "လစာစာရင်း မပြုပြင်နိုင်ပါ",
+        "adjustPayroll": "လစာစာရင်း ပြုပြင်မည်"
       }
     }
   },

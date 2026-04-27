@@ -13,6 +13,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type TimetableActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type TimetableTableFilters = {
@@ -21,7 +22,9 @@ export type TimetableTableFilters = {
   staffId?: string;
 };
 
-export async function getTimetable(filters?: Pick<TimetableTableFilters, "staffId">) {
+export async function getTimetable(
+  filters?: Pick<TimetableTableFilters, "staffId">,
+) {
   await requireSchoolAdminAccess();
   const schoolId = await requireTenant();
 
@@ -160,7 +163,11 @@ export async function createTimetableSlot(
   const raw = formDataToObject(formData);
   const parsed = timetableSlotSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const [section, staff, mapping] = await Promise.all([
@@ -178,12 +185,23 @@ export async function createTimetableSlot(
     }),
   ]);
 
-  if (!section) return { status: "error", message: "Selected section is invalid." };
-  if (!staff) return { status: "error", message: "Selected staff is invalid." };
+  if (!section)
+    return {
+      status: "error",
+      message: "Selected section is invalid.",
+      msgID: Date.now(),
+    };
+  if (!staff)
+    return {
+      status: "error",
+      message: "Selected staff is invalid.",
+      msgID: Date.now(),
+    };
   if (!mapping) {
     return {
       status: "error",
       message: "Staff must be assigned to the section before scheduling.",
+      msgID: Date.now(),
     };
   }
 
@@ -208,15 +226,21 @@ export async function createTimetableSlot(
       },
     });
   } catch (error) {
+    console.error("createTimetableSlot failed", error);
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "Unable to create timetable slot.",
+      message: "Unable to create timetable slot.",
+      msgID: Date.now(),
     };
   }
 
   revalidateLocalizedPath("/school/timetable");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success", message: "Timetable slot created." };
+  return {
+    status: "success",
+    message: "Timetable slot created.",
+    msgID: Date.now(),
+  };
 }
 
 export async function updateTimetableSlot(
@@ -229,14 +253,25 @@ export async function updateTimetableSlot(
   const raw = formDataToObject(formData);
   const parsed = timetableSlotSchema.safeParse(raw);
   if (!parsed.success || !parsed.data.id) {
-    return { status: "error", message: parsed.success ? "Slot id is required." : parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.success
+        ? "Slot id is required."
+        : parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const existing = await prisma.timetable.findFirst({
     where: { id: parsed.data.id, schoolId },
     select: { id: true },
   });
-  if (!existing) return { status: "error", message: "Timetable slot not found." };
+  if (!existing)
+    return {
+      status: "error",
+      message: "Timetable slot not found.",
+      msgID: Date.now(),
+    };
 
   try {
     await assertNoStaffConflict({
@@ -260,15 +295,21 @@ export async function updateTimetableSlot(
       },
     });
   } catch (error) {
+    console.error("updateTimetableSlot failed", error);
     return {
       status: "error",
-      message: error instanceof Error ? error.message : "Unable to update timetable slot.",
+      message: "Unable to update timetable slot.",
+      msgID: Date.now(),
     };
   }
 
   revalidateLocalizedPath("/school/timetable");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success", message: "Timetable slot updated." };
+  return {
+    status: "success",
+    message: "Timetable slot updated.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteTimetableSlot(formData: FormData) {
@@ -293,7 +334,11 @@ export async function deleteTimetableSlotById(id: string) {
   const schoolId = await requireTenant();
 
   if (!id) {
-    return { status: "error" as const, message: "Slot id is required." };
+    return {
+      status: "error" as const,
+      message: "Slot id is required.",
+      msgID: Date.now(),
+    };
   }
 
   const slot = await prisma.timetable.findFirst({
@@ -302,7 +347,11 @@ export async function deleteTimetableSlotById(id: string) {
   });
 
   if (!slot) {
-    return { status: "error" as const, message: "Timetable slot not found." };
+    return {
+      status: "error" as const,
+      message: "Timetable slot not found.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -310,13 +359,15 @@ export async function deleteTimetableSlotById(id: string) {
   } catch (error) {
     return {
       status: "error" as const,
-      message: error instanceof Error ? error.message : "Unable to delete slot.",
+      message:
+        error instanceof Error ? error.message : "Unable to delete slot.",
+      msgID: Date.now(),
     };
   }
 
   revalidateLocalizedPath("/school/timetable");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success" as const };
+  return { status: "success" as const, msgID: Date.now() };
 }
 
 export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
@@ -324,7 +375,11 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   const schoolId = await requireTenant();
 
   if (!id) {
-    return { status: "error" as const, message: "Slot id is required." };
+    return {
+      status: "error" as const,
+      message: "Slot id is required.",
+      msgID: Date.now(),
+    };
   }
 
   const slot = await prisma.timetable.findFirst({
@@ -338,7 +393,11 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   });
 
   if (!slot) {
-    return { status: "error" as const, message: "Timetable slot not found." };
+    return {
+      status: "error" as const,
+      message: "Timetable slot not found.",
+      msgID: Date.now(),
+    };
   }
 
   try {
@@ -359,11 +418,12 @@ export async function moveTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
     return {
       status: "error" as const,
       message: error instanceof Error ? error.message : "Unable to move slot.",
+      msgID: Date.now(),
     };
   }
 
   revalidateLocalizedPath("/school/timetable");
-  return { status: "success" as const };
+  return { status: "success" as const, msgID: Date.now() };
 }
 
 export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
@@ -371,7 +431,11 @@ export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   const schoolId = await requireTenant();
 
   if (!id) {
-    return { status: "error" as const, message: "Slot id is required." };
+    return {
+      status: "error" as const,
+      message: "Slot id is required.",
+      msgID: Date.now(),
+    };
   }
 
   const slot = await prisma.timetable.findFirst({
@@ -388,13 +452,18 @@ export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   });
 
   if (!slot) {
-    return { status: "error" as const, message: "Timetable slot not found." };
+    return {
+      status: "error" as const,
+      message: "Timetable slot not found.",
+      msgID: Date.now(),
+    };
   }
 
   if (slot.dayOfWeek === dayOfWeek) {
     return {
       status: "error" as const,
       message: "Choose a different day to paste this slot.",
+      msgID: Date.now(),
     };
   }
 
@@ -422,10 +491,58 @@ export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
     return {
       status: "error" as const,
       message: error instanceof Error ? error.message : "Unable to paste slot.",
+      msgID: Date.now(),
     };
   }
 
   revalidateLocalizedPath("/school/timetable");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success" as const };
+  return { status: "success" as const, msgID: Date.now() };
+}
+
+export async function getAssignedStaffs() {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const staff = await prisma.staff.findMany({
+    where: {
+      schoolId,
+      sections: {
+        some: { staffId: { not: "" } },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return staff;
+}
+
+export async function getSectionsByStaffId(staffId: string) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId,
+      staffMappings: {
+        some: {
+          staffId,
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      class: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return sections;
 }

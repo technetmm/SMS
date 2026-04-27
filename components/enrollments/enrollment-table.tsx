@@ -17,7 +17,7 @@ import {
   ENROLLMENT_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
 } from "@/lib/enum-labels";
-import { formatMoney } from "@/lib/helper";
+import { formatMoney } from "@/lib/formatter";
 import { UpdateEnrollmentStatusForm } from "@/components/enrollments/update-enrollment-status-form";
 import { UpdateProgressForm } from "@/components/enrollments/update-progress-form";
 import { EnrollmentRowActions } from "@/components/enrollments/enrollment-row-actions";

@@ -12,6 +12,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type ClassActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type ClassTableFilters = {
@@ -33,7 +34,6 @@ export async function createClass(
   const schoolId = await requireTenantId();
 
   const raw = formDataToObject(formData);
-  console.log("Raw form data for creating class:", raw);
   const parsed = classCreateSchema.safeParse(raw);
   if (!parsed.success) {
     return { status: "error", message: parsed.error.errors[0]?.message };
@@ -62,12 +62,20 @@ export async function createClass(
     });
   } catch (e) {
     console.error("Error creating class:", e);
-    return { status: "error", message: "Unable to create class." };
+    return {
+      status: "error",
+      message: "Unable to create class.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/classes");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success", message: "Class created successfully." };
+  return {
+    status: "success",
+    message: "Class created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getClasses() {
@@ -216,12 +224,20 @@ export async function updateClass(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to update class." };
+    return {
+      status: "error",
+      message: "Unable to update class.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/classes");
   revalidateLocalizedPath("/school/sections");
-  return { status: "success", message: "Class updated successfully." };
+  return {
+    status: "success",
+    message: "Class updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteClass(formData: FormData) {

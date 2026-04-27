@@ -3,11 +3,10 @@ import { PageHeader } from "@/components/shared/page-header";
 import { EnrollmentAttendanceForm } from "@/components/enrollments/enrollment-attendance-form";
 import { EnrollmentAttendanceTable } from "@/components/enrollments/enrollment-attendance-table";
 import {
+  getEnrolledSections,
+  getEnrolledStudents,
   getPaginatedAttendanceRecords,
-  getEnrollments,
 } from "@/app/(school)/school/enrollments/actions";
-import { requireTenantId } from "@/lib/tenant";
-import { prisma } from "@/lib/prisma/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { parsePageParam } from "@/lib/pagination";
 import { AttendanceStatus } from "@/app/generated/prisma/enums";
@@ -35,7 +34,6 @@ export default async function AttendancePage({
   }>;
 }) {
   await requireSchoolAdminAccess();
-  const schoolId = await requireTenantId();
   const params = await searchParams;
   const q = parseTextParam(params.q);
   const status = parseTableFilterEnumParam(params.status, [
@@ -51,18 +49,9 @@ export default async function AttendancePage({
 
   const page = parsePageParam(params.page);
   const t = await getTranslations("SchoolEntities.attendance.list");
-  const [enrollments, students, sections, rows] = await Promise.all([
-    getEnrollments(),
-    prisma.student.findMany({
-      where: { schoolId },
-      orderBy: { name: "asc" },
-      select: { id: true, name: true },
-    }),
-    prisma.section.findMany({
-      where: { schoolId },
-      orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
-      select: { id: true, name: true, class: { select: { name: true } } },
-    }),
+  const [students, sections, rows] = await Promise.all([
+    getEnrolledStudents(),
+    getEnrolledSections(),
     getPaginatedAttendanceRecords({
       page,
       filters: {
@@ -80,17 +69,8 @@ export default async function AttendancePage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("description")}
-      />
-      <EnrollmentAttendanceForm
-        defaultDate={today}
-        enrollments={enrollments.map((row) => ({
-          id: row.id,
-          label: `${row.student.name} • ${row.section.class.name} • ${row.section.name}`,
-        }))}
-      />
+      <PageHeader title={t("title")} description={t("description")} />
+      <EnrollmentAttendanceForm defaultDate={today} students={students} />
 
       <Card>
         <CardHeader>

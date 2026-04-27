@@ -52,7 +52,7 @@ export default async function TeacherProfilePage() {
         phone: true,
         status: true,
         remark: true,
-        ratePerSection: true,
+        ratePerHour: true,
       },
     }),
     prisma.staff
@@ -177,10 +177,10 @@ export default async function TeacherProfilePage() {
           value: staffProfile?.remark ?? "-",
         },
         {
-          label: "Rate Per Section",
+          label: "Rate Per Hour",
           value:
-            staffProfile?.ratePerSection != null
-              ? String(staffProfile.ratePerSection)
+            staffProfile?.ratePerHour != null
+              ? String(staffProfile.ratePerHour)
               : "-",
         },
       ]}

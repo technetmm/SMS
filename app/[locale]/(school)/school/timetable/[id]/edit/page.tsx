@@ -50,15 +50,14 @@ export default async function EditTimetablePage({
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Edit Timetable Slot" description="Update a weekly schedule block." />
+      <PageHeader
+        title="Edit Timetable Slot"
+        description="Update a weekly schedule block."
+      />
       <TimetableForm
         mode="edit"
         action={updateTimetableSlot}
         staff={staff}
-        sections={sections.map((section) => ({
-          id: section.id,
-          name: `${section.class.name} • ${section.name}`,
-        }))}
         initialData={slot}
         redirectPath={returnTo}
         cancelPath={returnTo}

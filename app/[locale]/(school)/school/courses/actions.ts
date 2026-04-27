@@ -11,6 +11,7 @@ import { containsInsensitive } from "@/lib/table-filters";
 export type CourseActionState = {
   status: "idle" | "success" | "error";
   message?: string;
+  msgID?: number;
 };
 
 export type CourseTableFilters = {
@@ -40,6 +41,7 @@ export async function createCourse(
     return {
       status: "error",
       message: parsedWithSubjects.error.errors[0]?.message,
+      msgID: Date.now(),
     };
   }
 
@@ -52,6 +54,7 @@ export async function createCourse(
     return {
       status: "error",
       message: "One or more selected subjects are invalid.",
+      msgID: Date.now(),
     };
   }
 
@@ -69,12 +72,20 @@ export async function createCourse(
       },
     });
   } catch {
-    return { status: "error", message: "Course name already exists." };
+    return {
+      status: "error",
+      message: "Course name already exists.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/courses");
   revalidateLocalizedPath("/school/classes");
-  return { status: "success", message: "Course created successfully." };
+  return {
+    status: "success",
+    message: "Course created successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function getCourses() {
@@ -178,23 +189,25 @@ export async function getCourseById(id: string) {
 
   if (!id) return null;
 
-  return prisma.course.findFirst({
-    where: { id, schoolId },
-    select: {
-      id: true,
-      name: true,
-      subjects: {
-        select: { subject: { select: { id: true, name: true } } },
+  return prisma.course
+    .findFirst({
+      where: { id, schoolId },
+      select: {
+        id: true,
+        name: true,
+        subjects: {
+          select: { subject: { select: { id: true, name: true } } },
+        },
       },
-    },
-  }).then((course) =>
-    course
-      ? {
-          ...course,
-          subjects: course.subjects.map((mapping) => mapping.subject),
-        }
-      : null,
-  );
+    })
+    .then((course) =>
+      course
+        ? {
+            ...course,
+            subjects: course.subjects.map((mapping) => mapping.subject),
+          }
+        : null,
+    );
 }
 
 export async function updateCourse(
@@ -216,7 +229,11 @@ export async function updateCourse(
   });
 
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const [course, subjects] = await Promise.all([
@@ -231,13 +248,14 @@ export async function updateCourse(
   ]);
 
   if (!course) {
-    return { status: "error", message: "Course not found." };
+    return { status: "error", message: "Course not found.", msgID: Date.now() };
   }
 
   if (subjects.length !== parsed.data.subjectIds.length) {
     return {
       status: "error",
       message: "One or more selected subjects are invalid.",
+      msgID: Date.now(),
     };
   }
 
@@ -256,12 +274,20 @@ export async function updateCourse(
       },
     });
   } catch {
-    return { status: "error", message: "Course name already exists." };
+    return {
+      status: "error",
+      message: "Course name already exists.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/school/courses");
   revalidateLocalizedPath("/school/classes");
-  return { status: "success", message: "Course updated successfully." };
+  return {
+    status: "success",
+    message: "Course updated successfully.",
+    msgID: Date.now(),
+  };
 }
 
 export async function deleteCourse(
@@ -272,7 +298,12 @@ export async function deleteCourse(
   const schoolId = await requireTenant();
 
   const id = String(formData.get("id") ?? "");
-  if (!id) return { status: "error", message: "Course id is required." };
+  if (!id)
+    return {
+      status: "error",
+      message: "Course id is required.",
+      msgID: Date.now(),
+    };
 
   const course = await prisma.course.findFirst({
     where: { id, schoolId },
@@ -283,13 +314,14 @@ export async function deleteCourse(
   });
 
   if (!course) {
-    return { status: "error", message: "Course not found." };
+    return { status: "error", message: "Course not found.", msgID: Date.now() };
   }
 
   if (course._count.classes > 0) {
     return {
       status: "error",
       message: "This course is already used by classes. Remove classes first.",
+      msgID: Date.now(),
     };
   }
 
@@ -297,5 +329,9 @@ export async function deleteCourse(
 
   revalidateLocalizedPath("/school/courses");
   revalidateLocalizedPath("/school/classes");
-  return { status: "success", message: "Course deleted successfully." };
+  return {
+    status: "success",
+    message: "Course deleted successfully.",
+    msgID: Date.now(),
+  };
 }

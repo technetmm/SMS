@@ -1,12 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
 import {
   markTeacherAttendance,
-  type TeacherActionState,
+  TeacherActionState,
+  getSectionsByStudentId,
 } from "@/app/(teacher)/teacher/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,68 +19,151 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "../ui/combobox";
+import { NativeSelect, NativeSelectOption } from "../ui/native-select";
 
 const initialState: TeacherActionState = { status: "idle" };
 
 type EnrollmentOption = {
   id: string;
-  label: string;
+  name: string;
 };
 
 export function TeacherAttendanceForm({
-  enrollments,
+  students,
+  defaultDate,
 }: {
-  enrollments: EnrollmentOption[];
-  defaultDate?: string;
+  students: EnrollmentOption[];
+  defaultDate: string;
 }) {
   const t = useTranslations("SchoolEntities.attendance.form");
   const router = useRouter();
-  const [state, formAction] = useActionState(markTeacherAttendance, initialState);
-  const [handled, setHandled] = useState(false);
-  const machineToday = useMemo(
-    () => new Date(Date.now() - new Date().getTimezoneOffset() * 60_000).toISOString().slice(0, 10),
+  const [state, formAction, pending] = useActionState<
+    TeacherActionState,
+    FormData
+  >(markTeacherAttendance, initialState);
+
+  const [selectedStudent, setSelectedStudent] =
+    useState<EnrollmentOption | null>(null);
+  const [selectedSection, setSelectedSection] =
+    useState<EnrollmentOption | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(defaultDate);
+  const [filteredSections, setFilteredSections] = useState<EnrollmentOption[]>(
     [],
   );
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
-    if (handled) return;
+    if (pending) lastHandledKeyRef.current = "";
+  }, [pending]);
+
+  // Filter sections based on selected student
+  useEffect(() => {
+    const filterSections = async () => {
+      if (!selectedStudent) {
+        setFilteredSections([]);
+        setSelectedSection(null);
+        return;
+      }
+
+      try {
+        // Fetch sections from backend based on student ID
+        const studentSections = await getSectionsByStudentId(
+          selectedStudent.id,
+        );
+
+        setFilteredSections(studentSections);
+
+        // Reset selected section if it's not in the filtered list
+        if (
+          selectedSection &&
+          !studentSections.find((s) => s.id === selectedSection.id)
+        ) {
+          setSelectedSection(null);
+        }
+      } catch (error) {
+        console.error("Error fetching sections:", error);
+        setFilteredSections([]);
+        setSelectedSection(null);
+      }
+    };
+
+    filterSections();
+  }, [selectedStudent?.id, selectedStudent, selectedSection]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
 
     if (state.status === "success") {
       toast.success(state.message ?? t("messages.saved"));
-      setHandled(true);
       router.refresh();
     }
     if (state.status === "error") {
       toast.error(state.message ?? t("messages.saveFailed"));
-      setHandled(true);
     }
-  }, [handled, router, state, t]);
+  }, [router, state, t]);
 
   return (
-    <form
-      action={formAction}
-      className="space-y-4"
-      onSubmit={() => setHandled(false)}
-    >
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="studentId" value={selectedStudent?.id ?? ""} />
+
       <Card>
         <CardHeader>
           <CardTitle>{t("title")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          <div className="grid gap-2 md:col-span-2">
-            <Label htmlFor="enrollmentId">{t("enrollment")}</Label>
-            <Select name="enrollmentId">
-              <SelectTrigger id="enrollmentId" className="w-full">
-                <SelectValue placeholder={t("selectEnrollment")} />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {enrollments.map((enrollment) => (
-                  <SelectItem key={enrollment.id} value={enrollment.id}>
-                    {enrollment.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-2">
+            <Label htmlFor="studentId">{t("student")}</Label>
+            <Combobox
+              items={students}
+              value={selectedStudent}
+              onValueChange={(value: EnrollmentOption | null) => {
+                setSelectedStudent(value);
+              }}
+              itemToStringLabel={(item) => item?.name ?? ""}
+            >
+              <ComboboxInput id="studentId" placeholder={t("selectStudent")} />
+              <ComboboxContent>
+                <ComboboxEmpty>{t("noItemsFound")}</ComboboxEmpty>
+                <ComboboxList>
+                  {(item: EnrollmentOption) => (
+                    <ComboboxItem key={item.id} value={item}>
+                      {item.name}
+                    </ComboboxItem>
+                  )}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="sectionId">{t("section")}</Label>
+            <NativeSelect
+              name="sectionId"
+              disabled={!selectedStudent || filteredSections.length === 0}
+              className="w-full"
+            >
+              <NativeSelectOption value="">
+                {t("selectSection")}
+              </NativeSelectOption>
+              {filteredSections.map((section) => (
+                <NativeSelectOption key={section.id} value={section.id}>
+                  {section.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
           </div>
 
           <div className="grid gap-2">
@@ -89,7 +172,8 @@ export function TeacherAttendanceForm({
               id="date"
               name="date"
               type="date"
-              defaultValue={machineToday}
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
               required
             />
           </div>
@@ -101,10 +185,16 @@ export function TeacherAttendanceForm({
                 <SelectValue placeholder={t("selectStatus")} />
               </SelectTrigger>
               <SelectContent position="popper">
-                <SelectItem value="PRESENT">{t("statusOptions.present")}</SelectItem>
-                <SelectItem value="ABSENT">{t("statusOptions.absent")}</SelectItem>
+                <SelectItem value="PRESENT">
+                  {t("statusOptions.present")}
+                </SelectItem>
+                <SelectItem value="ABSENT">
+                  {t("statusOptions.absent")}
+                </SelectItem>
                 <SelectItem value="LATE">{t("statusOptions.late")}</SelectItem>
-                <SelectItem value="LEAVE">{t("statusOptions.leave")}</SelectItem>
+                <SelectItem value="LEAVE">
+                  {t("statusOptions.leave")}
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>

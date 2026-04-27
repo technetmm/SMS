@@ -1,11 +1,14 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { DayOfWeek } from "@/app/generated/prisma/enums";
-import type { TimetableActionState } from "@/app/(school)/school/timetable/actions";
+import {
+  getSectionsByStaffId,
+  type TimetableActionState,
+} from "@/app/(school)/school/timetable/actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +29,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/combobox";
+import { NativeSelect, NativeSelectOption } from "../ui/native-select";
 
 const initialState: TimetableActionState = { status: "idle" };
 
@@ -38,7 +42,6 @@ type TimetableFormProps = {
     formData: FormData,
   ) => Promise<TimetableActionState>;
   staff: Option[];
-  sections: Option[];
   initialData?: {
     id: string;
     staffId: string;
@@ -66,39 +69,63 @@ export function TimetableForm({
   mode,
   action,
   staff,
-  sections,
   initialData,
   redirectPath = "/school/timetable",
   cancelPath = "/school/timetable",
 }: TimetableFormProps) {
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    TimetableActionState,
+    FormData
+  >(action, initialState);
 
   const initialStaff = useMemo(
     () => staff.find((item) => item.id === initialData?.staffId) ?? null,
     [staff, initialData?.staffId],
   );
-  const initialSection = useMemo(
-    () => sections.find((item) => item.id === initialData?.sectionId) ?? null,
-    [sections, initialData?.sectionId],
-  );
 
   const [selectedStaff, setSelectedStaff] = useState<Option | null>(
     initialStaff,
   );
-  const [selectedSection, setSelectedSection] = useState<Option | null>(
-    initialSection,
-  );
+  const [filteredSections, setFilteredSections] = useState<Option[]>([]);
 
-  // `initialData` is stable for the lifetime of the page render (server component),
-  // so we don't need to sync state from props via an effect.
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) lastHandledKeyRef.current = "";
+  }, [pending]);
+
+  useEffect(() => {
+    const filterSections = async () => {
+      if (!selectedStaff) {
+        setFilteredSections([]);
+        return;
+      }
+
+      try {
+        const staffSections = await getSectionsByStaffId(selectedStaff.id);
+        setFilteredSections(staffSections);
+      } catch (error) {
+        console.error("Error filtering sections:", error);
+        setFilteredSections([]);
+      }
+    };
+
+    filterSections();
+  }, [selectedStaff]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
       router.push(redirectPath);
-      router.refresh();
     }
+
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save timetable slot");
     }
@@ -110,10 +137,6 @@ export function TimetableForm({
       toast.error("Please select a staff.");
       return;
     }
-    if (!selectedSection) {
-      event.preventDefault();
-      toast.error("Please select a section.");
-    }
   }
 
   return (
@@ -122,7 +145,6 @@ export function TimetableForm({
         <input type="hidden" name="id" value={initialData.id} />
       ) : null}
       <input type="hidden" name="staffId" value={selectedStaff?.id ?? ""} />
-      <input type="hidden" name="sectionId" value={selectedSection?.id ?? ""} />
 
       <Card>
         <CardHeader>
@@ -156,27 +178,24 @@ export function TimetableForm({
           </div>
 
           <div className="grid gap-2">
-            <Label>Section</Label>
-            <Combobox
-              items={sections}
-              value={selectedSection}
-              onValueChange={(value: Option | null) =>
-                setSelectedSection(value)
-              }
-              itemToStringLabel={(item) => item?.name ?? ""}
+            <Label htmlFor="sectionId">Section</Label>
+            <NativeSelect
+              id="sectionId"
+              name="sectionId"
+              className="w-full"
+              disabled={!selectedStaff || filteredSections.length === 0}
             >
-              <ComboboxInput placeholder="Search section..." />
-              <ComboboxContent>
-                <ComboboxEmpty>No sections found.</ComboboxEmpty>
-                <ComboboxList>
-                  {(item: Option) => (
-                    <ComboboxItem key={item.id} value={item}>
-                      {item.name}
-                    </ComboboxItem>
-                  )}
-                </ComboboxList>
-              </ComboboxContent>
-            </Combobox>
+              <NativeSelectOption value="">Select section</NativeSelectOption>
+              {filteredSections.map((section) => (
+                <NativeSelectOption
+                  key={section.id}
+                  value={section.id}
+                  selected={section.id === initialData?.sectionId}
+                >
+                  {section.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
           </div>
 
           <div className="grid gap-2">

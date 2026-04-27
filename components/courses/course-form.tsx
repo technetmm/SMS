@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import React, { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { CourseActionState } from "@/app/(school)/school/courses/actions";
@@ -19,7 +19,6 @@ import {
   ComboboxItem,
   ComboboxList,
   useComboboxAnchor,
-  ComboboxInput,
 } from "@/components/ui/combobox";
 
 const initialState: CourseActionState = { status: "idle" };
@@ -56,17 +55,32 @@ export function CourseForm({
   initialData,
 }: CourseFormProps) {
   const router = useRouter();
-  const [state, formAction] = useActionState(action, initialState);
+  const [state, formAction, pending] = useActionState<
+    CourseActionState,
+    FormData
+  >(action, initialState);
   const [selectedSubjects, setSelectedSubjects] = useState<Subject[]>(() =>
     uniqueSubjects(initialData?.subjects ?? []),
   );
   const anchor = useComboboxAnchor();
+  const lastHandledKeyRef = useRef<string>("");
 
   useEffect(() => {
+    if (pending) {
+      lastHandledKeyRef.current = "";
+    }
+  }, [pending]);
+
+  useEffect(() => {
+    if (state.status === "idle") return;
+
+    const key = `${state.msgID}:${state.status}:${state.message ?? ""}`;
+    if (lastHandledKeyRef.current === key) return;
+    lastHandledKeyRef.current = key;
+
     if (state.status === "success") {
       toast.success(state.message ?? "Saved");
       router.push("/school/courses");
-      router.refresh();
     }
     if (state.status === "error") {
       toast.error(state.message ?? "Unable to save course");
@@ -127,22 +141,21 @@ export function CourseForm({
               <ComboboxChips ref={anchor} className="w-full">
                 <ComboboxValue>
                   {(values) => (
-                    <>
+                    <React.Fragment>
                       {values.map((value: Subject) => (
                         <ComboboxChip key={value.id}>{value.name}</ComboboxChip>
                       ))}
-                      <ComboboxChipsInput placeholder="Search subjects..." />
-                    </>
+                      <ComboboxChipsInput />
+                    </React.Fragment>
                   )}
                 </ComboboxValue>
               </ComboboxChips>
               <ComboboxContent anchor={anchor}>
-                <ComboboxInput placeholder="Search subjects..." />
                 <ComboboxEmpty>No items found.</ComboboxEmpty>
                 <ComboboxList>
                   {(item: Subject) => (
                     <ComboboxItem key={item.id} value={item}>
-                      {item?.name}
+                      {item.name}
                     </ComboboxItem>
                   )}
                 </ComboboxList>
