@@ -965,6 +965,22 @@ export async function markAttendance(
     };
   }
 
+  const existingAttendance = await prisma.attendance.findFirst({
+    where: {
+      enrollmentId: enrollment.id,
+      date: parsed.data.date,
+    },
+  });
+
+  if (existingAttendance) {
+    return {
+      status: "error",
+      message:
+        "Attendance has already been marked for this student on this date.",
+      msgID: Date.now(),
+    };
+  }
+
   try {
     await prisma.attendance.upsert({
       where: {
