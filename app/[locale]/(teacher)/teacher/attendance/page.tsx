@@ -17,6 +17,7 @@ import {
   parseTextParam,
 } from "@/lib/table-filters";
 import { getTranslations } from "next-intl/server";
+import { getAppIsoDate } from "@/lib/app-time";
 
 export default async function TeacherAttendancePage({
   searchParams,
@@ -65,6 +66,7 @@ export default async function TeacherAttendancePage({
       },
     }),
   ]);
+  const today = getAppIsoDate();
 
   if (!scope.schoolId || !scope.staffId) {
     return <TeacherAccessFallback />;
@@ -74,7 +76,10 @@ export default async function TeacherAttendancePage({
     <div className="space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      <TeacherAttendanceForm enrollments={formOptions.enrollments} />
+      <TeacherAttendanceForm
+        defaultDate={today}
+        students={formOptions.students}
+      />
 
       <Card>
         <CardHeader>

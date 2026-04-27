@@ -260,7 +260,7 @@ export async function getAssignedStaffs() {
     where: {
       schoolId,
       sections: {
-        some: {},
+        some: { staffId: { not: "" } },
       },
     },
     select: {
