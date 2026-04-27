@@ -320,6 +320,7 @@ export async function getTeacherAttendanceFormOptions() {
         schoolId: scope.schoolId,
         enrollments: {
           some: {
+            status: "ACTIVE",
             section: {
               staffMappings: {
                 some: { staffId: scope.staffId },
@@ -337,6 +338,11 @@ export async function getTeacherAttendanceFormOptions() {
         staffMappings: {
           some: { staffId: scope.staffId },
         },
+        enrollments: {
+          some: {
+            status: "ACTIVE",
+          },
+        },
       },
       orderBy: [{ class: { name: "asc" } }, { name: "asc" }],
       select: {
@@ -350,7 +356,7 @@ export async function getTeacherAttendanceFormOptions() {
   return {
     enrollments: enrollments.map((row) => ({
       id: row.id,
-      label: `${row.student.name} • ${row.section.class.name} • ${row.section.name}`,
+      label: row.section.name,
     })),
     students,
     sections: sections.map((section) => ({
@@ -370,18 +376,25 @@ export async function markTeacherAttendance(
     return {
       status: "error",
       message: "Your staff profile is not linked yet.",
+      msgID: Date.now(),
     };
   }
 
   const raw = formDataToObject(formData);
   const parsed = teacherAttendanceSchema.safeParse(raw);
   if (!parsed.success) {
-    return { status: "error", message: parsed.error.errors[0]?.message };
+    return {
+      status: "error",
+      message: parsed.error.errors[0]?.message,
+      msgID: Date.now(),
+    };
   }
 
   const enrollment = await prisma.enrollment.findFirst({
     where: {
-      id: parsed.data.enrollmentId,
+      studentId: parsed.data.studentId,
+      sectionId: parsed.data.sectionId,
+      status: "ACTIVE",
       schoolId: scope.schoolId,
       section: {
         staffMappings: {
@@ -396,6 +409,7 @@ export async function markTeacherAttendance(
     return {
       status: "error",
       message: "You can only mark attendance for assigned sections.",
+      msgID: Date.now(),
     };
   }
 
@@ -403,13 +417,13 @@ export async function markTeacherAttendance(
     await prisma.attendance.upsert({
       where: {
         enrollmentId_date: {
-          enrollmentId: parsed.data.enrollmentId,
+          enrollmentId: enrollment.id,
           date: parsed.data.date,
         },
       },
       create: {
         schoolId: scope.schoolId,
-        enrollmentId: parsed.data.enrollmentId,
+        enrollmentId: enrollment.id,
         date: parsed.data.date,
         status: parsed.data.status,
       },
@@ -418,13 +432,17 @@ export async function markTeacherAttendance(
       },
     });
   } catch {
-    return { status: "error", message: "Unable to save attendance." };
+    return {
+      status: "error",
+      message: "Unable to save attendance.",
+      msgID: Date.now(),
+    };
   }
 
   revalidateLocalizedPath("/teacher/attendance");
   revalidateLocalizedPath("/teacher/students");
   revalidateLocalizedPath("/teacher/dashboard");
-  return { status: "success", message: "Attendance saved." };
+  return { status: "success", message: "Attendance saved.", msgID: Date.now() };
 }
 
 export async function getTeacherPaginatedAttendanceRecords({
@@ -444,6 +462,12 @@ export async function getTeacherPaginatedAttendanceRecords({
       totalPages: 1,
     };
   }
+
+  Object.entries(filters || {}).forEach(([key, value]) => {
+    if (value === "ALL") {
+      delete filters?.[key as keyof typeof filters];
+    }
+  });
 
   const where: Record<string, unknown> = {
     schoolId: scope.schoolId,
@@ -493,6 +517,7 @@ export async function getTeacherPaginatedAttendanceRecords({
           id: true,
           date: true,
           status: true,
+          enrollmentId: true,
           enrollment: {
             select: {
               student: { select: { id: true, name: true } },
@@ -650,4 +675,87 @@ export async function updateTeacherProgress(
   revalidateLocalizedPath("/teacher/students");
   revalidateLocalizedPath("/teacher/dashboard");
   return { status: "success", message: "Progress updated." };
+}
+
+export async function getSectionsByStudentId(studentId: string) {
+  const scope = await requireTeacherAccess();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId: scope.schoolId,
+      enrollments: {
+        some: {
+          studentId,
+          status: "ACTIVE",
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+
+  // Get unique sections
+  return sections.filter(
+    (section, index, self) =>
+      self.findIndex((s) => s.id === section.id) === index,
+  );
+}
+
+export async function getEnrolledStudents() {
+  const scope = await requireTeacherAccess();
+
+  const studnets = await prisma.student.findMany({
+    where: {
+      schoolId: scope.schoolId,
+      status: "ACTIVE",
+      enrollments: {
+        some: {
+          status: "ACTIVE",
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return studnets;
+}
+
+export async function getEnrolledSections() {
+  const scope = await requireTeacherAccess();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId: scope.schoolId,
+      enrollments: {
+        some: {
+          status: "ACTIVE",
+        },
+      },
+    },
+    orderBy: {
+      name: "asc",
+    },
+    select: {
+      id: true,
+      name: true,
+      class: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return sections.filter(
+    (section, index, self) =>
+      self.findIndex((s) => s.id === section.id) === index,
+  );
 }

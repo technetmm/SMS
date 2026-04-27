@@ -101,7 +101,9 @@ export default async function TeacherStudentsPage({
               >
                 <option value="">{t("allStatuses")}</option>
                 <option value="ACTIVE">{t("statusOptions.active")}</option>
-                <option value="COMPLETED">{t("statusOptions.completed")}</option>
+                <option value="COMPLETED">
+                  {t("statusOptions.completed")}
+                </option>
                 <option value="DROPPED">{t("statusOptions.dropped")}</option>
               </select>
             </div>

@@ -32,7 +32,7 @@ export function TeacherAttendanceFilters({
   const commonT = useTranslations("Common");
 
   return (
-    <form className="grid gap-4 md:grid-cols-4" method="get">
+    <form className="grid gap-4 md:grid-cols-3" method="get">
       <div className="grid gap-2">
         <Label htmlFor="q">{t("search")}</Label>
         <Input
@@ -65,7 +65,7 @@ export function TeacherAttendanceFilters({
         allLabel={t("allSections")}
         options={sections.map((section) => ({
           value: section.id,
-          label: `${section.class.name} • ${section.name}`,
+          label: section.name,
         }))}
       />
 

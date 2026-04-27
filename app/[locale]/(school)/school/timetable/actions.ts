@@ -499,3 +499,50 @@ export async function duplicateTimetableSlot(id: string, dayOfWeek: DayOfWeek) {
   revalidateLocalizedPath("/school/sections");
   return { status: "success" as const, msgID: Date.now() };
 }
+
+export async function getAssignedStaffs() {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const staff = await prisma.staff.findMany({
+    where: {
+      schoolId,
+      sections: {
+        some: { staffId: { not: "" } },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  return staff;
+}
+
+export async function getSectionsByStaffId(staffId: string) {
+  await requireSchoolAdminAccess();
+  const schoolId = await requireTenant();
+
+  const sections = await prisma.section.findMany({
+    where: {
+      schoolId,
+      staffMappings: {
+        some: {
+          staffId,
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      class: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return sections;
+}

@@ -34,7 +34,6 @@ export async function createClass(
   const schoolId = await requireTenantId();
 
   const raw = formDataToObject(formData);
-  console.log("Raw form data for creating class:", raw);
   const parsed = classCreateSchema.safeParse(raw);
   if (!parsed.success) {
     return { status: "error", message: parsed.error.errors[0]?.message };

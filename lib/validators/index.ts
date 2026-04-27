@@ -227,7 +227,8 @@ export const enrollmentAttendanceSchema = z.object({
 });
 
 export const teacherAttendanceSchema = z.object({
-  enrollmentId: z.string().min(1, "Enrollment is required"),
+  studentId: z.string().min(1, "Student is required"),
+  sectionId: z.string().min(1, "Section is required"),
   date: z.coerce.date(),
   status: z.nativeEnum(AttendanceStatus),
 });
